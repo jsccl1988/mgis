@@ -1,0 +1,45 @@
+ninja_required_version = 1.7.2
+
+rule gn
+  command = ../../../../buildtools/win/gn.exe --root=./.. -q gen .
+  description = Regenerating ninja files
+
+build build.ninja: gn
+  generator = 1
+  depfile = build.ninja.d
+
+subninja toolchain.ninja
+
+build base: phony ./base.lib
+build core: phony ./core.lib
+build geometry: phony ./geometry.lib
+build base_test: phony ./base_test.exe
+build core_test: phony ./core_test.exe
+build geometry_test: phony ./geometry_test.exe
+build gbenchmark: phony obj/third_party/gbenchmark.stamp
+build glog: phony obj/third_party/glog.stamp
+build gtest: phony obj/third_party/gtest.stamp
+build $:all: phony obj/all.stamp
+build base$:base: phony ./base.lib
+build base$:base_test: phony ./base_test.exe
+build core$:core: phony ./core.lib
+build core$:core_test: phony ./core_test.exe
+build geometry$:geometry: phony ./geometry.lib
+build geometry$:geometry_test: phony ./geometry_test.exe
+build third_party$:gbenchmark: phony obj/third_party/gbenchmark.stamp
+build third_party$:glog: phony obj/third_party/glog.stamp
+build third_party$:gtest: phony obj/third_party/gtest.stamp
+
+build all: phony $
+    obj/all.stamp $
+    ./base.lib $
+    ./base_test.exe $
+    ./core.lib $
+    ./core_test.exe $
+    ./geometry.lib $
+    ./geometry_test.exe $
+    obj/third_party/gbenchmark.stamp $
+    obj/third_party/glog.stamp $
+    obj/third_party/gtest.stamp
+
+default all

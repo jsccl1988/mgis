@@ -1,0 +1,55 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+
+template("test") {
+  executable(target_name) {
+    forward_variables_from(invoker, "*")
+
+    testonly = true
+
+    sources += [
+      "//testing/main.cpp",
+    ]
+
+    include_dirs += [
+      "$root_gen_dir/",
+      "$root_out_dir/glog/include",
+      "$root_out_dir/gbenchmark/include",
+      "$root_out_dir/gtest/include",
+    ]
+
+    if (is_win) {
+      libs = [
+        "$root_out_dir/glog/lib/glog.lib",
+        "$root_out_dir/gbenchmark/lib/benchmark.lib",
+        "$root_out_dir/gbenchmark/lib/benchmark_main.lib",
+        "$root_out_dir/gtest/lib/gmock.lib",
+        "$root_out_dir/gtest/lib/gmock_main.lib",
+        "$root_out_dir/gtest/lib/gtest.lib",
+        "$root_out_dir/gtest/lib/gtest_main.lib",
+      ]
+    } else {
+      libs = [
+        "/usr/lib/x86_64-linux-gnu/libgflags.so",
+        "/usr/lib/x86_64-linux-gnu/libunwind.so",
+        "$root_out_dir/glog/lib/libglog.a",
+        "$root_out_dir/gbenchmark/lib/libbenchmark.a",
+        "$root_out_dir/gbenchmark/lib/libbenchmark_main.a",
+        "$root_out_dir/gtest/lib/libgmock.a",
+        "$root_out_dir/gtest/lib/libgmock_main.a",
+        "$root_out_dir/gtest/lib/libgtest.a",
+        "$root_out_dir/gtest/lib/libgtest_main.a",
+      ]
+
+      ldflags = [
+        "-lgflags",
+        "-lunwind"
+      ]
+    }
+
+    deps += [
+      "//third_party:gbenchmark",
+      "//third_party:gtest",
+    ]
+  }
+}

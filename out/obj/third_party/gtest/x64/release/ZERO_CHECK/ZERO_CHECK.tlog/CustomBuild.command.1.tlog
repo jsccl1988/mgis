@@ -1,0 +1,10 @@
+^D:\DEV\SRC\CCL\MGIS\OUT\OBJ\THIRD_PARTY\GTEST\CMAKEFILES\53A64E496B683B65CF2CE2719AC81A13\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Dev/src/ccl/mgis/third_party/googletest -BD:/Dev/src/ccl/mgis/out/obj/third_party/gtest --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Dev/src/ccl/mgis/out/obj/third_party/gtest/googletest-distribution.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

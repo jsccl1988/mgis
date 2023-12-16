@@ -1,0 +1,11 @@
+prefix=D:/Dev/src/ccl/mgis/out/glog
+exec_prefix=D:/Dev/src/ccl/mgis/out/glog/bin
+libdir=D:/Dev/src/ccl/mgis/out/glog/lib
+includedir=D:/Dev/src/ccl/mgis/out/glog/include
+
+Name: libglog
+Description: Google Log (glog) C++ logging framework
+Version: 0.6.0
+Libs: -L${libdir} -lglog
+Libs.private: -ldbghelp
+Cflags: -I${includedir}

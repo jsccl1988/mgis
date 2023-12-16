@@ -1,0 +1,34 @@
+# =============================================================================
+# Default
+# =============================================================================
+
+config("default") {
+  if (is_debug) {
+    defines = [
+      "DEBUG",
+      "_DEBUG",
+    ]
+  } else {
+    defines = [ "NDEBUG" ]
+  }
+}
+
+config("c_std") {
+  if (is_win) {
+    if (vs_version >= 150) {
+      cflags_c = [ "/std:$c_std" ]
+    }
+  } else {
+    cflags_c = [ "-std=$c_std" ]
+  }
+}
+
+config("cc_std") {
+  if (is_win) {
+    if (vs_version >= 150) {
+      cflags_cc = [ "/std:$cc_std" ]
+    }
+  } else {
+    cflags_cc = [ "-std=$cc_std" ]
+  }
+}

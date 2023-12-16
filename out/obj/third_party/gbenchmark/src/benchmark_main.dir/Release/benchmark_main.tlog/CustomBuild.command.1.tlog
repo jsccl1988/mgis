@@ -1,0 +1,10 @@
+^D:\DEV\SRC\CCL\MGIS\THIRD_PARTY\GOOGLEBENCHMARK\SRC\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Dev/src/ccl/mgis/third_party/googlebenchmark -BD:/Dev/src/ccl/mgis/out/obj/third_party/gbenchmark --check-stamp-file D:/Dev/src/ccl/mgis/out/obj/third_party/gbenchmark/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

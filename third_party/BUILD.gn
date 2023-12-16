@@ -1,0 +1,28 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+
+cmake("glog") {
+  cmake_root_dir = "//third_party/glog"
+  cmake_outputs = [
+    "$root_out_dir/glog/bin/glog.dll",
+    "$root_out_dir/glog/lib/glog.lib",
+  ]
+  cmake_options = ["BUILD_SHARED_LIBS=OFF"]
+}
+
+cmake("gbenchmark") {
+  cmake_root_dir = "//third_party/googlebenchmark"
+  cmake_outputs = [
+    "$root_out_dir/gbenchmark/bin/googlebenchmark.dll",
+    "$root_out_dir/gbenchmark/lib/googlebenchmark.lib",
+  ]
+  cmake_options = ["BENCHMARK_ENABLE_TESTING=OFF"]
+}
+
+cmake("gtest") {
+  cmake_root_dir = "//third_party/googletest"
+  cmake_outputs = [
+    "$root_out_dir/gtest/bin/googletest.dll",
+    "$root_out_dir/gtest/lib/googletest.lib",
+  ]
+}

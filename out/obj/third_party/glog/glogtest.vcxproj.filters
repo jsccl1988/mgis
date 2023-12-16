@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Dev\src\ccl\mgis\third_party\glog\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\demangle.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\logging.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\raw_logging.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\symbolize.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\utilities.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\vlog_is_on.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\signalhandler.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="D:\Dev\src\ccl\mgis\out\obj\third_party\glog\glogbase.dir\$(Configuration)\port.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Object Libraries">
+      <UniqueIdentifier>{910E67F3-4405-3228-B405-EC49775F7BA2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

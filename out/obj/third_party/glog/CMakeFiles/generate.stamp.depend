@@ -1,0 +1,71 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.28/Modules/BasicConfigVersion-SameMajorVersion.cmake.in
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeCXXInformation.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeDependentOption.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeParseArguments.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakePushCheckState.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CPack.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CPackComponent.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CTest.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CTestTargets.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CTestUseLaunchers.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCXXSourceRuns.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCXXSymbolExists.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckCompilerFlag.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckFunctionExists.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckLibraryExists.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckStructHasMember.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckSymbolExists.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/CheckTypeSize.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Compiler/MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/DartConfiguration.tcl.in
+C:/Program Files/CMake/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/FindThreads.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/GenerateExportHeader.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Internal/CheckFlagCommonConfig.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Internal/CheckSourceRuns.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Platform/Windows-Initialize.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/WriteBasicConfigVersionFile.cmake
+C:/Program Files/CMake/share/cmake-3.28/Modules/exportheader.cmake.in
+C:/Program Files/CMake/share/cmake-3.28/Templates/CPackConfig.cmake.in
+D:/Dev/src/ccl/mgis/out/obj/third_party/glog/CMakeFiles/3.28.0-rc5/CMakeCXXCompiler.cmake
+D:/Dev/src/ccl/mgis/out/obj/third_party/glog/CMakeFiles/3.28.0-rc5/CMakeRCCompiler.cmake
+D:/Dev/src/ccl/mgis/out/obj/third_party/glog/CMakeFiles/3.28.0-rc5/CMakeSystem.cmake
+D:/Dev/src/ccl/mgis/third_party/glog/CMakeLists.txt
+D:/Dev/src/ccl/mgis/third_party/glog/cmake/DetermineGflagsNamespace.cmake
+D:/Dev/src/ccl/mgis/third_party/glog/cmake/FindUnwind.cmake
+D:/Dev/src/ccl/mgis/third_party/glog/cmake/GetCacheVariables.cmake
+D:/Dev/src/ccl/mgis/third_party/glog/glog-config.cmake.in
+D:/Dev/src/ccl/mgis/third_party/glog/glog-modules.cmake.in
+D:/Dev/src/ccl/mgis/third_party/glog/libglog.pc.in
+D:/Dev/src/ccl/mgis/third_party/glog/src/config.h.cmake.in
+D:/Dev/src/ccl/mgis/third_party/glog/src/glog/logging.h.in
+D:/Dev/src/ccl/mgis/third_party/glog/src/glog/raw_logging.h.in
+D:/Dev/src/ccl/mgis/third_party/glog/src/glog/stl_logging.h.in
+D:/Dev/src/ccl/mgis/third_party/glog/src/glog/vlog_is_on.h.in

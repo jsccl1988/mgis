@@ -1,0 +1,17 @@
+defines = -DNOMINMAX -DNDEBUG -DUNICODE -D_UNICODE -DWINVER=0x0A00 -D_WIN32_WINNT=0x0A00 -D_WIN32_WINDOWS=0x0A00 -DNTDDI_VERSION=0x0A000000 -DWIN32_LEAN_AND_MEAN -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS
+include_dirs = -I.. -Igen -Iglog/include -Igbenchmark/include -Igtest/include -I.. -I.. -I.. -I.. -I.. -I.. -I.. -I.. -I..
+cflags = /EHsc /Gd /Gm- /Oy- /W3 /WX- /Zi /Zl /GS /Zc$:forScope /Zc$:wchar_t /analyze- /bigobj /fp$:precise /analyze- /bigobj /fp$:precise /utf-8 /Gy /O2 /Oi /GL /MT
+cflags_cc = /std$:c++latest /EHsc
+label_name = core
+target_out_dir = obj/core
+target_output_name = core
+
+build obj/core/core/command.obj: cxx ../core/command.cpp || obj/third_party/glog.stamp
+build obj/core/core/dynamic_library.obj: cxx ../core/dynamic_library.cpp || obj/third_party/glog.stamp
+build obj/core/core/listener.obj: cxx ../core/listener.cpp || obj/third_party/glog.stamp
+build obj/core/core/plugin.obj: cxx ../core/plugin.cpp || obj/third_party/glog.stamp
+
+build ./core.lib: alink obj/core/core/command.obj obj/core/core/dynamic_library.obj obj/core/core/listener.obj obj/core/core/plugin.obj || ./base.lib
+  arflags = /LTCG /MACHINE$:X64
+  output_extension = .lib
+  output_dir = .

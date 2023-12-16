@@ -1,0 +1,14 @@
+D:/Dev/src/ccl/mgis/out/glog/lib/glog.lib
+D:/Dev/src/ccl/mgis/out/glog/include/glog/export.h
+D:/Dev/src/ccl/mgis/out/glog/include/glog/logging.h
+D:/Dev/src/ccl/mgis/out/glog/include/glog/raw_logging.h
+D:/Dev/src/ccl/mgis/out/glog/include/glog/stl_logging.h
+D:/Dev/src/ccl/mgis/out/glog/include/glog/vlog_is_on.h
+D:/Dev/src/ccl/mgis/out/glog/include/glog/log_severity.h
+D:/Dev/src/ccl/mgis/out/glog/include/glog/platform.h
+D:/Dev/src/ccl/mgis/out/glog/lib/pkgconfig/libglog.pc
+D:/Dev/src/ccl/mgis/out/glog/lib/cmake/glog/glog-modules.cmake
+D:/Dev/src/ccl/mgis/out/glog/lib/cmake/glog/glog-config.cmake
+D:/Dev/src/ccl/mgis/out/glog/lib/cmake/glog/glog-config-version.cmake
+D:/Dev/src/ccl/mgis/out/glog/lib/cmake/glog/glog-targets.cmake
+D:/Dev/src/ccl/mgis/out/glog/lib/cmake/glog/glog-targets-release.cmake

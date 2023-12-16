@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\x64\release\ZERO_CHECK</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\cleanup_immediately_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\cleanup_with_absolute_prefix_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\cleanup_with_relative_prefix_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\demangle_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\logging_custom_prefix_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\logging_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\signalhandler_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\stacktrace_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\stl_logging_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\symbolize_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\Release\utilities_unittest.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\Dev\src\ccl\mgis\out\obj\third_party\glog\x64\release\ALL_BUILD</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

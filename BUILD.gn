@@ -1,0 +1,10 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+
+group("all") {
+  deps = [
+    "//base:base",
+    "//core:core",
+    "//geometry:geometry",
+  ]
+}

@@ -1,0 +1,8 @@
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/benchmark.lib
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/benchmark_main.lib
+D:/Dev/src/ccl/mgis/out/gbenchmark/include/benchmark/benchmark.h
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/cmake/benchmark/benchmarkConfig.cmake
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/cmake/benchmark/benchmarkConfigVersion.cmake
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/pkgconfig/benchmark.pc
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/cmake/benchmark/benchmarkTargets.cmake
+D:/Dev/src/ccl/mgis/out/gbenchmark/lib/cmake/benchmark/benchmarkTargets-release.cmake

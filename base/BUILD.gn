@@ -1,0 +1,42 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+import("//testing/test.gni")
+
+static_library("base") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "logging.cpp",
+    "init.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+    "$root_out_dir/gbenchmark/include",
+    "$root_out_dir/gtest/include",
+  ]
+
+  deps = [
+    "//third_party:glog",
+  ]
+}
+
+test("base_test") {
+  sources = [
+    "logging_unittest.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+    "$root_out_dir/gbenchmark/include",
+    "$root_out_dir/gtest/include",
+  ]
+
+  deps = [
+    ":base",
+  ]
+}

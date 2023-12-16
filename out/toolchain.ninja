@@ -1,0 +1,74 @@
+rule copy
+  command = copy /Y ${in} ${out}
+  description = COPY ${in} ${out}
+rule cc
+  command = ninja -t msvc -e environment.x64.x64 -- cl.exe /c ${in} /nologo ${defines} ${include_dirs} ${cflags} ${cflags_c} /Fo${out} /Fd"${target_out_dir}/${label_name}_c.pdb" /FS
+  description = CC ${out}
+  deps = msvc
+rule cxx
+  command = ninja -t msvc -e environment.x64.x64 -- cl.exe /c ${in} /Fo${out} /nologo ${defines} ${include_dirs} ${cflags} ${cflags_cc} /Fd"${target_out_dir}/${label_name}_cc.pdb" /FS
+  description = CXX ${out}
+  deps = msvc
+rule rc
+  command = ninja -t msvc -e environment.x64.x64 -- rc.exe /nologo ${defines} ${include_dirs} /fo${out} ${in}
+  description = RC ${out}
+  deps = msvc
+rule asm
+  command = ninja -t msvc -e environment.x64.x64 -- ml64.exe /nologo /c /Fo${out} ${defines} ${include_dirs} ${asmflags} ${in}
+  description = ASM ${out}
+rule stamp
+  command = cmd /c type nul > "${out}"
+  description = STAMP ${out}
+rule alink
+  command = ninja -t msvc -e environment.x64.x64 -- lib.exe /OUT:${out} /nologo ${arflags} @${out}.rsp
+  description = LIB ${out}
+  rspfile = ${out}.rsp
+  rspfile_content = ${in_newline}
+rule link
+  command = ninja -t msvc -e environment.x64.x64 -- link.exe ${ldflags} /OUT:${output_dir}/${target_output_name}${output_extension} /nologo /PDB:${output_dir}/${target_output_name}${output_extension}.pdb @${output_dir}/${target_output_name}${output_extension}.rsp
+  description = LINK ${out}
+  rspfile = ${output_dir}/${target_output_name}${output_extension}.rsp
+  rspfile_content = ${in_newline} ${libs} ${solibs}
+rule solink
+  command = ninja -t msvc -e environment.x64.x64 -- link.exe ${ldflags} /OUT:${output_dir}/${target_output_name}${output_extension} /nologo /IMPLIB:${output_dir}/${target_output_name}${output_extension}.lib /DLL /PDB:${output_dir}/${target_output_name}${output_extension}.pdb @${output_dir}/${target_output_name}${output_extension}.rsp
+  description = LINK(DLL) ${out}
+  rspfile = ${output_dir}/${target_output_name}${output_extension}.rsp
+  rspfile_content = ${libs} ${solibs} ${in_newline}
+  restat = 1
+rule solink_module
+  command = ninja -t msvc -e environment.x64.x64 -- link.exe ${ldflags} /OUT:${output_dir}/${target_output_name}${output_extension} /nologo /DLL /PDB:${output_dir}/${target_output_name}${output_extension}.pdb @${output_dir}/${target_output_name}${output_extension}.rsp
+  description = LINK_MODULE(DLL) ${out}
+  rspfile = ${output_dir}/${target_output_name}${output_extension}.rsp
+  rspfile_content = ${libs} ${solibs} ${in_newline}
+
+build obj/all.stamp: stamp ./base.lib ./core.lib ./geometry.lib
+subninja obj/base/base.ninja
+subninja obj/base/base_test.ninja
+subninja obj/core/core.ninja
+subninja obj/core/core_test.ninja
+subninja obj/geometry/geometry.ninja
+subninja obj/geometry/geometry_test.ninja
+rule __third_party_gbenchmark___build_toolchain_win_msvc__rule
+  command = C$:/Users/Think/AppData/Local/Microsoft/WindowsApps/python.exe ../build/tools/cmake.py ../third_party/googlebenchmark BENCHMARK_ENABLE_TESTING=OFF obj/third_party/gbenchmark gbenchmark x64 false true v177 0x0A00
+  description = ACTION //third_party:gbenchmark(//build/toolchain/win:msvc)
+  restat = 1
+
+build gbenchmark/bin/googlebenchmark.dll gbenchmark/lib/googlebenchmark.lib: __third_party_gbenchmark___build_toolchain_win_msvc__rule | ../build/tools/cmake.py ../third_party/googlebenchmark
+
+build obj/third_party/gbenchmark.stamp: stamp gbenchmark/bin/googlebenchmark.dll gbenchmark/lib/googlebenchmark.lib
+rule __third_party_glog___build_toolchain_win_msvc__rule
+  command = C$:/Users/Think/AppData/Local/Microsoft/WindowsApps/python.exe ../build/tools/cmake.py ../third_party/glog BUILD_SHARED_LIBS=OFF obj/third_party/glog glog x64 false true v177 0x0A00
+  description = ACTION //third_party:glog(//build/toolchain/win:msvc)
+  restat = 1
+
+build glog/bin/glog.dll glog/lib/glog.lib: __third_party_glog___build_toolchain_win_msvc__rule | ../build/tools/cmake.py ../third_party/glog
+
+build obj/third_party/glog.stamp: stamp glog/bin/glog.dll glog/lib/glog.lib
+rule __third_party_gtest___build_toolchain_win_msvc__rule
+  command = C$:/Users/Think/AppData/Local/Microsoft/WindowsApps/python.exe ../build/tools/cmake.py ../third_party/googletest CMAKE_VERBOSE_MAKEFILE$:BOOL=ON obj/third_party/gtest gtest x64 false true v177 0x0A00
+  description = ACTION //third_party:gtest(//build/toolchain/win:msvc)
+  restat = 1
+
+build gtest/bin/googletest.dll gtest/lib/googletest.lib: __third_party_gtest___build_toolchain_win_msvc__rule | ../build/tools/cmake.py ../third_party/googletest
+
+build obj/third_party/gtest.stamp: stamp gtest/bin/googletest.dll gtest/lib/googletest.lib

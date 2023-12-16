@@ -1,0 +1,10 @@
+^D:\DEV\SRC\CCL\MGIS\THIRD_PARTY\GLOG\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Dev/src/ccl/mgis/third_party/glog -BD:/Dev/src/ccl/mgis/out/obj/third_party/glog --check-stamp-file D:/Dev/src/ccl/mgis/out/obj/third_party/glog/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
