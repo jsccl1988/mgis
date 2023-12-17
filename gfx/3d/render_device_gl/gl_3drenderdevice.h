@@ -166,15 +166,15 @@ class GLRenderDevice : public 3DRenderDevice {
 
   //////////////////////////////////////////////////////////////////////////
   // shader
-  virtual Shader *CreateVertexShader(const char *szName);  // vertex shader
-  virtual Shader *CreatePixelShader(const char *szName);   // pixel shader
-  virtual long DestroyShader(const char *szName);
-  virtual Shader *GetShader(const char *szName);
+  virtual Shader *CreateVertexShader(const char *name);  // vertex shader
+  virtual Shader *CreatePixelShader(const char *name);   // pixel shader
+  virtual long DestroyShader(const char *name);
+  virtual Shader *GetShader(const char *name);
 
   // program
-  virtual Program *CreateProgram(const char *szName);
-  virtual long DestroyProgram(const char *szName);
-  virtual Program *GetProgram(const char *szName);
+  virtual Program *CreateProgram(const char *name);
+  virtual long DestroyProgram(const char *name);
+  virtual Program *GetProgram(const char *name);
 
   virtual long LoadShaderSource(Shader *shader, char *source);
   virtual long CompileShader(Shader *shader);
@@ -203,9 +203,9 @@ class GLRenderDevice : public 3DRenderDevice {
 
   //////////////////////////////////////////////////////////////////////////
   // texture
-  virtual Texture *CreateTexture(const char *szName);
-  virtual long DestroyTexture(const char *szName);
-  virtual Texture *GetTexture(const char *szName);
+  virtual Texture *CreateTexture(const char *name);
+  virtual long DestroyTexture(const char *name);
+  virtual Texture *GetTexture(const char *name);
 
   virtual long GenerateMipmap(Texture *texture);
   virtual long BindTexture(Texture *texture);

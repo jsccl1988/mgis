@@ -1,0 +1,112 @@
+language: c
+
+sudo: false
+
+# Save common build configurations as shortcuts, so we can reference them later.
+addons_shortcuts:
+  addons_clang35: &clang35
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+      packages: [ 'clang-3.5', 'libprotobuf-dev','protobuf-compiler' ]
+  addons_clang38: &clang38
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8' ]
+      packages: [ 'clang-3.8', 'libprotobuf-dev','protobuf-compiler' ]
+#  addons_clang39: &clang39
+#    apt:
+#      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.9' ]
+#      packages: [ 'clang-3.9', 'libprotobuf-dev','protobuf-compiler' ]
+  addons_gcc47: &gcc47
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-4.7', 'gcc-4.7', 'libprotobuf-dev','protobuf-compiler' ]
+  addons_gcc48: &gcc48
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-4.8', 'gcc-4.8', 'libprotobuf-dev','protobuf-compiler' ]
+  addons_gcc49: &gcc49
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-4.9', 'gcc-4.9', 'libprotobuf-dev','protobuf-compiler' ]
+  addons_gcc5: &gcc5
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-5', 'gcc-5', 'libprotobuf-dev','protobuf-compiler' ]
+  addons_gcc6: &gcc6
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-6', 'gcc-6', 'libprotobuf-dev','protobuf-compiler', 'doxygen', 'graphviz' ]
+
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode6
+      compiler: clang
+    - os: osx
+      osx_image: xcode7
+      compiler: clang
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+    - os: linux
+      compiler: "clang-3.5"
+      env: CXX=clang++-3.5
+      addons: *clang35
+    - os: linux
+      compiler: "clang-3.8"
+      env: CXX=clang++-3.8
+      addons: *clang38
+    - os: linux
+      compiler: "clang-3.8"
+      env: CXX=clang++-3.8 CXX_STD=c++14
+      addons: *clang38
+    - os: linux
+      compiler: "gcc-4.7"
+      env: CXX=g++-4.7
+      addons: *gcc47
+    - os: linux
+      compiler: "gcc-4.8"
+      env: CXX=g++-4.8
+      addons: *gcc48
+    - os: linux
+      compiler: "gcc-4.9"
+      env: CXX=g++-4.9 COVERAGE=gcov-4.9
+      addons: *gcc49
+    - os: linux
+      compiler: "gcc-4.9"
+      env: CXX=g++-4.9 CXX_STD=c++14
+      addons: *gcc49
+    - os: linux
+      compiler: "gcc-5"
+      env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+      addons: *gcc5
+    - os: linux
+      compiler: "gcc-5"
+      env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=1"
+      addons: *gcc5
+    - os: linux
+      compiler: "gcc-6"
+      env: CXX=g++-6 BUILD_DOC=1
+      addons: *gcc6
+
+before_install:
+ - echo ${CXX}
+ - if [[ $(uname -s) == 'Darwin' ]]; then
+     brew install protobuf;
+   fi
+
+install:
+ - make test
+ - if [ -n "${BUILD_DOC}" ]; then make doc; fi
+
+script:
+  - |
+    if [ -n "${COVERAGE}" ]; then
+      make clean
+      CXXFLAGS="--coverage ${CXXFLAGS}" LDFLAGS="--coverage ${LDFLAGS}" make test
+      which ${COVERAGE}
+      curl -S -f https://codecov.io/bash -o codecov
+      chmod +x codecov
+      ${COVERAGE} -p $(find test/ -name '*.o')
+      ./codecov -Z -f '*protozero*' -X search
+    fi

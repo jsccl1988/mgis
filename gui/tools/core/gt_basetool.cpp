@@ -36,13 +36,13 @@ BaseTool::BaseTool()
 BaseTool::~BaseTool() { ; }
 
 int BaseTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
-                   pfnToolCallBack pfnCallBack, void *pToFollow) {
-  if (SMT_ERR_NONE != IATool::Init(hWnd, pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                   pfnToolCallBack pfnCallBack, void *to_follow) {
+  if (ERR_NONE != IATool::Init(hWnd, pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   if (NULL == pMrdRenderDevice) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
   m_pRenderDevice = pMrdRenderDevice;
@@ -54,7 +54,7 @@ int BaseTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
 
   m_fScaleDelt = sysPra.zoom_scale_delt;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int BaseTool::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
@@ -99,7 +99,7 @@ int BaseTool::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
         GetCursorPos(&mousePos);
 
         if ((mousePos.x == wndCenter.x) && (mousePos.y == wndCenter.y))
-          return SMT_ERR_NONE;
+          return ERR_NONE;
 
         //	SetCursorPos(wndCenter.x,wndCenter.y);
 
@@ -168,6 +168,6 @@ int BaseTool::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
     }
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _GroupTool

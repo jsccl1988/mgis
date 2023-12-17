@@ -25,22 +25,22 @@ long Program::SetPixelShader(Shader *shader) {
 }
 
 long Program::Link(ShaderCompilationFlag flags) {
-  if (SMT_ERR_NONE != m_p3DRenderDevice->LinkProgram(this))
-    return SMT_ERR_FAILURE;
+  if (ERR_NONE != m_p3DRenderDevice->LinkProgram(this))
+    return ERR_FAILURE;
 
   /* Check if there is a need to check compilation */
   if (flags & SCF_CHECK_ERRORS) {
     long result = IsLinked();
 
     /* Check if there is a need to place errors in log file */
-    if (SMT_ERR_NONE != result && (flags & SCF_LOG_ERRORS)) {
+    if (ERR_NONE != result && (flags & SCF_LOG_ERRORS)) {
       ;
     }
 
     return result;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long Program::IsLinked() { return m_p3DRenderDevice->IsProgramLinked(this); }

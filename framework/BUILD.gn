@@ -1,0 +1,44 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+import("//testing/test.gni")
+
+static_library("framework") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "command.cpp",
+    "dynamic_library.cpp",
+    "listener.cpp",
+    "plugin.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+  ]
+
+  libs = [
+    # "$root_out_dir/geos/lib/geos.lib",
+  ]
+
+  deps = [
+    "//base:base",
+  ]
+}
+
+test("framework_test") {
+  sources = [
+    "framework_unittest.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+  ]
+
+  deps = [
+    ":framework",
+  ]
+}

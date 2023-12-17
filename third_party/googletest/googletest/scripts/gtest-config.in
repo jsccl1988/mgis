@@ -60,7 +60,7 @@ Compiler flag queries output the union of the sets of flags when combined.
  Version Queries:
   --min-version=VERSION      return 0 if the version is at least VERSION
   --exact-version=VERSION    return 0 if the version is exactly VERSION
-  --max-version=VERSION      return 0 if the version is at most VERSION
+  --std::max-version=VERSION      return 0 if the version is at most VERSION
 
  Compilation Flag Queries:
   --cppflags                 compile flags specific to the C-like preprocessors
@@ -71,13 +71,13 @@ Compiler flag queries output the union of the sets of flags when combined.
 EOF
 }
 
-# This function bounds our version with a min and a max. It uses some clever
+# This function bounds our version with a min and a std::max. It uses some clever
 # POSIX-compliant variable expansion to portably do all the work in the shell
 # and avoid any dependency on a particular "sed" or "awk" implementation.
 # Notable is that it will only ever compare the first 3 components of versions.
 # Further components will be cleanly stripped off. All versions must be
 # unadorned, so "v1.0" will *not* work. The minimum version must be in $1, and
-# the max in $2. TODO(chandlerc@google.com): If this ever breaks, we should
+# the std::max in $2. TODO(chandlerc@google.com): If this ever breaks, we should
 # investigate expanding this via autom4te from AS_VERSION_COMPARE rather than
 # continuing to maintain our own shell version.
 check_versions()
@@ -170,9 +170,9 @@ while test $# -gt 0; do
       do_check_versions=yes
       min_version=${1#--min-version=}
       ;;
-    --max-version=*)
+    --std::max-version=*)
       do_check_versions=yes
-      max_version=${1#--max-version=}
+      max_version=${1#--std::max-version=}
       ;;
     --exact-version=*)
       do_check_versions=yes

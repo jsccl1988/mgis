@@ -6,7 +6,7 @@ ShadersFunc::ShadersFunc() {}
 ShadersFunc::~ShadersFunc() {}
 
 long ShadersFunc::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 GLuint ShadersFunc::glCreateShader(GLenum type) { return 0; }

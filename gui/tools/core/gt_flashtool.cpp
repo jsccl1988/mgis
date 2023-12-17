@@ -35,10 +35,10 @@ FlashTool::~FlashTool() {
 }
 
 int FlashTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
-                    pfnToolCallBack pfnCallBack, void *pToFollow) {
-  if (SMT_ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
-                                     pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                    pfnToolCallBack pfnCallBack, void *to_follow) {
+  if (ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
+                                     pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   SysManager *pSysMgr = SysManager::GetSingletonPtr();
@@ -53,17 +53,17 @@ int FlashTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
   AppendFuncItems("¿ªÊ¼ÉÁË¸", GT_MSG_START_FLASH, FIM_2DVIEW);
   AppendFuncItems("Í£Ö¹ÉÁË¸", GT_MSG_STOP_FLASH, FIM_2DVIEW);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_START_FLASH);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_STOP_FLASH);
+  IATOOL_APPEND_MSG(GT_MSG_START_FLASH);
+  IATOOL_APPEND_MSG(GT_MSG_STOP_FLASH);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_FLASH_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_FLASH_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_PRA);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_FLASH_DATA);
+  IATOOL_APPEND_MSG(GT_MSG_SET_FLASH_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_GET_FLASH_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_SET_PRA);
+  IATOOL_APPEND_MSG(GT_MSG_SET_FLASH_DATA);
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int FlashTool::AuxDraw() {
@@ -71,14 +71,14 @@ int FlashTool::AuxDraw() {
     StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
 
     Style *pStyle = pStyleMgr->GetStyle(m_strFlashStyle.c_str());
-    if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(MRD_BL_DYNAMIC, true,
+    if (ERR_NONE == m_pRenderDevice->BeginRender(MRD_BL_DYNAMIC, true,
                                                      pStyle, R2_COPYPEN)) {
       m_pRenderDevice->RenderLayer(m_pResultLayer, R2_COPYPEN);
       m_pRenderDevice->EndRender(MRD_BL_DYNAMIC);
     }
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int FlashTool::Timer() {
@@ -88,11 +88,11 @@ int FlashTool::Timer() {
   else
     m_strFlashStyle = m_strFlashStyle2;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int FlashTool::Notify(long nMessage, ListenerMessage &param) {
-  if (param.hSrcWnd != m_hWnd) return SMT_ERR_NONE;
+  if (param.source_window != m_hWnd) return ERR_NONE;
 
   switch (nMessage) {
     case GT_MSG_DEFAULT_PROCESS: {
@@ -100,7 +100,7 @@ int FlashTool::Notify(long nMessage, ListenerMessage &param) {
     case GT_MSG_STOP_FLASH: {
       m_bFlash = false;
 
-      if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(MRD_BL_DYNAMIC, true,
+      if (ERR_NONE == m_pRenderDevice->BeginRender(MRD_BL_DYNAMIC, true,
                                                        NULL, R2_COPYPEN)) {
         m_pRenderDevice->RenderLayer((Layer *)NULL, R2_COPYPEN);
         m_pRenderDevice->EndRender(MRD_BL_DYNAMIC);
@@ -112,21 +112,21 @@ int FlashTool::Notify(long nMessage, ListenerMessage &param) {
       m_bFlash = true;
     } break;
     case GT_MSG_SET_FLASH_MODE: {
-      m_flsMode = eFlashMode(*(ushort *)param.wParam);
+      m_flsMode = eFlashMode(*(ushort *)param.wparam);
     } break;
     case GT_MSG_GET_FLASH_MODE: {
-      *(ushort *)param.wParam = m_flsMode;
+      *(ushort *)param.wparam = m_flsMode;
     } break;
     case GT_MSG_GET_STATUS: {
-      *(ushort *)param.wParam = (m_bFlash) ? 1 : 0;
+      *(ushort *)param.wparam = (m_bFlash) ? 1 : 0;
     } break;
     case GT_MSG_SET_PRA: {
       //
     } break;
     case GT_MSG_SET_FLASH_DATA: {
       //
-      int nLayerFeaType = *(int *)param.lParam;
-      VectorLayer *pSrcLayer = (VectorLayer *)param.wParam;
+      int nLayerFeaType = *(int *)param.lparam;
+      VectorLayer *pSrcLayer = (VectorLayer *)param.wparam;
       m_pResultLayer->DeleteAll();
       CopyLayer(m_pResultLayer, pSrcLayer);
 
@@ -152,6 +152,6 @@ int FlashTool::Notify(long nMessage, ListenerMessage &param) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _GroupTool

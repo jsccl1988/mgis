@@ -13,15 +13,15 @@ long GLRenderDevice::CreateFont(const char *chType, int nHeight, int nWidth,
   HDC hDC = ::GetDC(m_hWnd);
 
   GLText *pText = new GLText();
-  if (SMT_ERR_NONE != pText->CreateFont(hDC, chType, nHeight, nWidth, nWeight,
+  if (ERR_NONE != pText->CreateFont(hDC, chType, nHeight, nWidth, nWeight,
                                         bItalic, bUnderline, bStrike, dwSize))
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   ::ReleaseDC(m_hWnd, hDC);
 
   m_vTextPtrs.push_back(pText);
   unID = m_vTextPtrs.size() - 1;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

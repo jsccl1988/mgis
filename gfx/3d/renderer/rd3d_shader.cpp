@@ -18,7 +18,7 @@ long Shader::Load(std::string fileName, bool needToCompile,
 
   FILE* sFile = fopen(fileName.c_str(), "rb");
   if (NULL == sFile) {
-    return SMT_ERR_INVALID_FILE;
+    return ERR_INVALID_FILE;
   }
 
   char buf[1024];
@@ -32,34 +32,34 @@ long Shader::Load(std::string fileName, bool needToCompile,
 
   data.push_back(0);  // To get NULL-terminated string from vector
 
-  if (SMT_ERR_NONE !=
+  if (ERR_NONE !=
       m_p3DRenderDevice->LoadShaderSource(this, (char*)&data[0]))
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   if (needToCompile) {
     return Compile(flags);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long Shader::Compile(ShaderCompilationFlag flags) {
-  if (SMT_ERR_NONE != m_p3DRenderDevice->CompileShader(this))
-    return SMT_ERR_FAILURE;
+  if (ERR_NONE != m_p3DRenderDevice->CompileShader(this))
+    return ERR_FAILURE;
 
   /* Check if there is a need to check compilation */
   if (flags & SCF_CHECK_ERRORS) {
     long result = IsCompiled();
 
     /* Check if there is a need to place errors in log file */
-    if (result != SMT_ERR_NONE && (flags & SCF_LOG_ERRORS)) {
+    if (result != ERR_NONE && (flags & SCF_LOG_ERRORS)) {
       GetCompileLog();
     }
 
     return result;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long Shader::IsCompiled() { return m_p3DRenderDevice->IsShaderCompiled(this); }

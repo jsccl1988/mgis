@@ -92,6 +92,6 @@ long GPUStateManager::SetMatrixState(MatrixState& state) {
   SetWorldViewMatrix(state.worldview);
   SetProjectionMatrix(state.projection);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

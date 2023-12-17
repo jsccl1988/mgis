@@ -15,7 +15,7 @@ typedef vector<Texture*> vTexturePtrs;
 typedef map<string, Texture*> mapNameToTexturePtrs;
 typedef pair<string, Texture*> pairNameToTexturePtr;
 
-class GIS_CORE_EXPORT TextureManager {
+class CORE_EXPORT TextureManager {
  public:
   TextureManager(void);
   virtual ~TextureManager(void);
@@ -26,8 +26,8 @@ class GIS_CORE_EXPORT TextureManager {
 
  public:
   long AddTexture(Texture* pTexture);
-  Texture* GetTexture(const char* szName);
-  long DestroyTexture(const char* szName);
+  Texture* GetTexture(const char* name);
+  long DestroyTexture(const char* name);
   long DestroyAllTexture(void);
 
   void GetAllTextureName(vector<string>& vStrAllTextureName);

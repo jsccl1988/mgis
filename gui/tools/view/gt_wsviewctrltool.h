@@ -11,7 +11,7 @@ class WSViewCtrlTool : public BaseTool {
   virtual ~WSViewCtrlTool();
 
   int Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
-           pfnToolCallBack pfnCallBack = NULL, void *pToFollow = NULL);
+           pfnToolCallBack pfnCallBack = NULL, void *to_follow = NULL);
   int AuxDraw();
   int Timer();
 

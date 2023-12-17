@@ -17,7 +17,7 @@ long GLRenderDevice::DestroyFrameBuffer(FrameBuffer *frameBuffer) {
     m_pFuncFBO->glDeleteFramebuffers(1, &handle);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::BindFrameBuffer(FrameBuffer *frameBuffer) {
@@ -26,12 +26,12 @@ long GLRenderDevice::BindFrameBuffer(FrameBuffer *frameBuffer) {
     m_pFuncFBO->glBindFramebuffer(GL_FRAMEBUFFER_EXT, handle);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UnbindFrameBuffer() {
   m_pFuncFBO->glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 RenderBuffer *GLRenderDevice::CreateRenderBuffer(TextureFormat format,
@@ -53,7 +53,7 @@ RenderBuffer *GLRenderDevice::CreateRenderBuffer(TextureFormat format,
 long GLRenderDevice::DestroyRenderBuffer(RenderBuffer *renderBuffer) {
   GLhandleARB handle = renderBuffer->GetHandle();
   m_pFuncFBO->glDeleteRenderbuffers(1, &handle);
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::AttachRenderBuffer(FrameBuffer *frameBuffer,
@@ -66,7 +66,7 @@ long GLRenderDevice::AttachRenderBuffer(FrameBuffer *frameBuffer,
   m_pFuncFBO->glFramebufferRenderbuffer(GL_FRAMEBUFFER_EXT, rbSlot,
                                         GL_RENDERBUFFER_EXT, rdhandle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::AttachTexture(FrameBuffer *frameBuffer, Texture *texture2D,
@@ -75,7 +75,7 @@ long GLRenderDevice::AttachTexture(FrameBuffer *frameBuffer, Texture *texture2D,
   GLhandleARB id = texture2D->GetHandle();
   m_pFuncFBO->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, rbSlot, GL_TEXTURE_2D,
                                      id, 0);
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 FrameBufferStatus GLRenderDevice::CheckFrameBufferStatus() {

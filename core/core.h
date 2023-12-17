@@ -1,12 +1,10 @@
-#ifndef GIS_CORE_CORE_H
-#define GIS_CORE_CORE_H
+#ifndef CORE_CORE_H
+#define CORE_CORE_H
 
 #define SmartGIS 2.0
 
 #include <assert.h>
 #include <math.h>
-#include <windef.h>
-#include <windows.h>
 
 #include <fstream>
 #include <limits>
@@ -20,26 +18,8 @@
 #include "base/macros.h"
 #include "base/port.h"
 
-namespace core {
-enum eMouseStatusType {
-  typeNoStatus,
-  typeDLButtonDown,
-  typeLButtonDown,
-  typeLButtonUp,
-  typeMouseMove,
-  typeDRButtonDown,
-  typeRButtonDown,
-  typeRButtonUp,
-  typeMouseWeel
-};
+#include "core/core_export.h"
 
-enum eOperType {
-  typeNoOper,
-  typeAppendFeature,
-  typeModifyFeature,
-  typeAnalysis,
-  typeViewMap
-};
-}  // namespace core
+namespace core {}  // namespace core
 
-#endif  // GIS_CORE_CORE_H
+#endif  // CORE_CORE_H

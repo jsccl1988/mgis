@@ -8,7 +8,7 @@ class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
 //相机基类
-class GIS_CORE_EXPORT Camera {
+class CORE_EXPORT Camera {
  public:
   Camera(LP3DRENDERDEVICE p3DRenderDevice, Viewport3D &viewport);
   virtual ~Camera(void);
@@ -25,7 +25,7 @@ class GIS_CORE_EXPORT Camera {
 };
 
 //正射相机
-class GIS_CORE_EXPORT OrthCamera : public Camera {
+class CORE_EXPORT OrthCamera : public Camera {
  public:
   OrthCamera(LP3DRENDERDEVICE p3DRenderDevice, Viewport3D &viewport);
   virtual ~OrthCamera(void);
@@ -45,7 +45,7 @@ class GIS_CORE_EXPORT OrthCamera : public Camera {
 };
 
 //透视相机
-class GIS_CORE_EXPORT PerspCamera : public Camera {
+class CORE_EXPORT PerspCamera : public Camera {
  public:
   PerspCamera(LP3DRENDERDEVICE p3DRenderDevice, Viewport3D &viewport);
   virtual ~PerspCamera(void);
@@ -100,7 +100,7 @@ class GIS_CORE_EXPORT PerspCamera : public Camera {
 };
 
 //第一视角相机
-class GIS_CORE_EXPORT FPSCamera : public PerspCamera {
+class CORE_EXPORT FPSCamera : public PerspCamera {
  public:
   FPSCamera(LP3DRENDERDEVICE p3DRenderDevice, Viewport3D &viewport);
   virtual ~FPSCamera(void);
@@ -114,7 +114,7 @@ class GIS_CORE_EXPORT FPSCamera : public PerspCamera {
 };
 
 //球面相机
-class GIS_CORE_EXPORT ArbvCamera : public PerspCamera {
+class CORE_EXPORT ArbvCamera : public PerspCamera {
  public:
   ArbvCamera(LP3DRENDERDEVICE p3DRenderDevice, Viewport3D &viewport);
   virtual ~ArbvCamera(void);

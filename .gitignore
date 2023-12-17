@@ -1,0 +1,7 @@
+/out_*
+/out
+.ide.*
+.vscode
+.vs
+*.pyc
+*.swp

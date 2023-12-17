@@ -60,10 +60,10 @@ long ShadersFuncImpl::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
       NULL == _glUniform1fv || NULL == _glUniform2fv || NULL == _glUniform3fv ||
       NULL == _glUniform4fv || NULL == _glUniform1i ||
       NULL == _glGetUniformfv || NULL == _glGetUniformiv) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 GLuint ShadersFuncImpl::glCreateShader(GLenum type) {

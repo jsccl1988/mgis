@@ -27,14 +27,14 @@ long GLIndexBuffer::Lock() {
   m_bLocked = true;
   m_pIndex = m_pGLIndex;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLIndexBuffer::Unlock() {
   m_bLocked = false;
   m_pIndex = NULL;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void* GLIndexBuffer::GetIndexData() {
@@ -58,7 +58,7 @@ long GLIndexBuffer::PrepareForDrawing() {
     glDisableClientState(GL_INDEX_ARRAY);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLIndexBuffer::EndDrawing() {
@@ -66,6 +66,6 @@ long GLIndexBuffer::EndDrawing() {
     glDisableClientState(GL_INDEX_ARRAY);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

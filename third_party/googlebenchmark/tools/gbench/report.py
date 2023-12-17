@@ -292,7 +292,7 @@ def print_difference_report(
             return BC_CYAN
 
     first_col_width = find_longest_name(json_diff_report)
-    first_col_width = max(
+    first_col_width = std::max(
         first_col_width,
         len('Benchmark'))
     first_col_width += len(UTEST_COL_NAME)

@@ -414,30 +414,30 @@ TEST(PrintTypeSizeTest, Wchar_t) {
 TEST(PrintBuiltInTypeTest, Integer) {
   EXPECT_EQ("'\\xFF' (255)", Print(static_cast<unsigned char>(255)));  // uint8
   EXPECT_EQ("'\\x80' (-128)", Print(static_cast<signed char>(-128)));  // int8
-  EXPECT_EQ("65535", Print(std::numeric_limits<uint16_t>::max()));  // uint16
+  EXPECT_EQ("65535", Print(std::numeric_limits<uint16_t>::std::max()));  // uint16
   EXPECT_EQ("-32768", Print(std::numeric_limits<int16_t>::min()));  // int16
   EXPECT_EQ("4294967295",
-            Print(std::numeric_limits<uint32_t>::max()));  // uint32
+            Print(std::numeric_limits<uint32_t>::std::max()));  // uint32
   EXPECT_EQ("-2147483648",
             Print(std::numeric_limits<int32_t>::min()));  // int32
   EXPECT_EQ("18446744073709551615",
-            Print(std::numeric_limits<uint64_t>::max()));  // uint64
+            Print(std::numeric_limits<uint64_t>::std::max()));  // uint64
   EXPECT_EQ("-9223372036854775808",
             Print(std::numeric_limits<int64_t>::min()));  // int64
 #ifdef __cpp_char8_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char8_t>::min()));  // char8_t
   EXPECT_EQ("U+00FF",
-            Print(std::numeric_limits<char8_t>::max()));  // char8_t
+            Print(std::numeric_limits<char8_t>::std::max()));  // char8_t
 #endif
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char16_t>::min()));  // char16_t
   EXPECT_EQ("U+FFFF",
-            Print(std::numeric_limits<char16_t>::max()));  // char16_t
+            Print(std::numeric_limits<char16_t>::std::max()));  // char16_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char32_t>::min()));  // char32_t
   EXPECT_EQ("U+FFFFFFFF",
-            Print(std::numeric_limits<char32_t>::max()));  // char32_t
+            Print(std::numeric_limits<char32_t>::std::max()));  // char32_t
 }
 
 // Size types.
@@ -688,7 +688,7 @@ TEST(PrintPointerToPointerTest, IntPointerPointer) {
 
 void MyFunction(int /* n */) {}
 
-TEST(PrintPointerTest, NonMemberFunctionPointer) {
+TEST(PrintPointerTest, NonMemberFunctiopoint_sizeer) {
   // We cannot directly cast &MyFunction to const void* because the
   // standard disallows casting between pointers to functions and
   // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
@@ -741,7 +741,7 @@ TEST(PrintPointerTest, MemberVariablePointer) {
 // pointers, they don't point to a location in the address space.
 // Their representation is implementation-defined.  Thus they will be
 // printed as raw bytes.
-TEST(PrintPointerTest, MemberFunctionPointer) {
+TEST(PrintPointerTest, MemberFunctiopoint_sizeer) {
   EXPECT_TRUE(HasPrefix(Print(&Foo::MyMethod),
                         Print(sizeof(&Foo::MyMethod)) + "-byte object "));
   EXPECT_TRUE(
@@ -1358,7 +1358,7 @@ TEST(PrintReferenceTest, PrintsAddressAndValue) {
 
 // Tests that the universal printer prints a function pointer passed by
 // reference.
-TEST(PrintReferenceTest, HandlesFunctionPointer) {
+TEST(PrintReferenceTest, HandlesFunctiopoint_sizeer) {
   void (*fp)(int n) = &MyFunction;
   const std::string fp_pointer_string =
       PrintPointer(reinterpret_cast<const void*>(&fp));
@@ -1374,7 +1374,7 @@ TEST(PrintReferenceTest, HandlesFunctionPointer) {
 
 // Tests that the universal printer prints a member function pointer
 // passed by reference.
-TEST(PrintReferenceTest, HandlesMemberFunctionPointer) {
+TEST(PrintReferenceTest, HandlesMemberFunctiopoint_sizeer) {
   int (Foo::*p)(char ch) = &Foo::MyMethod;
   EXPECT_TRUE(HasPrefix(
       PrintByRef(p),

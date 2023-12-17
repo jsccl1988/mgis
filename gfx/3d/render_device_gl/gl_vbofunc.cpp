@@ -6,7 +6,7 @@ VBOFunc::VBOFunc() {}
 VBOFunc::~VBOFunc() {}
 
 long VBOFunc::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void VBOFunc::glGenBuffers(GLsizei count, GLuint *handle) { ; }

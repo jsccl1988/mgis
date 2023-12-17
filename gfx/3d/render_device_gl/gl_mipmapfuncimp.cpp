@@ -13,10 +13,10 @@ long MipmapFuncImpl::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
           "glGenerateMipmap");
 
   if (NULL == _glGenerateMipmap) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void MipmapFuncImpl::glGenerateMipmap(GLenum target) {

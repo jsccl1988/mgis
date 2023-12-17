@@ -39,7 +39,7 @@ class 3DDeviceCaps {
   virtual int GetMaxColorAttachments() = 0;
 
   /**
-  Returns max level of anisotropic filtration that is supported on the GPU.
+  Returns std::max level of anisotropic filtration that is supported on the GPU.
   @return Max level of anisotropic filtration that is supported on the GPU.
   */
   virtual float GetMaxAnisotropy() = 0;

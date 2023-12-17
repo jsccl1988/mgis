@@ -40,18 +40,18 @@
   }
 #endif
 
+// delete pointer on safe mode
 #ifndef SAFE_DELETE_A
 #define SAFE_DELETE_A(p) \
   {                      \
-    if (p != nullptr) {  \
-      delete[](p);       \
-      (p) = nullptr;     \
+    if (NULL != p) {     \
+      delete ([] p);     \
+      (p) = NULL;        \
     }                    \
   }
 #endif
 
 // release object on safe mode
-#ifndef SAFE_RELEASE
 #define SAFE_RELEASE(p) \
   {                     \
     if (NULL != p) {    \
@@ -59,7 +59,6 @@
       (p) = NULL;       \
     }                   \
   }
-#endif
 
 // namespace
 #ifndef NAMESPACE_USING_
@@ -122,9 +121,6 @@
 
 #define UnsetMarker 0
 #define SetMarker 1
-
-#define OK S_OK
-#define FALSE S_FALSE
 
 #if defined(WIN32) || defined(_WIN32)
 #ifndef snprintf

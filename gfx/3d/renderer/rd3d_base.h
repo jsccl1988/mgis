@@ -35,7 +35,7 @@ struct Viewport3D {
   }
 };
 
-struct GIS_CORE_EXPORT Color {
+struct CORE_EXPORT Color {
   union {
     struct {
       float fRed, fGreen, fBlue, fA;
@@ -55,7 +55,7 @@ enum LIGHTTYPE {
   LGT_SPOT          // spot light source
 };
 
-class GIS_CORE_EXPORT Light {
+class CORE_EXPORT Light {
  public:
   Light(void);
 
@@ -124,7 +124,7 @@ class GIS_CORE_EXPORT Light {
 };
 
 //////////////////////////////////////////////////////////////////////////
-class GIS_CORE_EXPORT Material {
+class CORE_EXPORT Material {
  public:
   Material(void);
 
@@ -151,7 +151,7 @@ class GIS_CORE_EXPORT Material {
 };
 
 //////////////////////////////////////////////////////////////////////////
-class GIS_CORE_EXPORT CombinedCamera {
+class CORE_EXPORT CombinedCamera {
  public:
   CombinedCamera();
   virtual ~CombinedCamera(void);
@@ -207,7 +207,7 @@ enum PlaneData {
   P_D = 3   // The distance the plane is from the origin
 };
 
-class GIS_CORE_EXPORT Frustum {
+class CORE_EXPORT Frustum {
  public:
   Frustum(void);
   virtual ~Frustum(void);

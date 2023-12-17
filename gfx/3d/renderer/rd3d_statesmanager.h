@@ -36,7 +36,7 @@ enum PipelineState {
 /**
 Manages all pipeline states.
 */
-class GIS_CORE_EXPORT GPUStateManager {
+class CORE_EXPORT GPUStateManager {
  public:
   GPUState *GetState();
   virtual void PushStates(uint flags);

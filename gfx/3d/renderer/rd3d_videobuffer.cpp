@@ -16,7 +16,7 @@ long VideoBuffer::Use() {
     m_p3DRenderDevice->BindBuffer(this);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long VideoBuffer::Unuse() {
@@ -26,7 +26,7 @@ long VideoBuffer::Unuse() {
     m_p3DRenderDevice->UnbindBuffer();
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void* VideoBuffer::Map(AccessMode access) {
@@ -43,7 +43,7 @@ long VideoBuffer::Unmap() {
   } else {
     m_p3DRenderDevice->UnmapBuffer(this);
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long VideoBuffer::Update(void* data, unsigned int size,
@@ -53,6 +53,6 @@ long VideoBuffer::Update(void* data, unsigned int size,
   } else {
     m_p3DRenderDevice->UpdateBuffer(this, data, size, method);
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

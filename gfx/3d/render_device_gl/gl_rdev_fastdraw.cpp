@@ -79,6 +79,6 @@ long GLRenderDevice::DrawCube3D(Vector3 vCenter, float fWidth, Color smtClr) {
 
   glEnd();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

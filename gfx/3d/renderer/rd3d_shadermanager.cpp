@@ -24,16 +24,16 @@ long ShaderManager::AddShader(Shader *pShader) {
 
     pLog->LogMessage("AddShader () already exist");
 
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-Shader *ShaderManager::GetShader(const char *szName) {
+Shader *ShaderManager::GetShader(const char *name) {
   Shader *pShader = NULL;
   mapNameToShaderPtrs::iterator mapIter;
-  mapIter = m_mapNameToShaderPtrs.find(szName);
+  mapIter = m_mapNameToShaderPtrs.find(name);
 
   if (mapIter != m_mapNameToShaderPtrs.end()) {
     pShader = (mapIter->second);
@@ -42,11 +42,11 @@ Shader *ShaderManager::GetShader(const char *szName) {
   return pShader;
 }
 
-void ShaderManager::DestroyShader(const char *szName) {
-  mapNameToShaderPtrs::iterator iter = m_mapNameToShaderPtrs.find(szName);
+void ShaderManager::DestroyShader(const char *name) {
+  mapNameToShaderPtrs::iterator iter = m_mapNameToShaderPtrs.find(name);
 
   if (iter != m_mapNameToShaderPtrs.end()) {
-    SMT_SAFE_DELETE(iter->second);
+    SAFE_DELETE(iter->second);
     m_mapNameToShaderPtrs.erase(iter);
   }
 }
@@ -55,7 +55,7 @@ void ShaderManager::DestroyAllShader(void) {
   mapNameToShaderPtrs::iterator i = m_mapNameToShaderPtrs.begin();
 
   while (i != m_mapNameToShaderPtrs.end()) {
-    SMT_SAFE_DELETE(i->second);
+    SAFE_DELETE(i->second);
     i++;
   }
 

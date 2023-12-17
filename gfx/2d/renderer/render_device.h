@@ -154,9 +154,9 @@ typedef RenderDevice *LPRENDERDEVICE;
 #ifdef __cplusplus
 extern "C" {
 #endif
-int SMT_EXPORT_DLL CreateRenderDevice(HINSTANCE hInst,
+int EXPORT_DLL CreateRenderDevice(HINSTANCE hInst,
                                       LPRENDERDEVICE &pMrdDevice);
-int SMT_EXPORT_DLL DestroyRenderDevice(LPRENDERDEVICE &pMrdDevice);
+int EXPORT_DLL DestroyRenderDevice(LPRENDERDEVICE &pMrdDevice);
 
 typedef HRESULT (*_CreateRenderDevice)(HINSTANCE hInst,
                                        LPRENDERDEVICE &pMrdDevice);

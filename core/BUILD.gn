@@ -5,37 +5,57 @@ import("//testing/test.gni")
 static_library("core") {
   defines = [
     "NOMINMAX",
+    "USE_UNSTABLE_GEOS_CPP_API",
   ]
 
   sources = [
-    "command.cpp",
-    "dynamic_library.cpp",
-    "listener.cpp",
-    "plugin.cpp",
+    "geometry/geometry.cpp",
+    "sdb/sdb.cpp",
+    # "command.cpp",
+    # "dynamic_library.cpp",
+    # "listener.cpp",
+    # "plugin.cpp",
   ]
 
   include_dirs += [
     "$root_gen_dir/",
     "$root_out_dir/glog/include",
-    "$root_out_dir/gbenchmark/include",
-    "$root_out_dir/gtest/include",
+    "$root_out_dir/geos/include",
+    "$root_out_dir/PROJ/include",
+    # "$root_out_dir/gdal/include",
+  ]
+
+  libs = [
+    "$root_out_dir/geos/lib/geos.lib",
+    "$root_out_dir/PROJ/lib/proj.lib",
+    # "$root_out_dir/gdal/lib/gdal.lib",
   ]
 
   deps = [
     "//base:base",
+    "//third_party:geos",
+    "//third_party:PROJ",
+    # "//third_party:gdal",
   ]
 }
 
 test("core_test") {
+  defines = [
+    "NOMINMAX",
+    "USE_UNSTABLE_GEOS_CPP_API",
+  ]
+
   sources = [
     "core_unittest.cpp",
+    "geometry/geometry_unittest.cpp",
   ]
 
   include_dirs += [
     "$root_gen_dir/",
     "$root_out_dir/glog/include",
-    "$root_out_dir/gbenchmark/include",
-    "$root_out_dir/gtest/include",
+    "$root_out_dir/geos/include",
+    "$root_out_dir/PROJ/include",
+    # "$root_out_dir/gdal/include",
   ]
 
   deps = [

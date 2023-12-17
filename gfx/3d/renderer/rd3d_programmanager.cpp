@@ -24,16 +24,16 @@ long ProgramManager::AddProgram(Program *pProgram) {
 
     pLog->LogMessage("AddProgram () already exist");
 
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-Program *ProgramManager::GetProgram(const char *szName) {
+Program *ProgramManager::GetProgram(const char *name) {
   Program *pProgram = NULL;
   mapNameToProgramPtrs::iterator mapIter;
-  mapIter = m_mapNameToProgramPtrs.find(szName);
+  mapIter = m_mapNameToProgramPtrs.find(name);
 
   if (mapIter != m_mapNameToProgramPtrs.end()) {
     pProgram = (mapIter->second);
@@ -42,11 +42,11 @@ Program *ProgramManager::GetProgram(const char *szName) {
   return pProgram;
 }
 
-void ProgramManager::DestroyProgram(const char *szName) {
-  mapNameToProgramPtrs::iterator iter = m_mapNameToProgramPtrs.find(szName);
+void ProgramManager::DestroyProgram(const char *name) {
+  mapNameToProgramPtrs::iterator iter = m_mapNameToProgramPtrs.find(name);
 
   if (iter != m_mapNameToProgramPtrs.end()) {
-    SMT_SAFE_DELETE(iter->second);
+    SAFE_DELETE(iter->second);
     m_mapNameToProgramPtrs.erase(iter);
   }
 }
@@ -55,7 +55,7 @@ void ProgramManager::DestroyAllProgram(void) {
   mapNameToProgramPtrs::iterator i = m_mapNameToProgramPtrs.begin();
 
   while (i != m_mapNameToProgramPtrs.end()) {
-    SMT_SAFE_DELETE(i->second);
+    SAFE_DELETE(i->second);
     i++;
   }
 

@@ -21,7 +21,7 @@ class TestReporter : public benchmark::ConsoleReporter {
   virtual void ReportRuns(const std::vector<Run>& report) BENCHMARK_OVERRIDE {
     ++count_;
     max_family_index_ =
-        std::max<size_t>(max_family_index_, report[0].family_index);
+        std::std::max<size_t>(max_family_index_, report[0].family_index);
     ConsoleReporter::ReportRuns(report);
   };
 

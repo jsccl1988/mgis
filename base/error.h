@@ -7,7 +7,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "base_types.h"
+#include "base/base_types.h"
+#include "base/base_export.h"
 
 #define BASE(n) 5000 + n
 
@@ -53,16 +54,16 @@ const RESULT kResultIOError = BASE(4);
 const RESULT kResultMemoryError = BASE(5);
 const RESULT kResultTimeout = BASE(6);
 
-class BASE_EXPORT NException : public std::runtime_error {
+class BASE_EXPORT Exception : public std::runtime_error {
  public:
-  NException(const std::string &e)
+  Exception(const std::string &e)
       : std::runtime_error(e), error_code_(base::kResultFailed) {}
-  NException(const char *s, uint32_t error_code = base::kResultFailed)
+  Exception(const char *s, uint32_t error_code = base::kResultFailed)
       : std::runtime_error(s), error_code_(error_code) {}
-  NException()
+  Exception()
       : std::runtime_error((const char *)"Unknown error"),
         error_code_(base::kResultFailed) {}
-  virtual ~NException() throw() {}
+  virtual ~Exception() throw() {}
   uint32_t error_code() const { return error_code_; }
 
  private:

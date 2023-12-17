@@ -58,10 +58,10 @@ long FBOFuncImpl::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
       /*NULL == _glFramebufferTexture1D||NULL == _glFramebufferTexture2D||NULL
          == _glFramebufferTexture3D||*/
       NULL == _glCheckFramebufferStatus) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void FBOFuncImpl::glGenFramebuffers(GLsizei count, GLuint *ids) {

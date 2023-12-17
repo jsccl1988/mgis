@@ -711,18 +711,18 @@ int RenderDeviceGDI::RenderLayer(const TileLayer *pLayer, int op) {
   pLayer->MoveFirst();
   while (!pLayer->IsEnd()) {
     Tile *pTile = pLayer->GetTile();
-    if (NULL != pTile && pTile->bVisible) {
+    if (NULL != pTile && pTile->visible) {
       /*	Envelope envTile,envViewp;
-              RectToEnvelope(envTile,pTile->rtTileRect);
-              LRectToDRect(pTile->rtTileRect,titleDPRect);
+              RectToEnvelope(envTile,pTile->tile_rect);
+              LRectToDRect(pTile->tile_rect,titleDPRect);
 
               if (!envTile.Intersects(envViewp) ||
                       (titleDPRect.Height() < 2 && titleDPRect.Width() < 2))
                       return ERR_NONE;*/
 
       CxImage tmpImage;
-      tmpImage.Decode((BYTE *)pTile->pTileBuf, pTile->lTileBufSize,
-                      pTile->lImageCode);
+      tmpImage.Decode((BYTE *)pTile->buffer, pTile->buffer_size,
+                      pTile->codec);
       tmpImage.Stretch(m_hCurDC, titleDPRect.lb.x, titleDPRect.rt.y,
                        titleDPRect.Width(), titleDPRect.Height());
     }
@@ -889,10 +889,10 @@ int RenderDeviceGDI::DrawMultiLineString(
 
 int RenderDeviceGDI::DrawMultiPoint(const Style *pStyle,
                                     const MultiPoint *pMultiPoint) {
-  int nPoints = pMultiPoint->GetNumGeometries();
+  int point_sizes = pMultiPoint->GetNumGeometries();
 
   int i = 0;
-  while (i < nPoints) {
+  while (i < point_sizes) {
     DrawPoint(pStyle, (Point *)pMultiPoint->GetGeometryRef(i));
     i++;
   }
@@ -1027,45 +1027,45 @@ int RenderDeviceGDI::DrawSymbol(HICON hIcon, long lHeight, long lWidth,
 }
 
 int RenderDeviceGDI::DrawLineSpline(const Spline *pSpline) {
-  int nPoints = pSpline->GetAnalyticPointCount();
-  if (nPoints < 2) return ERR_INVALID_PARAM;
+  int point_sizes = pSpline->GetAnalyticPointCount();
+  if (point_sizes < 2) return ERR_INVALID_PARAM;
 
   int i = 0;
   POINT *lpPoint = NULL;
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) <
+  if (point_sizes * (sizeof(POINT)) <
       (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
     m_bufPool.FreeAllBuf();
     lpPoint = (POINT *)m_bufPool.NewBuf();
   } else
-    lpPoint = new POINT[nPoints];
+    lpPoint = new POINT[point_sizes];
 #else
-  lpPoint = new POINT[nPoints];
+  lpPoint = new POINT[point_sizes];
 #endif
 
   if (m_rdPra.show_point) {
     int r = m_rdPra.point_raduis;
-    for (int i = 0; i < nPoints; i++) {
+    for (int i = 0; i < point_sizes; i++) {
       LPToDP(pSpline->GetAnalyticX(i), pSpline->GetAnalyticY(i), lpPoint[i].x,
              lpPoint[i].y);
       DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
     }
 
     MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-    PolylineTo(m_hCurDC, lpPoint, nPoints);
+    PolylineTo(m_hCurDC, lpPoint, point_sizes);
   } else {
-    for (int i = 0; i < nPoints; i++) {
+    for (int i = 0; i < point_sizes; i++) {
       LPToDP(pSpline->GetAnalyticX(i), pSpline->GetAnalyticY(i), lpPoint[i].x,
              lpPoint[i].y);
     }
 
     MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-    PolylineTo(m_hCurDC, lpPoint, nPoints);
+    PolylineTo(m_hCurDC, lpPoint, point_sizes);
   }
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) <
+  if (point_sizes * (sizeof(POINT)) <
       (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
     m_bufPool.FreeAllBuf();
   } else
@@ -1085,26 +1085,26 @@ int RenderDeviceGDI::DrawLineSpline(const Spline *pSpline) {
 }
 
 int RenderDeviceGDI::DrawLineString(const LineString *pLinestring) {
-  int nPoints = pLinestring->GetNumPoints();
-  if (nPoints < 2) return ERR_INVALID_PARAM;
+  int point_sizes = pLinestring->GetNumPoints();
+  if (point_sizes < 2) return ERR_INVALID_PARAM;
 
   int i = 0;
   POINT *lpPoint = NULL;
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) <
+  if (point_sizes * (sizeof(POINT)) <
       (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
     m_bufPool.FreeAllBuf();
     lpPoint = (POINT *)m_bufPool.NewBuf();
   } else
-    lpPoint = new POINT[nPoints];
+    lpPoint = new POINT[point_sizes];
 #else
-  lpPoint = new POINT[nPoints];
+  lpPoint = new POINT[point_sizes];
 #endif
 
   if (m_rdPra.show_point) {
     int r = m_rdPra.point_raduis;
-    for (int i = 0; i < nPoints; i++) {
+    for (int i = 0; i < point_sizes; i++) {
       LPToDP(pLinestring->GetX(i), pLinestring->GetY(i), lpPoint[i].x,
              lpPoint[i].y);
       // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
@@ -1113,17 +1113,17 @@ int RenderDeviceGDI::DrawLineString(const LineString *pLinestring) {
       DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
     }
   } else {
-    for (int i = 0; i < nPoints; i++) {
+    for (int i = 0; i < point_sizes; i++) {
       LPToDP(pLinestring->GetX(i), pLinestring->GetY(i), lpPoint[i].x,
              lpPoint[i].y);
     }
   }
 
   MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-  PolylineTo(m_hCurDC, lpPoint, nPoints);
+  PolylineTo(m_hCurDC, lpPoint, point_sizes);
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) <
+  if (point_sizes * (sizeof(POINT)) <
       (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
     m_bufPool.FreeAllBuf();
   } else
@@ -1136,19 +1136,19 @@ int RenderDeviceGDI::DrawLineString(const LineString *pLinestring) {
 }
 
 int RenderDeviceGDI::DrawLinearRing(const LinearRing *pLinearRing) {
-  int nPoints = pLinearRing->GetNumPoints();
-  if (nPoints < 2) return ERR_INVALID_PARAM;
+  int point_sizes = pLinearRing->GetNumPoints();
+  if (point_sizes < 2) return ERR_INVALID_PARAM;
 
   int i = 0;
   POINT *lpPoint = NULL;
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
+  if (point_sizes * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
     m_bufPool.FreeAllBuf();
     lpPoint = (POINT *)m_bufPool.NewBuf();
   } else
-    lpPoint = new POINT[nPoints];
+    lpPoint = new POINT[point_sizes];
 #else
-  lpPoint = new POINT[nPoints];
+  lpPoint = new POINT[point_sizes];
 #endif
   if (m_rdPra.show_point) {
     int r = m_rdPra.point_raduis;
@@ -1161,17 +1161,17 @@ int RenderDeviceGDI::DrawLinearRing(const LinearRing *pLinearRing) {
       DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
     }
   } else {
-    for (int i = 0; i < nPoints; i++) {
+    for (int i = 0; i < point_sizes; i++) {
       LPToDP(pLinearRing->GetX(i), pLinearRing->GetY(i), lpPoint[i].x,
              lpPoint[i].y);
     }
   }
 
   MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-  PolylineTo(m_hCurDC, lpPoint, nPoints);
+  PolylineTo(m_hCurDC, lpPoint, point_sizes);
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
+  if (point_sizes * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
     m_bufPool.FreeAllBuf();
   } else
     SAFE_DELETE_A(lpPoint);
@@ -1543,27 +1543,27 @@ int RenderDeviceGDI::DrawRect(const fRect &rect, bool bDP) {
 }
 
 int RenderDeviceGDI::DrawLine(fPoint *pfPoints, int nCount, bool bDP) {
-  int nPoints = nCount;
-  if (nPoints < 2) return ERR_INVALID_PARAM;
+  int point_sizes = nCount;
+  if (point_sizes < 2) return ERR_INVALID_PARAM;
 
   int i = 0;
   POINT *lpPoint = NULL;
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) <
+  if (point_sizes * (sizeof(POINT)) <
       (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
     m_bufPool.FreeAllBuf();
     lpPoint = (POINT *)m_bufPool.NewBuf();
   } else
-    lpPoint = new POINT[nPoints];
+    lpPoint = new POINT[point_sizes];
 #else
-  lpPoint = new POINT[nPoints];
+  lpPoint = new POINT[point_sizes];
 #endif
 
   if (m_rdPra.show_point) {
     int r = m_rdPra.point_raduis;
     if (!bDP) {
-      for (int i = 0; i < nPoints; i++) {
+      for (int i = 0; i < point_sizes; i++) {
         LPToDP(pfPoints[i].x, pfPoints[i].y, lpPoint[i].x, lpPoint[i].y);
         // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
         // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y
@@ -1571,7 +1571,7 @@ int RenderDeviceGDI::DrawLine(fPoint *pfPoints, int nCount, bool bDP) {
         DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
       }
     } else {
-      for (int i = 0; i < nPoints; i++) {
+      for (int i = 0; i < point_sizes; i++) {
         lpPoint[i].x = pfPoints[i].x;
         lpPoint[i].y = pfPoints[i].y;
         // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
@@ -1582,11 +1582,11 @@ int RenderDeviceGDI::DrawLine(fPoint *pfPoints, int nCount, bool bDP) {
     }
   } else {
     if (!bDP) {
-      for (int i = 0; i < nPoints; i++) {
+      for (int i = 0; i < point_sizes; i++) {
         LPToDP(pfPoints[i].x, pfPoints[i].y, lpPoint[i].x, lpPoint[i].y);
       }
     } else {
-      for (int i = 0; i < nPoints; i++) {
+      for (int i = 0; i < point_sizes; i++) {
         lpPoint[i].x = pfPoints[i].x;
         lpPoint[i].y = pfPoints[i].y;
       }
@@ -1594,10 +1594,10 @@ int RenderDeviceGDI::DrawLine(fPoint *pfPoints, int nCount, bool bDP) {
   }
 
   MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-  PolylineTo(m_hCurDC, lpPoint, nPoints);
+  PolylineTo(m_hCurDC, lpPoint, point_sizes);
 
 #ifdef GDI_USE_BUFPOOL
-  if (nPoints * (sizeof(POINT)) <
+  if (point_sizes * (sizeof(POINT)) <
       (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
     m_bufPool.FreeAllBuf();
   } else
@@ -1610,14 +1610,14 @@ int RenderDeviceGDI::DrawLine(fPoint *pfPoints, int nCount, bool bDP) {
 }
 
 int RenderDeviceGDI::DrawLine(const fPoint &ptA, const fPoint &ptB, bool bDP) {
-  lPoint pt1(ptA.x, ptA.y), pt2(ptB.x, ptB.y);
+  lPoint point(ptA.x, ptA.y), pt2(ptB.x, ptB.y);
 
   if (!bDP) {
-    LPToDP(ptA.x, ptA.y, pt1.x, pt1.y);
+    LPToDP(ptA.x, ptA.y, point.x, point.y);
     LPToDP(ptB.x, ptB.y, pt2.x, pt2.y);
   }
 
-  MoveToEx(m_hCurDC, pt1.x, pt1.y, NULL);
+  MoveToEx(m_hCurDC, point.x, point.y, NULL);
   LineTo(m_hCurDC, pt2.x, pt2.y);
 
   return ERR_NONE;

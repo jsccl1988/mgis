@@ -9,18 +9,18 @@ Base3DTool::~Base3DTool() {
 }
 
 int Base3DTool::Init(LP3DRENDERDEVICE p3DRenderDevice, Scene* pScene, HWND hWnd,
-                     pfnToolCallBack pfnCallBack, void* pToFollow) {
-  if (SMT_ERR_NONE != IATool::Init(hWnd, pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                     pfnToolCallBack pfnCallBack, void* to_follow) {
+  if (ERR_NONE != IATool::Init(hWnd, pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   if (NULL == p3DRenderDevice || NULL == pScene) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
   m_p3DRenderDevice = p3DRenderDevice;
   m_pScene = pScene;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _GroupTool

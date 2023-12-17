@@ -21,15 +21,15 @@ namespace _GroupTool {
 
 3DViewCtrlTool ::~3DViewCtrlTool() {
   UnRegisterMessage();
-  SMT_SAFE_DELETE(m_pCamera);
+  SAFE_DELETE(m_pCamera);
 }
 
 int 3DViewCtrlTool ::Init(LP3DRENDERDEVICE p3DRenderDevice, Scene* pScene,
                           HWND hWnd, pfnToolCallBack pfnCallBack,
-                          void* pToFollow) {
-  if (SMT_ERR_NONE !=
-      Base3DTool::Init(p3DRenderDevice, pScene, hWnd, pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                          void* to_follow) {
+  if (ERR_NONE !=
+      Base3DTool::Init(p3DRenderDevice, pScene, hWnd, pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   Vector3 TCenter = Vector3(0, 0, 0);
@@ -72,27 +72,27 @@ int 3DViewCtrlTool ::Init(LP3DRENDERDEVICE p3DRenderDevice, Scene* pScene,
   AppendFuncItems("复位", GT_MSG_3DVIEW_RESTORE, FIM_3DVIEW | FIM_3DMFMENU);
   // AppendFuncItems("二维视图",GT_MSG_VIEW_ACTIVE,FIM_3DVIEW);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_3DVIEW_TRACEBALL);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_3DVIEW_SPHERECAMERA);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_3DVIEW_FIRSTPERSON);
-  // SMT_IATOOL_APPEND_MSG(GT_MSG_3DVIEW_ACTIVE);
+  IATOOL_APPEND_MSG(GT_MSG_3DVIEW_TRACEBALL);
+  IATOOL_APPEND_MSG(GT_MSG_3DVIEW_SPHERECAMERA);
+  IATOOL_APPEND_MSG(GT_MSG_3DVIEW_FIRSTPERSON);
+  // IATOOL_APPEND_MSG(GT_MSG_3DVIEW_ACTIVE);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_3DVIEW_RESIZE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_3DVIEW_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_3DVIEW_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_3DVIEW_RESTORE)
+  IATOOL_APPEND_MSG(GT_MSG_3DVIEW_RESIZE);
+  IATOOL_APPEND_MSG(GT_MSG_SET_3DVIEW_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_GET_3DVIEW_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_3DVIEW_RESTORE)
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-int 3DViewCtrlTool ::AuxDraw() { return SMT_ERR_NONE; }
+int 3DViewCtrlTool ::AuxDraw() { return ERR_NONE; }
 
-int 3DViewCtrlTool ::Timer() { return SMT_ERR_NONE; }
+int 3DViewCtrlTool ::Timer() { return ERR_NONE; }
 
 int 3DViewCtrlTool ::Notify(long nMessage, ListenerMessage& param) {
-  if (param.hSrcWnd != m_hWnd) {
+  if (param.source_window != m_hWnd) {
     switch (nMessage) {
       case GT_MSG_3DVIEW_ACTIVE: {
         SetForegroundWindow(m_hWnd);
@@ -125,7 +125,7 @@ int 3DViewCtrlTool ::Notify(long nMessage, ListenerMessage& param) {
       } break;
       case GT_MSG_3DVIEW_SPHERECAMERA: {
         if (m_viewMode != V3DM_ShpereCamera) {
-          SMT_SAFE_DELETE(m_pCamera);
+          SAFE_DELETE(m_pCamera);
           Viewport3D viewport = m_p3DRenderDevice->GetViewport();
           Aabb aabb = m_pScene->GetAabb();
 
@@ -140,7 +140,7 @@ int 3DViewCtrlTool ::Notify(long nMessage, ListenerMessage& param) {
       } break;
       case GT_MSG_3DVIEW_FIRSTPERSON: {
         if (m_viewMode != V3DM_FirstPerson) {
-          SMT_SAFE_DELETE(m_pCamera);
+          SAFE_DELETE(m_pCamera);
           RECT wndRect;
           lPoint point;
           GetWindowRect(m_hWnd, &wndRect);
@@ -187,17 +187,17 @@ int 3DViewCtrlTool ::Notify(long nMessage, ListenerMessage& param) {
         }
       } break;
       case GT_MSG_SET_3DVIEW_MODE: {
-        m_viewMode = eView3DMode(*(ushort*)param.wParam);
+        m_viewMode = eView3DMode(*(ushort*)param.wparam);
       } break;
       case GT_MSG_GET_3DVIEW_MODE: {
-        *(ushort*)param.wParam = m_viewMode;
+        *(ushort*)param.wparam = m_viewMode;
       } break;
       default:
         break;
     }
     SetActive();
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int 3DViewCtrlTool ::SetCursor(void) {
@@ -216,7 +216,7 @@ int 3DViewCtrlTool ::SetCursor(void) {
       ::SetCursor(m_hCrossCursor);
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int 3DViewCtrlTool ::LButtonDown(uint nFlags, lPoint point) {
@@ -226,7 +226,7 @@ int 3DViewCtrlTool ::LButtonDown(uint nFlags, lPoint point) {
     TrackballProv(point, m_vPrePos);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int 3DViewCtrlTool ::MouseMove(uint nFlags, lPoint point) {
@@ -264,7 +264,7 @@ int 3DViewCtrlTool ::MouseMove(uint nFlags, lPoint point) {
   if (m_viewMode == V3DM_FirstPerson) {
     ((FPSCamera*)m_pCamera)->SetViewByMouse();
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int 3DViewCtrlTool ::LButtonUp(uint nFlags, lPoint point) {
@@ -292,7 +292,7 @@ int 3DViewCtrlTool ::LButtonUp(uint nFlags, lPoint point) {
 
   m_bIsDrag = false;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int 3DViewCtrlTool ::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
@@ -343,22 +343,22 @@ int 3DViewCtrlTool ::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
       break;
     case 'C': {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
+      param.source_window = m_hWnd;
       Notify(GT_MSG_3DVIEW_TRACEBALL, param);
     } break;
     case 'V': {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
+      param.source_window = m_hWnd;
       Notify(GT_MSG_3DVIEW_SPHERECAMERA, param);
     } break;
     case 'B': {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
+      param.source_window = m_hWnd;
       Notify(GT_MSG_3DVIEW_FIRSTPERSON, param);
     } break;
     case 'Z': {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
+      param.source_window = m_hWnd;
       Notify(GT_MSG_3DVIEW_RESTORE, param);
     } break;
     case 'O': {
@@ -368,7 +368,7 @@ int 3DViewCtrlTool ::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
     break;
     case VK_ESCAPE: {
       if (m_viewMode != V3DM_Normal) {
-        SMT_SAFE_DELETE(m_pCamera);
+        SAFE_DELETE(m_pCamera);
         Viewport3D viewport = m_p3DRenderDevice->GetViewport();
         Aabb aabb = m_pScene->GetAabb();
 
@@ -385,7 +385,7 @@ int 3DViewCtrlTool ::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
     break;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int 3DViewCtrlTool ::MouseWeel(uint nFlags, short zDelta, lPoint point) {
@@ -402,7 +402,7 @@ int 3DViewCtrlTool ::MouseWeel(uint nFlags, short zDelta, lPoint point) {
   //方法二
   m_pCamera->MoveEyeSmoothly(zDelta < 0);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////

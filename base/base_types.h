@@ -94,6 +94,9 @@ const int64_t kInt64Max = ((int64_t)GG_LONGLONG(0x7FFFFFFFFFFFFFFF));
 const double kDoubleMax = 1E+10;
 const float kFloatMax = 1E+10;
 
+const double kEpsilon = 1E-5;
+const double kPI = 3.1415926;
+
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \

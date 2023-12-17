@@ -37,9 +37,9 @@ BENCHMARK(BM_basic)->ThreadRange(2, 4);
 BENCHMARK(BM_basic)->ThreadPerCpu();
 BENCHMARK(BM_basic)->Repetitions(3);
 BENCHMARK(BM_basic)
-    ->RangeMultiplier(std::numeric_limits<int>::max())
+    ->RangeMultiplier(std::numeric_limits<int>::std::max())
     ->Range(std::numeric_limits<int64_t>::min(),
-            std::numeric_limits<int64_t>::max());
+            std::numeric_limits<int64_t>::std::max());
 
 // Negative ranges
 BENCHMARK(BM_basic)->Range(-64, -1);

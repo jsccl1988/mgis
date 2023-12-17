@@ -51,7 +51,7 @@ long GLRenderDevice::Init(HWND hWnd, const char *logname) {
   LogManager *pLogMgr = LogManager::GetSingletonPtr();
   Log *pLog = pLogMgr->CreateLog(logname);
 
-  if (NULL == pLog) return SMT_FALSE;
+  if (NULL == pLog) return FALSE;
 
   pLog->LogMessage("Init OpenGL 3DRenderDevice ok!");
 
@@ -73,21 +73,21 @@ long GLRenderDevice::Init(HWND hWnd, const char *logname) {
   // Choose pixel format
   int nPixelFormat = ChoosePixelFormat(hDC, &pfd);
   if (nPixelFormat == 0) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   } else {
     // Set pixel format
     BOOL bResult = SetPixelFormat(hDC, nPixelFormat, &pfd);
     if (!bResult) {
-      return SMT_ERR_FAILURE;
+      return ERR_FAILURE;
     } else {
       // Create a rendering context.
       m_hRC = wglCreateContext(hDC);
       if (!m_hRC) {
-        return SMT_ERR_FAILURE;
+        return ERR_FAILURE;
       } else {
         // Set it as the current context
         if (!wglMakeCurrent(hDC, m_hRC)) {
-          return SMT_ERR_FAILURE;
+          return ERR_FAILURE;
         }
       }
     }
@@ -96,7 +96,7 @@ long GLRenderDevice::Init(HWND hWnd, const char *logname) {
   ::ReleaseDC(m_hWnd, hDC);
 
   //////////////////////////////////////////////////////////////////////////
-  if (SMT_ERR_NONE != SetDeviceCaps()) return SMT_ERR_FAILURE;
+  if (ERR_NONE != SetDeviceCaps()) return ERR_FAILURE;
 
   //////////////////////////////////////////////////////////////////////////
   // Set a default viewport
@@ -124,7 +124,7 @@ long GLRenderDevice::Init(HWND hWnd, const char *logname) {
   SetDepthClearValue(1.0f);
   SetStencilClearValue(0);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::Destroy() {
@@ -176,32 +176,32 @@ long GLRenderDevice::Destroy() {
   }
 
   //
-  SMT_SAFE_DELETE(m_pDeviceCaps);
+  SAFE_DELETE(m_pDeviceCaps);
 
   //
-  SMT_SAFE_DELETE(m_pFuncShaders);
-  SMT_SAFE_DELETE(m_pFuncMultTex);
-  SMT_SAFE_DELETE(m_pFuncVSync);
-  SMT_SAFE_DELETE(m_pFuncMipmap);
-  SMT_SAFE_DELETE(m_pFuncVBO);
-  SMT_SAFE_DELETE(m_pFuncFBO);
+  SAFE_DELETE(m_pFuncShaders);
+  SAFE_DELETE(m_pFuncMultTex);
+  SAFE_DELETE(m_pFuncVSync);
+  SAFE_DELETE(m_pFuncMipmap);
+  SAFE_DELETE(m_pFuncVBO);
+  SAFE_DELETE(m_pFuncFBO);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::Release() {
   //
-  SMT_SAFE_DELETE(m_pStateManager);
+  SAFE_DELETE(m_pStateManager);
   //
 
   int nFont = m_vTextPtrs.size();
   for (int i = 0; i < nFont; i++) {
     GLText *pFont = m_vTextPtrs.at(i);
-    SMT_SAFE_DELETE(pFont);
+    SAFE_DELETE(pFont);
   }
   m_vTextPtrs.clear();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetDeviceCaps(void) {
@@ -214,10 +214,10 @@ long GLRenderDevice::SetDeviceCaps(void) {
     m_pFuncMultTex = new MultitextureFunc();
 
   if (NULL != m_pFuncMultTex &&
-      SMT_ERR_NONE == m_pFuncMultTex->Initialize(this))
+      ERR_NONE == m_pFuncMultTex->Initialize(this))
     ;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   /* Init GL_ARB_vertex_buffer_object */
   if (m_pDeviceCaps->IsVBOSupported())
@@ -225,10 +225,10 @@ long GLRenderDevice::SetDeviceCaps(void) {
   else
     m_pFuncVBO = new VBOFunc();
 
-  if (NULL != m_pFuncVBO && SMT_ERR_NONE == m_pFuncVBO->Initialize(this))
+  if (NULL != m_pFuncVBO && ERR_NONE == m_pFuncVBO->Initialize(this))
     ;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   /* Init shaders */
   if (m_pDeviceCaps->IsGLSLSupported())
@@ -237,10 +237,10 @@ long GLRenderDevice::SetDeviceCaps(void) {
     m_pFuncShaders = new ShadersFunc();
 
   if (NULL != m_pFuncShaders &&
-      SMT_ERR_NONE == m_pFuncShaders->Initialize(this))
+      ERR_NONE == m_pFuncShaders->Initialize(this))
     ;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   /* Init frame buffer objects */
   if (m_pDeviceCaps->IsFBOSupported())
@@ -248,10 +248,10 @@ long GLRenderDevice::SetDeviceCaps(void) {
   else
     m_pFuncFBO = new FBOFunc();
 
-  if (NULL != m_pFuncFBO && SMT_ERR_NONE == m_pFuncFBO->Initialize(this))
+  if (NULL != m_pFuncFBO && ERR_NONE == m_pFuncFBO->Initialize(this))
     ;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   /* Init mimmap generation */
   if (m_pDeviceCaps->IsMipMapsSupported())
@@ -259,10 +259,10 @@ long GLRenderDevice::SetDeviceCaps(void) {
   else
     m_pFuncMipmap = new MipmapFunc();
 
-  if (NULL != m_pFuncMipmap && SMT_ERR_NONE == m_pFuncMipmap->Initialize(this))
+  if (NULL != m_pFuncMipmap && ERR_NONE == m_pFuncMipmap->Initialize(this))
     ;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   /* Init VSync extension */
   if (m_pDeviceCaps->IsVSyncSupported())
@@ -270,29 +270,29 @@ long GLRenderDevice::SetDeviceCaps(void) {
   else
     m_pFuncVSync = new VSyncFunc();
 
-  if (NULL != m_pFuncVSync && SMT_ERR_NONE == m_pFuncVSync->Initialize(this))
+  if (NULL != m_pFuncVSync && ERR_NONE == m_pFuncVSync->Initialize(this))
     ;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 GLenum GLRenderDevice::ConvertType(Type type) {
   switch (type) {
-    case SMT_SHORT:
+    case SHORT:
       return GL_SHORT;
-    case SMT_INT:
+    case INT:
       return GL_INT;
-    case SMT_FLOAT:
+    case FLOAT:
       return GL_FLOAT;
-    case SMT_DOUBLE:
+    case DOUBLE:
       return GL_DOUBLE;
-    case SMT_UNSIGNED_INT:
+    case UNSIGNED_INT:
       return GL_UNSIGNED_INT;
-    case SMT_UNSIGNED_BYTE:
+    case UNSIGNED_BYTE:
       return GL_UNSIGNED_BYTE;
-    case SMT_UNSIGNED_SHORT:
+    case UNSIGNED_SHORT:
       return GL_UNSIGNED_SHORT;
   }
   return -1;

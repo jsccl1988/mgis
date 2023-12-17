@@ -42,15 +42,15 @@ long GLText::CreateFont(HDC hDC, const char *chType, int nHeight, int nWidth,
                      ANTIALIASED_QUALITY, FF_DONTCARE | DEFAULT_PITCH, chType);
   }
 
-  if (m_hFont == NULL) return SMT_FALSE;
+  if (m_hFont == NULL) return FALSE;
 
-  return SMT_OK;
+  return OK;
 }
 
 HFONT GLText::GetFont() { return m_hFont; }
 
 long GLText::DrawText(HDC hDC, float x, float y, float z, const char *str) {
-  if (str == NULL) return SMT_ERR_INVALID_PARAM;
+  if (str == NULL) return ERR_INVALID_PARAM;
 
   ::SelectObject(hDC, m_hFont);
 
@@ -71,11 +71,11 @@ long GLText::DrawText(HDC hDC, float x, float y, float z, const char *str) {
     }
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 HRESULT GLText::DrawText(HDC hDC, float x, float y, const char *str) {
-  if (str == NULL) return SMT_ERR_INVALID_PARAM;
+  if (str == NULL) return ERR_INVALID_PARAM;
   /*
   int length;
   length = (int)strlen(str);
@@ -105,6 +105,6 @@ HRESULT GLText::DrawText(HDC hDC, float x, float y, const char *str) {
     }
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

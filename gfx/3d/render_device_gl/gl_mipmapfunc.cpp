@@ -6,7 +6,7 @@ MipmapFunc::MipmapFunc() {}
 MipmapFunc::~MipmapFunc() {}
 
 long MipmapFunc::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void MipmapFunc::glGenerateMipmap(GLenum target) { ; }

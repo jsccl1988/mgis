@@ -3384,7 +3384,7 @@ class FloatingPointNearTest : public FloatingPointTest<RawType> {
     EXPECT_FALSE(m2.Matches(ParentType::close_to_one_));
     EXPECT_FALSE(m2.Matches(-ParentType::close_to_one_));
 
-    // Check that inf matches inf, regardless of the of the specified max
+    // Check that inf matches inf, regardless of the of the specified std::max
     // absolute error.
     Matcher<RawType> m3 = matcher_maker(ParentType::infinity_, 0.0);
     EXPECT_TRUE(m3.Matches(ParentType::infinity_));
@@ -3413,7 +3413,7 @@ class FloatingPointNearTest : public FloatingPointTest<RawType> {
     EXPECT_FALSE(m8.Matches(ParentType::max_));
     EXPECT_TRUE(m8.Matches(-ParentType::max_));
 
-    // The difference between max() and -max() normally overflows to infinity,
+    // The difference between std::max() and -std::max() normally overflows to infinity,
     // but it should still match if the max_abs_error is also infinity.
     Matcher<RawType> m9 = matcher_maker(
         ParentType::max_, ParentType::infinity_);
@@ -3498,7 +3498,7 @@ TEST_F(FloatTest, NanSensitiveFloatEqCanDescribeSelf) {
 }
 
 // Instantiate FloatingPointTest for testing floats with a user-specified
-// max absolute error.
+// std::max absolute error.
 typedef FloatingPointNearTest<float> FloatNearTest;
 
 TEST_F(FloatNearTest, FloatNearMatches) {
@@ -3613,7 +3613,7 @@ TEST_F(DoubleTest, NanSensitiveDoubleEqCanDescribeSelf) {
 }
 
 // Instantiate FloatingPointTest for testing floats with a user-specified
-// max absolute error.
+// std::max absolute error.
 typedef FloatingPointNearTest<double> DoubleNearTest;
 
 TEST_F(DoubleNearTest, DoubleNearMatches) {
@@ -4570,7 +4570,7 @@ std::string IntToStringFunction(int input) {
   return input == 1 ? "foo" : "bar";
 }
 
-TEST(ResultOfTest, WorksForFunctionPointers) {
+TEST(ResultOfTest, WorksForFunctiopoint_sizeers) {
   Matcher<int> matcher = ResultOf(&IntToStringFunction, Eq(std::string("foo")));
 
   EXPECT_TRUE(matcher.Matches(1));
@@ -4660,7 +4660,7 @@ TEST(ResultOfTest, WorksForCompatibleMatcherTypes) {
 
 // Tests that the program aborts when ResultOf is passed
 // a NULL function pointer.
-TEST(ResultOfDeathTest, DiesOnNullFunctionPointers) {
+TEST(ResultOfDeathTest, DiesOnNullFunctiopoint_sizeers) {
   EXPECT_DEATH_IF_SUPPORTED(
       ResultOf(static_cast<std::string (*)(int dummy)>(nullptr),
                Eq(std::string("foo"))),
@@ -6083,7 +6083,7 @@ static std::string EMString(int element, int matcher) {
 
 TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
   // A situation where all elements and matchers have a match
-  // associated with them, but the max matching is not perfect.
+  // associated with them, but the std::max matching is not perfect.
   std::vector<std::string> v;
   v.push_back("a");
   v.push_back("b");
@@ -6098,7 +6098,7 @@ TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
       "and the closest match is 2 of 3 matchers with the "
       "pairings:\n";
 
-  // We have to be a bit loose here, because there are 4 valid max matches.
+  // We have to be a bit loose here, because there are 4 valid std::max matches.
   EXPECT_THAT(
       listener.str(),
       AnyOf(prefix + "{\n  " + EMString(0, 0) +
@@ -6143,7 +6143,7 @@ TEST_F(UnorderedElementsAreTest, DescribeNegation) {
 
 namespace {
 
-// Used as a check on the more complex max flow method used in the
+// Used as a check on the more complex std::max flow method used in the
 // real testing::internal::FindMaxBipartiteMatching. This method is
 // compatible but runs in worst-case factorial time, so we only
 // use it in testing for small problem sizes.

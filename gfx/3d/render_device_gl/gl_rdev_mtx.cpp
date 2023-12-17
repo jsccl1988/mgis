@@ -13,51 +13,51 @@ long GLRenderDevice::MatrixModeSet(MatrixMode mode) {
   else
     glMatrixMode(GL_MODELVIEW);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 MatrixMode GLRenderDevice::MatrixModeGet() const { return m_matrixMode; }
 
 long GLRenderDevice::MatrixLoadIdentity() {
   glLoadIdentity();
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixLoad(const Matrix& mtx) {
   glLoadMatrixf((float*)(&mtx));
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixPush() {
   glPushMatrix();
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixPop() {
   glPopMatrix();
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixScale(float x, float y, float z) {
   glScalef(x, y, z);
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixTranslation(float x, float y, float z) {
   glTranslatef(x, y, z);
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixRotation(float angle, float x, float y, float z) {
   glRotatef(angle, x, y, z);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::MatrixMultiply(const Matrix& mtx) {
   glMultMatrixf((float*)(&mtx));
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 Matrix GLRenderDevice::MatrixGet() {

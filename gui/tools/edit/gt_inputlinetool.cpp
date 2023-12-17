@@ -30,17 +30,17 @@ InputLineTool::InputLineTool()
 }
 
 InputLineTool::~InputLineTool() {
-  SMT_SAFE_DELETE(m_pGeom);
+  SAFE_DELETE(m_pGeom);
 
   UnRegisterMessage();
 }
 
 int InputLineTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
                         HWND hWnd, pfnToolCallBack pfnCallBack,
-                        void *pToFollow) {
-  if (SMT_ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
-                                     pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                        void *to_follow) {
+  if (ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
+                                     pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
@@ -49,32 +49,32 @@ int InputLineTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
     pStyle->SetStyleType(ST_PenDesc);
   }
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_INPUT_LINE_TYPE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_INPUT_LINE_TYPE);
+  IATOOL_APPEND_MSG(GT_MSG_SET_INPUT_LINE_TYPE);
+  IATOOL_APPEND_MSG(GT_MSG_GET_INPUT_LINE_TYPE);
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-int InputLineTool::AuxDraw() { return SMT_ERR_NONE; }
+int InputLineTool::AuxDraw() { return ERR_NONE; }
 
 int InputLineTool::Notify(long nMessage, ListenerMessage &param) {
-  if (param.hSrcWnd != m_hWnd) return SMT_ERR_NONE;
+  if (param.source_window != m_hWnd) return ERR_NONE;
 
   switch (nMessage) {
     case GT_MSG_DEFAULT_PROCESS: {
     } break;
     case GT_MSG_SET_INPUT_LINE_TYPE: {
-      m_appendType = *(ushort *)param.wParam;
+      m_appendType = *(ushort *)param.wparam;
     } break;
     case GT_MSG_GET_INPUT_LINE_TYPE: {
-      *(ushort *)param.wParam = m_appendType;
+      *(ushort *)param.wparam = m_appendType;
     } break;
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputLineTool::LButtonDown(uint nFlags, lPoint point) {
@@ -100,7 +100,7 @@ int InputLineTool::LButtonDown(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputLineTool::MouseMove(uint nFlags, lPoint point) {
@@ -126,7 +126,7 @@ int InputLineTool::MouseMove(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputLineTool::LButtonUp(uint nFlags, lPoint point) {
@@ -152,7 +152,7 @@ int InputLineTool::LButtonUp(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputLineTool::RButtonDown(uint nFlags, lPoint point) {
@@ -186,11 +186,11 @@ int InputLineTool::RButtonDown(uint nFlags, lPoint point) {
       SetEnableContexMenu(true);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputLineTool::MouseWeel(uint nFlags, short zDelta, lPoint point) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -241,7 +241,7 @@ void InputLineTool::AppendLineString(uint mouse_status, lPoint point) {
       if (m_bIsDrag) {
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fpts[0].x = m_pntOrigin.x;
           fpts[0].y = m_pntOrigin.y;
@@ -302,7 +302,7 @@ void InputLineTool::AppendArc(uint mouse_status, lPoint point) {
         m_nStep = 1;
         EndAppendLine();
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             m_pRenderDevice->BeginRender(MRD_BL_QUICK, true, false))
           m_pRenderDevice->EndRender(MRD_BL_QUICK);
       }
@@ -335,7 +335,7 @@ void InputLineTool::AppendArc(uint mouse_status, lPoint point) {
 
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fpts[0].x = m_pntOrigin.x;
           fpts[0].y = m_pntOrigin.y;
@@ -385,7 +385,7 @@ void InputLineTool::AppendRect(uint mouse_status, lPoint point) {
 
         EndAppendLine();
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             m_pRenderDevice->BeginRender(MRD_BL_QUICK, true, false))
           m_pRenderDevice->EndRender(MRD_BL_QUICK);
       }
@@ -398,7 +398,7 @@ void InputLineTool::AppendRect(uint mouse_status, lPoint point) {
       if (m_bIsDrag) {
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fRect frt1, frt2;
           frt1.Merge(m_pntOrigin.x, m_pntOrigin.y);
@@ -478,7 +478,7 @@ void InputLineTool::AppendLinearRing(uint mouse_status, lPoint point) {
 
           StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
           Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-          if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+          if (ERR_NONE == m_pRenderDevice->BeginRender(
                                   MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
             m_pRenderDevice->DrawLine(fpts, 2, true);
 
@@ -490,7 +490,7 @@ void InputLineTool::AppendLinearRing(uint mouse_status, lPoint point) {
           pLinearRing->CloseRings();
           EndAppendLine();
 
-          if (SMT_ERR_NONE ==
+          if (ERR_NONE ==
               m_pRenderDevice->BeginRender(MRD_BL_QUICK, true, false))
             m_pRenderDevice->EndRender(MRD_BL_QUICK);
         }
@@ -504,7 +504,7 @@ void InputLineTool::AppendLinearRing(uint mouse_status, lPoint point) {
       if (m_bIsDrag) {
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fpts[0].x = m_pntOrigin.x;
           fpts[0].y = m_pntOrigin.y;
@@ -576,7 +576,7 @@ void InputLineTool::AppendSpline(uint mouse_status, lPoint point) {
         pSpline->CalcAnalyticPoints();
         EndAppendLine();
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             m_pRenderDevice->BeginRender(MRD_BL_QUICK, true, false))
           m_pRenderDevice->EndRender(MRD_BL_QUICK);
 
@@ -591,7 +591,7 @@ void InputLineTool::AppendSpline(uint mouse_status, lPoint point) {
       if (m_bIsDrag) {
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           SysManager *pSysMgr = SysManager::GetSingletonPtr();
           SystemOptions sysPra = pSysMgr->GetSysPra();
@@ -619,13 +619,13 @@ void InputLineTool::EndAppendLine(void) {
   ushort uRetType = GT_MSG_RET_INPUT_LINE;
   ListenerMessage param;
 
-  param.hSrcWnd = m_hWnd;
-  param.wParam = WPARAM(m_pGeom);
-  param.lParam = LPARAM(&uRetType);
+  param.source_window = m_hWnd;
+  param.wparam = WPARAM(m_pGeom);
+  param.lparam = LPARAM(&uRetType);
 
   EndIA(GT_MSG_RET_DELEGATE, param);
 
-  SMT_SAFE_DELETE(m_pGeom);
+  SAFE_DELETE(m_pGeom);
 
   SetOperDone(true);
 }

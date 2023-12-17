@@ -24,7 +24,7 @@ class Base3DTool : public IATool {
 
  public:
   virtual int Init(LP3DRENDERDEVICE p3DRenderDevice, Scene *pScene, HWND hWnd,
-                   pfnToolCallBack pfnCallBack = NULL, void *pToFollow = NULL);
+                   pfnToolCallBack pfnCallBack = NULL, void *to_follow = NULL);
 
  public:
   LP3DRENDERDEVICE GetRenderDevice(void) { return m_p3DRenderDevice; }

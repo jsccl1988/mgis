@@ -1087,7 +1087,7 @@ static int
 dirent_wcstombs_s(
     size_t *pReturnValue,
     char *mbstr,
-    size_t sizeInBytes, /* max size of mbstr */
+    size_t sizeInBytes, /* std::max size of mbstr */
     const wchar_t *wcstr,
     size_t count)
 {

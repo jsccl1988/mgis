@@ -18,14 +18,14 @@ long 3DRenderer ::CreateDevice(const char *chAPI) {
     if (!dll_) {
       ::MessageBox(NULL, "Loading GLRenderDeviceD.dll from lib failed.",
                    "SmartGis - error", MB_OK | MB_ICONERROR);
-      return SMT_FALSE;
+      return FALSE;
     }
 #else
     dll_ = LoadLibrary("GLRenderDevice.dll");
     if (!dll_) {
       ::MessageBox(NULL, "Loading GLRenderDevice.dll from lib failed.",
                    "SmartGis - error", MB_OK | MB_ICONERROR);
-      return SMT_FALSE;
+      return FALSE;
     }
 #endif
   } else if (strcmp(chAPI, "Direct3D") == 0) {
@@ -34,20 +34,20 @@ long 3DRenderer ::CreateDevice(const char *chAPI) {
     if (!dll_) {
       ::MessageBox(NULL, "Loading D3DRenderDeviceD.dll from lib failed.",
                    "SmartGis - error", MB_OK | MB_ICONERROR);
-      return SMT_FALSE;
+      return FALSE;
     }
 #else
     dll_ = LoadLibrary("D3DRenderDevice.dll");
     if (!dll_) {
       ::MessageBox(NULL, "Loading D3DRenderDevice.dll from lib failed.",
                    "SmartGis - error", MB_OK | MB_ICONERROR);
-      return SMT_FALSE;
+      return FALSE;
     }
 #endif
   } else {
     _snprintf(buffer, 300, "API '%s' not yet supported.", chAPI);
     ::MessageBox(NULL, buffer, "SmartGis - error", MB_OK | MB_ICONERROR);
-    return SMT_FALSE;
+    return FALSE;
   }
 
   _Create3DRenderDevice _CreateRDev = 0;
@@ -63,10 +63,10 @@ long 3DRenderer ::CreateDevice(const char *chAPI) {
                  "SmartGis - error", MB_OK | MB_ICONERROR);
     m_pDevice = NULL;
 
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void 3DRenderer ::Release(void) {

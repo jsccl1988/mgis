@@ -119,7 +119,7 @@ struct TextureEnvMode {
 class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
-class GIS_CORE_EXPORT Texture {
+class CORE_EXPORT Texture {
  public:
   Texture(LP3DRENDERDEVICE p3DRenderDevice, uint handle, string strName);
   virtual ~Texture();

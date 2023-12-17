@@ -9,7 +9,7 @@ namespace _3Drd {
 class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
-class GIS_CORE_EXPORT Program {
+class CORE_EXPORT Program {
  public:
   Program(LP3DRENDERDEVICE p3DRenderDevice, uint handle, string strName);
   virtual ~Program();

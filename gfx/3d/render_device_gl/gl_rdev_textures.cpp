@@ -3,36 +3,36 @@
 using namespace core;
 
 namespace _3Drd {
-Texture *GLRenderDevice::CreateTexture(const char *szName) {
+Texture *GLRenderDevice::CreateTexture(const char *name) {
   GLuint unHandle;
   glGenTextures(1, &unHandle);
 
-  Texture *pTex = new Texture(this, unHandle, szName);
-  if (SMT_ERR_NONE == m_textureMgr.AddTexture(pTex))
+  Texture *pTex = new Texture(this, unHandle, name);
+  if (ERR_NONE == m_textureMgr.AddTexture(pTex))
     return pTex;
   else {
-    SMT_SAFE_DELETE(pTex);
+    SAFE_DELETE(pTex);
     return NULL;
   }
 }
 
 long GLRenderDevice::GenerateMipmap(Texture *pTexture) {
-  if (NULL == pTexture) return SMT_ERR_INVALID_PARAM;
+  if (NULL == pTexture) return ERR_INVALID_PARAM;
 
-  if (SMT_ERR_NONE == pTexture->Use()) {
+  if (ERR_NONE == pTexture->Use()) {
     m_pFuncMipmap->glGenerateMipmap(GL_TEXTURE_2D);
     pTexture->Unuse();
 
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 
-long GLRenderDevice::DestroyTexture(const char *szName) {
-  Texture *pTexture = m_textureMgr.GetTexture(szName);
+long GLRenderDevice::DestroyTexture(const char *name) {
+  Texture *pTexture = m_textureMgr.GetTexture(name);
 
-  if (NULL == pTexture) return SMT_ERR_INVALID_PARAM;
+  if (NULL == pTexture) return ERR_INVALID_PARAM;
 
   GLhandleARB handle = pTexture->GetHandle();
   if (handle != 0) {
@@ -41,28 +41,28 @@ long GLRenderDevice::DestroyTexture(const char *szName) {
 
   m_textureMgr.DestroyTexture(pTexture->GetTextureName());
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-Texture *GLRenderDevice::GetTexture(const char *szName) {
-  return m_textureMgr.GetTexture(szName);
+Texture *GLRenderDevice::GetTexture(const char *name) {
+  return m_textureMgr.GetTexture(name);
 }
 
 long GLRenderDevice::BindTexture(Texture *pTexture) {
-  if (NULL == pTexture) return SMT_ERR_INVALID_PARAM;
+  if (NULL == pTexture) return ERR_INVALID_PARAM;
 
   GLhandleARB handle = pTexture->GetHandle();
   glBindTexture(GL_TEXTURE_2D, handle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::BuildTexture(Texture *pTexture) {
-  if (NULL == pTexture) return SMT_ERR_INVALID_PARAM;
+  if (NULL == pTexture) return ERR_INVALID_PARAM;
 
   void *pDataBuf = pTexture->GetData();
 
-  if (NULL == pDataBuf) return SMT_ERR_INVALID_PARAM;
+  if (NULL == pDataBuf) return ERR_INVALID_PARAM;
 
   TextureDesc texDesc = pTexture->GetDesc();
 
@@ -116,27 +116,27 @@ long GLRenderDevice::BuildTexture(Texture *pTexture) {
   pTexture->SetEnvMode(texEvn);
   pTexture->SetSampler(texSampler);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UnbindTexture() {
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::BindRectTexture(Texture *pTexture) {
-  if (NULL == pTexture) return SMT_ERR_INVALID_PARAM;
+  if (NULL == pTexture) return ERR_INVALID_PARAM;
 
   GLhandleARB handle = pTexture->GetHandle();
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, handle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UnbindRectTexture() {
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

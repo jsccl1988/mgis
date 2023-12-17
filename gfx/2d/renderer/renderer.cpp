@@ -17,7 +17,7 @@ int Renderer::CreateDevice(const char *chAPI) {
     if (!dll_) {
       ::MessageBox(NULL, "Loading RenderDeviceGDI.dll from dll failed.",
                    "SmartGis - error", MB_OK | MB_ICONERROR);
-      return SMT_ERR_FAILURE;
+      return ERR_FAILURE;
     }
 
     _CreateRenderDevice _CreateRenderDev = 0;
@@ -26,7 +26,7 @@ int Renderer::CreateDevice(const char *chAPI) {
     _CreateRenderDev =
         (_CreateRenderDevice)GetProcAddress(dll_, "CreateRenderDevice");
 
-    if (NULL == _CreateRenderDev) return SMT_ERR_FAILURE;
+    if (NULL == _CreateRenderDev) return ERR_FAILURE;
 
     hr = _CreateRenderDev(dll_, m_pDevice);
 
@@ -35,10 +35,10 @@ int Renderer::CreateDevice(const char *chAPI) {
                    MB_OK | MB_ICONERROR);
       m_pDevice = NULL;
 
-      return SMT_ERR_FAILURE;
+      return ERR_FAILURE;
     }
 
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   }
 
   void Renderer::Release(void) {

@@ -8,7 +8,7 @@ Style::Style(void) {
   m_stType = ST_PenDesc;
 }
 
-Style::Style(const char *szName, const PenDesc &penDesc,
+Style::Style(const char *name, const PenDesc &penDesc,
                    const BrushDesc &brushDesc,
                    const AnnotationDesc &annoDesc,
                    const SymbolDesc &symbolDesc)
@@ -16,7 +16,7 @@ Style::Style(const char *szName, const PenDesc &penDesc,
       m_stBrushDesc(brushDesc),
       m_stAnnoDesc(annoDesc),
       m_stSymbolDesc(symbolDesc) {
-  SetStyleName(szName);
+  SetStyleName(name);
 }
 
 Style::~Style() {}
@@ -80,7 +80,7 @@ int StyleTable::FindStyleNameIndex(const char *stylename) const {
 
 int StyleTable::AddStyle(const char *stylename) {
   int index = FindStyleNameIndex(stylename);
-  if (index > 0 && index < m_nStyleCount) return SMT_ERR_NONE;
+  if (index > 0 && index < m_nStyleCount) return ERR_NONE;
 
   StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
   if (pStyleMgr->GetStyle(stylename) != NULL) {
@@ -89,16 +89,16 @@ int StyleTable::AddStyle(const char *stylename) {
     m_pStyleNames[m_nStyleCount] = strdup(stylename);
     m_nStyleCount++;
 
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 
 void StyleTable::RemoveStyle(const char *stylename) {
   int index = FindStyleNameIndex(stylename);
   if (index != -1 && index < m_nStyleCount) {
-    SMT_SAFE_DELETE_A(m_pStyleNames[index]);
+    SAFE_DELETE_A(m_pStyleNames[index]);
     memmove(m_pStyleNames + index, m_pStyleNames + index + 1,
             sizeof(void *) * (m_nStyleCount - index - 1));
     m_nStyleCount--;
@@ -163,7 +163,7 @@ StyleManager *StyleManager::GetSingletonPtr(void) {
   return singleton_;
 }
 
-void StyleManager::DestoryInstance(void) { SMT_SAFE_DELETE(singleton_); }
+void StyleManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
 
 //////////////////////////////////////////////////////////////////////////
 StyleManager::StyleManager(void) {
@@ -189,7 +189,7 @@ void StyleManager::DestroyAllStyle() {
   StylePtrList::iterator i = m_StylePtrList.begin();
 
   while (i != m_StylePtrList.end()) {
-    SMT_SAFE_DELETE(*i);
+    SAFE_DELETE(*i);
     ++i;
   }
   m_StylePtrList.clear();
@@ -215,7 +215,7 @@ void StyleManager::DestroyStyle(const char *name) {
 
   while (i != m_StylePtrList.end()) {
     if (strcmp((**i).GetStyleName(), name) == 0) {
-      SMT_SAFE_DELETE(*i);
+      SAFE_DELETE(*i);
       m_StylePtrList.erase(i);
       break;
     }

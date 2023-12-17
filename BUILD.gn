@@ -5,6 +5,6 @@ group("all") {
   deps = [
     "//base:base",
     "//core:core",
-    "//geometry:geometry",
+    # "//framework:framework",
   ]
 }

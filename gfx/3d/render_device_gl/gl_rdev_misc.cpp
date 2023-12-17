@@ -9,19 +9,19 @@ namespace _3Drd {
 long GLRenderDevice::SetClearColor(const Color &clr) {
   glClearColor(clr.fRed, clr.fGreen, clr.fBlue, clr.fA);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetDepthClearValue(float z) {
   glClearDepth(z);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetStencilClearValue(ulong s) {
   glClearStencil(s);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::Clear(DWORD flags) {
@@ -35,49 +35,49 @@ long GLRenderDevice::Clear(DWORD flags) {
 
   glClear(glFlags);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetViewport(Viewport3D &viewport) {
   m_viewPort = viewport;
 
   if (m_viewPort.ulHeight == 0 || m_viewPort.ulWidth == 0)
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   glViewport(viewport.ulX, viewport.ulY, viewport.ulWidth, viewport.ulHeight);
-  if (GL_NO_ERROR != glGetError()) return SMT_ERR_FAILURE;
+  if (GL_NO_ERROR != glGetError()) return ERR_FAILURE;
 
   glScissor(viewport.ulX, viewport.ulY, viewport.ulWidth, viewport.ulHeight);
-  if (GL_NO_ERROR != glGetError()) return SMT_ERR_FAILURE;
+  if (GL_NO_ERROR != glGetError()) return ERR_FAILURE;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetOrtho(float left, float right, float bottom, float top,
                               float zNear, float zFar) {
   ::glOrtho(left, right, bottom, top, zNear, zFar);
 
-  if (GL_NO_ERROR != glGetError()) return SMT_ERR_FAILURE;
+  if (GL_NO_ERROR != glGetError()) return ERR_FAILURE;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetPerspective(float fovy, float aspect, float zNear,
                                     float zFar) {
   ::gluPerspective(fovy, aspect, zNear, zFar);
 
-  if (GL_NO_ERROR != glGetError()) return SMT_ERR_FAILURE;
+  if (GL_NO_ERROR != glGetError()) return ERR_FAILURE;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetViewLookAt(Vector3 &vPos, Vector3 &vView,
                                    Vector3 &vUp) {
   gluLookAt(vPos.x, vPos.y, vPos.z, vView.x, vView.y, vView.z, vUp.x, vUp.y,
             vUp.z);
-  if (GL_NO_ERROR != glGetError()) return SMT_ERR_FAILURE;
+  if (GL_NO_ERROR != glGetError()) return ERR_FAILURE;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // calculator 3D pos by 2D pos
@@ -114,7 +114,7 @@ long GLRenderDevice::Transform2DTo3D(Vector3 &vOrg, Vector3 &vTar,
     vTar.Set(_x, _y, _z);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // 3d to 2d
@@ -134,7 +134,7 @@ long GLRenderDevice::Transform3DTo2D(const Vector3 &ver3D, lPoint &point) {
   point.x = _x;
   point.y = _y;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -268,6 +268,6 @@ long GLRenderDevice::GetFrustum(Frustum &smtFrustum) {
 
   smtFrustum.SetFrustum(frustum);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

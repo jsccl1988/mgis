@@ -27,7 +27,7 @@ enum ArrayType {
 class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
-class GIS_CORE_EXPORT VideoBuffer {
+class CORE_EXPORT VideoBuffer {
  public:
   VideoBuffer(LP3DRENDERDEVICE p3DRenderDevice, uint handle, ArrayType type);
   virtual ~VideoBuffer();

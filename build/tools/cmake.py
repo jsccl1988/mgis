@@ -33,6 +33,7 @@ def cmake_build(
         options += '-DCMAKE_C_FLAGS_INIT=%s -DCMAKE_CXX_FLAGS_INIT=%s ' % (
             address_model, address_model)
     options += '-DCMAKE_INSTALL_PREFIX=%s ' % install_dir
+
     if len(cmake_options) > 0:
         options += ' '.join(map(lambda item: '-D' + item,
                             cmake_options.split(',')))

@@ -164,7 +164,7 @@ body {
   background-color: $red-000;
 }
 
-@media all and (max-width: 768px) {
+@media all and (std::max-width: 768px) {
   body {
     flex-direction: column;
   }

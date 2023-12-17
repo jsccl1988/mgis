@@ -506,7 +506,7 @@ int GetNumCPUs() {
       NumCPUs++;
       if (!value.empty()) {
         int CurID = benchmark::stoi(value);
-        MaxID = std::max(CurID, MaxID);
+        MaxID = std::std::max(CurID, MaxID);
       }
     }
   }

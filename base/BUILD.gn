@@ -8,6 +8,48 @@ static_library("base") {
   ]
 
   sources = [
+    "encrypt/des.cpp",
+    "file/file_util.cpp",
+    "file/file_util_posix.cpp",
+    "file/file_util_win.cpp",
+    "framework/default_message_pump.cpp",
+    "framework/message_loop.cpp",
+    "framework/message_loop_proxy.cpp",
+    "framework/message_pump.cpp",
+    "framework/win_io_message_pump.cpp",
+    "framework/win_message_pump.cpp",
+    "framework/win_ui_message_pump.cpp",
+    "hardware/cpu.cpp",
+    "network/network_util.cpp",
+    "synchronization/lock_posix.cpp",
+    "synchronization/lock_win.cpp",
+    "synchronization/semaphore_posix.cpp",
+    "synchronization/semaphore_win.cpp",
+    "synchronization/waitable_event_posix.cpp",
+    "synchronization/waitable_event_win.cpp",
+    "third_party/chrome/atomicops_internals_x86_gcc.cc",
+    "third_party/convert_utf/ConvertUTF.c",
+    "third_party/modp_b64/modp_b64.cc",
+    "thread/framework_thread.cpp",
+    "thread/thread_local_posix.cpp",
+    "thread/thread_local_win.cpp",
+    "thread/thread_manager.cpp",
+    "thread/thread_posix.cpp",
+    "thread/thread_win.cpp",
+    "time/time.cpp",
+    "time/time_posix.cpp",
+    "time/time_win.cpp",
+    "util/at_exit.cpp",
+    "util/base64.cpp",
+    "util/cmd_line_args.cpp",
+    "util/string_number_conversions.cpp",
+    "util/string_util.cpp",
+    "win32/object_watcher.cpp",
+    "win32/path_util.cpp",
+    "win32/platform_string_util.cpp",
+    "win32/security_util.cpp",
+    "win32/shared_memory.cpp",
+    "win32/win_util.cpp",
     "logging.cpp",
     "init.cpp",
   ]
@@ -15,8 +57,6 @@ static_library("base") {
   include_dirs += [
     "$root_gen_dir/",
     "$root_out_dir/glog/include",
-    "$root_out_dir/gbenchmark/include",
-    "$root_out_dir/gtest/include",
   ]
 
   deps = [
@@ -31,9 +71,6 @@ test("base_test") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
-    "$root_out_dir/gbenchmark/include",
-    "$root_out_dir/gtest/include",
   ]
 
   deps = [

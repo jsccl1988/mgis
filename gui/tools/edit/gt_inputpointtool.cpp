@@ -32,52 +32,52 @@ InputPointTool::InputPointTool()
 }
 
 InputPointTool::~InputPointTool() {
-  SMT_SAFE_DELETE(m_pGeom);
+  SAFE_DELETE(m_pGeom);
 
   UnRegisterMessage();
 }
 
 int InputPointTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
                          HWND hWnd, pfnToolCallBack pfnCallBack,
-                         void *pToFollow) {
-  if (SMT_ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
-                                     pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                         void *to_follow) {
+  if (ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
+                                     pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
   Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
   pStyle->SetStyleType(ST_PenDesc | ST_BrushDesc | ST_SymbolDesc | ST_AnnoDesc);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_INPUT_POINT_TYPE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_INPUT_POINT_TYPE);
+  IATOOL_APPEND_MSG(GT_MSG_SET_INPUT_POINT_TYPE);
+  IATOOL_APPEND_MSG(GT_MSG_GET_INPUT_POINT_TYPE);
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-int InputPointTool::AuxDraw() { return SMT_ERR_NONE; }
+int InputPointTool::AuxDraw() { return ERR_NONE; }
 
 int InputPointTool::Notify(long nMessage, ListenerMessage &param) {
-  if (param.hSrcWnd != m_hWnd) return SMT_ERR_NONE;
+  if (param.source_window != m_hWnd) return ERR_NONE;
 
   switch (nMessage) {
     case GT_MSG_DEFAULT_PROCESS: {
     } break;
     case GT_MSG_SET_INPUT_POINT_TYPE: {
-      m_appendType = *(ushort *)param.wParam;
+      m_appendType = *(ushort *)param.wparam;
     } break;
     case GT_MSG_GET_INPUT_ANNO_ANGLE: {
-      *(float *)param.wParam = m_fAngle;
+      *(float *)param.wparam = m_fAngle;
     } break;
     case GT_MSG_GET_INPUT_POINT_TYPE: {
-      *(ushort *)param.wParam = m_appendType;
+      *(ushort *)param.wparam = m_appendType;
     } break;
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputPointTool::LButtonDown(uint nFlags, lPoint point) {
@@ -102,7 +102,7 @@ int InputPointTool::LButtonDown(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputPointTool::MouseMove(uint nFlags, lPoint point) {
@@ -119,7 +119,7 @@ int InputPointTool::MouseMove(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputPointTool::LButtonUp(uint nFlags, lPoint point) {
@@ -136,7 +136,7 @@ int InputPointTool::LButtonUp(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputPointTool::RButtonDown(uint nFlags, lPoint point) {
@@ -160,11 +160,11 @@ int InputPointTool::RButtonDown(uint nFlags, lPoint point) {
     else
       SetEnableContexMenu(true);
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int InputPointTool::MouseWeel(uint nFlags, short zDelta, lPoint point) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -208,7 +208,7 @@ void InputPointTool::AppendText(short mouse_status, lPoint point) {
 
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fpts[0].x = m_pntOrigin.x;
           fpts[0].y = m_pntOrigin.y;
@@ -238,7 +238,7 @@ void InputPointTool::AppendText(short mouse_status, lPoint point) {
       if (m_bIsDrag) {
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fpts[0].x = m_pntOrigin.x;
           fpts[0].y = m_pntOrigin.y;
@@ -284,13 +284,13 @@ void InputPointTool::EndAppendPoint() {
   ushort uRetType = GT_MSG_RET_INPUT_POINT;
   ListenerMessage param;
 
-  param.hSrcWnd = m_hWnd;
-  param.wParam = WPARAM(m_pGeom);
-  param.lParam = LPARAM(&uRetType);
+  param.source_window = m_hWnd;
+  param.wparam = WPARAM(m_pGeom);
+  param.lparam = LPARAM(&uRetType);
 
   EndIA(GT_MSG_RET_DELEGATE, param);
 
-  SMT_SAFE_DELETE(m_pGeom);
+  SAFE_DELETE(m_pGeom);
 
   SetOperDone(true);
 }

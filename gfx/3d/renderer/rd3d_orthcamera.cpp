@@ -34,6 +34,6 @@ long OrthCamera::Apply(void) {
                                    2.0f / m_viewport.ulHeight, 1.0f);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

@@ -7,7 +7,7 @@
 
 namespace core {
 
-struct GIS_CORE_EXPORT Viewport {
+struct CORE_EXPORT Viewport {
   float m_fVOX;
   float m_fVOY;
   float m_fVHeight;
@@ -16,7 +16,7 @@ struct GIS_CORE_EXPORT Viewport {
   Viewport() : m_fVOX(0), m_fVOY(0), m_fVHeight(0), m_fVWidth(0) {}
 };
 
-struct GIS_CORE_EXPORT Windowport {
+struct CORE_EXPORT Windowport {
   float m_fWOX;
   float m_fWOY;
   float m_fWHeight;

@@ -27,10 +27,10 @@ long VBOFuncImpl::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
   if (NULL == _glGenBuffers || NULL == _glDeleteBuffers ||
       NULL == _glBindBuffer || NULL == _glBufferData || NULL == _glMapBuffer ||
       NULL == _glUnmapBuffer || NULL == _glGetBufferParameteriv) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void VBOFuncImpl::glGenBuffers(GLsizei count, GLuint *handle) {

@@ -6,7 +6,7 @@ MultitextureFunc::MultitextureFunc() {}
 MultitextureFunc::~MultitextureFunc() {}
 
 long MultitextureFunc::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void MultitextureFunc::glActiveTexture(GLenum texture) { ; }

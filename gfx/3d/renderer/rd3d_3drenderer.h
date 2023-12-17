@@ -3,7 +3,7 @@
 #include "rd3d_3drenderdevice.h"
 
 namespace _3Drd {
-class GIS_CORE_EXPORT 3DRenderer {
+class CORE_EXPORT 3DRenderer {
  public:
   3DRenderer(HINSTANCE hInst);
   ~3DRenderer(void);

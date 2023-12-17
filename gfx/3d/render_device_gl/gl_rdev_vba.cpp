@@ -24,26 +24,26 @@ long GLRenderDevice::SetVertexArray(int components, Type type, int stride,
                                     void* data) {
   glVertexPointer(components, ConvertType(type), stride, data);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetTextureCoordsArray(int components, Type type,
                                            int stride, void* data) {
   glTexCoordPointer(components, ConvertType(type), stride, data);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetNormalArray(Type type, int stride, void* data) {
   glNormalPointer(ConvertType(type), stride, data);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetIndexArray(Type type, int stride, void* data) {
   glIndexPointer(ConvertType(type), stride, data);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::EnableArray(ArrayType type, bool enabled) {
@@ -53,6 +53,6 @@ long GLRenderDevice::EnableArray(ArrayType type, bool enabled) {
     glDisableClientState(ConvertArrayType(type));
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

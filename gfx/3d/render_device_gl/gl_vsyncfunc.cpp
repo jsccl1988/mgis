@@ -6,7 +6,7 @@ VSyncFunc::VSyncFunc() {}
 VSyncFunc::~VSyncFunc() {}
 
 long VSyncFunc::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int VSyncFunc::WaitForVSync() { return 0; }

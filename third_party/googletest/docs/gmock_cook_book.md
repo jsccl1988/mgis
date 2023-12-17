@@ -1840,7 +1840,7 @@ class MockFoo : public Foo {
 The `Return(x)` action saves a copy of `x` when the action is created, and
 always returns the same value whenever it's executed. Sometimes you may want to
 instead return the *live* value of `x` (i.e. its value at the time when the
-action is *executed*.). Use either `ReturnRef()` or `ReturnPointee()` for this
+action is *executed*.). Use either `ReturnRef()` or `Returpoint_sizeee()` for this
 purpose.
 
 If the mock function's return type is a reference, you can do it using
@@ -1882,16 +1882,16 @@ a proxy object that references some temporary objects.) As a result,
 `std::ref(x)` is converted to an `int` value (instead of a `const int&`) when
 the expectation is set, and `Return(std::ref(x))` will always return 0.
 
-`ReturnPointee(pointer)` was provided to solve this problem specifically. It
+`Returpoint_sizeee(pointer)` was provided to solve this problem specifically. It
 returns the value pointed to by `pointer` at the time the action is *executed*:
 
 ```cpp
-using testing::ReturnPointee;
+using testing::Returpoint_sizeee;
 ...
   int x = 0;
   MockFoo foo;
   EXPECT_CALL(foo, GetValue())
-      .WillRepeatedly(ReturnPointee(&x));  // Note the & here.
+      .WillRepeatedly(Returpoint_sizeee(&x));  // Note the & here.
   x = 42;
   EXPECT_EQ(42, foo.GetValue());  // This will succeed now.
 ```
@@ -2074,11 +2074,11 @@ using ::testing::_;
 using ::testing::SaveArg;
 using ::testing::Return;
 
-ACTION_P(ReturnPointee, p) { return *p; }
+ACTION_P(Returpoint_sizeee, p) { return *p; }
 ...
   int previous_value = 0;
   EXPECT_CALL(my_mock, GetPrevValue)
-      .WillRepeatedly(ReturnPointee(&previous_value));
+      .WillRepeatedly(Returpoint_sizeee(&previous_value));
   EXPECT_CALL(my_mock, UpdateValue)
       .WillRepeatedly(SaveArg<0>(&previous_value));
   my_mock.DoSomethingToUpdateValue();

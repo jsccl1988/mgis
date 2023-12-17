@@ -40,11 +40,11 @@ void DrawLine(HDC hDC, core::lPoint *plPoints, int nCount, BOOL xor) {
   ::PolylineTo(hDC, (POINT *)plPoints, nCount);
 }
 
-void DrawLine(HDC hDC, POINT *pPoints, int nCount, BOOL xor) {
-  if (pPoints == NULL) return;
+void DrawLine(HDC hDC, POINT *points, int nCount, BOOL xor) {
+  if (points == NULL) return;
 
-  ::MoveToEx(hDC, pPoints[0].x, pPoints[0].y, NULL);
-  ::PolylineTo(hDC, pPoints, nCount);
+  ::MoveToEx(hDC, points[0].x, points[0].y, NULL);
+  ::PolylineTo(hDC, points, nCount);
 }
 
 void DrawCross(HDC hDC, long lX, long lY, long r, BOOL xor) {

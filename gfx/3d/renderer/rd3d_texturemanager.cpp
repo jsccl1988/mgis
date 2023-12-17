@@ -12,7 +12,7 @@ TextureManager::TextureManager(void) { DestroyAllTexture(); }
 TextureManager::~TextureManager(void) { DestroyAllTexture(); }
 
 long TextureManager::AddTexture(Texture *pTexture) {
-  if (NULL == pTexture) return SMT_ERR_FAILURE;
+  if (NULL == pTexture) return ERR_FAILURE;
 
   LogManager *pLogMgr = LogManager::GetSingletonPtr();
   Log *pLog = pLogMgr->GetDefaultLog();
@@ -24,16 +24,16 @@ long TextureManager::AddTexture(Texture *pTexture) {
         pairNameToTexturePtr(pTexture->GetTextureName(), pTexture));
   else {
     pLog->LogMessage("AddTexture () already exist");
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-Texture *TextureManager::GetTexture(const char *szName) {
+Texture *TextureManager::GetTexture(const char *name) {
   Texture *pTexture = NULL;
   mapNameToTexturePtrs::iterator mapIter;
-  mapIter = m_mapNameToTexturePtrs.find(szName);
+  mapIter = m_mapNameToTexturePtrs.find(name);
 
   if (mapIter != m_mapNameToTexturePtrs.end()) {
     pTexture = (mapIter->second);
@@ -42,28 +42,28 @@ Texture *TextureManager::GetTexture(const char *szName) {
   return pTexture;
 }
 
-long TextureManager::DestroyTexture(const char *szName) {
-  mapNameToTexturePtrs::iterator iter = m_mapNameToTexturePtrs.find(szName);
+long TextureManager::DestroyTexture(const char *name) {
+  mapNameToTexturePtrs::iterator iter = m_mapNameToTexturePtrs.find(name);
 
   if (iter != m_mapNameToTexturePtrs.end()) {
-    SMT_SAFE_DELETE(iter->second);
+    SAFE_DELETE(iter->second);
     m_mapNameToTexturePtrs.erase(iter);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long TextureManager::DestroyAllTexture(void) {
   mapNameToTexturePtrs::iterator i = m_mapNameToTexturePtrs.begin();
 
   while (i != m_mapNameToTexturePtrs.end()) {
-    SMT_SAFE_DELETE(i->second);
+    SAFE_DELETE(i->second);
     i++;
   }
 
   m_mapNameToTexturePtrs.clear();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void TextureManager::GetAllTextureName(vector<string> &vStrAllTextureName) {

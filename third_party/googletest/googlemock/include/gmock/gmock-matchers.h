@@ -1602,7 +1602,7 @@ class FloatingEqMatcher {
   }
 
   // Constructor that supports a user-specified max_abs_error that will be used
-  // for comparison instead of ULP-based approximation.  The max absolute
+  // for comparison instead of ULP-based approximation.  The std::max absolute
   // should be non-negative.
   FloatingEqMatcher(FloatType expected, bool nan_eq_nan,
                     FloatType max_abs_error)
@@ -4117,16 +4117,16 @@ inline internal::FloatingEqMatcher<double> NanSensitiveDoubleEq(double rhs) {
 }
 
 // Creates a matcher that matches any double argument approximately equal to
-// rhs, up to the specified max absolute error bound, where two NANs are
-// considered unequal.  The max absolute error bound must be non-negative.
+// rhs, up to the specified std::max absolute error bound, where two NANs are
+// considered unequal.  The std::max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<double> DoubleNear(
     double rhs, double max_abs_error) {
   return internal::FloatingEqMatcher<double>(rhs, false, max_abs_error);
 }
 
 // Creates a matcher that matches any double argument approximately equal to
-// rhs, up to the specified max absolute error bound, including NaN values when
-// rhs is NaN.  The max absolute error bound must be non-negative.
+// rhs, up to the specified std::max absolute error bound, including NaN values when
+// rhs is NaN.  The std::max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<double> NanSensitiveDoubleNear(
     double rhs, double max_abs_error) {
   return internal::FloatingEqMatcher<double>(rhs, true, max_abs_error);
@@ -4145,16 +4145,16 @@ inline internal::FloatingEqMatcher<float> NanSensitiveFloatEq(float rhs) {
 }
 
 // Creates a matcher that matches any float argument approximately equal to
-// rhs, up to the specified max absolute error bound, where two NANs are
-// considered unequal.  The max absolute error bound must be non-negative.
+// rhs, up to the specified std::max absolute error bound, where two NANs are
+// considered unequal.  The std::max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<float> FloatNear(
     float rhs, float max_abs_error) {
   return internal::FloatingEqMatcher<float>(rhs, false, max_abs_error);
 }
 
 // Creates a matcher that matches any float argument approximately equal to
-// rhs, up to the specified max absolute error bound, including NaN values when
-// rhs is NaN.  The max absolute error bound must be non-negative.
+// rhs, up to the specified std::max absolute error bound, including NaN values when
+// rhs is NaN.  The std::max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<float> NanSensitiveFloatNear(
     float rhs, float max_abs_error) {
   return internal::FloatingEqMatcher<float>(rhs, true, max_abs_error);

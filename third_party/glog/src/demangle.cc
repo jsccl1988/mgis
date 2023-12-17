@@ -725,7 +725,7 @@ static bool ParseAbiTag(State *state) {
 
 // <operator-name> ::= nw, and other two letters cases
 //                 ::= cv <type>  # (cast)
-//                 ::= v  <digit> <source-name> # vendor extended operator
+//                 ::= v  <digit> <source-name> # third_party extended operator
 static bool ParseOperatorName(State *state) {
   if (!AtLeastNumCharsRemaining(state->mangled_cur, 2)) {
     return false;
@@ -741,7 +741,7 @@ static bool ParseOperatorName(State *state) {
   }
   *state = copy;
 
-  // Then vendor extended operators.
+  // Then third_party extended operators.
   if (ParseOneCharToken(state, 'v') && ParseCharClass(state, "0123456789") &&
       ParseSourceName(state)) {
     return true;
@@ -916,7 +916,7 @@ static bool ParseCtorDtorName(State *state) {
 //        ::= O <type>   # rvalue reference-to (C++0x)
 //        ::= C <type>   # complex pair (C 2000)
 //        ::= G <type>   # imaginary (C 2000)
-//        ::= U <source-name> <type>  # vendor extended type qualifier
+//        ::= U <source-name> <type>  # third_party extended type qualifier
 //        ::= <builtin-type>
 //        ::= <function-type>
 //        ::= <class-enum-type>

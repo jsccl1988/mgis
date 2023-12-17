@@ -14,15 +14,15 @@ typedef vector<Program*> vProgramPtrs;
 typedef map<string, Program*> mapNameToProgramPtrs;
 typedef pair<string, Program*> pairNameToProgramPtr;
 
-class GIS_CORE_EXPORT ProgramManager {
+class CORE_EXPORT ProgramManager {
  public:
   ProgramManager(void);
   virtual ~ProgramManager(void);
 
  public:
   long AddProgram(Program* pProgram);
-  Program* GetProgram(const char* szName);
-  void DestroyProgram(const char* szName);
+  Program* GetProgram(const char* name);
+  void DestroyProgram(const char* name);
   void DestroyAllProgram(void);
 
   void GetAllProgramName(vector<string>& vStrAllProgramName);

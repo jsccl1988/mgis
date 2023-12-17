@@ -43,13 +43,13 @@ long GLRenderDevice::SetLight(int index, Light *pLight) {
     }
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::SetAmbientLight(const Color &clr) {
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, clr.c);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // texture
@@ -59,7 +59,7 @@ long GLRenderDevice::SetTexture(Texture *pTex) {
   else
     glDisable(GL_TEXTURE_2D);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // materail
@@ -76,7 +76,7 @@ long GLRenderDevice::SetMaterial(Material *pMat) {
   } else
     glDisable(GL_COLOR_MATERIAL);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // set fog
@@ -96,7 +96,7 @@ long GLRenderDevice::SetFog(FogMode mode, const Color &col, float density,
     default:
       // Give up on it
       glDisable(GL_FOG);
-      return SMT_ERR_NONE;
+      return ERR_NONE;
   }
 
   glEnable(GL_FOG);
@@ -107,13 +107,13 @@ long GLRenderDevice::SetFog(FogMode mode, const Color &col, float density,
   glFogf(GL_FOG_END, end);
   glHint(GL_FOG_HINT, GL_NICEST);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////
 // aactivate additive blending
 long GLRenderDevice::SetBlending(bool bBlending) {
-  if (m_bBlending == bBlending) return SMT_ERR_NONE;
+  if (m_bBlending == bBlending) return ERR_NONE;
 
   m_bBlending = bBlending;
 
@@ -127,7 +127,7 @@ long GLRenderDevice::SetBlending(bool bBlending) {
     glDisable(GL_ALPHA_TEST);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // activate backface culling
@@ -143,7 +143,7 @@ long GLRenderDevice::SetBackfaceCulling(RenderStateValue rsv) {
   } else
     glDisable(GL_CULL_FACE);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // activate stencil buffer
@@ -216,7 +216,7 @@ long GLRenderDevice::SetStencilBufferMode(RenderStateValue rsv, DWORD dw) {
   glStencilFunc(m_unStencilCmp, m_nStencilRef, m_unStencilMask);
   glStencilOp(m_unOpStencilFail, m_unOpStencilZFail, m_unOpStencilZPass);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // activate depth buffer
@@ -234,7 +234,7 @@ long GLRenderDevice::SetDepthBufferMode(RenderStateValue rsv) {
   else if (rsv == RSV_DEPTH_NONE) {
     glEnable(GL_DEPTH_TEST);
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 // activate wireframe mode
@@ -256,6 +256,6 @@ long GLRenderDevice::SetShadeMode(RenderStateValue rsv, float f,
     }
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

@@ -32,7 +32,7 @@ SelectTool::SelectTool() : m_bCaptured(false), m_pResultLayer(NULL) {
 }
 
 SelectTool::~SelectTool() {
-  SMT_SAFE_DELETE(m_gQDes.pQueryGeom);
+  SAFE_DELETE(m_gQDes.pQueryGeom);
 
   this->EndDelegate();
 
@@ -42,10 +42,10 @@ SelectTool::~SelectTool() {
 }
 
 int SelectTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
-                     pfnToolCallBack pfnCallBack, void *pToFollow) {
-  if (SMT_ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
-                                     pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                     pfnToolCallBack pfnCallBack, void *to_follow) {
+  if (ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
+                                     pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   LogManager *pLogMgr = LogManager::GetSingletonPtr();
@@ -70,17 +70,17 @@ int SelectTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
   AppendFuncItems("清除选择要素", GT_MSG_SELECT_CLEAR,
                   FIM_2DVIEW | FIM_2DMFMENU);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SELECT_POINTSEL);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SELECT_RECTSEL);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SELECT_POLYGONSEL);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SELECT_CLEAR);
+  IATOOL_APPEND_MSG(GT_MSG_SELECT_POINTSEL);
+  IATOOL_APPEND_MSG(GT_MSG_SELECT_RECTSEL);
+  IATOOL_APPEND_MSG(GT_MSG_SELECT_POLYGONSEL);
+  IATOOL_APPEND_MSG(GT_MSG_SELECT_CLEAR);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_SEL_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_SEL_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_SET_SEL_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_GET_SEL_MODE);
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int SelectTool::AuxDraw() { return BaseTool::AuxDraw(); }
@@ -88,7 +88,7 @@ int SelectTool::AuxDraw() { return BaseTool::AuxDraw(); }
 int SelectTool::Timer() { return BaseTool::AuxDraw(); }
 
 int SelectTool::Notify(long nMessage, ListenerMessage &param) {
-  if (param.hSrcWnd != m_hWnd) return SMT_ERR_NONE;
+  if (param.source_window != m_hWnd) return ERR_NONE;
 
   switch (nMessage) {
     case GT_MSG_DEFAULT_PROCESS: {
@@ -97,7 +97,7 @@ int SelectTool::Notify(long nMessage, ListenerMessage &param) {
       m_selMode = ST_Point;
 
       OnSetSelMode();
-      param.bModify = true;
+      param.modify = true;
 
       SetActive();
     } break;
@@ -105,7 +105,7 @@ int SelectTool::Notify(long nMessage, ListenerMessage &param) {
       m_selMode = ST_Rect;
 
       OnSetSelMode();
-      param.bModify = true;
+      param.modify = true;
 
       SetActive();
     } break;
@@ -113,7 +113,7 @@ int SelectTool::Notify(long nMessage, ListenerMessage &param) {
       m_selMode = ST_Polygon;
 
       OnSetSelMode();
-      param.bModify = true;
+      param.modify = true;
 
       SetActive();
     } break;
@@ -121,35 +121,35 @@ int SelectTool::Notify(long nMessage, ListenerMessage &param) {
       m_pResultLayer->DeleteAll();
 
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(m_pResultLayer);
-      param.lParam = LPARAM(&m_nLayerFeaType);
-      PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                    SMT_IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(m_pResultLayer);
+      param.lparam = LPARAM(&m_nLayerFeaType);
+      PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                    IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
 
       SetActive();
     } break;
 
     case GT_MSG_SET_SEL_MODE: {
-      m_selMode = eSelectMode(*(ushort *)param.wParam);
+      m_selMode = eSelectMode(*(ushort *)param.wparam);
 
       OnSetSelMode();
 
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_GET_SEL_MODE: {
-      *(ushort *)param.wParam = m_selMode;
+      *(ushort *)param.wparam = m_selMode;
     } break;
     case GT_MSG_RET_DELEGATE: {
-      ushort uRetType = *(ushort *)param.lParam;
-      m_gQDes.pQueryGeom = ((Geometry *)param.wParam)->Clone();
+      ushort uRetType = *(ushort *)param.lparam;
+      m_gQDes.pQueryGeom = ((Geometry *)param.wparam)->Clone();
 
       OnRetDelegate(uRetType);
     } break;
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void SelectTool::OnRetDelegate(int nRetType) {
@@ -162,18 +162,18 @@ void SelectTool::OnRetDelegate(int nRetType) {
       m_pOperMap->QueryFeature(&m_gQDes, &m_pQDes, m_pResultLayer,
                                m_nLayerFeaType);
 
-      SMT_SAFE_DELETE(m_gQDes.pQueryGeom);
+      SAFE_DELETE(m_gQDes.pQueryGeom);
 
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(m_pResultLayer);
-      param.lParam = LPARAM(&m_nLayerFeaType);
-      PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                    SMT_IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(m_pResultLayer);
+      param.lparam = LPARAM(&m_nLayerFeaType);
+      PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                    IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
 
-      param.wParam = param.lParam = NULL;
-      PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                    SMT_IATOOL_MSG_KEY(GT_MSG_START_FLASH), param);
+      param.wparam = param.lparam = NULL;
+      PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                    IATOOL_MSG_KEY(GT_MSG_START_FLASH), param);
 
       if (m_pResultLayer->GetFeatureCount() == 1) {
         Show2DFeatureInfoDlg(m_pResultLayer->GetFeature(0));
@@ -187,20 +187,20 @@ void SelectTool::OnRetDelegate(int nRetType) {
       m_pOperMap->QueryFeature(&m_gQDes, &m_pQDes, m_pResultLayer,
                                m_nLayerFeaType);
 
-      SMT_SAFE_DELETE(m_gQDes.pQueryGeom);
+      SAFE_DELETE(m_gQDes.pQueryGeom);
 
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(m_pResultLayer);
-      param.lParam = LPARAM(&m_nLayerFeaType);
-      PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                    SMT_IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(m_pResultLayer);
+      param.lparam = LPARAM(&m_nLayerFeaType);
+      PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                    IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
 
-      param.wParam = param.lParam = NULL;
-      PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                    SMT_IATOOL_MSG_KEY(GT_MSG_START_FLASH), param);
+      param.wparam = param.lparam = NULL;
+      PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                    IATOOL_MSG_KEY(GT_MSG_START_FLASH), param);
 
-      uint unID = SMT_C_INVALID_UINT_VALUE;
+      uint unID = C_INVALID_UINT_VALUE;
 
       if (m_pResultLayer->GetFeatureCount() > 1) {
         vector<uint> vIDs;
@@ -242,14 +242,14 @@ void SelectTool::OnSetSelMode(void) {
       if (NULL != pInputTool) {
         pInputTool->SetToolStyleName(styleSonfig.curve_style_);
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
-          ushort unPointType = PT_DOT;
+          ushort upoint_sizeType = PT_DOT;
 
           ListenerMessage param;
-          param.hSrcWnd = m_hWnd;
-          param.wParam = WPARAM(&unPointType);
-          param.lParam = NULL;
+          param.source_window = m_hWnd;
+          param.wparam = WPARAM(&upoint_sizeType);
+          param.lparam = NULL;
           pInputTool->Notify(GT_MSG_SET_INPUT_POINT_TYPE, param);
 
           this->BeginDelegate(pInputTool);
@@ -263,14 +263,14 @@ void SelectTool::OnSetSelMode(void) {
       if (NULL != pInputTool) {
         pInputTool->SetToolStyleName(styleSonfig.curve_style_);
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
           ushort unLineType = LT_LinearRing;
 
           ListenerMessage param;
-          param.hSrcWnd = m_hWnd;
-          param.wParam = WPARAM(&unLineType);
-          param.lParam = NULL;
+          param.source_window = m_hWnd;
+          param.wparam = WPARAM(&unLineType);
+          param.lparam = NULL;
 
           pInputTool->Notify(GT_MSG_SET_INPUT_LINE_TYPE, param);
 
@@ -285,14 +285,14 @@ void SelectTool::OnSetSelMode(void) {
       if (NULL != pInputTool) {
         pInputTool->SetToolStyleName(styleSonfig.curve_style_);
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
           ushort unLineType = LT_Rect;
 
           ListenerMessage param;
-          param.hSrcWnd = m_hWnd;
-          param.wParam = WPARAM(&unLineType);
-          param.lParam = NULL;
+          param.source_window = m_hWnd;
+          param.wparam = WPARAM(&unLineType);
+          param.lparam = NULL;
 
           pInputTool->Notify(GT_MSG_SET_INPUT_LINE_TYPE, param);
 
@@ -314,11 +314,11 @@ int SelectTool::KeyDown(uint nChar, uint nRepCnt, uint nFlags) {
           m_pResultLayer->DeleteAll();
 
           ListenerMessage param;
-          param.hSrcWnd = m_hWnd;
-          param.wParam = WPARAM(m_pResultLayer);
-          param.lParam = LPARAM(&m_nLayerFeaType);
-          PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                        SMT_IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
+          param.source_window = m_hWnd;
+          param.wparam = WPARAM(m_pResultLayer);
+          param.lparam = LPARAM(&m_nLayerFeaType);
+          PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                        IATOOL_MSG_KEY(GT_MSG_SET_FLASH_DATA), param);
 
           SetActive();
         } break;

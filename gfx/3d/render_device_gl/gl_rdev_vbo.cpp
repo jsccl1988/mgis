@@ -17,50 +17,50 @@ long GLRenderDevice::BindBuffer(VideoBuffer *buffer) {
   GLhandleARB handle = buffer->GetHandle();
   m_pFuncVBO->glBindBuffer(GL_ARRAY_BUFFER, handle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::BindIndexBuffer(VideoBuffer *buffer) {
   GLhandleARB handle = buffer->GetHandle();
   m_pFuncVBO->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, handle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UnbindBuffer() {
   m_pFuncVBO->glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UnbindIndexBuffer() {
   m_pFuncVBO->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UpdateBuffer(VideoBuffer *buffer, void *data, uint size,
                                   VideoBufferStoreMethod method) {
-  if (NULL == buffer) return SMT_ERR_INVALID_PARAM;
+  if (NULL == buffer) return ERR_INVALID_PARAM;
 
   BindBuffer(buffer);
   GLenum GLMethod = ConvertVideoBufferStoreMethod(method);
   m_pFuncVBO->glBufferData(GL_ARRAY_BUFFER, size, data, GLMethod);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::UpdateIndexBuffer(VideoBuffer *buffer, void *data,
                                        uint size,
                                        VideoBufferStoreMethod method) {
-  if (NULL == buffer || NULL == data) return SMT_ERR_INVALID_PARAM;
+  if (NULL == buffer || NULL == data) return ERR_INVALID_PARAM;
 
   BindIndexBuffer(buffer);
 
   GLenum GLMethod = ConvertVideoBufferStoreMethod(method);
   m_pFuncVBO->glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GLMethod);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void *GLRenderDevice::MapBuffer(VideoBuffer *buffer, AccessMode access) {
@@ -75,11 +75,11 @@ void *GLRenderDevice::MapBuffer(VideoBuffer *buffer, AccessMode access) {
 }
 
 long GLRenderDevice::UnmapBuffer(VideoBuffer *buffer) {
-  if (NULL == buffer) return SMT_ERR_INVALID_PARAM;
+  if (NULL == buffer) return ERR_INVALID_PARAM;
 
   GLboolean result = m_pFuncVBO->glUnmapBuffer(GL_ARRAY_BUFFER);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void *GLRenderDevice::MapIndexBuffer(VideoBuffer *buffer, AccessMode access) {
@@ -94,24 +94,24 @@ void *GLRenderDevice::MapIndexBuffer(VideoBuffer *buffer, AccessMode access) {
 }
 
 long GLRenderDevice::UnmapIndexBuffer(VideoBuffer *buffer) {
-  if (NULL == buffer) return SMT_ERR_INVALID_PARAM;
+  if (NULL == buffer) return ERR_INVALID_PARAM;
 
   GLboolean result = m_pFuncVBO->glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::DestroyBuffer(VideoBuffer *buffer) {
   GLhandleARB handle = buffer->GetHandle();
   m_pFuncVBO->glDeleteBuffers(1, &handle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLRenderDevice::DestroyIndexBuffer(VideoBuffer *buffer) {
   GLhandleARB handle = buffer->GetHandle();
   m_pFuncVBO->glDeleteBuffers(1, &handle);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

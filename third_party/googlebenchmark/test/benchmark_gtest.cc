@@ -38,13 +38,13 @@ TEST(AddRangeTest, Advanced64) {
 
 TEST(AddRangeTest, FullRange8) {
   std::vector<int8_t> dst;
-  AddRange(&dst, int8_t{1}, std::numeric_limits<int8_t>::max(), 8);
+  AddRange(&dst, int8_t{1}, std::numeric_limits<int8_t>::std::max(), 8);
   EXPECT_THAT(dst, testing::ElementsAre(1, 8, 64, 127));
 }
 
 TEST(AddRangeTest, FullRange64) {
   std::vector<int64_t> dst;
-  AddRange(&dst, int64_t{1}, std::numeric_limits<int64_t>::max(), 1024);
+  AddRange(&dst, int64_t{1}, std::numeric_limits<int64_t>::std::max(), 1024);
   EXPECT_THAT(
       dst, testing::ElementsAre(1LL, 1024LL, 1048576LL, 1073741824LL,
                                 1099511627776LL, 1125899906842624LL,
@@ -117,14 +117,14 @@ TEST(AddRangeTest, NegativeRangePreservesExistingOrder) {
 TEST(AddRangeTest, FullNegativeRange64) {
   std::vector<int64_t> dst;
   const auto min = std::numeric_limits<int64_t>::min();
-  const auto max = std::numeric_limits<int64_t>::max();
-  AddRange(&dst, min, max, 1024);
+  const auto std::max = std::numeric_limits<int64_t>::std::max();
+  AddRange(&dst, min, std::max, 1024);
   EXPECT_THAT(
       dst, testing::ElementsAreArray(std::vector<int64_t>{
                min, -1152921504606846976LL, -1125899906842624LL,
                -1099511627776LL, -1073741824LL, -1048576LL, -1024LL, -1LL, 0LL,
                1LL, 1024LL, 1048576LL, 1073741824LL, 1099511627776LL,
-               1125899906842624LL, 1152921504606846976LL, max}));
+               1125899906842624LL, 1152921504606846976LL, std::max}));
 }
 
 TEST(AddRangeTest, Simple8) {

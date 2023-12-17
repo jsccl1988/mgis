@@ -20,19 +20,19 @@ namespace _3Drd {
 HRESULT Create3DRenderDevice(HINSTANCE hDLL, 3DRenderDevice * &pDevice) {
   if (!pDevice) {
     pDevice = new GLRenderDevice(hDLL);
-    return SMT_OK;
+    return OK;
   }
 
-  return SMT_FALSE;
+  return FALSE;
 }
 
 HRESULT Release3DRenderDevice(3DRenderDevice * &pDevice) {
   if (!pDevice) {
-    return SMT_FALSE;
+    return FALSE;
   }
   delete pDevice;
   pDevice = NULL;
 
-  return SMT_OK;
+  return OK;
 }
 }  // namespace _3Drd

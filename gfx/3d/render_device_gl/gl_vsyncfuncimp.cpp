@@ -12,10 +12,10 @@ long VSyncFuncImpl::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
       "wglSwapIntervalEXT");
 
   if (NULL == _wglSwapInterval) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int VSyncFuncImpl::WaitForVSync() { return 0; }

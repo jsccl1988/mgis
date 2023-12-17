@@ -31,10 +31,10 @@ ViewCtrlTool::~ViewCtrlTool() { UnRegisterMessage(); }
 
 int ViewCtrlTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
                        HWND hWnd, pfnToolCallBack pfnCallBack,
-                       void *pToFollow) {
-  if (SMT_ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
-                                     pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                       void *to_follow) {
+  if (ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
+                                     pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   UINT idCursors[] = {IDC_CURSOR_ZOOMIN, IDC_CURSOR_ZOOMOUT,
@@ -52,29 +52,29 @@ int ViewCtrlTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
   AppendFuncItems("Ë¢ÐÂ", GT_MSG_VIEW_ZOOMREFRESH, FIM_2DVIEW | FIM_2DMFMENU);
   // AppendFuncItems("ÈýÎ¬ÊÓÍ¼",GT_MSG_3DVIEW_ACTIVE,FIM_2DVIEW);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMIN);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMOUT);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMMOVE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMRESTORE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMREFRESH);
-  // SMT_IATOOL_APPEND_MSG(GT_MSG_VIEW_ACTIVE);
+  IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMIN);
+  IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMOUT);
+  IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMMOVE);
+  IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMRESTORE);
+  IATOOL_APPEND_MSG(GT_MSG_VIEW_ZOOMREFRESH);
+  // IATOOL_APPEND_MSG(GT_MSG_VIEW_ACTIVE);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_VIEW_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_VIEW_MODE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_SET_SCALEDELT);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_GET_SCALEDELT);
+  IATOOL_APPEND_MSG(GT_MSG_SET_VIEW_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_GET_VIEW_MODE);
+  IATOOL_APPEND_MSG(GT_MSG_SET_SCALEDELT);
+  IATOOL_APPEND_MSG(GT_MSG_GET_SCALEDELT);
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
-int ViewCtrlTool::AuxDraw() { return SMT_ERR_NONE; }
+int ViewCtrlTool::AuxDraw() { return ERR_NONE; }
 
-int ViewCtrlTool::Timer() { return SMT_ERR_NONE; }
+int ViewCtrlTool::Timer() { return ERR_NONE; }
 
 int ViewCtrlTool::Notify(long nMessage, ListenerMessage &param) {
-  if (param.hSrcWnd != m_hWnd) {
+  if (param.source_window != m_hWnd) {
     switch (nMessage) {
       case GT_MSG_VIEW_ZOOMRESTORE: {
         m_viewMode = VM_ZoomRestore;
@@ -108,7 +108,7 @@ int ViewCtrlTool::Notify(long nMessage, ListenerMessage &param) {
         ZoomRefresh();
       } break;
       case GT_MSG_SET_VIEW_MODE: {
-        m_viewMode = eViewMode(*(ushort *)param.wParam);
+        m_viewMode = eViewMode(*(ushort *)param.wparam);
 
         switch (m_viewMode) {
           case VM_ZoomRestore:
@@ -122,20 +122,20 @@ int ViewCtrlTool::Notify(long nMessage, ListenerMessage &param) {
         }
       } break;
       case GT_MSG_GET_VIEW_MODE: {
-        *(ushort *)param.wParam = m_viewMode;
+        *(ushort *)param.wparam = m_viewMode;
       } break;
       case GT_MSG_SET_SCALEDELT: {
-        m_fScaleDelt = *(double *)param.wParam;
+        m_fScaleDelt = *(double *)param.wparam;
       } break;
       case GT_MSG_GET_SCALEDELT: {
-        *(double *)param.wParam = m_fScaleDelt;
+        *(double *)param.wparam = m_fScaleDelt;
       } break;
     }
 
     SetActive();
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int ViewCtrlTool::SetCursor(void) {
@@ -164,7 +164,7 @@ int ViewCtrlTool::SetCursor(void) {
       break;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int ViewCtrlTool::LButtonDown(uint nFlags, lPoint point) {
@@ -183,7 +183,7 @@ int ViewCtrlTool::LButtonDown(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int ViewCtrlTool::MouseMove(uint nFlags, lPoint point) {
@@ -200,7 +200,7 @@ int ViewCtrlTool::MouseMove(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int ViewCtrlTool::LButtonUp(uint nFlags, lPoint point) {
@@ -217,7 +217,7 @@ int ViewCtrlTool::LButtonUp(uint nFlags, lPoint point) {
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int ViewCtrlTool::RButtonDown(uint nFlags, lPoint point) {
@@ -237,7 +237,7 @@ int ViewCtrlTool::RButtonDown(uint nFlags, lPoint point) {
 
   SetOperDone(true);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int ViewCtrlTool::MouseWeel(uint nFlags, short zDelta, lPoint point) {
@@ -256,7 +256,7 @@ int ViewCtrlTool::MouseWeel(uint nFlags, short zDelta, lPoint point) {
   m_pRenderDevice->ZoomScale(m_pOperMap, lpnt, fScale);
   m_pRenderDevice->Refresh();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -270,14 +270,14 @@ void ViewCtrlTool::ZoomMove(short mouse_status, core::lPoint point) {
       m_pntCur = point;
 
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = (WPARAM)(&m_usFlashed);
-      PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                    SMT_IATOOL_MSG_KEY(GT_MSG_GET_STATUS), param);
+      param.source_window = m_hWnd;
+      param.wparam = (WPARAM)(&m_usFlashed);
+      PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                    IATOOL_MSG_KEY(GT_MSG_GET_STATUS), param);
 
-      if (*(ushort *)param.wParam) {
-        PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                      SMT_IATOOL_MSG_KEY(GT_MSG_STOP_FLASH), param);
+      if (*(ushort *)param.wparam) {
+        PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                      IATOOL_MSG_KEY(GT_MSG_STOP_FLASH), param);
       }
     } break;
     case typeMouseMove: {
@@ -316,10 +316,10 @@ void ViewCtrlTool::ZoomMove(short mouse_status, core::lPoint point) {
 
         if (m_usFlashed) {
           ListenerMessage param;
-          param.hSrcWnd = m_hWnd;
+          param.source_window = m_hWnd;
 
-          PostIAToolMessage(SMT_IATOOL_MSG_BROADCAST,
-                        SMT_IATOOL_MSG_KEY(GT_MSG_START_FLASH), param);
+          PostIAToolMessage(IATOOL_MSG_BROADCAST,
+                        IATOOL_MSG_KEY(GT_MSG_START_FLASH), param);
         }
       }
     } break;
@@ -355,8 +355,8 @@ void ViewCtrlTool::ZoomIn(short mouse_status, core::lPoint point) {
           fRect frt;
           lRect lrt;
           lrt.lb.x = min(m_pntOrigin.x, m_pntCur.x);
-          lrt.lb.y = max(m_pntOrigin.y, m_pntCur.y);
-          lrt.rt.x = max(m_pntOrigin.x, m_pntCur.x);
+          lrt.lb.y = std::max(m_pntOrigin.y, m_pntCur.y);
+          lrt.rt.x = std::max(m_pntOrigin.x, m_pntCur.x);
           lrt.rt.y = min(m_pntOrigin.y, m_pntCur.y);
 
           m_pRenderDevice->DRectToLRect(lrt, frt);
@@ -364,7 +364,7 @@ void ViewCtrlTool::ZoomIn(short mouse_status, core::lPoint point) {
         } else
           m_pRenderDevice->ZoomScale(m_pOperMap, point, 1 - m_fScaleDelt);
 
-        if (SMT_ERR_NONE ==
+        if (ERR_NONE ==
             m_pRenderDevice->BeginRender(MRD_BL_QUICK, true, false))
           m_pRenderDevice->EndRender(MRD_BL_QUICK);
 
@@ -377,7 +377,7 @@ void ViewCtrlTool::ZoomIn(short mouse_status, core::lPoint point) {
       if (m_bCaptured) {
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fRect frt1, frt2;
           frt1.Merge(m_pntOrigin.x, m_pntOrigin.y);
@@ -400,7 +400,7 @@ void ViewCtrlTool::ZoomIn(short mouse_status, core::lPoint point) {
 
         StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
         Style *pStyle = pStyleMgr->GetStyle(m_szStyleName);
-        if (SMT_ERR_NONE == m_pRenderDevice->BeginRender(
+        if (ERR_NONE == m_pRenderDevice->BeginRender(
                                 MRD_BL_QUICK, false, pStyle, R2_NOTXORPEN)) {
           fRect frt;
           frt.Merge(m_pntOrigin.x, m_pntOrigin.y);

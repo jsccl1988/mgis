@@ -8,7 +8,7 @@ namespace _3Drd {
 class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
-class GIS_CORE_EXPORT RenderBuffer {
+class CORE_EXPORT RenderBuffer {
  public:
   RenderBuffer(LP3DRENDERDEVICE p3DRenderDevice, uint handle,
                TextureFormat format, uint width, uint height)

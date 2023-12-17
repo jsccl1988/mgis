@@ -167,18 +167,18 @@ class 3DRenderDevice {
 
   //////////////////////////////////////////////////////////////////////////shader
   // vertex shader
-  virtual Shader *CreateVertexShader(const char *szName) = 0;
+  virtual Shader *CreateVertexShader(const char *name) = 0;
 
   // pixel shader
-  virtual Shader *CreatePixelShader(const char *szName) = 0;
+  virtual Shader *CreatePixelShader(const char *name) = 0;
 
-  virtual Shader *GetShader(const char *szName) = 0;
-  virtual long DestroyShader(const char *szName) = 0;
+  virtual Shader *GetShader(const char *name) = 0;
+  virtual long DestroyShader(const char *name) = 0;
 
   // program
-  virtual Program *CreateProgram(const char *szName) = 0;
-  virtual Program *GetProgram(const char *szName) = 0;
-  virtual long DestroyProgram(const char *szName) = 0;
+  virtual Program *CreateProgram(const char *name) = 0;
+  virtual Program *GetProgram(const char *name) = 0;
+  virtual long DestroyProgram(const char *name) = 0;
 
   virtual long LoadShaderSource(Shader * shader, char *source) = 0;
   virtual long CompileShader(Shader * shader) = 0;
@@ -210,9 +210,9 @@ class 3DRenderDevice {
 
   //////////////////////////////////////////////////////////////////////////texture
   // texture
-  virtual Texture *CreateTexture(const char *szName) = 0;
-  virtual Texture *GetTexture(const char *szName) = 0;
-  virtual long DestroyTexture(const char *szName) = 0;
+  virtual Texture *CreateTexture(const char *name) = 0;
+  virtual Texture *GetTexture(const char *name) = 0;
+  virtual long DestroyTexture(const char *name) = 0;
 
   virtual long GenerateMipmap(Texture * texture) = 0;
   virtual long BindTexture(Texture * texture) = 0;

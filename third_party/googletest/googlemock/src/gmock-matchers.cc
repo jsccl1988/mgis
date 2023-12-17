@@ -58,7 +58,7 @@ GTEST_API_ std::string FormatMatcherDescription(bool negation,
 
 // FindMaxBipartiteMatching and its helper class.
 //
-// Uses the well-known Ford-Fulkerson max flow method to find a maximum
+// Uses the well-known Ford-Fulkerson std::max flow method to find a maximum
 // bipartite matching. Flow is considered to be from left to right.
 // There is an implicit source node that is connected to all of the left
 // nodes, and an implicit sink node that is connected to all of the

@@ -35,11 +35,23 @@ template("cmake") {
       rebase_path(cmake_root_dir, root_build_dir),
     ]
 
+    options = ""
+    size = 0
     foreach(option, cmake_options) {
-      args += [option]
+      size += 1
+    }
+
+    i = 0
+    foreach(option, cmake_options) {
+      i += 1
+      options += option
+      if (i != size) {
+        options += ","
+      }
     }
 
     args += [
+      options,
       rebase_path(cmake_build_dir, root_build_dir),
       rebase_path(cmake_install_dir, root_build_dir),
       "$target_cpu",

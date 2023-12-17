@@ -18,10 +18,10 @@ IACommandReceiver::IACommandReceiver(LPRENDERDEVICE pRenderDevice,
 
 IACommandReceiver::~IACommandReceiver() {}
 
-bool IACommandReceiver::Action(bool bUndo) {
+bool IACommandReceiver::Action(bool is_undo) {
   switch (m_iaType) {
     case eIA_AppendFeature: {
-      if (bUndo) {
+      if (is_undo) {
         m_pFeature = m_pFeature->Clone();
         m_pOperMap->DeleteFeature(m_pFeature);
       } else {
@@ -29,7 +29,7 @@ bool IACommandReceiver::Action(bool bUndo) {
       }
     } break;
     case eIA_DeleteFeature: {
-      if (bUndo) {
+      if (is_undo) {
         m_pOperMap->AppendFeature(m_pFeature, true);
       } else {
         m_pFeature = m_pFeature->Clone();
@@ -37,7 +37,7 @@ bool IACommandReceiver::Action(bool bUndo) {
       }
     } break;
     case eIA_ModifyFeature: {
-      if (bUndo) {
+      if (is_undo) {
         m_pOperMap->UpdateFeature(m_pFeature);
       }
     } break;

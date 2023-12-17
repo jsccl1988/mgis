@@ -44,13 +44,13 @@ enum IAType { eIA_AppendFeature, eIA_DeleteFeature, eIA_ModifyFeature };
 
 // smt msg
 // 2d tool
-#define GT_MSG_DEFAULT_PROCESS (SMT_MSG_2D_TOOL + 0)  //默认处理
-#define GT_MSG_INVALID (SMT_MSG_2D_TOOL + 1)  //无效消息
-#define GT_MSG_RET_DELEGATE (SMT_MSG_2D_TOOL + 2)  //委托，返回
+#define GT_MSG_DEFAULT_PROCESS (MSG_2D_TOOL + 0)  //默认处理
+#define GT_MSG_INVALID (MSG_2D_TOOL + 1)  //无效消息
+#define GT_MSG_RET_DELEGATE (MSG_2D_TOOL + 2)  //委托，返回
 
 // input point tool
 #define GT_MSG_BEGIN_INPUT_POINT \
-  (SMT_MSG_2D_TOOL + GT_TOOL_MAX_MSG_COUNT)  //点输入工具开始消息
+  (MSG_2D_TOOL + GT_TOOL_MAX_MSG_COUNT)  //点输入工具开始消息
 #define GT_MSG_SET_INPUT_POINT_TYPE \
   (GT_MSG_BEGIN_INPUT_POINT + 1)  //设置输入点类型
 #define GT_MSG_GET_INPUT_POINT_TYPE \
@@ -115,7 +115,7 @@ enum IAType { eIA_AppendFeature, eIA_DeleteFeature, eIA_ModifyFeature };
 
 //////////////////////////////////////////////////////////////////////////
 // view control tool
-#define GT_MSG_CMD_VIEWCTRL_BEGIN SMT_MSG_CMD_BEGIN
+#define GT_MSG_CMD_VIEWCTRL_BEGIN MSG_CMD_BEGIN
 #define GT_MSG_VIEW_ZOOMIN (GT_MSG_CMD_VIEWCTRL_BEGIN + 1)
 #define GT_MSG_VIEW_ZOOMOUT (GT_MSG_CMD_VIEWCTRL_BEGIN + 2)
 #define GT_MSG_VIEW_ZOOMMOVE (GT_MSG_CMD_VIEWCTRL_BEGIN + 3)

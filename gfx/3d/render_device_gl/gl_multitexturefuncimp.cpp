@@ -12,10 +12,10 @@ long MultitextureFuncImpl::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
       "glActiveTextureARB");
 
   if (NULL == _glActiveTexture) {
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void MultitextureFuncImpl::glActiveTexture(GLenum texture) {

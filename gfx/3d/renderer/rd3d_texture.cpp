@@ -25,21 +25,21 @@ Texture::~Texture() { ; }
 long Texture::Use(void) {
   GPUStateManager *stateManager = m_p3DRenderDevice->GetStateManager();
 
-  if (SMT_ERR_NONE == m_p3DRenderDevice->BindTexture(this) &&
-      SMT_ERR_NONE == stateManager->SetSampler(m_texSampler) &&
-      SMT_ERR_NONE == stateManager->SetTextureEnvironment(m_texEnv)) {
-    return SMT_ERR_NONE;
+  if (ERR_NONE == m_p3DRenderDevice->BindTexture(this) &&
+      ERR_NONE == stateManager->SetSampler(m_texSampler) &&
+      ERR_NONE == stateManager->SetTextureEnvironment(m_texEnv)) {
+    return ERR_NONE;
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 
 long Texture::Unuse() {
-  if (SMT_ERR_NONE == m_p3DRenderDevice->UnbindTexture()) {
-    return SMT_ERR_NONE;
+  if (ERR_NONE == m_p3DRenderDevice->UnbindTexture()) {
+    return ERR_NONE;
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 
 TextureSampler Texture::GetSampler() const { return m_texSampler; }
@@ -113,19 +113,19 @@ long Texture::Create(ulong ulWidth, ulong ulHeight, TextureFormat format,
 
   m_pCurrentPixel = (unsigned char *)NULL;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long Texture::SetData(void *pData, ulong ulSize) {
-  if (!IsLocked()) return SMT_ERR_FAILURE;
+  if (!IsLocked()) return ERR_FAILURE;
 
   if (m_pBuffer == NULL || pData == NULL || ulSize < 1 ||
       ulSize != m_ulPixelStride * m_texDesc.width * m_texDesc.height)
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 
   memcpy(m_pBuffer, pData, ulSize);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void *Texture::GetData() { return m_pBuffer; }
@@ -134,7 +134,7 @@ long Texture::Lock() {
   m_pCurrentPixel = (unsigned char *)m_pBuffer;
   m_bLocked = true;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long Texture::Unlock() {
@@ -145,11 +145,11 @@ long Texture::Unlock() {
     m_p3DRenderDevice->BuildTexture(this);
     //...
 
-    SMT_SAFE_DELETE_A(m_pBuffer);
+    SAFE_DELETE_A(m_pBuffer);
     m_pCurrentPixel = (unsigned char *)m_pBuffer;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long Texture::Load(string fileName, bool bDynamic, bool bUseMips) {
@@ -163,23 +163,23 @@ long Texture::Load(string fileName, bool bDynamic, bool bUseMips) {
     else
       texFmt = RGBA8;
 
-    if (SMT_ERR_NONE == Create(img.GetWidth(), img.GetHeight(), texFmt,
+    if (ERR_NONE == Create(img.GetWidth(), img.GetHeight(), texFmt,
                                bDynamic, bUseMips) &&
-        SMT_ERR_NONE == Lock() &&
-        SMT_ERR_NONE == SetData(img.GetDIB(), img.GetHeight() * img.GetWidth() *
+        ERR_NONE == Lock() &&
+        ERR_NONE == SetData(img.GetDIB(), img.GetHeight() * img.GetWidth() *
                                                   (img.GetBpp() / 8)) &&
-        SMT_ERR_NONE == Unlock()) {
-      return SMT_ERR_NONE;
+        ERR_NONE == Unlock()) {
+      return ERR_NONE;
     } else {
       LogManager *pLogMgr = LogManager::GetSingletonPtr();
       Log *pLog = pLogMgr->GetDefaultLog();
 
       pLog->LogMessage("AddTexture() %s fail", fileName.c_str());
 
-      return SMT_ERR_FAILURE;
+      return ERR_FAILURE;
     }
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 }  // namespace _3Drd

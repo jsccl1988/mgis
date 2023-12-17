@@ -610,7 +610,7 @@ TEST(ReturnTest, CanConvertArgumentUsingNonConstTypeCastOperator) {
 }
 
 // Tests that ReturnNull() returns NULL in a pointer-returning function.
-TEST(ReturnNullTest, WorksInPointerReturningFunction) {
+TEST(ReturnNullTest, WorksIpoint_sizeerReturningFunction) {
   const Action<int*()> a1 = ReturnNull();
   EXPECT_TRUE(a1.Perform(std::make_tuple()) == nullptr);
 

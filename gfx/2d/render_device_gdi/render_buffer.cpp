@@ -17,13 +17,13 @@ RenderBuffer::~RenderBuffer(void) {
 
 //////////////////////////////////////////////////////////////////////////
 inline long RenderBuffer::SetWnd(HWND hWnd) {
-  if (!m_bOnwerBuf) return SMT_ERR_FAILURE;
+  if (!m_bOnwerBuf) return ERR_FAILURE;
   m_hWnd = hWnd;
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long RenderBuffer::SetBufSize(int cx, int cy) {
-  if (!m_bOnwerBuf || cx < 1 || cy < 1) return SMT_ERR_FAILURE;
+  if (!m_bOnwerBuf || cx < 1 || cy < 1) return ERR_FAILURE;
 
   if (m_hPaintBuf) {
     DeleteObject(m_hPaintBuf);
@@ -35,13 +35,13 @@ long RenderBuffer::SetBufSize(int cx, int cy) {
   m_nBufHeight = cy;
   m_hPaintBuf = CreateCompatibleBitmap(hDC, m_nBufWidth, m_nBufHeight);
 
-  if (NULL == m_hPaintBuf) return SMT_ERR_FAILURE;
+  if (NULL == m_hPaintBuf) return ERR_FAILURE;
 
   ClearBuf(0, 0, m_nBufWidth, m_nBufHeight);
 
   ::ReleaseDC(m_hWnd, hDC);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long RenderBuffer::ShareBuf(RenderBuffer &rbSrc) {
@@ -57,11 +57,11 @@ long RenderBuffer::ShareBuf(RenderBuffer &rbSrc) {
 
   m_bOnwerBuf = false;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long RenderBuffer::ClearBuf(int x, int y, int w, int h, COLORREF clr) {
-  if (w < 1 || h < 1) return SMT_ERR_FAILURE;
+  if (w < 1 || h < 1) return ERR_FAILURE;
 
   RECT rect;
   rect.left = x;
@@ -86,12 +86,12 @@ long RenderBuffer::ClearBuf(int x, int y, int w, int h, COLORREF clr) {
 
   ::ReleaseDC(m_hWnd, hDC);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
                            int srcOrgx, int srcOrgy, int op) {
-  if (m_hPaintBuf == NULL) return SMT_ERR_FAILURE;
+  if (m_hPaintBuf == NULL) return ERR_FAILURE;
 
   HDC hDC = GetDC(m_hWnd);
   HDC hSrcDC = this->PrepareDC(false);
@@ -103,15 +103,15 @@ long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
   ::ReleaseDC(m_hWnd, hDC);
 
   if (bRet)
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 }
 
 long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
                            int srcOrgx, int srcOrgy, int srcW, int srcH,
                            eSwapType type, int op, COLORREF clr) {
-  if (m_hPaintBuf == NULL) return SMT_ERR_FAILURE;
+  if (m_hPaintBuf == NULL) return ERR_FAILURE;
 
   HDC hDC = GetDC(m_hWnd);
   HDC hSrcDC = this->PrepareDC(false);
@@ -132,15 +132,15 @@ long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
   ::ReleaseDC(m_hWnd, hDC);
 
   if (bRet)
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 }
 
 long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
                            int destW, int destH, int srcOrgx, int srcOrgy,
                            int op) {
-  if (m_hPaintBuf == NULL) return SMT_ERR_FAILURE;
+  if (m_hPaintBuf == NULL) return ERR_FAILURE;
 
   HDC hTargetDC = rbTarget.PrepareDC(false);
   HDC hSrcDC = this->PrepareDC(false);
@@ -152,16 +152,16 @@ long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
   rbTarget.EndDC();
 
   if (bRet)
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 }
 
 long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
                            int destW, int destH, int srcOrgx, int srcOrgy,
                            int srcW, int srcH, eSwapType type, int op,
                            COLORREF clr) {
-  if (m_hPaintBuf == NULL) return SMT_ERR_FAILURE;
+  if (m_hPaintBuf == NULL) return ERR_FAILURE;
 
   HDC hTargetDC = rbTarget.PrepareDC(false);
   HDC hSrcDC = this->PrepareDC(false);
@@ -183,9 +183,9 @@ long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
   rbTarget.EndDC();
 
   if (bRet)
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   else
-    return SMT_ERR_FAILURE;
+    return ERR_FAILURE;
 }
 
 HDC RenderBuffer::PrepareDC(bool bClip) {
@@ -214,7 +214,7 @@ long RenderBuffer::EndDC(void) {
     m_hPaintDC = NULL;
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
@@ -233,7 +233,7 @@ RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
 //////////////////////////////////////////////////////////////////////////
 long RenderBuffer::DrawImage(const char *szImageBuf, int nImageBufSize,
                              long lCodeType, long x, long y, long cx, long cy) {
-  if (NULL == szImageBuf || 0 == nImageBufSize) return SMT_ERR_INVALID_PARAM;
+  if (NULL == szImageBuf || 0 == nImageBufSize) return ERR_INVALID_PARAM;
 
   CxImage tmpImage;
   tmpImage.Decode((BYTE *)szImageBuf, nImageBufSize, lCodeType);
@@ -242,13 +242,13 @@ long RenderBuffer::DrawImage(const char *szImageBuf, int nImageBufSize,
   tmpImage.Draw(hDC, x, y, cx, cy);
   EndDC();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long RenderBuffer::StrethImage(const char *szImageBuf, int nImageBufSize,
                                long lCodeType, long xoffset, long yoffset,
                                long xsize, long ysize, DWORD dwRop) {
-  if (NULL == szImageBuf || 0 == nImageBufSize) return SMT_ERR_INVALID_PARAM;
+  if (NULL == szImageBuf || 0 == nImageBufSize) return ERR_INVALID_PARAM;
 
   CxImage tmpImage;
   tmpImage.Decode((BYTE *)szImageBuf, nImageBufSize, lCodeType);
@@ -257,7 +257,7 @@ long RenderBuffer::StrethImage(const char *szImageBuf, int nImageBufSize,
   tmpImage.Stretch(hDC, xoffset, yoffset, xsize, ysize, dwRop);
   EndDC();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long RenderBuffer::Save2Image(const char *szFilePath, bool bBgTransparent) {
@@ -275,7 +275,7 @@ long RenderBuffer::Save2ImageBuf(char *&szImageBuf, long &lImageBufSize,
 //////////////////////////////////////////////////////////////////////////
 long RenderBuffer::Save2Image(HBITMAP hBitMap, const char *szFilePath,
                               bool bBgTransparent) {
-  if (hBitMap == NULL || strlen(szFilePath) == 0) return SMT_ERR_FAILURE;
+  if (hBitMap == NULL || strlen(szFilePath) == 0) return ERR_FAILURE;
 
   CxImage image;
 
@@ -294,17 +294,17 @@ long RenderBuffer::Save2Image(HBITMAP hBitMap, const char *szFilePath,
     }
 
     if (image.Save(szFilePath, GetImageTypeByFileExt(szFilePath))) {
-      return SMT_ERR_NONE;
+      return ERR_NONE;
     }
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 
 long RenderBuffer::Save2ImageBuf(HBITMAP hBitMap, char *&szImageBuf,
                                  long &lImageBufSize, long lCodeType,
                                  bool bBgTransparent) {
-  if (hBitMap == NULL || szImageBuf != NULL) return SMT_ERR_FAILURE;
+  if (hBitMap == NULL || szImageBuf != NULL) return ERR_FAILURE;
 
   BYTE *pImageBuf = NULL;
   long lSize = 0;
@@ -326,19 +326,19 @@ long RenderBuffer::Save2ImageBuf(HBITMAP hBitMap, char *&szImageBuf,
       szImageBuf = (char *)pImageBuf;
       lImageBufSize = lSize;
 
-      return SMT_ERR_NONE;
+      return ERR_NONE;
     }
 
-    return SMT_ERR_NONE;
+    return ERR_NONE;
   }
 
-  return SMT_ERR_FAILURE;
+  return ERR_FAILURE;
 }
 
 long RenderBuffer::FreeImageBuf(char *&szImageBuf) {
-  SMT_SAFE_DELETE_A(szImageBuf);
+  SAFE_DELETE_A(szImageBuf);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 }  // namespace gfx2d

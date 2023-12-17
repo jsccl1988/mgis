@@ -30,7 +30,7 @@ enum FrameBufferStatus {
 class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
-class GIS_CORE_EXPORT FrameBuffer {
+class CORE_EXPORT FrameBuffer {
  public:
   FrameBuffer(LP3DRENDERDEVICE p3DRenderDevice, uint handle);
   virtual ~FrameBuffer();

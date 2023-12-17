@@ -104,9 +104,9 @@ class FooInterface {
   virtual int TypeWithComma(const std::map<int, std::string>& a_map) = 0;
   virtual int TypeWithTemplatedCopyCtor(const TemplatedCopyable<int>&) = 0;
 
-  virtual int (*ReturnsFunctionPointer1(int))(bool) = 0;
+  virtual int (*ReturnsFunctiopoint_sizeer1(int))(bool) = 0;
   using fn_ptr = int (*)(bool);
-  virtual fn_ptr ReturnsFunctionPointer2(int) = 0;
+  virtual fn_ptr ReturnsFunctiopoint_sizeer2(int) = 0;
 
   virtual int RefQualifiedConstRef() const& = 0;
   virtual int RefQualifiedConstRefRef() const&& = 0;
@@ -176,8 +176,8 @@ class MockFoo : public FooInterface {
   MOCK_METHOD(int, TypeWithTemplatedCopyCtor,
               (const TemplatedCopyable<int>&));  // NOLINT
 
-  MOCK_METHOD(int (*)(bool), ReturnsFunctionPointer1, (int), ());
-  MOCK_METHOD(fn_ptr, ReturnsFunctionPointer2, (int), ());
+  MOCK_METHOD(int (*)(bool), ReturnsFunctiopoint_sizeer1, (int), ());
+  MOCK_METHOD(fn_ptr, ReturnsFunctiopoint_sizeer2, (int), ());
 
 #if GTEST_OS_WINDOWS
   MOCK_METHOD(int, CTNullary, (), (Calltype(STDMETHODCALLTYPE)));
@@ -245,8 +245,8 @@ class LegacyMockFoo : public FooInterface {
   MOCK_METHOD1(TypeWithTemplatedCopyCtor,
                int(const TemplatedCopyable<int>&));  // NOLINT
 
-  MOCK_METHOD1(ReturnsFunctionPointer1, int (*(int))(bool));
-  MOCK_METHOD1(ReturnsFunctionPointer2, fn_ptr(int));
+  MOCK_METHOD1(ReturnsFunctiopoint_sizeer1, int (*(int))(bool));
+  MOCK_METHOD1(ReturnsFunctiopoint_sizeer2, fn_ptr(int));
 
 #if GTEST_OS_WINDOWS
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTNullary, int());

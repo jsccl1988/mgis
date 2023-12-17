@@ -3,6 +3,7 @@
 #include "base/logging.h"
 
 namespace base {
+
 void Initialize(int /*argc*/,
                 char* argv[]) {  // NOLINT(modernize-avoid-c-arrays)
   FLAGS_logtostderr = true;
@@ -12,4 +13,5 @@ void Initialize(int /*argc*/,
 }
 
 void Deinitialize() { google::ShutdownGoogleLogging(); }
+
 }  // namespace base

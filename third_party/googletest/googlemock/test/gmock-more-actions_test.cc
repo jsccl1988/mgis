@@ -56,7 +56,7 @@ using testing::Action;
 using testing::DeleteArg;
 using testing::Invoke;
 using testing::ReturnArg;
-using testing::ReturnPointee;
+using testing::Returpoint_sizeee;
 using testing::SaveArg;
 using testing::SaveArgPointee;
 using testing::SetArgReferee;
@@ -677,9 +677,9 @@ TEST(SetArrayArgumentTest, SetsTheNthArrayWithIteratorArgument) {
   EXPECT_EQ(letters, s);
 }
 
-TEST(ReturnPointeeTest, Works) {
+TEST(Returpoint_sizeeeTest, Works) {
   int n = 42;
-  const Action<int()> a = ReturnPointee(&n);
+  const Action<int()> a = Returpoint_sizeee(&n);
   EXPECT_EQ(42, a.Perform(std::make_tuple()));
 
   n = 43;

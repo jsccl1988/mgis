@@ -39,10 +39,10 @@ AppendFeatureTool::~AppendFeatureTool() {
 
 int AppendFeatureTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
                             HWND hWnd, pfnToolCallBack pfnCallBack,
-                            void *pToFollow) {
-  if (SMT_ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
-                                     pfnCallBack, pToFollow)) {
-    return SMT_ERR_FAILURE;
+                            void *to_follow) {
+  if (ERR_NONE != BaseTool::Init(pMrdRenderDevice, pOperMap, hWnd,
+                                     pfnCallBack, to_follow)) {
+    return ERR_FAILURE;
   }
 
   StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
@@ -77,26 +77,26 @@ int AppendFeatureTool::Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap,
   AppendFuncItems("添加多边形区", GT_MSG_APPEND_SURF_POLYGON_FEATURE,
                   FIM_2DMFMENU);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_POINT_CHILDIMAGE_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_POINT_ANNO_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_POINT_DOT_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_POINT_CHILDIMAGE_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_POINT_ANNO_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_POINT_DOT_FEATURE);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_LINESTRING_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_LAG_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_BZER_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_B_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_3_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_RECT_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_ARC_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_LINEARRING_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_LINESTRING_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_LAG_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_BZER_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_B_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_SPLINE_3_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_RECT_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_ARC_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_LINE_LINEARRING_FEATURE);
 
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_SURF_FAN_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_SURF_RECT_FEATURE);
-  SMT_IATOOL_APPEND_MSG(GT_MSG_APPEND_SURF_POLYGON_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_SURF_FAN_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_SURF_RECT_FEATURE);
+  IATOOL_APPEND_MSG(GT_MSG_APPEND_SURF_POLYGON_FEATURE);
 
   RegisterMessage();
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 int AppendFeatureTool::AuxDraw() { return BaseTool::AuxDraw(); }
@@ -110,7 +110,7 @@ void AppendFeatureTool::SetOperMap(Map *pOperMap) {
 }
 
 int AppendFeatureTool::Notify(long nMessage, ListenerMessage &param) {
-  if (param.hSrcWnd != m_hWnd) return SMT_ERR_NONE;
+  if (param.source_window != m_hWnd) return ERR_NONE;
 
   SysManager *pSysMgr = SysManager::GetSingletonPtr();
   StyleConfig &styleSonfig = pSysMgr->GetSysStyleConfig();
@@ -121,96 +121,96 @@ int AppendFeatureTool::Notify(long nMessage, ListenerMessage &param) {
     case GT_MSG_APPEND_POINT_CHILDIMAGE_FEATURE: {
       ushort unType = PT_ChildImage;
       OnInputPointFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_POINT_ANNO_FEATURE: {
       ushort unType = PT_Text;
       OnInputPointFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_POINT_DOT_FEATURE: {
       ushort unType = PT_DOT;
       OnInputPointFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     //////////////////////////////////////////////////////////////////////////
     case GT_MSG_APPEND_LINE_RECT_FEATURE: {
       ushort unType = LT_Rect;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_ARC_FEATURE: {
       ushort unType = LT_Arc;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_LINEARRING_FEATURE: {
       ushort unType = LT_LinearRing;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_LINESTRING_FEATURE: {
       ushort unType = LT_LineString;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_SPLINE_LAG_FEATURE: {
       ushort unType = LT_Spline_Lag;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_SPLINE_BZER_FEATURE: {
       ushort unType = LT_Spline_Bzer;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_SPLINE_B_FEATURE: {
       ushort unType = LT_Spline_B;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_LINE_SPLINE_3_FEATURE: {
       ushort unType = LT_Spline_3;
       OnInputLineFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     //////////////////////////////////////////////////////////////////////////
     case GT_MSG_APPEND_SURF_FAN_FEATURE: {
       ushort unType = RT_Fan;
       OnInputRegionFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_SURF_RECT_FEATURE: {
       ushort unType = RT_Rect;
       OnInputRegionFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     case GT_MSG_APPEND_SURF_POLYGON_FEATURE: {
       ushort unType = RT_Polygon;
       OnInputRegionFeature(unType);
-      param.bModify = true;
+      param.modify = true;
     } break;
     //////////////////////////////////////////////////////////////////////////
     case GT_MSG_RET_DELEGATE: {
-      ushort uRetType = *(ushort *)param.lParam;
-      m_pGeom = ((Geometry *)param.wParam)->Clone();
+      ushort uRetType = *(ushort *)param.lparam;
+      m_pGeom = ((Geometry *)param.wparam)->Clone();
       OnRetDelegate(uRetType);
     } break;
     default:
       break;
   }
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void AppendFeatureTool::OnRetDelegate(int nRetType) {
   switch (nRetType) {
     case GT_MSG_RET_INPUT_POINT: {
-      ushort unPointType = 0;
+      ushort upoint_sizeType = 0;
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(&unPointType);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(&upoint_sizeType);
       m_pDelegateTag->Notify(GT_MSG_GET_INPUT_POINT_TYPE, param);
-      AppendPointFeature(unPointType);
+      AppendPointFeature(upoint_sizeType);
     } break;
     case GT_MSG_RET_INPUT_LINE: {
       AppendLineFeature();
@@ -234,10 +234,10 @@ void AppendFeatureTool::OnInputPointFeature(ushort unType) {
   if (NULL != pInputTool) {
     pInputTool->SetToolStyleName(styleSonfig.point_style_);
 
-    if (SMT_ERR_NONE == pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
+    if (ERR_NONE == pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(&unType);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(&unType);
       pInputTool->Notify(GT_MSG_SET_INPUT_POINT_TYPE, param);
       this->BeginDelegate(pInputTool);
     }
@@ -258,10 +258,10 @@ void AppendFeatureTool::OnInputLineFeature(ushort unType) {
   if (NULL != pInputTool) {
     pInputTool->SetToolStyleName(styleSonfig.curve_style_);
 
-    if (SMT_ERR_NONE == pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
+    if (ERR_NONE == pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(&unType);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(&unType);
 
       pInputTool->Notify(GT_MSG_SET_INPUT_LINE_TYPE, param);
 
@@ -284,10 +284,10 @@ void AppendFeatureTool::OnInputRegionFeature(ushort unType) {
   if (NULL != pInputTool) {
     pInputTool->SetToolStyleName(styleSonfig.region_style_);
 
-    if (SMT_ERR_NONE == pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
+    if (ERR_NONE == pInputTool->Init(m_pRenderDevice, m_pOperMap, m_hWnd)) {
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(&unType);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(&unType);
 
       pInputTool->Notify(GT_MSG_SET_INPUT_REGION_TYPE, param);
 
@@ -306,10 +306,10 @@ void AppendFeatureTool::AppendPointFeature(ushort unType) {
     case PT_Text: {
       float angle = 0;
       ListenerMessage param;
-      param.hSrcWnd = m_hWnd;
-      param.wParam = WPARAM(&angle);
+      param.source_window = m_hWnd;
+      param.wparam = WPARAM(&angle);
       m_pDelegateTag->Notify(GT_MSG_GET_INPUT_ANNO_ANGLE, param);
-      if (SMT_ERR_NONE == InputTextDlg(m_strAnno))
+      if (ERR_NONE == InputTextDlg(m_strAnno))
         AppendTextFeature(m_strAnno.c_str(), angle);
     } break;
     case PT_DOT: {
@@ -342,11 +342,11 @@ void AppendFeatureTool::AppendChildImageFeature() {
       m_pRenderDevice->Refresh(m_pOperMap, frt);
 
       //
-      Command *pCommand = new Command(new IACommandReceiver(
+      Command *command = new Command(new IACommandReceiver(
           m_pRenderDevice, m_pOperMap, pFeature, eIA_AppendFeature));
-      m_cmdMgr.PushUndoCommand(pCommand);
+      m_cmdMgr.PushUndoCommand(command);
     } else
-      SMT_SAFE_DELETE(pFeature);
+      SAFE_DELETE(pFeature);
 
     m_pGeom = NULL;
   }
@@ -381,11 +381,11 @@ void AppendFeatureTool::AppendTextFeature(const char *szAnno, float fangle) {
       m_pRenderDevice->Refresh(m_pOperMap, frt);
 
       //
-      Command *pCommand = new Command(new IACommandReceiver(
+      Command *command = new Command(new IACommandReceiver(
           m_pRenderDevice, m_pOperMap, pFeature, eIA_AppendFeature));
-      m_cmdMgr.PushUndoCommand(pCommand);
+      m_cmdMgr.PushUndoCommand(command);
     } else
-      SMT_SAFE_DELETE(pFeature);
+      SAFE_DELETE(pFeature);
 
     m_pGeom = NULL;
   }
@@ -416,11 +416,11 @@ void AppendFeatureTool::AppendDotFeature() {
       m_pRenderDevice->Refresh(m_pOperMap, frt);
 
       //
-      Command *pCommand = new Command(new IACommandReceiver(
+      Command *command = new Command(new IACommandReceiver(
           m_pRenderDevice, m_pOperMap, pFeature, eIA_AppendFeature));
-      m_cmdMgr.PushUndoCommand(pCommand);
+      m_cmdMgr.PushUndoCommand(command);
     } else
-      SMT_SAFE_DELETE(pFeature);
+      SAFE_DELETE(pFeature);
 
     m_pGeom = NULL;
   }
@@ -451,11 +451,11 @@ void AppendFeatureTool::AppendLineFeature(void) {
       m_pRenderDevice->Refresh(m_pOperMap, frt);
 
       //
-      Command *pCommand = new Command(new IACommandReceiver(
+      Command *command = new Command(new IACommandReceiver(
           m_pRenderDevice, m_pOperMap, pFeature, eIA_AppendFeature));
-      m_cmdMgr.PushUndoCommand(pCommand);
+      m_cmdMgr.PushUndoCommand(command);
     } else
-      SMT_SAFE_DELETE(pFeature);
+      SAFE_DELETE(pFeature);
 
     m_pGeom = NULL;
   }
@@ -486,11 +486,11 @@ void AppendFeatureTool::AppendRegionFeature() {
       m_pRenderDevice->Refresh(m_pOperMap, frt);
 
       //
-      Command *pCommand = new Command(new IACommandReceiver(
+      Command *command = new Command(new IACommandReceiver(
           m_pRenderDevice, m_pOperMap, pFeature, eIA_AppendFeature));
-      m_cmdMgr.PushUndoCommand(pCommand);
+      m_cmdMgr.PushUndoCommand(command);
     } else
-      SMT_SAFE_DELETE(pFeature);
+      SAFE_DELETE(pFeature);
 
     m_pGeom = NULL;
   }

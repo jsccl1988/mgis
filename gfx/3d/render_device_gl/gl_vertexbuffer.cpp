@@ -84,7 +84,7 @@ long GLVertexBuffer::Lock() {
   m_pNormal = m_pGLNormals;
   m_pTexCoord = m_pGLTexCoords;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLVertexBuffer::Unlock() {
@@ -95,7 +95,7 @@ long GLVertexBuffer::Unlock() {
   m_pNormal = NULL;
   m_pTexCoord = NULL;
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void *GLVertexBuffer::GetVertexData() { return m_pGLVertices; }
@@ -172,7 +172,7 @@ long GLVertexBuffer::PrepareForDrawing() {
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 long GLVertexBuffer::EndDrawing() {
@@ -184,6 +184,6 @@ long GLVertexBuffer::EndDrawing() {
 
   if (m_pGLTexCoords != NULL) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

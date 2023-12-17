@@ -6,7 +6,7 @@ FBOFunc::FBOFunc() {}
 FBOFunc::~FBOFunc() {}
 
 long FBOFunc::Initialize(LPGLRENDERDEVICE pGLRenderDevice) {
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 
 void FBOFunc::glGenFramebuffers(GLsizei count, GLuint *ids) { ; }

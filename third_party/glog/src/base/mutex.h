@@ -122,7 +122,7 @@
 # ifndef NOGDI
 #  define NOGDI
 # endif
-// To avoid macro definition of min/max.
+// To avoid macro definition of min/std::max.
 # ifndef NOMINMAX
 #  define NOMINMAX
 # endif

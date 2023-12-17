@@ -1,5 +1,5 @@
-#ifndef GIS_CORE_STYLE_H
-#define GIS_CORE_STYLE_H
+#ifndef CORE_STYLE_H
+#define CORE_STYLE_H
 
 #include "core/core.h"
 #include "core/core_export.h"
@@ -95,10 +95,10 @@ struct SymbolDesc {
   }
 };
 
-class GIS_CORE_EXPORT Style {
+class CORE_EXPORT Style {
  public:
   Style(void);
-  Style(const char *szName, const PenDesc &penDesc,
+  Style(const char *name, const PenDesc &penDesc,
            const BrushDesc &brushDesc, const AnnotationDesc &annoDesc,
            const SymbolDesc &symbolDesc);
 
@@ -109,7 +109,7 @@ class GIS_CORE_EXPORT Style {
   ulong GetStyleType(void) const { return m_stType; }
 
   void SetStyleType(ulong tp) { m_stType = tp; }
-  void SetStyleName(const char *szName) { strcpy(name_, szName); }
+  void SetStyleName(const char *name) { strcpy(name_, name); }
   Style *Clone(const char *szNewName) const;
 
   //////////////////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ class GIS_CORE_EXPORT Style {
 
 typedef vector<Style *> StylePtrList;
 
-class GIS_CORE_EXPORT StyleTable {
+class CORE_EXPORT StyleTable {
  public:
   StyleTable(void);
   ~StyleTable(void);
@@ -179,7 +179,7 @@ class GIS_CORE_EXPORT StyleTable {
   int m_nStyleCount;
 };
 
-class GIS_CORE_EXPORT StyleManager {
+class CORE_EXPORT StyleManager {
  private:
   StyleManager(void);
 
@@ -215,4 +215,4 @@ class GIS_CORE_EXPORT StyleManager {
 };
 }  // namespace core
 
-#endif  //GIS_CORE_STYLE_H
+#endif  //CORE_STYLE_H

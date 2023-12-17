@@ -161,7 +161,7 @@ struct ContainerPrinter {
 // a location in the address space.  Their representation is
 // implementation-defined.  Therefore they will be printed as raw
 // bytes.)
-struct FunctionPointerPrinter {
+struct Functiopoint_sizeerPrinter {
   template <typename T, typename = typename std::enable_if<
                             std::is_function<T>::value>::type>
   static void PrintValue(T* p, ::std::ostream* os) {
@@ -305,7 +305,7 @@ struct FindFirstPrinter<
 template <typename T>
 void PrintWithFallback(const T& value, ::std::ostream* os) {
   using Printer = typename FindFirstPrinter<
-      T, void, ContainerPrinter, FunctionPointerPrinter, PointerPrinter,
+      T, void, ContainerPrinter, Functiopoint_sizeerPrinter, PointerPrinter,
       internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
       ProtobufPrinter, ConvertibleToIntegerPrinter,
       ConvertibleToStringViewPrinter, RawBytesPrinter, FallbackPrinter>::type;

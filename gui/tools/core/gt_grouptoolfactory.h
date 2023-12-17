@@ -23,7 +23,7 @@ enum GroupTool3DType {
   GTT_3DViewControl,
 };
 
-class GIS_CORE_EXPORT GroupToolFactory {
+class CORE_EXPORT GroupToolFactory {
  public:
   // create
   static int CreateGroupTool(BaseTool*& pTool, GroupToolType type);

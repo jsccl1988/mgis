@@ -1249,8 +1249,8 @@ typedef unsigned long long BiggestParsable;
 typedef signed long long BiggestSignedParsable;
 # endif  // GTEST_OS_WINDOWS
 
-// We cannot use std::numeric_limits<T>::max() as it clashes with the
-// max() macro defined by <windows.h>.
+// We cannot use std::numeric_limits<T>::std::max() as it clashes with the
+// std::max() macro defined by <windows.h>.
 const BiggestParsable kBiggestParsableMax = ULLONG_MAX;
 const BiggestSignedParsable kBiggestSignedParsableMax = LLONG_MAX;
 

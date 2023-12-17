@@ -13,7 +13,7 @@ enum ShaderCompilationFlag {
 class 3DRenderDevice;
 typedef class 3DRenderDevice * LP3DRENDERDEVICE;
 
-class GIS_CORE_EXPORT Shader {
+class CORE_EXPORT Shader {
  public:
   Shader(LP3DRENDERDEVICE p3DRenderDevice, uint handle, string strName);
   virtual ~Shader();

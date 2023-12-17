@@ -52,7 +52,7 @@ BM_copy/64           1608 ns       1608 ns     432758   37.9501MB/s
 BM_copy/512         12589 ns      12589 ns      54806   38.7867MB/s
 BM_copy/1024        25169 ns      25169 ns      27713   38.8003MB/s
 BM_copy/8192       201165 ns     201112 ns       3486   38.8466MB/s
-RUNNING: ./a.out --benchmark_out=/tmp/tmpt1wwG_
+RUNNING: ./a.out --benchmark_out=/tmp/tmpointwwG_
 Run on (8 X 4000 MHz CPU s)
 2017-11-07 21:16:53
 ------------------------------------------------------

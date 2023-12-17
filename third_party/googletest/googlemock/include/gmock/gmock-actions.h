@@ -1142,7 +1142,7 @@ struct DeleteArgAction {
 };
 
 template <typename Ptr>
-struct ReturnPointeeAction {
+struct Returpoint_sizeeeAction {
   Ptr pointer;
   template <typename... Args>
   auto operator()(const Args&...) const -> decltype(*pointer) {
@@ -1449,7 +1449,7 @@ internal::DeleteArgAction<k> DeleteArg() {
 
 // This action returns the value pointed to by 'pointer'.
 template <typename Ptr>
-internal::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
+internal::Returpoint_sizeeeAction<Ptr> Returpoint_sizeee(Ptr pointer) {
   return {pointer};
 }
 

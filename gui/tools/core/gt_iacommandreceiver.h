@@ -13,7 +13,7 @@ class IACommandReceiver : public CommandReceiver {
   virtual ~IACommandReceiver();
 
  public:
-  virtual bool Action(bool bUndo);
+  virtual bool Action(bool is_undo);
 
  public:
   IAType m_iaType;

@@ -123,6 +123,6 @@ long PerspCamera::Apply(void) {
   m_p3DRenderDevice->MatrixLoadIdentity();
   m_p3DRenderDevice->SetViewLookAt(m_vEye, m_vTarget, m_vUp);
 
-  return SMT_ERR_NONE;
+  return ERR_NONE;
 }
 }  // namespace _3Drd

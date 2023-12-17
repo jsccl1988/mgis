@@ -16,10 +16,10 @@ using namespace _Rd;
 using namespace core;
 using namespace _IATool;
 
-#define SMT_IATOOL_MSG_KEY(lMessage) (SMT_MSG_KEY(lMessage, m_hWnd))
+#define IATOOL_MSG_KEY(message) (MSG_KEY(message, m_hWnd))
 
-#define SMT_IATOOL_APPEND_MSG(lMessage) \
-  { AppendMessage(SMT_IATOOL_MSG_KEY(lMessage)); }
+#define IATOOL_APPEND_MSG(message) \
+  { AppendMessage(IATOOL_MSG_KEY(message)); }
 
 namespace _GroupTool {
 extern HINSTANCE g_hInstance;
@@ -32,7 +32,7 @@ class BaseTool : public IATool {
 
  public:
   virtual int Init(LPRENDERDEVICE pMrdRenderDevice, Map *pOperMap, HWND hWnd,
-                   pfnToolCallBack pfnCallBack = NULL, void *pToFollow = NULL);
+                   pfnToolCallBack pfnCallBack = NULL, void *to_follow = NULL);
 
   LPRENDERDEVICE GetRenderDevice(void) { return m_pRenderDevice; }
 

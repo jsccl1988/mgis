@@ -15,15 +15,15 @@ typedef vector<Shader*> vShaderPtrs;
 typedef map<string, Shader*> mapNameToShaderPtrs;
 typedef pair<string, Shader*> pairNameToShaderPtr;
 
-class GIS_CORE_EXPORT ShaderManager {
+class CORE_EXPORT ShaderManager {
  public:
   ShaderManager(void);
   virtual ~ShaderManager(void);
 
  public:
   long AddShader(Shader* pShader);
-  Shader* GetShader(const char* szName);
-  void DestroyShader(const char* szName);
+  Shader* GetShader(const char* name);
+  void DestroyShader(const char* name);
   void DestroyAllShader(void);
 
   void GetAllShaderName(vector<string>& vStrAllShaderName);
