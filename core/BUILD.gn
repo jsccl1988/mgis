@@ -22,20 +22,21 @@ static_library("core") {
     "$root_out_dir/glog/include",
     "$root_out_dir/geos/include",
     "$root_out_dir/PROJ/include",
-    # "$root_out_dir/gdal/include",
+    "$root_out_dir/gdal/include",
   ]
 
   libs = [
     "$root_out_dir/geos/lib/geos.lib",
     "$root_out_dir/PROJ/lib/proj.lib",
-    # "$root_out_dir/gdal/lib/gdal.lib",
+    "$root_out_dir/gdal/lib/gdal.lib",
   ]
 
   deps = [
     "//base:base",
     "//third_party:geos",
     "//third_party:PROJ",
-    # "//third_party:gdal",
+    "//third_party:gdal",
+    # "//third_party:PDAL",
   ]
 }
 
@@ -55,7 +56,7 @@ test("core_test") {
     "$root_out_dir/glog/include",
     "$root_out_dir/geos/include",
     "$root_out_dir/PROJ/include",
-    # "$root_out_dir/gdal/include",
+    "$root_out_dir/gdal/include",
   ]
 
   deps = [

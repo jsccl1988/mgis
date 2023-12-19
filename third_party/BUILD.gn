@@ -36,7 +36,7 @@ cmake("geos") {
 
   cmake_options = [
     "USE_UNSTABLE_GEOS_CPP_API=1",
-    "BUILD_SHARED_LIBS=OFF",
+    "BUILD_SHARED_LIBS=ON",
   ]
 }
 
@@ -56,7 +56,7 @@ cmake("PROJ") {
 
   sqlite3_install = rebase_path("$root_out_dir/sqlite3")
   cmake_options = [
-    "BUILD_SHARED_LIBS=OFF",
+    "BUILD_SHARED_LIBS=ON",
     "BUILD_TESTING=OFF",
     "ENABLE_TIFF=OFF",
     "ENABLE_CURL=OFF",
@@ -68,31 +68,19 @@ cmake("PROJ") {
   ]
 }
 
-# cmake("gdal") {
-#   cmake_root_dir = "//third_party/gdal"
-#   cmake_outputs = [
-#     "$root_out_dir/gdal/lib/gdal.lib",
-#   ]
+cmake("gdal") {
+  cmake_root_dir = "//third_party/gdal"
+  cmake_outputs = [
+    "$root_out_dir/gdal/lib/gdal.lib",
+  ]
 
-#   proj_install = rebase_path("$root_out_dir/PROJ")
-#   cmake_options = [
-#     "BUILD_SHARED_LIBS=OFF",
-#     "GDAL_BUILD_OPTIONAL_DRIVERS=OFF",
-#     "OGR_BUILD_OPTIONAL_DRIVERS=OFF",
-#     "GDAL_USE_XERCESC=OFF",
-#     "PROJ_INCLUDE_DIR=$proj_install/include",
-#     "PROJ_LIBRARY_RELEASE=$proj_install/lib/proj.lib",
-#   ]
-# }
-
-# cmake("PDAL") {
-#   cmake_root_dir = "//third_party/PDAL"
-#   cmake_outputs = [
-#     "$root_out_dir/PDAL/bin/PDAL.dll",
-#     "$root_out_dir/PDAL/lib/PDAL.lib",
-#   ]
-
-#   cmake_options = [
-#     "BUILD_SHARED_LIBS=OFF",
-#   ]
-# }
+  proj_install = rebase_path("$root_out_dir/PROJ")
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+    "GDAL_BUILD_OPTIONAL_DRIVERS=OFF",
+    "OGR_BUILD_OPTIONAL_DRIVERS=OFF",
+    "GDAL_USE_XERCESC=OFF",
+    "PROJ_INCLUDE_DIR=$proj_install/include",
+    "PROJ_LIBRARY_RELEASE=$proj_install/lib/proj.lib",
+  ]
+}
