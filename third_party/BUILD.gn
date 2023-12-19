@@ -40,6 +40,20 @@ cmake("geos") {
   ]
 }
 
+cmake("cpp-httplib") {
+  cmake_root_dir = "//third_party/cpp-httplib"
+  cmake_outputs = [
+    "$root_out_dir/cpp-httplib/include/httplib.h",
+  ]
+}
+
+# makefile("protozero") {
+#   makefile_root_dir = "//third_party/protozero"
+#   makefile_outputs = [
+#     "$root_out_dir/protozero/lib/protozero.lib",
+#   ]
+# }
+
 cmake("sqlite3") {
   cmake_root_dir = "//third_party/sqlite3"
   cmake_outputs = [
@@ -68,6 +82,34 @@ cmake("PROJ") {
   ]
 }
 
+# cmake("libtiff") {
+#   cmake_root_dir = "//third_party/libtiff"
+#   cmake_outputs = [
+#     "$root_out_dir/libtiff/lib/libtiff.lib",
+#   ]
+
+#   cmake_options = [
+#     "BUILD_SHARED_LIBS=OFF",
+#   ]
+# }
+
+# cmake("libgeotiff") {
+#   cmake_root_dir = "//third_party/libgeotiff/libgeotiff"
+#   cmake_outputs = [
+#     "$root_out_dir/libgeotiff/lib/libgeotiff.lib",
+#   ]
+
+#   proj_install = rebase_path("$root_out_dir/PROJ")
+#   libtiff_install = rebase_path("$root_out_dir/libtiff")
+#   cmake_options = [
+#     "BUILD_SHARED_LIBS=ON",
+#     "PROJ_INCLUDE_DIR=$proj_install/include",
+#     "PROJ_LIBRARY=$proj_install/lib/proj.lib",
+#     "TIFF_INCLUDE_DIR=$libtiff_install/include",
+#     "TIFF_LIBRARY=$libtiff_install/lib/tiff.lib",
+#   ]
+# }
+
 cmake("gdal") {
   cmake_root_dir = "//third_party/gdal"
   cmake_outputs = [
@@ -84,3 +126,42 @@ cmake("gdal") {
     "PROJ_LIBRARY_RELEASE=$proj_install/lib/proj.lib",
   ]
 }
+
+cmake("libspatialindex") {
+  cmake_root_dir = "//third_party/libspatialindex"
+  cmake_outputs = [
+    "$root_out_dir/libspatialindex/bin/libspatialindex.dll",
+    "$root_out_dir/libspatialindex/lib/libspatialindex.lib",
+  ]
+
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+  ]
+}
+
+cmake("spatial") {
+  cmake_root_dir = "//third_party/spatial"
+  cmake_outputs = [
+    "$root_out_dir/spatial/include",
+  ]
+
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+  ]
+}
+
+cmake("SpatiaLiteCpp") {
+  cmake_root_dir = "//third_party/SpatiaLiteCpp"
+  cmake_outputs = [
+    "$root_out_dir/SpatiaLiteCpp/bin/SpatiaLiteCpp.dll",
+    "$root_out_dir/SpatiaLiteCpp/lib/SpatiaLiteCpp.lib",
+  ]
+
+  spatialite_install = rebase_path("$root_out_dir/libspatialite")
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+    "spatialite_dir_inc=$spatialite_install/include",
+    "spatialite_dir_lib=$spatialite_install/lib/proj.lib",
+  ]
+}
+

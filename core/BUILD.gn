@@ -33,10 +33,17 @@ static_library("core") {
 
   deps = [
     "//base:base",
+    "//third_party:cpp-httplib",
+    # "//third_party:protozero",
+    # "//third_party:libtiff",
+    # "//third_party:libgeotiff",
+    "//third_party:sqlite3",
     "//third_party:geos",
     "//third_party:PROJ",
     "//third_party:gdal",
-    # "//third_party:PDAL",
+    "//third_party:libspatialindex",
+    "//third_party:spatial",
+    # "//third_party:SpatiaLiteCpp",
   ]
 }
 
