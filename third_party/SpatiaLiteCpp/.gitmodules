@@ -1,0 +1,6 @@
+[submodule "ext/shared_ptr"]
+	path = ext/shared_ptr
+	url = https://github.com/SRombauts/shared_ptr.git
+[submodule "ext/SQLiteCpp"]
+	path = ext/SQLiteCpp
+	url = https://github.com/SRombauts/SQLiteCpp.git
