@@ -47,12 +47,12 @@ cmake("cpp-httplib") {
   ]
 }
 
-# makefile("protozero") {
-#   makefile_root_dir = "//third_party/protozero"
-#   makefile_outputs = [
-#     "$root_out_dir/protozero/lib/protozero.lib",
-#   ]
-# }
+makefile("protozero") {
+  makefile_root_dir = "//third_party/protozero"
+  makefile_outputs = [
+    "$root_out_dir/protozero/lib/protozero.lib",
+  ]
+}
 
 cmake("sqlite3") {
   cmake_root_dir = "//third_party/sqlite3"
@@ -82,34 +82,6 @@ cmake("PROJ") {
   ]
 }
 
-# cmake("libtiff") {
-#   cmake_root_dir = "//third_party/libtiff"
-#   cmake_outputs = [
-#     "$root_out_dir/libtiff/lib/libtiff.lib",
-#   ]
-
-#   cmake_options = [
-#     "BUILD_SHARED_LIBS=OFF",
-#   ]
-# }
-
-# cmake("libgeotiff") {
-#   cmake_root_dir = "//third_party/libgeotiff/libgeotiff"
-#   cmake_outputs = [
-#     "$root_out_dir/libgeotiff/lib/libgeotiff.lib",
-#   ]
-
-#   proj_install = rebase_path("$root_out_dir/PROJ")
-#   libtiff_install = rebase_path("$root_out_dir/libtiff")
-#   cmake_options = [
-#     "BUILD_SHARED_LIBS=ON",
-#     "PROJ_INCLUDE_DIR=$proj_install/include",
-#     "PROJ_LIBRARY=$proj_install/lib/proj.lib",
-#     "TIFF_INCLUDE_DIR=$libtiff_install/include",
-#     "TIFF_LIBRARY=$libtiff_install/lib/tiff.lib",
-#   ]
-# }
-
 cmake("gdal") {
   cmake_root_dir = "//third_party/gdal"
   cmake_outputs = [
@@ -121,7 +93,7 @@ cmake("gdal") {
     "BUILD_SHARED_LIBS=ON",
     "GDAL_BUILD_OPTIONAL_DRIVERS=OFF",
     "OGR_BUILD_OPTIONAL_DRIVERS=OFF",
-    "GDAL_USE_XERCESC=OFF",
+    "GDAL_USE_INTERNAL_LIBS=ON",
     "PROJ_INCLUDE_DIR=$proj_install/include",
     "PROJ_LIBRARY_RELEASE=$proj_install/lib/proj.lib",
   ]

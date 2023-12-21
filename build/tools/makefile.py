@@ -44,10 +44,10 @@ def makefile_build(
             prefix,
             config_options,
         )
-        print(config_cmd)
-        sys.stdout.flush()
-        os.system(config_cmd)
-        os.system('echo > "%s"' % os.path.join(prefix, 'configure'))
+        # print(config_cmd)
+        # sys.stdout.flush()
+        # os.system(config_cmd)
+        # os.system('echo > "%s"' % os.path.join(prefix, 'configure'))
 
     make = 'make' if sys.platform != 'win32' else 'nmake'
     if sys.platform == 'win32' and len(makefile_file) > 0:
@@ -62,6 +62,7 @@ def makefile_build(
 
 
 def main():
+    print(sys.argv[1:])
     [
         makefile_root_dir,
         makefile_config_cmd,

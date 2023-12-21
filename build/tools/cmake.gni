@@ -35,23 +35,13 @@ template("cmake") {
       rebase_path(cmake_root_dir, root_build_dir),
     ]
 
-    options = ""
-    size = 0
-    foreach(option, cmake_options) {
-      size += 1
-    }
 
-    i = 0
-    foreach(option, cmake_options) {
-      i += 1
-      options += option
-      if (i != size) {
-        options += ","
-      }
-    }
+    options = exec_script("//build/tools/string_join.py",
+                                                    cmake_options,
+                                                    "list lines")
 
     args += [
-      options,
+      options[0],
       rebase_path(cmake_build_dir, root_build_dir),
       rebase_path(cmake_install_dir, root_build_dir),
       "$target_cpu",
