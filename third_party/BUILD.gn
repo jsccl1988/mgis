@@ -47,18 +47,25 @@ cmake("cpp-httplib") {
   ]
 }
 
-makefile("protozero") {
-  makefile_root_dir = "//third_party/protozero"
-  makefile_outputs = [
-    "$root_out_dir/protozero/lib/protozero.lib",
-  ]
-}
-
 cmake("sqlite3") {
   cmake_root_dir = "//third_party/sqlite3"
   cmake_outputs = [
     "$root_out_dir/sqlite3/bin/sqlite3.exe",
     "$root_out_dir/sqlite3/lib/sqlite3.lib",
+  ]
+}
+
+cmake("SQLiteCpp") {
+  cmake_root_dir = "//third_party/SQLiteCpp"
+  cmake_outputs = [
+    "$root_out_dir/SQLiteCpp/lib/SQLiteCpp.lib",
+  ]
+
+  # sqlite3_install = rebase_path("$root_out_dir/sqlite3")
+  cmake_options = [
+    "BUILD_SHARED_LIBS=OFF",
+    "SQLITECPP_INTERNAL_SQLITE=ON",
+    "SQLITECPP_RUN_CPPLINT=OFF",
   ]
 }
 
@@ -136,4 +143,3 @@ cmake("SpatiaLiteCpp") {
     "spatialite_dir_lib=$spatialite_install/lib/proj.lib",
   ]
 }
-

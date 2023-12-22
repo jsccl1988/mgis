@@ -1,13 +1,13 @@
 // Copyright (c) 2023 The Mogu Authors.
 // All rights reserved.
 
-#include "base/logging.h"
-
 #include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 
+#include "base/logging.h"
 #include "testing/test.h"
 
 class TestSDB : public ::testing::Test {

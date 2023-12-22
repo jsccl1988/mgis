@@ -8,3 +8,11 @@ group("all") {
     # "//framework:framework",
   ]
 }
+
+group("test") {
+  testonly = true
+  deps = [
+    "//base:base_test",
+    "//core:core_test",
+  ]
+}
