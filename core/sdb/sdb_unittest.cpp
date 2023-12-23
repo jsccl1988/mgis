@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include "base/logging.h"
+#include "ogrsf_frmts.h"
 #include "testing/test.h"
 
 class TestSDB : public ::testing::Test {
@@ -18,6 +19,4 @@ class TestSDB : public ::testing::Test {
   void TearDown() override {}
 };
 
-TEST_F(TestSDB, test_log) {
-  LOG(INFO) << __FUNCTION__ << "() logged";
-}
+TEST_F(TestSDB, test_log) {}

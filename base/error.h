@@ -7,12 +7,11 @@
 #include <stdexcept>
 #include <string>
 
-#include "base/base_types.h"
 #include "base/base_export.h"
+#include "base/base_types.h"
 
 #define BASE(n) 5000 + n
 
-namespace base {
 enum Err {
   ERR_NONE = 0,        //正确
   ERR_FAILURE,         //失败
@@ -54,15 +53,16 @@ const RESULT kResultIOError = BASE(4);
 const RESULT kResultMemoryError = BASE(5);
 const RESULT kResultTimeout = BASE(6);
 
+namespace base {
 class BASE_EXPORT Exception : public std::runtime_error {
  public:
   Exception(const std::string &e)
-      : std::runtime_error(e), error_code_(base::kResultFailed) {}
-  Exception(const char *s, uint32_t error_code = base::kResultFailed)
+      : std::runtime_error(e), error_code_(kResultFailed) {}
+  Exception(const char *s, uint32_t error_code = kResultFailed)
       : std::runtime_error(s), error_code_(error_code) {}
   Exception()
       : std::runtime_error((const char *)"Unknown error"),
-        error_code_(base::kResultFailed) {}
+        error_code_(kResultFailed) {}
   virtual ~Exception() throw() {}
   uint32_t error_code() const { return error_code_; }
 

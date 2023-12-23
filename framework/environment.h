@@ -4,7 +4,7 @@
 #include <string>
 
 #include "framework/framework.h"
-#include "framework/core_export.h"
+#include "framework/framework_export.h"
 
 namespace framework {
 struct MapDocInfo {

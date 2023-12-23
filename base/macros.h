@@ -45,8 +45,8 @@
 #define SAFE_DELETE_A(p) \
   {                      \
     if (NULL != p) {     \
-      delete ([] p);     \
-      (p) = NULL;        \
+      delete[] p;        \
+      p = NULL;          \
     }                    \
   }
 #endif

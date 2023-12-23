@@ -20,7 +20,6 @@ static_library("framework") {
   ]
 
   libs = [
-    # "$root_out_dir/geos/lib/geos.lib",
   ]
 
   deps = [
@@ -28,17 +27,17 @@ static_library("framework") {
   ]
 }
 
-# test("framework_test") {
-#   sources = [
-#     "framework_unittest.cpp",
-#   ]
+test("framework_test") {
+  sources = [
+    "framework_unittest.cpp",
+  ]
 
-#   include_dirs += [
-#     "$root_gen_dir/",
-#     "$root_out_dir/glog/include",
-#   ]
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+  ]
 
-#   deps = [
-#     ":framework",
-#   ]
-# }
+  deps = [
+    ":framework",
+  ]
+}

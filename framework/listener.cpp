@@ -3,96 +3,97 @@
 #include <algorithm>
 
 #include "base/logging.h"
+#include "framework/message.h"
 
 namespace framework {
+using base::Err;
 Listener::Listener() {}
 Listener::~Listener() {}
 
 const char *Listener::GetName() const { return name_.c_str(); }
 void Listener::SetName(const char *name) { name_ = name; }
 
-bool Listener::AppendFuncItems(const char *function, long message,
-                               long lStyle) {
-  bool bRet = true;
-  if (lStyle & FIM_2DVIEW) {
-    bRet &= AppendFuncItems(function, message, view2d_function_items_);
+bool Listener::AppendFuncItems(const char *function, long message, long style) {
+  bool ret = true;
+  if (style & FIM_2DVIEW) {
+    ret &= AppendFuncItems(function, message, view2d_function_items_);
   }
 
-  if (lStyle & FIM_3DVIEW) {
-    bRet &= AppendFuncItems(function, message, view3d_function_items_);
+  if (style & FIM_3DVIEW) {
+    ret &= AppendFuncItems(function, message, view3d_function_items_);
   }
 
-  if (lStyle & FIM_3DEXVIEW) {
-    bRet &= AppendFuncItems(function, message, view3dex_function_items_);
+  if (style & FIM_3DEXVIEW) {
+    ret &= AppendFuncItems(function, message, view3dex_function_items_);
   }
 
-  if (lStyle & FIM_MAPDOCCATALOG) {
-    bRet &= AppendFuncItems(function, message, map_doc_catalog_function_items_);
+  if (style & FIM_MAPDOCCATALOG) {
+    ret &= AppendFuncItems(function, message, map_doc_catalog_function_items_);
   }
 
-  if (lStyle & FIM_2DMFTOOLBAR) {
-    bRet &= AppendFuncItems(function, message, toolbar2d_function_items_);
+  if (style & FIM_2DMFTOOLBAR) {
+    ret &= AppendFuncItems(function, message, toolbar2d_function_items_);
   }
 
-  if (lStyle & FIM_3DMFTOOLBAR) {
-    bRet &= AppendFuncItems(function, message, toolbar3d_function_items_);
+  if (style & FIM_3DMFTOOLBAR) {
+    ret &= AppendFuncItems(function, message, toolbar3d_function_items_);
   }
 
-  if (lStyle & FIM_2DMFMENU) {
-    bRet &= AppendFuncItems(function, message, menu2d_function_items_);
+  if (style & FIM_2DMFMENU) {
+    ret &= AppendFuncItems(function, message, menu2d_function_items_);
   }
 
-  if (lStyle & FIM_3DMFMENU) {
-    bRet &= AppendFuncItems(function, message, menu3d_function_items_);
+  if (style & FIM_3DMFMENU) {
+    ret &= AppendFuncItems(function, message, menu3d_function_items_);
   }
 
-  if (lStyle & FIM_AUXMODULEBOX) {
-    bRet &= AppendFuncItems(function, message, am_box_function_items_);
+  if (style & FIM_AUXMODULEBOX) {
+    ret &= AppendFuncItems(function, message, am_box_function_items_);
   }
 
-  if (lStyle & FIM_AUXMODULETREE) {
-    bRet &= AppendFuncItems(function, message, am_tree_function_items_);
+  if (style & FIM_AUXMODULETREE) {
+    ret &= AppendFuncItems(function, message, am_tree_function_items_);
   }
 
-  return bRet;
+  return ret;
 }
 
 function_items Listener::GetFuncItems(FuncItemStyle style) {
-  function_items vTmpFuncItems;
+  function_items temp_function_items;
   switch (style) {
     case FIM_2DVIEW: {
-      vTmpFuncItems = view2d_function_items_;
+      temp_function_items = view2d_function_items_;
     } break;
     case FIM_3DVIEW: {
-      vTmpFuncItems = view3d_function_items_;
+      temp_function_items = view3d_function_items_;
     } break;
     case FIM_3DEXVIEW: {
-      vTmpFuncItems = view3dex_function_items_;
+      temp_function_items = view3dex_function_items_;
     } break;
     case FIM_MAPDOCCATALOG: {
-      vTmpFuncItems = map_doc_catalog_function_items_;
+      temp_function_items = map_doc_catalog_function_items_;
     } break;
     case FIM_2DMFTOOLBAR: {
-      vTmpFuncItems = toolbar2d_function_items_;
+      temp_function_items = toolbar2d_function_items_;
     } break;
     case FIM_3DMFTOOLBAR: {
-      vTmpFuncItems = toolbar3d_function_items_;
+      temp_function_items = toolbar3d_function_items_;
     } break;
     case FIM_2DMFMENU: {
-      vTmpFuncItems = menu2d_function_items_;
+      temp_function_items = menu2d_function_items_;
     } break;
     case FIM_3DMFMENU: {
-      vTmpFuncItems = menu3d_function_items_;
+      temp_function_items = menu3d_function_items_;
     } break;
     case FIM_AUXMODULEBOX: {
-      vTmpFuncItems = am_box_function_items_;
+      temp_function_items = am_box_function_items_;
     } break;
     case FIM_AUXMODULETREE: {
-      vTmpFuncItems = am_tree_function_items_;
+      temp_function_items = am_tree_function_items_;
     } break;
   }
 
-  return vTmpFuncItems;
+  return temp_function_items;
 }
 
 bool Listener::AppendFuncItems(const char *function, long message,
@@ -107,7 +108,7 @@ bool Listener::AppendFuncItems(const char *function, long message,
 
   FuntionItem funcItem;
 
-  strcpy(funcItem.name, function);
+  funcItem.name = function;
   funcItem.message = message;
 
   function_items.push_back(funcItem);
@@ -133,7 +134,7 @@ int Listener::RegisterMessage() {
   ListenerManager *listener_manager = ListenerManager::GetSingletonPtr();
   listener_manager->RegisterListenerMessage(this);
 
-  return ERR_NONE;
+  return base::ERR_NONE;
 }
 
 int Listener::UnRegister() {
@@ -145,21 +146,18 @@ int Listener::UnRegisterMessage() {
   ListenerManager *listener_manager = ListenerManager::GetSingletonPtr();
   listener_manager->UnRegisterListenerMessage(this);
 
-  return ERR_NONE;
+  return base::ERR_NONE;
 }
 
 int Listener::SetActive() {
   ListenerManager *listener_manager = ListenerManager::GetSingletonPtr();
   listener_manager->SetActiveListener(this);
 
-  return ERR_NONE;
+  return base::ERR_NONE;
 }
 
 ListenerManager *ListenerManager::singleton_ = nullptr;
 ListenerManager *ListenerManager::GetSingletonPtr(void) {
-  CSLock cslock;
-  ScopeCSLock scope(&cslock);
-
   if (singleton_ == nullptr) {
     singleton_ = new ListenerManager();
   }
@@ -174,11 +172,11 @@ ListenerManager::~ListenerManager(void) { RemoveAllListener(); }
 
 long ListenerManager::Notify(Listener *listener, long message,
                              ListenerMessage &param) {
-  if (listener == LISTENER_MSG_INVALID) {
-    return ERR_INVALID_PARAM;
+  if (listener == LISTENER_MESSAGE_INVALID) {
+    return base::ERR_INVALID_PARAM;
   }
 
-  if (listener == LISTENER_MSG_BROADCAST) {
+  if (listener == LISTENER_MESSAGE_BROADCAST) {
     Message2Ptr::iterator mapIter;
     mapIter = message2listeners_.find(message);
     if (mapIter != message2listeners_.end()) {
@@ -187,12 +185,13 @@ long ListenerManager::Notify(Listener *listener, long message,
         pFindListener->Notify(message, param);
       }
     } else {
-      Listeners vDoneList;
+      Listeners done_listeners;
       Listeners ::iterator it = listeners_.begin();
       while (it != listeners_.end()) {
-        if (find(vDoneList.begin(), vDoneList.end(), *it) == vDoneList.end()) {
+        if (find(done_listeners.begin(), done_listeners.end(), *it) ==
+            done_listeners.end()) {
           param.modify = false;
-          vDoneList.push_back(*it);
+          done_listeners.push_back(*it);
           (*it++)->Notify(message, param);
           if (param.modify) {
             it = listeners_.begin();
@@ -206,7 +205,7 @@ long ListenerManager::Notify(Listener *listener, long message,
     listener->Notify(message, param);
   }
 
-  return ERR_NONE;
+  return base::ERR_NONE;
 }
 
 long ListenerManager::RegisterListener(Listener *listener) {
@@ -220,7 +219,7 @@ long ListenerManager::RegisterListener(Listener *listener) {
   }
 
   listeners_.push_back(listener);
-  return ERR_NONE;
+  return base::ERR_NONE;
 }
 
 long ListenerManager::RemoveListener(Listener *listener) {
@@ -239,7 +238,7 @@ long ListenerManager::RemoveListener(Listener *listener) {
 long ListenerManager::RemoveAllListener(void) {
   listeners_.clear();
 
-  return ERR_NONE;
+  return base::ERR_NONE;
 }
 
 Listener *ListenerManager::GetListener(int index) {

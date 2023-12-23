@@ -4,7 +4,7 @@
 #include <memory>
 #include <mutex>
 
-#include "../util/at_exit.h"
+#include "base/util/at_exit.h"
 namespace base {
 #define SINGLETON_DEFINE(TypeName)    \
   static TypeName* GetInstance() {    \
@@ -37,7 +37,7 @@ class Singleton {
   Singleton& operator=(const Singleton&) = delete;
 
  public:
-  static const TSingletonPtr& GetInstance() {
+  static TSingletonPtr& GetInstance() {
     static TSingletonPtr instance = nullptr;
     static std::once_flag oc;
     std::call_once(oc, [&] {

@@ -4,11 +4,13 @@
 
 #include <string>
 
+#include "base/memory/singleton.h"
+
 #include "framework/framework.h"
 #include "framework/framework_export.h"
 
 namespace framework {
-class FRAMEWORK_EXPORT_EXPORT DynamicLibrary {
+class FRAMEWORK_EXPORT DynamicLibrary {
  public:
   DynamicLibrary(const char* name, const char* path);
   virtual ~DynamicLibrary(void);
@@ -18,7 +20,7 @@ class FRAMEWORK_EXPORT_EXPORT DynamicLibrary {
   inline const char* GetPath(void) const { return path_.c_str(); }
 
   virtual bool Load(void);
-  virtual void UnLoad(void);
+  virtual bool Unload(void);
 
  protected:
   std::string name_;
@@ -26,8 +28,8 @@ class FRAMEWORK_EXPORT_EXPORT DynamicLibrary {
   HMODULE dll_;
 };
 
-typedef std::vector<DynamicLibrary*> DynamicLibrarys;
-class FRAMEWORK_EXPORT_EXPORT DynamicLibraryManager {
+using DynamicLibrarys = std::vector<DynamicLibrary*> ;
+class FRAMEWORK_EXPORT DynamicLibraryManager {
  public:
   virtual ~DynamicLibraryManager(void);
 
@@ -37,7 +39,7 @@ class FRAMEWORK_EXPORT_EXPORT DynamicLibraryManager {
 
  public:
   DynamicLibrary* LoadDynamicLibrary(const char* name, const char* path);
-  void UnLoadDynamicLibrary(const char* name);
+  void UnloadDynamicLibrary(const char* name);
 
  protected:
   DynamicLibrarys dynamic_librarys;

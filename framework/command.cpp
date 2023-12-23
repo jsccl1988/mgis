@@ -1,6 +1,7 @@
 #include "framework/command.h"
 
 #include <algorithm>
+#include <vector>
 
 #include "base/logging.h"
 
@@ -10,7 +11,7 @@ Command::Command(CommandReceiver* receiver, bool auto_delete_receiver)
 
 Command::~Command(void) {
   if (auto_delete_receiver_) {
-    delete receiver_
+    delete receiver_;
   }
 }
 
@@ -43,7 +44,7 @@ Command& Command::operator=(const Command& rhs) { return *this; }
 // Command
 MacroCommand::MacroCommand() : Command(NULL, false) {}
 MacroCommand::~MacroCommand() {
-  vector<Command*>::iterator iter = commands_.begin();
+  std::vector<Command*>::iterator iter = commands_.begin();
 
   while (iter != commands_.end()) {
     if (*iter) {
@@ -57,7 +58,7 @@ MacroCommand::~MacroCommand() {
 }
 
 bool MacroCommand::Execute() {
-  vector<Command*>::iterator iter = commands_.begin();
+  std::vector<Command*>::iterator iter = commands_.begin();
 
   while (iter != commands_.end()) {
     if (!(*iter)->Execute()) {
@@ -71,7 +72,7 @@ bool MacroCommand::Execute() {
 }
 
 bool MacroCommand::UnExecute() {
-  vector<Command*>::iterator iter = commands_.begin();
+  std::vector<Command*>::iterator iter = commands_.begin();
 
   while (iter != commands_.end()) {
     if (!(*iter)->UnExecute()) {

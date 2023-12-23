@@ -7,7 +7,9 @@ cmake("glog") {
     "$root_out_dir/glog/bin/glog.dll",
     "$root_out_dir/glog/lib/glog.lib",
   ]
-  cmake_options = ["BUILD_SHARED_LIBS=OFF"]
+  cmake_options = [
+    "BUILD_SHARED_LIBS=OFF",
+  ]
 }
 
 cmake("gbenchmark") {
@@ -16,7 +18,10 @@ cmake("gbenchmark") {
     "$root_out_dir/gbenchmark/bin/googlebenchmark.dll",
     "$root_out_dir/gbenchmark/lib/googlebenchmark.lib",
   ]
-  cmake_options = ["BENCHMARK_ENABLE_TESTING=OFF"]
+  cmake_options = [
+    "BUILD_SHARED_LIBS=OFF",
+    "BENCHMARK_ENABLE_TESTING=OFF",
+  ]
 }
 
 cmake("gtest") {
@@ -24,6 +29,10 @@ cmake("gtest") {
   cmake_outputs = [
     "$root_out_dir/gtest/bin/googletest.dll",
     "$root_out_dir/gtest/lib/googletest.lib",
+  ]
+  cmake_options = [
+    "BUILD_SHARED_LIBS=OFF",
+    "BENCHMARK_ENABLE_TESTING=ON",
   ]
 }
 
@@ -35,8 +44,8 @@ cmake("geos") {
   ]
 
   cmake_options = [
-    "USE_UNSTABLE_GEOS_CPP_API=1",
     "BUILD_SHARED_LIBS=ON",
+    "USE_UNSTABLE_GEOS_CPP_API=1",
   ]
 }
 
@@ -52,6 +61,10 @@ cmake("sqlite3") {
   cmake_outputs = [
     "$root_out_dir/sqlite3/bin/sqlite3.exe",
     "$root_out_dir/sqlite3/lib/sqlite3.lib",
+  ]
+
+  cmake_options = [
+    "BUILD_SHARED_LIBS=OFF",
   ]
 }
 
@@ -98,6 +111,7 @@ cmake("gdal") {
   proj_install = rebase_path("$root_out_dir/PROJ")
   cmake_options = [
     "BUILD_SHARED_LIBS=ON",
+    "BUILD_TESTING=OFF",
     "GDAL_BUILD_OPTIONAL_DRIVERS=OFF",
     "OGR_BUILD_OPTIONAL_DRIVERS=OFF",
     "GDAL_USE_INTERNAL_LIBS=ON",
@@ -118,10 +132,12 @@ cmake("libspatialindex") {
   ]
 }
 
-cmake("spatial") {
-  cmake_root_dir = "//third_party/spatial"
+cmake("libspatialite") {
+  cmake_root_dir = "//third_party/libspatialite"
   cmake_outputs = [
-    "$root_out_dir/spatial/include",
+    "$root_out_dir/libspatialite/include",
+    "$root_out_dir/libspatialite/lib",
+    "$root_out_dir/libspatialite/bin",
   ]
 
   cmake_options = [
@@ -140,6 +156,20 @@ cmake("SpatiaLiteCpp") {
   cmake_options = [
     "BUILD_SHARED_LIBS=ON",
     "spatialite_dir_inc=$spatialite_install/include",
-    "spatialite_dir_lib=$spatialite_install/lib/proj.lib",
+    "spatialite_dir_lib=$spatialite_install/lib",
+  ]
+}
+
+group("all") {
+  deps = [
+    ":cpp-httplib",
+    ":sqlite3",
+    ":SQLiteCpp",
+    ":geos",
+    ":PROJ",
+    ":gdal",
+    ":libspatialindex",
+    ":libspatialite",
+    ":SpatiaLiteCpp",
   ]
 }

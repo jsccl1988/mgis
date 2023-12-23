@@ -1,14 +1,17 @@
 #ifndef FRAMEWORK_EXPORT_LISTENER_H
 #define FRAMEWORK_EXPORT_LISTENER_H
 
+#include <map>
 #include <string>
+#include <vector>
 
 #include "framework/framework.h"
-#include "framework/core_export.h"
+#include "framework/framework_export.h"
 #include "framework/message.h"
 
+
 namespace framework {
-class FRAMEWORK_EXPORT_EXPORT Listener {
+class FRAMEWORK_EXPORT Listener {
  public:
   Listener(void);
   virtual ~Listener(void);
@@ -29,7 +32,7 @@ class FRAMEWORK_EXPORT_EXPORT Listener {
   void SetName(const char* name);
 
   bool AppendFuncItems(const char* function, long message,
-                       long lStyle = FIM_2DVIEW | FIM_3DVIEW);
+                       long style = FIM_2DVIEW | FIM_3DVIEW);
   function_items GetFuncItems(FuncItemStyle style);
 
   Messages GetMessages(void) { return messages_; }
@@ -55,10 +58,10 @@ class FRAMEWORK_EXPORT_EXPORT Listener {
   Messages messages_;
 };
 
-typedef std::vector<Listener*> Listeners;
-typedef std::map<std::string, Listener> Name2Listener;
+using Listeners = std::vector<Listener*> ;
+using Name2Listener = std::map<std::string, Listener> ;
 
-class FRAMEWORK_EXPORT_EXPORT ListenerManager {
+class FRAMEWORK_EXPORT ListenerManager {
  public:
   virtual ~ListenerManager(void);
 
@@ -93,5 +96,11 @@ class FRAMEWORK_EXPORT_EXPORT ListenerManager {
   ListenerManager(void);
   static ListenerManager* singleton_;
 };
+
+long PostListenerMessage(Listener* listener, long message,
+                         ListenerMessage& param) {
+  ListenerManager* listener_manager = ListenerManager::GetSingletonPtr();
+  return listener_manager->Notify(listener, message, param);
+}
 }  // namespace framework
 #endif  // FRAMEWORK_EXPORT_LISTENER_H

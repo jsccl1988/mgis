@@ -124,11 +124,6 @@ config("crt_link") {
         "libcpmtd.lib",
       ]
       if (vs_version >= 140) {
-        ldflags += [
-           "/NODEFAULTLIB:libvcruntimed.lib",
-           "/NODEFAULTLIB:libucrtd.lib",
-        ]
-
         libs += [
           "libvcruntimed.lib",
           "libucrtd.lib",
@@ -140,11 +135,6 @@ config("crt_link") {
         "libcpmt.lib",
       ]
       if (vs_version >= 140) {
-        ldflags += [
-           "/NODEFAULTLIB:libvcruntime.lib",
-           "/NODEFAULTLIB:libucrt.lib",
-        ]
-
         libs += [
           "libvcruntime.lib",
           "libucrt.lib",

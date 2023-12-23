@@ -16,13 +16,13 @@ RenderBuffer::~RenderBuffer(void) {
 }
 
 //////////////////////////////////////////////////////////////////////////
-inline long RenderBuffer::SetWnd(HWND hWnd) {
+inline long RenderBuffer::SetHWND(HWND hWnd) {
   if (!m_bOnwerBuf) return ERR_FAILURE;
   m_hWnd = hWnd;
   return ERR_NONE;
 }
 
-long RenderBuffer::SetBufSize(int cx, int cy) {
+long RenderBuffer::SetSize(int cx, int cy) {
   if (!m_bOnwerBuf || cx < 1 || cy < 1) return ERR_FAILURE;
 
   if (m_hPaintBuf) {
@@ -31,29 +31,29 @@ long RenderBuffer::SetBufSize(int cx, int cy) {
   }
 
   HDC hDC = GetDC(m_hWnd);
-  m_nBufWidth = cx;
-  m_nBufHeight = cy;
-  m_hPaintBuf = CreateCompatibleBitmap(hDC, m_nBufWidth, m_nBufHeight);
+  m_nWidth = cx;
+  m_nHeight = cy;
+  m_hPaintBuf = CreateCompatibleBitmap(hDC, m_nWidth, m_nHeight);
 
   if (NULL == m_hPaintBuf) return ERR_FAILURE;
 
-  ClearBuf(0, 0, m_nBufWidth, m_nBufHeight);
+  ClearBuf(0, 0, m_nWidth, m_nHeight);
 
   ::ReleaseDC(m_hWnd, hDC);
 
   return ERR_NONE;
 }
 
-long RenderBuffer::ShareBuf(RenderBuffer &rbSrc) {
+long RenderBuffer::ShareBuffer(RenderBuffer &rbSrc) {
   if (m_bOnwerBuf && m_hPaintBuf) {
     DeleteObject(m_hPaintBuf);
     m_hPaintBuf = NULL;
   }
 
-  this->SetWnd(rbSrc.GetWnd());
-  this->m_nBufHeight = rbSrc.GetBufHeight();
-  this->m_nBufWidth = rbSrc.GetBufWidth();
-  this->m_hPaintBuf = rbSrc.GetBuf();
+  this->SetHWND(rbSrc.GetHWND());
+  this->m_nHeight = rbSrc.GetHeight();
+  this->m_nWidth = rbSrc.GetWidth();
+  this->m_hPaintBuf = rbSrc.GetBuffer();
 
   m_bOnwerBuf = false;
 
@@ -89,7 +89,7 @@ long RenderBuffer::ClearBuf(int x, int y, int w, int h, COLORREF clr) {
   return ERR_NONE;
 }
 
-long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
+long RenderBuffer::Swap(int destOrgx, int destOrgy, int destW, int destH,
                            int srcOrgx, int srcOrgy, int op) {
   if (m_hPaintBuf == NULL) return ERR_FAILURE;
 
@@ -108,7 +108,7 @@ long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
     return ERR_FAILURE;
 }
 
-long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
+long RenderBuffer::Swap(int destOrgx, int destOrgy, int destW, int destH,
                            int srcOrgx, int srcOrgy, int srcW, int srcH,
                            eSwapType type, int op, COLORREF clr) {
   if (m_hPaintBuf == NULL) return ERR_FAILURE;
@@ -137,7 +137,7 @@ long RenderBuffer::SwapBuf(int destOrgx, int destOrgy, int destW, int destH,
     return ERR_FAILURE;
 }
 
-long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
+long RenderBuffer::Swap(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
                            int destW, int destH, int srcOrgx, int srcOrgy,
                            int op) {
   if (m_hPaintBuf == NULL) return ERR_FAILURE;
@@ -157,7 +157,7 @@ long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
     return ERR_FAILURE;
 }
 
-long RenderBuffer::SwapBuf(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
+long RenderBuffer::Swap(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
                            int destW, int destH, int srcOrgx, int srcOrgy,
                            int srcW, int srcH, eSwapType type, int op,
                            COLORREF clr) {
@@ -193,11 +193,11 @@ HDC RenderBuffer::PrepareDC(bool bClip) {
   m_hPaintDC = CreateCompatibleDC(hDC);
   ::ReleaseDC(m_hWnd, hDC);
 
-  m_hOldPaintBuf = (HBITMAP)SelectObject(m_hPaintDC, m_hPaintBuf);
+  m_hOldPaintBuffer = (HBITMAP)SelectObject(m_hPaintDC, m_hPaintBuf);
 
   if (bClip) {
     RECT rtClip;
-    HRGN hNewRgn = ::CreateRectRgn(0, 0, m_nBufWidth, m_nBufHeight);
+    HRGN hNewRgn = ::CreateRectRgn(0, 0, m_nWidth, m_nHeight);
     ::GetClipBox(m_hPaintDC, &rtClip);
     ::SelectClipRgn(m_hPaintDC, hNewRgn);
     ::DeleteObject(hNewRgn);
@@ -208,7 +208,7 @@ HDC RenderBuffer::PrepareDC(bool bClip) {
 
 long RenderBuffer::EndDC(void) {
   if (m_hPaintDC) {
-    SelectObject(m_hPaintDC, m_hOldPaintBuf);
+    SelectObject(m_hPaintDC, m_hOldPaintBuffer);
     DeleteDC(m_hPaintDC);
 
     m_hPaintDC = NULL;
@@ -225,18 +225,18 @@ RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
     m_hPaintBuf = NULL;
   }
 
-  this->SetWnd(other.GetWnd());
-  this->SetBufSize(other.GetBufWidth(), other.GetBufHeight());
+  this->SetHWND(other.GetHWND());
+  this->SetSize(other.GetWidth(), other.GetHeight());
   return *this;
 }
 
 //////////////////////////////////////////////////////////////////////////
-long RenderBuffer::DrawImage(const char *szImageBuf, int nImageBufSize,
+long RenderBuffer::DrawImage(const char *szImageBuffer, int nImageBufferSize,
                              long lCodeType, long x, long y, long cx, long cy) {
-  if (NULL == szImageBuf || 0 == nImageBufSize) return ERR_INVALID_PARAM;
+  if (NULL == szImageBuffer || 0 == nImageBufferSize) return ERR_INVALID_PARAM;
 
   CxImage tmpImage;
-  tmpImage.Decode((BYTE *)szImageBuf, nImageBufSize, lCodeType);
+  tmpImage.Decode((BYTE *)szImageBuffer, nImageBufferSize, lCodeType);
 
   HDC hDC = PrepareDC();
   tmpImage.Draw(hDC, x, y, cx, cy);
@@ -245,13 +245,13 @@ long RenderBuffer::DrawImage(const char *szImageBuf, int nImageBufSize,
   return ERR_NONE;
 }
 
-long RenderBuffer::StrethImage(const char *szImageBuf, int nImageBufSize,
+long RenderBuffer::StrethImage(const char *szImageBuffer, int nImageBufferSize,
                                long lCodeType, long xoffset, long yoffset,
                                long xsize, long ysize, DWORD dwRop) {
-  if (NULL == szImageBuf || 0 == nImageBufSize) return ERR_INVALID_PARAM;
+  if (NULL == szImageBuffer || 0 == nImageBufferSize) return ERR_INVALID_PARAM;
 
   CxImage tmpImage;
-  tmpImage.Decode((BYTE *)szImageBuf, nImageBufSize, lCodeType);
+  tmpImage.Decode((BYTE *)szImageBuffer, nImageBufferSize, lCodeType);
 
   HDC hDC = PrepareDC();
   tmpImage.Stretch(hDC, xoffset, yoffset, xsize, ysize, dwRop);
@@ -265,9 +265,9 @@ long RenderBuffer::Save2Image(const char *szFilePath, bool bBgTransparent) {
   return lRtn;
 }
 
-long RenderBuffer::Save2ImageBuf(char *&szImageBuf, long &lImageBufSize,
+long RenderBuffer::Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize,
                                  long lCodeType, bool bBgTransparent) {
-  long lRtn = Save2ImageBuf(m_hPaintBuf, szImageBuf, lImageBufSize, lCodeType,
+  long lRtn = Save2ImageBuffer(m_hPaintBuf, szImageBuffer, lImageBufferSize, lCodeType,
                             bBgTransparent);
   return lRtn;
 }
@@ -301,10 +301,10 @@ long RenderBuffer::Save2Image(HBITMAP hBitMap, const char *szFilePath,
   return ERR_FAILURE;
 }
 
-long RenderBuffer::Save2ImageBuf(HBITMAP hBitMap, char *&szImageBuf,
-                                 long &lImageBufSize, long lCodeType,
+long RenderBuffer::Save2ImageBuffer(HBITMAP hBitMap, char *&szImageBuffer,
+                                 long &lImageBufferSize, long lCodeType,
                                  bool bBgTransparent) {
-  if (hBitMap == NULL || szImageBuf != NULL) return ERR_FAILURE;
+  if (hBitMap == NULL || szImageBuffer != NULL) return ERR_FAILURE;
 
   BYTE *pImageBuf = NULL;
   long lSize = 0;
@@ -323,8 +323,8 @@ long RenderBuffer::Save2ImageBuf(HBITMAP hBitMap, char *&szImageBuf,
     }
 
     if (image.Encode(pImageBuf, lSize, lCodeType)) {
-      szImageBuf = (char *)pImageBuf;
-      lImageBufSize = lSize;
+      szImageBuffer = (char *)pImageBuf;
+      lImageBufferSize = lSize;
 
       return ERR_NONE;
     }
@@ -335,8 +335,8 @@ long RenderBuffer::Save2ImageBuf(HBITMAP hBitMap, char *&szImageBuf,
   return ERR_FAILURE;
 }
 
-long RenderBuffer::FreeImageBuf(char *&szImageBuf) {
-  SAFE_DELETE_A(szImageBuf);
+long RenderBuffer::FreeImageBuffer(char *&szImageBuffer) {
+  SAFE_DELETE_A(szImageBuffer);
 
   return ERR_NONE;
 }

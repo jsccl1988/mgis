@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "framework/framework.h"
-#include "framework/core_export.h"
+#include "framework/framework_export.h"
 
 namespace framework {
-class FRAMEWORK_EXPORT_EXPORT CommandReceiver {
+class FRAMEWORK_EXPORT CommandReceiver {
  public:
   CommandReceiver() {}
   virtual ~CommandReceiver() {}
@@ -17,7 +17,7 @@ class FRAMEWORK_EXPORT_EXPORT CommandReceiver {
   virtual bool Action(bool is_undo) = 0;
 };
 
-class FRAMEWORK_EXPORT_EXPORT Command {
+class FRAMEWORK_EXPORT Command {
  public:
   Command(CommandReceiver* receiver, bool auto_delete_receiver = true);
   virtual ~Command(void);
@@ -38,7 +38,7 @@ class FRAMEWORK_EXPORT_EXPORT Command {
   bool auto_delete_receiver_;
 };
 
-class FRAMEWORK_EXPORT_EXPORT MacroCommand : public Command {
+class FRAMEWORK_EXPORT MacroCommand : public Command {
  public:
   MacroCommand();
   ~MacroCommand();
@@ -57,7 +57,7 @@ class FRAMEWORK_EXPORT_EXPORT MacroCommand : public Command {
   std::vector<Command*> commands_;
 };
 
-class FRAMEWORK_EXPORT_EXPORT CommandManager {
+class FRAMEWORK_EXPORT CommandManager {
  public:
   CommandManager(void);
   virtual ~CommandManager();

@@ -63,8 +63,8 @@ int RenderDeviceGDI::Init(HWND hWnd, const char *logname) {
 
   m_strLogName = logname;
 
-  m_smtRenderBuf.SetWnd(m_hWnd);
-  m_smtMapRenderBuf.SetWnd(m_hWnd);
+  m_smtRenderBuf.SetHWND(m_hWnd);
+  m_smtMapRenderBuf.SetHWND(m_hWnd);
 
   return ERR_NONE;
 }
@@ -129,15 +129,15 @@ int RenderDeviceGDI::Resize(int orgx, int orgy, int cx, int cy) {
 
   m_fblc = (xblc > yblc) ? yblc : xblc;
 
-  if (ERR_NONE == m_smtRenderBuf.SetBufSize(m_Viewport.m_fVWidth,
+  if (ERR_NONE == m_smtRenderBuf.SetSize(m_Viewport.m_fVWidth,
                                                 m_Viewport.m_fVHeight) &&
-      ERR_NONE == m_smtMapRenderBuf.SetBufSize(m_Viewport.m_fVWidth,
+      ERR_NONE == m_smtMapRenderBuf.SetSize(m_Viewport.m_fVWidth,
                                                    m_Viewport.m_fVHeight)) {
     if (ERR_NONE ==
-            m_smtRenderBuf.SwapBuf(m_Viewport.m_fVOX, m_Viewport.m_fVOY,
+            m_smtRenderBuf.Swap(m_Viewport.m_fVOX, m_Viewport.m_fVOY,
                                    m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
                                    m_Viewport.m_fVOX, m_Viewport.m_fVOY) &&
-        ERR_NONE == m_smtMapRenderBuf.SwapBuf(
+        ERR_NONE == m_smtMapRenderBuf.Swap(
                             m_Viewport.m_fVOX, m_Viewport.m_fVOY,
                             m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
                             m_Viewport.m_fVOX, m_Viewport.m_fVOY)) {
@@ -259,14 +259,14 @@ int RenderDeviceGDI::Refresh() {
       m_Viewport.m_fVOX, m_Viewport.m_fVOY, m_Viewport.m_fVWidth,
       m_Viewport.m_fVWidth /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
 
-  m_smtMapRenderBuf.SwapBuf(m_smtRenderBuf, m_virViewport1.m_fVOX,
+  m_smtMapRenderBuf.Swap(m_smtRenderBuf, m_virViewport1.m_fVOX,
                             m_virViewport1.m_fVOY, m_virViewport1.m_fVWidth,
                             m_virViewport1.m_fVHeight, m_virViewport2.m_fVOX,
                             m_virViewport2.m_fVOY, m_virViewport2.m_fVWidth,
                             m_virViewport2.m_fVHeight, BLT_TRANSPARENT,
                             SRCCOPY /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
 
-  m_smtRenderBuf.SwapBuf(m_curDrawingOrg.x, m_curDrawingOrg.y,
+  m_smtRenderBuf.Swap(m_curDrawingOrg.x, m_curDrawingOrg.y,
                          m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
                          m_Viewport.m_fVOX, m_Viewport.m_fVOY);
 
@@ -566,14 +566,14 @@ int RenderDeviceGDI::RenderMap(void) {
       m_Viewport.m_fVOX, m_Viewport.m_fVOY, m_Viewport.m_fVWidth,
       m_Viewport.m_fVHeight /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
 
-  m_smtMapRenderBuf.SwapBuf(m_smtRenderBuf, m_virViewport1.m_fVOX,
+  m_smtMapRenderBuf.Swap(m_smtRenderBuf, m_virViewport1.m_fVOX,
                             m_virViewport1.m_fVOY, m_virViewport1.m_fVWidth,
                             m_virViewport1.m_fVHeight, m_virViewport2.m_fVOX,
                             m_virViewport2.m_fVOY, m_virViewport2.m_fVWidth,
                             m_virViewport2.m_fVHeight, BLT_TRANSPARENT,
                             SRCCOPY /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
 
-  m_smtRenderBuf.SwapBuf(m_curDrawingOrg.x, m_curDrawingOrg.y,
+  m_smtRenderBuf.Swap(m_curDrawingOrg.x, m_curDrawingOrg.y,
                          m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
                          m_Viewport.m_fVOX, m_Viewport.m_fVOY);
 
@@ -1696,7 +1696,7 @@ int RenderDeviceGDI::DrawText(const char *szAnno, float fangel, float fCHeight,
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawImage(const char *szImageBuf, int nImageBufSize,
+int RenderDeviceGDI::DrawImage(const char *szImageBuffer, int nImageBufferSize,
                                const fRect &frect, long lCodeType,
                                eRDBufferLayer eMRDBufLyr) {
   long lRtn = ERR_FAILURE;
@@ -1706,7 +1706,7 @@ int RenderDeviceGDI::DrawImage(const char *szImageBuf, int nImageBufSize,
 
   switch (eMRDBufLyr) {
     case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.DrawImage(szImageBuf, nImageBufSize, lCodeType,
+      lRtn = m_smtMapRenderBuf.DrawImage(szImageBuffer, nImageBufferSize, lCodeType,
                                          lrt.lb.x, lrt.rt.y, lrt.Width(),
                                          lrt.Height());
     } break;
@@ -1715,7 +1715,7 @@ int RenderDeviceGDI::DrawImage(const char *szImageBuf, int nImageBufSize,
   return lRtn;
 }
 
-int RenderDeviceGDI::StrethImage(const char *szImageBuf, int nImageBufSize,
+int RenderDeviceGDI::StrethImage(const char *szImageBuffer, int nImageBufferSize,
                                  const fRect &frect, long lCodeType,
                                  eRDBufferLayer eMRDBufLyr) {
   long lRtn = ERR_FAILURE;
@@ -1726,7 +1726,7 @@ int RenderDeviceGDI::StrethImage(const char *szImageBuf, int nImageBufSize,
 
   switch (eMRDBufLyr) {
     case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.StrethImage(szImageBuf, nImageBufSize, lCodeType,
+      lRtn = m_smtMapRenderBuf.StrethImage(szImageBuffer, nImageBufferSize, lCodeType,
                                            lrt.lb.x, lrt.rt.y, lrt.Width(),
                                            lrt.Height());
     } break;
@@ -1748,14 +1748,14 @@ int RenderDeviceGDI::SaveImage(const char *szFilePath,
   return lRtn;
 }
 
-int RenderDeviceGDI::Save2ImageBuf(char *&szImageBuf, long &lImageBufSize,
+int RenderDeviceGDI::Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize,
                                    long lCodeType, eRDBufferLayer eMRDBufLyr,
                                    bool bBgTransparent) {
   long lRtn = ERR_FAILURE;
 
   switch (eMRDBufLyr) {
     case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.Save2ImageBuf(szImageBuf, lImageBufSize,
+      lRtn = m_smtMapRenderBuf.Save2ImageBuffer(szImageBuffer, lImageBufferSize,
                                              lCodeType, bBgTransparent);
     } break;
   }
@@ -1763,7 +1763,7 @@ int RenderDeviceGDI::Save2ImageBuf(char *&szImageBuf, long &lImageBufSize,
   return lRtn;
 }
 
-int RenderDeviceGDI::FreeImageBuf(char *&szImageBuf) {
-  return RenderBuf::FreeImageBuf(szImageBuf);
+int RenderDeviceGDI::FreeImageBuffer(char *&szImageBuffer) {
+  return RenderBuf::FreeImageBuffer(szImageBuffer);
 }
 }  // namespace gfx2d

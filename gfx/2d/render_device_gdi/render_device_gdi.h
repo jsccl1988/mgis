@@ -90,18 +90,18 @@ class RenderDeviceGDI : public RenderDevice {
   int DrawLine(const fPoint &ptA, const fPoint &ptB, bool bDP = false);
   int DrawText(const char *szAnno, float fangel, float fCHeight, float fCWidth,
                float fCSpace, const fPoint &point, bool bDP = false);
-  int DrawImage(const char *szImageBuf, int nImageBufSize, const fRect &frect,
+  int DrawImage(const char *szImageBuffer, int nImageBufferSize, const fRect &frect,
                 long lCodeType, eRDBufferLayer eMRDBufLyr = MRD_BL_MAP);
-  int StrethImage(const char *szImageBuf, int nImageBufSize, const fRect &frect,
+  int StrethImage(const char *szImageBuffer, int nImageBufferSize, const fRect &frect,
                   long lCodeType, eRDBufferLayer eMRDBufLyr = MRD_BL_MAP);
 
  public:
   int SaveImage(const char *szFilePath, eRDBufferLayer eMRDBufLyr = MRD_BL_MAP,
                 bool bBgTransparent = false);
-  int Save2ImageBuf(char *&szImageBuf, long &lImageBufSize, long lCodeType,
+  int Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize, long lCodeType,
                     eRDBufferLayer eMRDBufLyr = MRD_BL_MAP,
                     bool bBgTransparent = false);
-  int FreeImageBuf(char *&szImageBuf);
+  int FreeImageBuffer(char *&szImageBuffer);
 
  private:
   int DrawTinLines(const Tin *pTin);

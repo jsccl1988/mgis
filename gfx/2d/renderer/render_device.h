@@ -116,10 +116,10 @@ class RenderDevice {
   virtual int DrawText(const char *szAnno, float fangel, float fCHeight,
                        float fCWidth, float fCSpace, const fPoint &point,
                        bool bDP = false) = 0;
-  virtual int DrawImage(const char *szImageBuf, int nImageBufSize,
+  virtual int DrawImage(const char *szImageBuffer, int nImageBufferSize,
                         const fRect &frect, long lCodeType,
                         eRDBufferLayer eMRDBufLyr = MRD_BL_MAP) = 0;
-  virtual int StrethImage(const char *szImageBuf, int nImageBufSize,
+  virtual int StrethImage(const char *szImageBuffer, int nImageBufferSize,
                           const fRect &frect, long lCodeType,
                           eRDBufferLayer eMRDBufLyr = MRD_BL_MAP) = 0;
 
@@ -127,11 +127,11 @@ class RenderDevice {
   virtual int SaveImage(const char *szFilePath,
                         eRDBufferLayer eMRDBufLyr = MRD_BL_MAP,
                         bool bBgTransparent = false) = 0;
-  virtual int Save2ImageBuf(char *&szImageBuf, long &lImageBufSize,
+  virtual int Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize,
                             long lCodeType,
                             eRDBufferLayer eMRDBufLyr = MRD_BL_MAP,
                             bool bBgTransparent = false) = 0;
-  virtual int FreeImageBuf(char *&szImageBuf) = 0;
+  virtual int FreeImageBuffer(char *&szImageBuffer) = 0;
 
  protected:
   HINSTANCE m_hInst;

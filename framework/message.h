@@ -42,8 +42,8 @@ enum FuncItemStyle {
 
 struct ListenerMessage {
   HWND source_window{nullptr};
-  WPARAM wparam{nullptr};
-  LPARAM lparam{nullptr};
+  WPARAM wparam{NULL};
+  LPARAM lparam{NULL};
   void *to_follow{nullptr};
   bool modify{false};
 
@@ -78,11 +78,4 @@ using Message2PtrPair = std::pair<long, void *>;
         framework::ListenerManager::GetSingletonPtr();       \
     listener_manager->Notify(listener, message, param); \
   }
-
-long PostListenerMessage(Listener *listener, long message,
-                         ListenerMessage &param) {
-  ListenerManager *listener_manager = ListenerManager::GetSingletonPtr();
-  return listener_manager->Notify(listener, message, param);
-}
-
 #endif  // FRAMEWORK_EXPORT_MESSAGE_H

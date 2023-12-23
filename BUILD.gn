@@ -3,9 +3,7 @@
 
 group("all") {
   deps = [
-    "//base:base",
-    "//core:core",
-    # "//framework:framework",
+    "//third_party:all",
   ]
 }
 
@@ -14,5 +12,6 @@ group("test") {
   deps = [
     "//base:base_test",
     "//core:core_test",
+    # "//framework:framework_test",
   ]
 }

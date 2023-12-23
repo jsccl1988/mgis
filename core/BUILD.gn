@@ -50,8 +50,38 @@ static_library("core") {
     "//third_party:PROJ",
     "//third_party:gdal",
     "//third_party:libspatialindex",
-    "//third_party:spatial",
     "//third_party:SpatiaLiteCpp",
+  ]
+}
+
+executable("gdal_ogrsf") {
+  sources = [
+    "sdb/ogr/commonutils.cpp",
+    "sdb/ogr/test_ogrsf.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/gdal/include",
+  ]
+
+  deps = [
+    ":core",
+  ]
+}
+
+executable("gdal_reprojmulti") {
+  sources = [
+    "sdb/ogr/test_reprojmulti.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/gdal/include",
+  ]
+
+  deps = [
+    ":core",
   ]
 }
 
@@ -76,6 +106,17 @@ test("core_test") {
     "$root_out_dir/geos/include",
     "$root_out_dir/PROJ/include",
     "$root_out_dir/gdal/include",
+  ]
+
+  libs = [
+    "$root_out_dir/sqlite3/lib/sqlite3.lib",
+    "$root_out_dir/SQLiteCpp/lib/SQLiteCpp.lib",
+    "$root_out_dir/geos/lib/geos.lib",
+    "$root_out_dir/PROJ/lib/proj.lib",
+    "$root_out_dir/gdal/lib/gdal.lib",
+    "$root_out_dir/libspatialindex/lib/spatialindex-64.lib",
+    "$root_out_dir/libspatialite/lib/spatialite_i.lib",
+    "$root_out_dir/SpatiaLiteCpp/lib/SpatiaLiteCpp.lib",
   ]
 
   deps = [

@@ -19,7 +19,7 @@ template("test") {
     ]
 
     if (is_win) {
-      libs = [
+      libs += [
         "$root_out_dir/glog/lib/glog.lib",
         "$root_out_dir/gbenchmark/lib/benchmark.lib",
         "$root_out_dir/gbenchmark/lib/benchmark_main.lib",
@@ -29,7 +29,7 @@ template("test") {
         "$root_out_dir/gtest/lib/gtest_main.lib",
       ]
     } else {
-      libs = [
+      libs += [
         "/usr/lib/x86_64-linux-gnu/libgflags.so",
         "/usr/lib/x86_64-linux-gnu/libunwind.so",
         "$root_out_dir/glog/lib/libglog.a",

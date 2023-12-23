@@ -9,14 +9,14 @@ DynamicLibrary::DynamicLibrary(const char* name, const char* path) {
   dll_ = nullptr;
 }
 
-DynamicLibrary::~DynamicLibrary() { UnLoad(); }
+DynamicLibrary::~DynamicLibrary() { Unload(); }
 
 bool DynamicLibrary::Load() {
   LOG(INFO) << __FUNCTION__ << "loading" << name_;
 
-  int path_length = path_.length()+ MAX_PATH;
-  char* path = new char[path_length];
-  sprintf_s(path, path_length, "%s%s", path_.c_str(), name_.c_str());
+  size_t path_length = path_.length()+ MAX_PATH;
+  auto path = std::make_unique<char[]>(path_length);
+  sprintf_s(path.get(), path_length, "%s%s", path_.c_str(), name_.c_str());
   // dll_ = ::LoadLibrary(path);
   if (!dll_) {
     std::string err = "   Loading ";
@@ -26,40 +26,28 @@ bool DynamicLibrary::Load() {
     return false;
   }
 
-  SAFE_DELETE_A(path);
-
   return true;
 }
 
-void DynamicLibrary::UnLoad() {
+bool DynamicLibrary::Unload() {
   if (dll_ != NULL) {
     LOG(INFO) << __FUNCTION__ << "unloading" << name_;
     ::FreeLibrary(dll_);
     dll_ = NULL;
   }
+
+  return true;
 }
 
-DynamicLibraryManager* DynamicLibraryManager::singleton_ = NULL;
-DynamicLibraryManager::DynamicLibraryManager(void) {}
 DynamicLibraryManager::~DynamicLibraryManager(void) {
   for (DynamicLibrarys::iterator it = dynamic_librarys.begin();
        it != dynamic_librarys.end(); ++it) {
-    (*it)->UnLoad();
+    (*it)->Unload();
     SAFE_DELETE(*it);
   }
 
   dynamic_librarys.clear();
 }
-
-DynamicLibraryManager* DynamicLibraryManager::GetSingletonPtr(void) {
-  if (singleton_ == NULL) {
-    singleton_ = new DynamicLibraryManager();
-  }
-  return singleton_;
-}
-
-void DynamicLibraryManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
-
 
 DynamicLibrary* DynamicLibraryManager::LoadDynamicLibrary(const char* name,
                                                           const char* path) {
@@ -82,11 +70,11 @@ DynamicLibrary* DynamicLibraryManager::LoadDynamicLibrary(const char* name,
   return pLib;
 }
 
-void DynamicLibraryManager::UnLoadDynamicLibrary(const char* name) {
+void DynamicLibraryManager::UnloadDynamicLibrary(const char* name) {
   DynamicLibrarys::iterator i = dynamic_librarys.begin();
   while (i != dynamic_librarys.end()) {
     if (strcmp((*i)->GetName(), name) == 0) {
-      (*i)->UnLoad();
+      (*i)->Unload();
       SAFE_DELETE(*i);
       dynamic_librarys.erase(i);
       break;
