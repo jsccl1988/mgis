@@ -32,6 +32,7 @@ executable("smartgis") {
   ]
 
   libs += [
+    "atls.lib",
     "$root_out_dir/glog/lib/glog.lib",
   ]
 
