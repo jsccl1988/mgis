@@ -4,8 +4,9 @@
 #ifndef CONTENT_PUBLIC_APP_TASK_RUNNER_H
 #define CONTENT_PUBLIC_APP_TASK_RUNNER_H
 
-#include "base/basic_types.h"
+#include "base/base_types.h"
 #include "base/memory/ref_counted.h"
+#include "base/memory/scoped_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "base/platform.h"
 
@@ -27,7 +28,7 @@ class Task : public base::RefCountedThreadSafe<Task> {
 class TaskRunner : public base::RefCountedThreadSafe<TaskRunner>,
                    public base::SupportsWeakPtr<TaskRunner> {
  public:
-  virtual int PostTask(Task* task, int64 delay = 0) = 0;
+  virtual int PostTask(Task* task, int64_t delay = 0) = 0;
 
  protected:
   friend class base::RefCountedThreadSafe<TaskRunner>;

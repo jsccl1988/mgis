@@ -7,7 +7,7 @@
 #include "base/memory/singleton.h"
 #include "base/third_party/chrome/atomicops.h"
 
-#define AUTO_MAP_LOCK() NAutoLock __l(&GetInstance()->lock_);
+#define AUTO_MAP_LOCK() AutoLock __l(&GetInstance()->lock_);
 #define AQUIRE_ACCESS()    \
   {                        \
     if (!AquireAccess()) { \

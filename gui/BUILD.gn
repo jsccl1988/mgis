@@ -13,15 +13,13 @@ executable("smartgis") {
       "app/main_runner.cpp",
       "base/path/base_paths_win.cpp",
       "base/thread/message_loop.cpp",
-      "base/thread/thread.cpp",
       "base/thread/thread_manager.cpp",
       "base/thread/thread.cpp",
-      "base/scoped_process_initializer.h",
       "base/command_line.cpp",
       "content_impl/app/task_runner_impl.cpp",
       "content_impl/delegate/map_box_delegate_impl.cpp",
       "content_impl/delegate/map_view_delegate_impl.cpp",
-      "content_impl/delegate/map_content_client_impl.cpp",
+      "content_impl/map_content_client_impl.cpp",
       "content_impl/map_content_factory.cpp",
       "content_impl/map_content_manager.cpp",
       "main.cpp",
@@ -29,31 +27,16 @@ executable("smartgis") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "third_party/wtl/",
+    "$root_out_dir/glog/include",
+    "//gui/third_party/wtl8.0/",
+  ]
+
+  libs += [
+    "$root_out_dir/glog/lib/glog.lib",
   ]
 
   deps = [
     "//base:base",
-}
-
-test("gui_test") {
-  defines = [
-    "NOMINMAX",
-  ]
-
-  sources = [
-    "gui_unittest.cpp",
-  ]
-
-  include_dirs += [
-    "$root_gen_dir/",
-  ]
-
-  libs = [
-    "$root_out_dir/sqlite3/lib/sqlite3.lib",
-  ]
-
-  deps = [
-    ":view",
+    "//third_party:glog",
   ]
 }

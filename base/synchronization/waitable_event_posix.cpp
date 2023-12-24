@@ -38,12 +38,12 @@ WaitableEvent::WaitableEvent(bool manual_reset, bool initially_signaled)
 WaitableEvent::~WaitableEvent() {}
 
 void WaitableEvent::Reset() {
-  base::NAutoLock locked(&kernel_->lock_);
+  base::AutoLock locked(&kernel_->lock_);
   kernel_->signaled_ = false;
 }
 
 void WaitableEvent::Signal() {
-  base::NAutoLock locked(&kernel_->lock_);
+  base::AutoLock locked(&kernel_->lock_);
 
   if (kernel_->signaled_) return;
 
@@ -58,7 +58,7 @@ void WaitableEvent::Signal() {
 }
 
 bool WaitableEvent::IsSignaled() {
-  base::NAutoLock locked(&(kernel_->lock_));
+  base::AutoLock locked(&(kernel_->lock_));
 
   const bool result = kernel_->signaled_;
   if (result && !kernel_->manual_reset_) kernel_->signaled_ = false;
@@ -77,7 +77,7 @@ class SyncWaiter : public WaitableEvent::Waiter {
   SyncWaiter() : fired_(false), signaling_event_(NULL), lock_(), cv_(&lock_) {}
 
   bool Fire(WaitableEvent* signaling_event) {
-    base::NAutoLock locked(&lock_);
+    base::AutoLock locked(&lock_);
 
     if (fired_) return false;
 

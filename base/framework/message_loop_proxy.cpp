@@ -27,21 +27,21 @@ bool MessageLoopProxy::PostNonNestableDelayedTask(const StdClosure& task,
 }
 
 bool MessageLoopProxy::BelongsToCurrentThread() const {
-  NAutoLock lock(&message_loop_lock_);
+  AutoLock lock(&message_loop_lock_);
   return (target_message_loop_ &&
           (MessageLoop::current() == target_message_loop_));
 }
 
 // MessageLoop::DestructionObserver implementation
 void MessageLoopProxy::WillDestroyCurrentMessageLoop() {
-  NAutoLock lock(&message_loop_lock_);
+  AutoLock lock(&message_loop_lock_);
   target_message_loop_ = nullptr;
 }
 
 void MessageLoopProxy::OnDestruct() const {
   bool delete_later = false;
   {
-    NAutoLock lock(&message_loop_lock_);
+    AutoLock lock(&message_loop_lock_);
     if (target_message_loop_ &&
         (MessageLoop::current() != target_message_loop_)) {
       target_message_loop_->PostNonNestableTask(
@@ -59,7 +59,7 @@ MessageLoopProxy::MessageLoopProxy()
 
 bool MessageLoopProxy::PostTaskHelper(const StdClosure& task, TimeDelta delay,
                                       bool nestable) {
-  NAutoLock lock(&message_loop_lock_);
+  AutoLock lock(&message_loop_lock_);
   if (target_message_loop_) {
     if (nestable) {
       if (delay == TimeDelta())

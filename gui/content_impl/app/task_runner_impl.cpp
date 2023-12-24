@@ -18,7 +18,7 @@ TaskRunnerImpl::TaskRunnerImpl() {}
 
 TaskRunnerImpl::~TaskRunnerImpl() {}
 
-int TaskRunnerImpl::PostTask(content::Task* task, int64 delay) {
+int TaskRunnerImpl::PostTask(content::Task* task, int64_t delay) {
   if (!task) return -1;
 
   ThreadManager::PostTask(ThreadManager::UI, std::bind(&OnRunTask, task),

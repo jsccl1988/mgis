@@ -11,22 +11,21 @@
 #include <queue>
 #include <string>
 
-#include "base/basic_types.h"
-#include "base/lock.h"
+#include "base/base_types.h"
 #include "base/platform.h"
+#include "base/synchronization/lock.h"
 #include "gui/base/thread/message_loop.h"
 #include "gui/base/thread/thread_local_pointer.h"
 #include "gui/base/thread/thread_name.h"
-
 
 namespace gui {
 class Thread {
  public:
   struct Options {
    public:
-    uint32 stack_size_;
+    uint32_t stack_size_;
     bool use_com_;
-    dword32 coinitex_flag_;
+    uint32_t coinitex_flag_;
 
     const char* thread_name_;
     bool couninitex_hack_;
@@ -34,12 +33,12 @@ class Thread {
     Options()
         : stack_size_(0),
           use_com_(false),
-          coinitex_flag_((dword32)-1),
+          coinitex_flag_((uint32_t)-1),
           thread_name_(NULL),
           couninitex_hack_(false) {}
 
-    Options(uint32 stack_size, bool use_com = false, dword32 coinitex_flag = -1,
-            LPCSTR thread_name = NULL)
+    Options(uint32_t stack_size, bool use_com = false,
+            uint32_t coinitex_flag = -1, LPCSTR thread_name = NULL)
         : stack_size_(stack_size),
           use_com_(use_com),
           coinitex_flag_(coinitex_flag),
@@ -83,7 +82,6 @@ class Thread {
 
  private:
   bool stopping_;
-
   StartupData* startup_data_;
 
   MessageLoop* message_loop_;

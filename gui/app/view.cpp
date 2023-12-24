@@ -1,17 +1,16 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#include "gui/browser_frame.h"
-#include "gui/browser_view.h"
+#include "gui/app/view.h"
 
+#include "gui/app/frame.h"
 
 namespace gui {
 View::View() {}
-
 View::~View() {}
 
 LRESULT View::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam,
-                            BOOL& bHandled) {
+                     BOOL& bHandled) {
   if (frame_) {
     frame_->Resize();
   }

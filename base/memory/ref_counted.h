@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The Baidu Authors.
+// Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
@@ -8,14 +8,13 @@
 #ifndef BASE_SMART_PTR_REF_COUNTED_H_
 #define BASE_SMART_PTR_REF_COUNTED_H_
 
+#include <algorithm>
 #include <cassert>
 #include <iosfwd>
 
-#include <algorithm>
-
-#include "base/build/build_config.h"
 #include "base/compiler_specific.h"
 #include "base/platform.h"
+#include "build/build_config.h"
 
 namespace base {
 
@@ -28,27 +27,27 @@ class RefCountedBase {
  protected:
   RefCountedBase()
       : ref_count_(0)
-  #ifdef _DEBUG
-      , in_dtor_(false)
-  #endif
-      {
+#ifdef _DEBUG
+        ,
+        in_dtor_(false)
+#endif
+  {
   }
 
   ~RefCountedBase() {
-  #ifdef _DEBUG
+#ifdef _DEBUG
     assert(in_dtor_);
-  #endif
+#endif
   }
-
 
   void AddRef() const {
     // TODO(maruel): Add back once it doesn't assert 500 times/sec.
     // Current thread books the critical section "AddRelease"
     // without release it.
     // DFAKE_SCOPED_LOCK_THREAD_LOCKED(add_release_);
-  #ifdef _DEBUG
+#ifdef _DEBUG
     assert(!in_dtor_);
-  #endif
+#endif
     ++ref_count_;
   }
 
@@ -58,13 +57,13 @@ class RefCountedBase {
     // Current thread books the critical section "AddRelease"
     // without release it.
     // DFAKE_SCOPED_LOCK_THREAD_LOCKED(add_release_);
-  #ifdef _DEBUG
+#ifdef _DEBUG
     assert(!in_dtor_);
-  #endif
+#endif
     if (--ref_count_ == 0) {
-  #ifdef _DEBUG
+#ifdef _DEBUG
       in_dtor_ = true;
-  #endif
+#endif
       return true;
     }
     return false;
@@ -104,13 +103,14 @@ class RefCountedThreadSafeBase {
     ::InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(&ref_count_), 1);
   }
 
-// Returns true if the object should self-delete.
+  // Returns true if the object should self-delete.
   bool Release() const {
 #ifdef _DEBUG
     assert(!in_dtor_);
 #endif
     long new_value = InterlockedExchangeAdd(
-      reinterpret_cast<volatile LONG*>(&ref_count_), -1) - 1;
+                         reinterpret_cast<volatile LONG*>(&ref_count_), -1) -
+                     1;
     if (0 == new_value) {
 #ifdef _DEBUG
       in_dtor_ = true;
@@ -132,11 +132,12 @@ class RefCountedThreadSafeBase {
 }  // namespace subtle
 
 // Forward declaration.
-template <class T, class Traits> class RefCounted;
+template <class T, class Traits>
+class RefCounted;
 
 // Default traits for RefCounted<T>.  Deletes the object when its ref
 // count reaches 0.  Overload to delete it on a different crt etc.
-template<class T>
+template <class T>
 struct DefaultRefCountedTraits {
   virtual void Destruct(const T* x) {
     // Delete through RefCounted to make child classes only need to be
@@ -149,7 +150,6 @@ struct DefaultRefCountedTraits {
     RefCounted<T, DefaultRefCountedTraits>::DeleteInternal(x);
   }
 };
-
 
 //
 // A base class for reference counted classes.  Otherwise, known as a cheap
@@ -170,9 +170,7 @@ class RefCounted : public subtle::RefCountedBase {
  public:
   RefCounted() {}
 
-  void AddRef() const {
-    subtle::RefCountedBase::AddRef();
-  }
+  void AddRef() const { subtle::RefCountedBase::AddRef(); }
 
   void Release() const {
     if (subtle::RefCountedBase::Release()) {
@@ -191,11 +189,12 @@ class RefCounted : public subtle::RefCountedBase {
 };
 
 // Forward declaration.
-template <class T, class Traits> class RefCountedThreadSafe;
+template <class T, class Traits>
+class RefCountedThreadSafe;
 
 // Default traits for RefCountedThreadSafe<T>.  Deletes the object when its ref
 // count reaches 0.  Overload to delete it on a different thread etc.
-template<class T>
+template <class T>
 struct DefaultRefCountedThreadSafeTraits {
   virtual void Destruct(const T* x) {
     // Delete through RefCountedThreadSafe to make child classes only need to be
@@ -205,8 +204,8 @@ struct DefaultRefCountedThreadSafeTraits {
     // point so we can call the original function on multi-crt space,we add
     // virtual table to DefaultRefCountedThreadSafeTraits instead of to T so we
     // can avoid introduce virtual table to T if T do not need virtual table.
-    RefCountedThreadSafe<T,
-                         DefaultRefCountedThreadSafeTraits>::DeleteInternal(x);
+    RefCountedThreadSafe<T, DefaultRefCountedThreadSafeTraits>::DeleteInternal(
+        x);
   }
 };
 
@@ -225,12 +224,9 @@ struct DefaultRefCountedThreadSafeTraits {
 template <class T, class Traits = DefaultRefCountedThreadSafeTraits<T> >
 class RefCountedThreadSafe : public subtle::RefCountedThreadSafeBase {
  public:
-  RefCountedThreadSafe() {
-  }
+  RefCountedThreadSafe() {}
 
-  void AddRef() const {
-    subtle::RefCountedThreadSafeBase::AddRef();
-  }
+  void AddRef() const { subtle::RefCountedThreadSafeBase::AddRef(); }
 
   void Release() const {
     if (subtle::RefCountedThreadSafeBase::Release()) {
@@ -252,9 +248,9 @@ class RefCountedThreadSafe : public subtle::RefCountedThreadSafeBase {
 // A thread-safe wrapper for some piece of data so we can place other
 // things in scoped_refptrs<>.
 //
-template<class T>
+template <class T>
 class RefCountedData
-    : public base::RefCountedThreadSafe< base::RefCountedData<T> > {
+    : public base::RefCountedThreadSafe<base::RefCountedData<T> > {
  public:
   RefCountedData() : data() {}
   RefCountedData(const T& in_value) : data(in_value) {}
@@ -322,28 +318,23 @@ class ScopedRefPtr {
  public:
   typedef T element_type;
 
-  ScopedRefPtr() : ptr_(NULL) {
-  }
+  ScopedRefPtr() : ptr_(NULL) {}
 
   ScopedRefPtr(T* p) : ptr_(p) {
-    if (ptr_)
-      AddRef(ptr_);
+    if (ptr_) AddRef(ptr_);
   }
 
   ScopedRefPtr(const ScopedRefPtr<T>& r) : ptr_(r.ptr_) {
-    if (ptr_)
-      AddRef(ptr_);
+    if (ptr_) AddRef(ptr_);
   }
 
   template <class U>
   ScopedRefPtr(const ScopedRefPtr<U>& r) : ptr_(r.get()) {
-    if (ptr_)
-      AddRef(ptr_);
+    if (ptr_) AddRef(ptr_);
   }
 
   ~ScopedRefPtr() {
-    if (ptr_)
-      Release(ptr_);
+    if (ptr_) Release(ptr_);
   }
 
   T* get() const { return ptr_; }
@@ -360,12 +351,10 @@ class ScopedRefPtr {
 
   ScopedRefPtr<T>& operator=(T* p) {
     // AddRef first so that self assignment should work
-    if (p)
-      AddRef(p);
+    if (p) AddRef(p);
     T* old_ptr = ptr_;
     ptr_ = p;
-    if (old_ptr)
-      Release(old_ptr);
+    if (old_ptr) Release(old_ptr);
     return *this;
   }
 
@@ -384,9 +373,7 @@ class ScopedRefPtr {
     *pp = p;
   }
 
-  void swap(ScopedRefPtr<T>& r) {
-    swap(&r.ptr_);
-  }
+  void swap(ScopedRefPtr<T>& r) { swap(&r.ptr_); }
 
  private:
   // Allow ScopedRefPtr<T> to be used in boolean expressions, but not

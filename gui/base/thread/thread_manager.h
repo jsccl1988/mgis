@@ -36,7 +36,7 @@ class ThreadManager {
   static bool GetMessageLoop(ID identifier, MessageLoop** message_loop);
 
   static bool PostTask(ID identifier, const std::function<void(void)>& handler,
-                       int64 delay = 0);
+                       int64_t delay = 0);
 
  private:
   static base::Lock callers_lock_;

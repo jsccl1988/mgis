@@ -45,9 +45,9 @@ bool Thread::StartWithOptions(const Options& options) {
     strncpy_s(name_, options.thread_name_, _TRUNCATE);
   }
 
-  uint32 flags = 0;
+  uint32_t flags = 0;
 
-  uint32 threadId = 0;
+  uint32_t threadId = 0;
   thread_ = (HANDLE)_beginthreadex(NULL, options.stack_size_, ThreadFunc, this,
                                    flags, &threadId);
 

@@ -11,9 +11,10 @@
 
 namespace content {
 class MapBox : public base::RefCountedThreadSafe<MapBox>,
-                 public base::SupportsWeakPtr<MapBox> {
+               public base::SupportsWeakPtr<MapBox> {
  public:
   struct Preferences {
+    Preferences() {}
     Preferences(const Preferences& other) { this->operator=(other); }
 
     Preferences& operator=(const Preferences& other) {
@@ -31,9 +32,6 @@ class MapBox : public base::RefCountedThreadSafe<MapBox>,
   // Create/Destroy
   virtual void Create(const MapBox::Preferences& preferences) = 0;
   virtual void Destroy() = 0;
-
-  // MapView
-  virtual void QueryMapViewManager(MapViewManager** map_view_manager) = 0;
 
  protected:
   friend class base::RefCountedThreadSafe<MapBox>;

@@ -1,11 +1,15 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#include "gui/main_runner.h"
+#include "gui/app/main_runner.h"
 
+#include "gui/app/frame.h"
 #include "gui/base/path/base_paths.h"
 #include "gui/base/thread/message_loop.h"
 #include "gui/base/thread/thread_manager.h"
+#include "gui/content_impl/app/task_runner_impl.h"
+#include "gui/content_impl/map_content_factory.h"
+#include "gui/content_impl/map_content_manager.h"
 
 
 namespace gui {
@@ -25,14 +29,18 @@ bool MainRunner::Init() {
   }
 
   bool result = false;
-  // web render
-  content::MapContent* content = NULL;
+  content::MapContent* content = nullptr;
   MapContentFactory factory;
   task_runner_ = new TaskRunnerImpl();
   if (factory.CreateMapContent(&content) && content) {
-    result = gui::MapContentManager::Instance()->Init(this, content,
-                                                     task_runner_->AsWeakPtr());
+    result = gui::MapContentManager::Instance()->Init(
+        this, content, task_runner_->AsWeakPtr());
   }
+
+  Frame* frame = new Frame();
+  frame->CreateEx();
+  frame->ShowWindow(SW_MAXIMIZE);
+  frame->Show();
 
   return true;
 }
@@ -52,43 +60,8 @@ bool MainRunner::Stop() {
     return false;
   }
 
-  if (process_singleton_) {
-    process_singleton_->Cleanup();
-    process_singleton_ = NULL;
-  }
-
   if (!DestroyThreads()) {
     return false;
-  }
-
-  return true;
-}
-
-bool MainRunner::InitProcessSingleton() {
-  string16 user_data_dir;
-  if (!PathProvider(gui::DIR_APP_DATA_HBGUI, &user_data_dir)) return false;
-  process_singleton_ = new ProcessSingleton(this, user_data_dir);
-
-  // When another process is running, use that process instead of starting a
-  // new one. NotifyOtherProcess will currently give the other process up to
-  // 20 seconds to respond. Note that this needs to be done before we attempt
-  // to read the profile.
-  notify_result_ = process_singleton_->NotifyOtherProcessOrCreate();
-  switch (notify_result_) {
-    case ProcessSingleton::PROCESS_NONE:
-      // No process already running, fall through to starting a new one.
-      return true;
-
-    case ProcessSingleton::PROCESS_NOTIFIED:
-      return false;
-
-    case ProcessSingleton::PROFILE_IN_USE:
-      return false;
-
-    case ProcessSingleton::LOCK_ERROR:
-      return false;
-    default:
-      break;
   }
 
   return true;
@@ -113,21 +86,9 @@ bool MainRunner::CreateThreads() {
 bool MainRunner::DestroyThreads() {
   ui_message_loop_->Quit();
   ThreadManager::RemoveAllMessageLoop();
-  ui_message_loop_.reset(NULL);
-  worker_thread_.reset(NULL);
+  ui_message_loop_.reset(nullptr);
+  worker_thread_.reset(nullptr);
 
   return true;
-}
-
-// Inherit from ProcessSingleton::Delegate
-bool MainRunner::OnNotify(const gui::CommandLine& command_line,
-                          const string16& current_directory) {
-  uint32 new_id = kUint32Max;
-  if (!Browser::Instance()->ProcessCommand(command_line)) {
-    Browser::Instance()->NewWindow(kUint32Max, L"https://www.baidu.com",
-                                   &new_id);
-  }
-
-  return false;
 }
 }  // namespace gui

@@ -16,7 +16,7 @@ class TaskRunnerImpl : public content::TaskRunner {
   virtual ~TaskRunnerImpl();
 
  public:
-  int PostTask(content::Task* task, int64 delay = 0) override;
+  int PostTask(content::Task* task, int64_t delay = 0) override;
 };
 }  // namespace gui
 

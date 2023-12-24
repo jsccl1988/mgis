@@ -1,11 +1,11 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#ifndef GUI_BROWSER_FRAME_H_
-#define GUI_BROWSER_FRAME_H_
+#ifndef GUI_APP_FRAME_H
+#define GUI_APP_FRAME_H
 
-#include "gui/app.h"
-#include "gui/view.h"
+#include "gui/app/app.h"
+#include "gui/app/view.h"
 
 namespace gui {
 class Frame : public CFrameWindowImpl<Frame>,
@@ -30,18 +30,10 @@ class Frame : public CFrameWindowImpl<Frame>,
   MESSAGE_HANDLER(WM_EXITSIZEMOVE, OnExitSizeMove)
   COMMAND_ID_HANDLER(ID_APP_EXIT, OnFileExit)
   COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
-  COMMAND_ID_HANDLER(ID_FILE_SAVE_AS, OnFileSaveAs)
   COMMAND_ID_HANDLER(ID_FILE_PRINT, OnPrint)
   COMMAND_ID_HANDLER(ID_FILE_PRINT_PREVIEW, OnPrintPreview)
   COMMAND_ID_HANDLER(ID_VIEW_TOOLBAR, OnViewToolBar)
   COMMAND_ID_HANDLER(ID_VIEW_STATUS_BAR, OnViewStatusBar)
-  COMMAND_ID_HANDLER(ID_NEWWINDOW_DEFAULT, OpenDefaultWindow)
-  COMMAND_ID_HANDLER(ID_FEATURE_SWITCH, OnSwitch)
-  COMMAND_ID_HANDLER(ID_FEATURE_SHOW, OnShow)
-  COMMAND_ID_HANDLER(ID_FEATURE_HIDE, OnHide)
-  COMMAND_ID_HANDLER(ID_FEATURE_REFRESH, OnRefresh)
-  COMMAND_ID_HANDLER(ID_FEATURE_ZOOMIN, OnZoomin)
-  COMMAND_ID_HANDLER(ID_FEATURE_ZOOMOUT, OnZoomout)
   REFLECT_NOTIFICATIONS()
   CHAIN_MSG_MAP(CUpdateUI<Frame>)
   CHAIN_MSG_MAP(CFrameWindowImpl<Frame>)
@@ -68,21 +60,7 @@ class Frame : public CFrameWindowImpl<Frame>,
   LRESULT OnExitSizeMove(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
                          BOOL& bHandled);
 
-  LRESULT OnShow(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                 BOOL& /*bHandled*/);
-  LRESULT OnHide(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                 BOOL& /*bHandled*/);
-  LRESULT OnSwitch(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                   BOOL& /*bHandled*/);
-  LRESULT OnGoBack(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                   BOOL& /*bHandled*/);
-  LRESULT OnGoForward(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                      BOOL& /*bHandled*/);
-  LRESULT OnFileSaveAs(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                       BOOL& /*bHandled*/);
-  LRESULT OnViewFullscreen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                           BOOL& /*bHandled*/);
-  LRESULT OnViewToolBar(WORD /*wNotifyCode*/ WORD /*wID*/, HWND /*hWndCtl*/,
+  LRESULT OnViewToolBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
                         BOOL& /*bHandled*/);
   LRESULT OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
                           BOOL& /*bHandled*/);
@@ -92,15 +70,6 @@ class Frame : public CFrameWindowImpl<Frame>,
                   BOOL& /*bHandled*/);
   LRESULT OnPrintPreview(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
                          BOOL& /*bHandled*/);
-
-  LRESULT OpenDefaultWindow(WORD /*wNotifyCode*/, WORD /*wID*/,
-                            HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-  LRESULT OnRefresh(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                    BOOL& /*bHandled*/);
-  LRESULT OnZoomin(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                   BOOL& /*bHandled*/);
-  LRESULT OnZoomout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/,
-                    BOOL& /*bHandled*/);
 
   void UpdateLayout(BOOL bResizeBars = TRUE);
 
@@ -112,9 +81,6 @@ class Frame : public CFrameWindowImpl<Frame>,
 
  private:
   View view_;
-
- private:
-  uint32 zoom_level_;
 };
 }  // namespace gui
-#endif  // GUI_BROWSER_FRAME_H_
+#endif  // GUI_APP_FRAME_H

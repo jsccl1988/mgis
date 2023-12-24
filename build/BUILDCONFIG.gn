@@ -57,8 +57,8 @@ declare_args() {
 
 declare_args() {
   if (is_win) {
-    c_std = "clatest"
-    cc_std = "c++latest"
+    c_std = "c17"
+    cc_std = "c++17"
   } else {
     c_std = "c23"
     cc_std = "c++23"

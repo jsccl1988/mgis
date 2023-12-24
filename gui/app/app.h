@@ -1,38 +1,37 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#ifndef VIEW_APP_H_
-#define VIEW_APP_H_
+#ifndef GUI_APP_APP_H_
+#define GUI_APP_APP_H_
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#pragma warning(disable : 4995)
+#pragma warning(disable : 4838)
+#pragma warning(disable : 4302)
+
+#include "targetver.h"
 
 #include <atlbase.h>
 #include <atlcom.h>
 #include <atlstr.h>
 #include <atltypes.h>
-
 #include <malloc.h>
 #include <memory.h>
 #include <process.h>
 #include <stdlib.h>
 #include <tchar.h>
+#include <windows.h>
 
 #include <string>
 
-#include "third_party/wtl/atlapp.h"
-#include "third_party/wtl/atlcrack.h"
-#include "third_party/wtl/atlctrls.h"
-#include "third_party/wtl/atlctrlw.h"
-#include "third_party/wtl/atldlgs.h"
-#include "third_party/wtl/atlframe.h"
-#include "third_party/wtl/atlwinx.h"
-
+#include "atlapp.h"
+#include "atlcrack.h"
+#include "atlctrls.h"
+#include "atlctrlw.h"
+#include "atldlgs.h"
+#include "atlframe.h"
+#include "atlwinx.h"
 #include "resource.h"
-#include "targetver.h"
 
 extern CAppModule _Module;
 
-#pragma warning(disable : 4995)
-
-#endif  // VIEW_APP_H_
+#endif  // GUI_APP_APP_H_

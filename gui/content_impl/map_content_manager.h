@@ -6,24 +6,23 @@
 
 #include <map>
 
-#include "base/lock.h"
 #include "base/memory/ref_counted.h"
-#include "content/frame/map_box.h"
-#include "content/frame/map_view.h"
-#include "content/map_content.h"
+#include "base/synchronization/lock.h"
+#include "content/public/map_box/map_box.h"
+#include "content/public/map_box/map_view.h"
+#include "content/public/map_content.h"
 
 namespace gui {
-class MapContent;
 class MainRunner;
 class MapContentManager {
  public:
   static MapContentManager* Instance();
 
  public:
-  bool Init(MainRunner* main_runner, content::MapContent* content,
+  bool Init(MainRunner* main_runner, content::MapContent* map_content,
             const base::WeakPtr<content::TaskRunner>& task_runner);
 
-  bool GetVersion(string16* version);
+  bool GetVersion(std::string* version);
   bool GetMapBox(content::MapBox** map_box);
   bool GetMapContentClient(content::MapContentClient** map_content_client);
 
@@ -40,7 +39,7 @@ class MapContentManager {
 
   base::ScopedRefPtr<MainRunner> main_runner_;
 
-  content::MapContent::Setting map_content_setting_;
+  content::MapContent::Preferences map_content_preferences_;
   content::MapBox::Preferences map_box_preferences_;
 
   static base::Lock g_factory_lock;

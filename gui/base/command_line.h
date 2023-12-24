@@ -7,35 +7,34 @@
 #include <map>
 #include <vector>
 
-#include "base/basic_types.h"
+#include "base/base_types.h"
 #include "base/platform.h"
 
 namespace gui {
 class CommandLine {
  public:
-  explicit CommandLine(const string16 & program = string16(L""));
+  explicit CommandLine(const string16& program = string16(L""));
 
  public:
-  void ParseFromString(const string16 & command_line);
+  void ParseFromString(const string16& command_line);
 
   const string16& GetCommandLine();
   string16 GetProgram() const { return program_; }
-  const std::vector<string16> & GetNoneSwitchArgs() const {
+  const std::vector<string16>& GetNoneSwitchArgs() const {
     return nonswitch_args_;
   }
 
-  string16 GetSwitchValue(const string16 & switch_name);
+  string16 GetSwitchValue(const string16& switch_name);
 
-  void AppendSwitchArg(const string16 & switch_name
-    , const string16 & switch_value);
+  void AppendSwitchArg(const string16& switch_name,
+                       const string16& switch_value);
 
   bool HasExternalLink() const;
 
  public:
-  // Define const switch names, just instead of macros
-  static const wchar_t * kPrefix;
-  static const wchar_t * kDelimeter;
-  static const wchar_t * kInstall;
+  static const wchar_t* kPrefix;
+  static const wchar_t* kDelimeter;
+  static const wchar_t* kInstall;
 
  private:
   string16 argv_;

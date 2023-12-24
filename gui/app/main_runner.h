@@ -2,14 +2,14 @@
 // All rights reserved.
 
 
-#ifndef GUI_MAIN_RUNNER_H_
-#define GUI_MAIN_RUNNER_H_
+#ifndef GUI_APP_MAIN_RUNNER_H
+#define GUI_APP_MAIN_RUNNER_H
 
 #include <assert.h>
 
 #include <memory>
 
-#include "app/task_runner.h"
+#include "content/public/app/task_runner.h"
 #include "gui/base/thread/thread.h"
 
 namespace gui {
@@ -41,4 +41,4 @@ class MainRunner : public base::RefCountedThreadSafe<MainRunner> {
 };
 }  // namespace gui
 
-#endif  // GUI_MAIN_RUNNER_H_
+#endif  // GUI_APP_MAIN_RUNNER_H

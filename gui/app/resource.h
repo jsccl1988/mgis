@@ -1,8 +1,8 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#ifndef GUI_RESOURCE_H_
-#define GUI_RESOURCE_H_
+#ifndef GUI_APP_RESOURCE_H
+#define GUI_APP_RESOURCE_H
 
 #define IDD_ABOUTBOX 100
 #define IDR_MAINFRAME 101
@@ -37,4 +37,4 @@
 #endif  // APSTUDIO_READONLY_SYMBOLS
 #endif  // APSTUDIO_INVOKED
 
-#endif  // GUI_RESOURCE_H_
+#endif  // GUI_APP_RESOURCE_H

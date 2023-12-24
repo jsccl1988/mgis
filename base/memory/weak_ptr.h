@@ -68,6 +68,7 @@
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
+#include "base/template_util.h"
 
 namespace base {
 

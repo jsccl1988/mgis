@@ -12,7 +12,6 @@ class MapBoxDelegate : public base::RefCountedThreadSafe<MapBoxDelegate>,
                          public base::SupportsWeakPtr<MapBoxDelegate> {
  public:
   virtual void PreMainMessageLoopRun() = 0;
-  virtual void OnVersionChange(const std::string& version) = 0;
 
  protected:
   friend class base::RefCountedThreadSafe<MapBoxDelegate>;

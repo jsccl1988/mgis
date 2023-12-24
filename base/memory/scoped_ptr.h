@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The Baidu Authors.
+// Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
@@ -90,7 +90,7 @@
 #include <algorithm>  // For std::swap().
 #include <iosfwd>
 
-#include "base/basic_types.h"
+#include "base/base_types.h"
 #include "base/compiler_specific.h"
 #include "base/move.h"
 #include "base/memory/ref_counted.h"

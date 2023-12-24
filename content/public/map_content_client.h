@@ -9,7 +9,7 @@
 #include "delegate/map_box_delegate.h"
 #include "delegate/map_view_delegate.h"
 
-namespace web_render {
+namespace content {
 class MapContentClient : public base::RefCountedThreadSafe<MapContentClient>,
                          public base::SupportsWeakPtr<MapContentClient> {
  public:
@@ -20,5 +20,5 @@ class MapContentClient : public base::RefCountedThreadSafe<MapContentClient>,
   friend class base::RefCountedThreadSafe<MapContentClient>;
   virtual ~MapContentClient() {}
 };
-}  // namespace web_render
+}  // namespace content
 #endif  // CONTENT_PUBLIC_MAP_CONTENT_CLIENT_H

@@ -52,7 +52,7 @@ void AtExitManager::RegisterTask(StdClosure task) {
     return;
   }
 
-  NAutoLock lock(&g_top_manager->lock_);
+  AutoLock lock(&g_top_manager->lock_);
   g_top_manager->stack_.push(task);
 }
 
@@ -63,7 +63,7 @@ void AtExitManager::ProcessCallbacksNow() {
     return;
   }
 
-  NAutoLock lock(&g_top_manager->lock_);
+  AutoLock lock(&g_top_manager->lock_);
 
   while (!g_top_manager->stack_.empty()) {
     StdClosure task = g_top_manager->stack_.top();

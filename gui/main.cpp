@@ -3,9 +3,12 @@
 
 #include <shellscalingapi.h>
 
+#include "base/logging.h"
+#include "base/util/string_util.h"
+#include "gui/app/main_runner.h"
+#include "gui/app/resource.h"
 #include "gui/base/scoped_process_initializer.h"
-#include "gui/main_runner.h"
-#include "gui/resource.h"
+
 
 // Win8.1 supports monitor-specific DPI scaling.
 bool SetProcessDpiAwarenessWrapper(PROCESS_DPI_AWARENESS value) {
@@ -16,12 +19,11 @@ bool SetProcessDpiAwarenessWrapper(PROCESS_DPI_AWARENESS value) {
   if (set_process_dpi_awareness_func) {
     HRESULT hr = set_process_dpi_awareness_func(value);
     if (SUCCEEDED(hr)) {
-      Log(LL_DEBUG, TAG(L"gui"), L"SetProcessDpiAwareness succeeded.");
+      LOG(INFO) << "SetProcessDpiAwareness succeeded.";
       return true;
     } else if (hr == E_ACCESSDENIED) {
-      Log(LL_DEBUG, TAG(L"gui"),
-          L"Access denied error from SetProcessDpiAwareness.\
-      Function called twice, or manifest was used.");
+      LOG(ERROR) << "Access denied error from SetProcessDpiAwareness.\
+      Function called twice, or manifest was used.";
     }
   }
   return false;
@@ -41,13 +43,12 @@ void EnableHighDPISupport() {
   if (!SetProcessDpiAwarenessWrapper(PROCESS_SYSTEM_DPI_AWARE)) {
     BOOL success = SetProcessDPIAwareWrapper();
     if (success) {
-      Log(LL_DEBUG, TAG(L"gui"), L"SetProcessDPIAwareWrapper succeeded.");
+      LOG(INFO) << "SetProcessDPIAwareWrapper succeeded.";
     }
   }
 }
 
-int WINAPI _tWinMain(HINSTANCE instance, HINSTANCE /*hPrevInstance*/
-                     ,
+int WINAPI _tWinMain(HINSTANCE instance, HINSTANCE /*hPrevInstance*/,
                      LPTSTR lpstrCmdLine, int show) {
   ScopedProcessInitializer process_initializer;
   EnableHighDPISupport();

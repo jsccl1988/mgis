@@ -172,7 +172,7 @@ void MessageLoop::AddToIncomingQueue(const PendingTask &task) {
   // 本方法可能会在另一个线程中被执行，所以必须线程安全
   std::shared_ptr<MessagePump> pump;
   {
-    NAutoLock lock(&incoming_queue_lock_);
+    AutoLock lock(&incoming_queue_lock_);
     bool was_empty = incoming_queue_.empty();
     incoming_queue_.push(task);
     if (!was_empty) return;
@@ -196,7 +196,7 @@ void MessageLoop::ReloadWorkQueue() {
   if (!work_queue_.empty()) return;
 
   {
-    NAutoLock lock(&incoming_queue_lock_);
+    AutoLock lock(&incoming_queue_lock_);
     if (incoming_queue_.empty()) return;
     // 常数时间交换内存
     work_queue_.Swap(&incoming_queue_);

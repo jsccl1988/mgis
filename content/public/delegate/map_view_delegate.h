@@ -13,9 +13,7 @@ namespace content {
 class MapViewDelegate : public base::RefCountedThreadSafe<MapViewDelegate>,
                         public base::SupportsWeakPtr<MapViewDelegate> {
  public:
-  // notify display stuff
-  virtual void OnStatusTextChange(const std::string &status_text) = 0;
-  virtual void OnZoomChange(int32 size) = 0;
+  virtual void OnStatusChange(const std::string &status) = 0;
 
  protected:
   friend class base::RefCountedThreadSafe<MapViewDelegate>;

@@ -1,10 +1,10 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#ifndef GUI_VIEW_H_
-#define GUI_VIEW_H_
+#ifndef GUI_APP_VIEW_H
+#define GUI_APP_VIEW_H
 
-#include "gui/app.h"
+#include "gui/app/app.h"
 
 namespace gui {
 
@@ -36,8 +36,7 @@ class View : public ATL::CWindowImpl<View> {
 
   // Prevent web area repaint
   // https://msdn.microsoft.com/en-us/library/windows/desktop/ms648055(v=vs.85).aspx
-  LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
-                            ,
+  LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
                             BOOL& /*bHandled*/) {
     return NO_ERASEBACKTROUND;
   }
@@ -47,4 +46,4 @@ class View : public ATL::CWindowImpl<View> {
 };
 }  // namespace gui
 
-#endif  // GUI_VIEW_H_
+#endif  // GUI_APP_VIEW_H

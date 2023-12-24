@@ -28,8 +28,8 @@ static bool IsSwitch(const ATL::CString& parameter_string,
   ATL::CString prefix = CommandLine::kPrefix;
   if (parameter_string.Find(prefix) != 0) return false;
 
-  const int32 switch_start = prefix.GetLength();
-  const int32 equals_psition =
+  const int32_t switch_start = prefix.GetLength();
+  const int32_t equals_psition =
       parameter_string.Find(CommandLine::kDelimeter, switch_start);
 
   if (equals_psition == -1) {
@@ -84,7 +84,7 @@ void CommandLine::ParseFromString(const string16& command_line) {
 
   if (command_line_copy.IsEmpty()) return;
 
-  int32 args_number = 0;
+  int32_t args_number = 0;
   wchar_t** args = NULL;
 
   args = ::CommandLineToArgvW(command_line_copy, &args_number);
@@ -94,7 +94,7 @@ void CommandLine::ParseFromString(const string16& command_line) {
   program_ = program.Trim();
 
   bool parse_switches = true;
-  for (int32 i = 1; i < args_number; ++i) {
+  for (int32_t i = 1; i < args_number; ++i) {
     ATL::CString arg = args[i];
     arg.Trim();
 
