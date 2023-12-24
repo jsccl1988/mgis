@@ -1,0 +1,111 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (Simplified, PRC) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+  "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+  "#include ""afxres.h""\r\n"
+  "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+  "\r\n"
+  "\0"
+END
+
+#endif  // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU
+BEGIN
+  POPUP "&File"
+  BEGIN
+    MENUITEM "Save &As...",         ID_FILE_SAVE_AS
+    MENUITEM SEPARATOR
+    MENUITEM "&Print...\tCtrl+P",   ID_FILE_PRINT
+    MENUITEM "Print Pre&view",      ID_FILE_PRINT_PREVIEW
+    MENUITEM SEPARATOR
+    MENUITEM "E&xit",               ID_APP_EXIT
+  END
+  POPUP "&Help"
+  BEGIN
+    MENUITEM "&About Demo",  ID_APP_ABOUT
+  END
+  POPUP "Feature"
+  BEGIN
+    POPUP "NewWindow"
+    BEGIN
+      MENUITEM "Default",           ID_NEWWINDOW_DEFAULT
+      MENUITEM "Private",           ID_NEWWINDOW_PRIVATE
+      MENUITEM "Temp",              ID_NEWWINDOW_TEMP
+    END
+    MENUITEM "Switch",              ID_FEATURE_SWITCH
+    MENUITEM "Show",                ID_FEATURE_SHOW
+    MENUITEM "Hide",                ID_FEATURE_HIDE
+    MENUITEM "Back",                ID_FEATURE_GOBACK
+    MENUITEM "Forward",             ID_FEATURE_GOFORWARD
+    MENUITEM "OnPageMute",          ID_FEATURE_MUTE
+    MENUITEM "OnRefresh",           ID_FEATURE_REFRESH
+    MENUITEM "OnZoomin",            ID_FEATURE_ZOOMIN
+    MENUITEM "OnZoomout",           ID_FEATURE_ZOOMOUT
+    MENUITEM "OnSnapshot",          ID_FEATURE_SNAPSHOT
+    MENUITEM "OnDevTools",          ID_FEATURE_DEVTOOLS
+    MENUITEM "OnInjectJs",          ID_FEATURE_INJECTJS
+    MENUITEM "FlashPopStart",       ID_FEATURE_FLASH_POP_START
+    MENUITEM "FlashPopEnd",         ID_FEATURE_FLASH_POP_END
+    MENUITEM "UrlFetch",            ID_FEATURE_URL_FETCH
+    MENUITEM "AutoDetectCharset",   ID_FEATURE_AUTODETECT_CHARSET
+    MENUITEM "SwitchADBlock",       ID_FEATURE_SWITCH_ADBLOCK
+
+  END
+END
+
+#endif  // Chinese (Simplified, PRC) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif  // not APSTUDIO_INVOKED
+

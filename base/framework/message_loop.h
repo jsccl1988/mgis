@@ -206,7 +206,7 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
 
   bool nestable_tasks_allowed_;
   TaskQueue incoming_queue_;
-  NLock incoming_queue_lock_;
+  Lock incoming_queue_lock_;
 
   TaskQueue work_queue_;
   TaskQueue deferred_non_nestable_work_queue_;

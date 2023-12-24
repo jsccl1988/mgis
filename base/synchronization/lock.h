@@ -16,7 +16,7 @@
 
 namespace base {
 
-class BASE_EXPORT NLock {
+class BASE_EXPORT Lock {
  public:
 #if defined(OS_WIN)
   typedef CRITICAL_SECTION OSLockType;
@@ -24,19 +24,19 @@ class BASE_EXPORT NLock {
   typedef pthread_mutex_t OSLockType;
 #endif
 
-  NLock();
-  ~NLock();
+  Lock();
+  ~Lock();
 
   // If the lock is not held, take it and return true.  If the lock is already
   // held by something else, immediately return false.
   bool Try();
 
-  // Take the lock, blocking until it is available if necessary.
-  void Lock();
+  // Take the acquire, blocking until it is available if necessary.
+  void Acquire();
 
   // Release the lock.  This must only be called by the lock's holder: after
   // a successful call to Try, or a call to Lock.
-  void Unlock();
+  void Release();
 
   // Return the native underlying lock.  Not supported for Windows builds.
 #if !defined(OS_WIN)
@@ -47,36 +47,36 @@ class BASE_EXPORT NLock {
   OSLockType os_lock_;
 };
 
-class BASE_EXPORT NAutoLock {
+class BASE_EXPORT AutoLock {
  public:
-  NAutoLock(NLock *lock) {
+  AutoLock(Lock *lock) {
     assert(lock);
     lock_ = lock;
-    lock_->Lock();
+    lock_->Acquire();
   }
 
-  ~NAutoLock() {
-    if (lock_) lock_->Unlock();
+  ~AutoLock() {
+    if (lock_) lock_->Release();
   }
 
  private:
-  NLock *lock_;
+  Lock *lock_;
 };
 
-class BASE_EXPORT NAutoUnlock {
+class BASE_EXPORT AutoUnlock {
  public:
-  NAutoUnlock(NLock *lock) {
+  AutoUnlock(Lock *lock) {
     assert(lock);
     lock_ = lock;
-    lock_->Unlock();
+    lock_->Release();
   }
 
-  ~NAutoUnlock() {
-    if (lock_) lock_->Lock();
+  ~AutoUnlock() {
+    if (lock_) lock_->Acquire();
   }
 
  private:
-  NLock *lock_;
+  Lock *lock_;
 };
 
 }  // namespace base

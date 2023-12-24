@@ -64,7 +64,7 @@ class BASE_EXPORT MessageLoopProxy : public base::SupportWeakCallback {
   void DeleteSelf() const;
 
   // The lock that protects access to target_message_loop_.
-  mutable NLock message_loop_lock_;
+  mutable Lock message_loop_lock_;
   MessageLoop* target_message_loop_;
 
  private:

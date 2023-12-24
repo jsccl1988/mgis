@@ -1,0 +1,43 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+import("//testing/test.gni")
+
+static_library("content") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "core/command.cpp",
+    "core/dynamic_library.cpp",
+    "core/message_listener.cpp",
+    "core/plugin.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+  ]
+
+  libs = [
+  ]
+
+  deps = [
+    "//base:base",
+  ]
+}
+
+test("content_test") {
+  sources = [
+    "content_unittest.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+  ]
+
+  deps = [
+    ":content",
+  ]
+}

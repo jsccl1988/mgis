@@ -113,14 +113,14 @@ class SyncWaiter : public WaitableEvent::Waiter {
   // ---------------------------------------------------------------------------
   void Disable() { fired_ = true; }
 
-  base::NLock* lock() { return &lock_; }
+  base::Lock* lock() { return &lock_; }
 
   base::ConditionVariable* cv() { return &cv_; }
 
  private:
   bool fired_;
   WaitableEvent* signaling_event_;  // The WaitableEvent which woke us
-  base::NLock lock_;
+  base::Lock lock_;
   base::ConditionVariable cv_;
 };
 

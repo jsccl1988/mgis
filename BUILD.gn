@@ -4,6 +4,7 @@
 group("all") {
   deps = [
     "//third_party:all",
+    # "//gui:smartgis",
   ]
 }
 
@@ -12,6 +13,7 @@ group("test") {
   deps = [
     "//base:base_test",
     "//core:core_test",
-    # "//framework:framework_test",
+    "//content:content_test",
+    # "//gui:gui_test",
   ]
 }

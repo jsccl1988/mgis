@@ -7,24 +7,24 @@
 
 namespace base {
 
-NLock::NLock() {
+Lock::Lock() {
   // The second parameter is the spin count, for short-held locks it avoid the
   // contending thread from going to sleep which helps performance greatly.
   ::InitializeCriticalSectionAndSpinCount(&os_lock_, 2000);
 }
 
-NLock::~NLock() { ::DeleteCriticalSection(&os_lock_); }
+Lock::~Lock() { ::DeleteCriticalSection(&os_lock_); }
 
-bool NLock::Try() {
+bool Lock::Try() {
   if (::TryEnterCriticalSection(&os_lock_)) {
     return true;
   }
   return false;
 }
 
-void NLock::Lock() { ::EnterCriticalSection(&os_lock_); }
+void Lock::Acquire() { ::EnterCriticalSection(&os_lock_); }
 
-void NLock::Unlock() { ::LeaveCriticalSection(&os_lock_); }
+void Lock::Release() { ::LeaveCriticalSection(&os_lock_); }
 
 }  // namespace base
 

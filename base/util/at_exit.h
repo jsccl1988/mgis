@@ -56,7 +56,7 @@ class BASE_EXPORT AtExitManager {
   explicit AtExitManager(bool shadow);
 
  private:
-  base::NLock lock_;
+  base::Lock lock_;
   std::stack<StdClosure> stack_;
   AtExitManager* next_manager_;  // Stack of managers to allow shadowing.
 

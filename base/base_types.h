@@ -6,6 +6,7 @@
 
 #include <sys/types.h>
 
+#include <string>
 #include "base/base_config.h"
 
 #ifndef COMPILER_MSVC
@@ -57,6 +58,7 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 typedef unsigned __int64 uint64_t;
+typedef std::wstring string16;
 
 /* the following definitions are from VS2010's stdint.h */
 #ifndef _INTPTR_T_DEFINED

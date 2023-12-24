@@ -145,7 +145,7 @@ DWORD last_seen_now = 0;
 // easy to use a Singleton without even knowing it, and that may lead to many
 // gotchas). Its impact on startup time should be negligible due to low-level
 // nature of time code.
-base::NLock rollover_lock;
+base::Lock rollover_lock;
 
 // We use timeGetTime() to implement TimeTicks::Now().  This can be problematic
 // because it returns the number of milliseconds since Windows has started,
@@ -153,7 +153,7 @@ base::NLock rollover_lock;
 // rollover ourselves, which works if TimeTicks::Now() is called at least every
 // 49 days.
 TimeDelta RolloverProtectedNow() {
-  base::NAutoLock locked(&rollover_lock);
+  base::AutoLock locked(&rollover_lock);
   // We should hold the lock while calling tick_function to make sure that
   // we keep last_seen_now stay correctly in sync.
   DWORD now = timeGetTime();

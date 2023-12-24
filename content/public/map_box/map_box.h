@@ -1,0 +1,43 @@
+// Copyright (c) 2023 The MGIS Authors.
+// All rights reserved.
+
+#ifndef CONTENT_PUBLIC_MAP_BOX_MAP_BOX_H
+#define CONTENT_PUBLIC_MAP_BOX_MAP_BOX_H
+
+#include <string>
+
+#include "base/memory/ref_counted.h"
+#include "base/memory/weak_ptr.h"
+
+namespace content {
+class MapBox : public base::RefCountedThreadSafe<MapBox>,
+                 public base::SupportsWeakPtr<MapBox> {
+ public:
+  struct Preferences {
+    Preferences(const Preferences& other) { this->operator=(other); }
+
+    Preferences& operator=(const Preferences& other) {
+      if (this == &other) return *this;
+
+      return *this;
+    }
+  };
+
+ public:
+  // Property
+  virtual void GetPreferences(MapBox::Preferences* preferences) = 0;
+  virtual void GetVersion(std::string* version) = 0;
+
+  // Create/Destroy
+  virtual void Create(const MapBox::Preferences& preferences) = 0;
+  virtual void Destroy() = 0;
+
+  // MapView
+  virtual void QueryMapViewManager(MapViewManager** map_view_manager) = 0;
+
+ protected:
+  friend class base::RefCountedThreadSafe<MapBox>;
+  virtual ~MapBox() {}
+};
+}  // namespace content
+#endif  // CONTENT_PUBLIC_MAP_BOX_MAP_BOX_H

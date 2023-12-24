@@ -1,0 +1,59 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+import("//testing/test.gni")
+
+executable("smartgis") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+      "app/frame.cpp",
+      "app/view.cpp",
+      "app/main_runner.cpp",
+      "base/path/base_paths_win.cpp",
+      "base/thread/message_loop.cpp",
+      "base/thread/thread.cpp",
+      "base/thread/thread_manager.cpp",
+      "base/thread/thread.cpp",
+      "base/scoped_process_initializer.h",
+      "base/command_line.cpp",
+      "content_impl/app/task_runner_impl.cpp",
+      "content_impl/delegate/map_box_delegate_impl.cpp",
+      "content_impl/delegate/map_view_delegate_impl.cpp",
+      "content_impl/delegate/map_content_client_impl.cpp",
+      "content_impl/map_content_factory.cpp",
+      "content_impl/map_content_manager.cpp",
+      "main.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "third_party/wtl/",
+  ]
+
+  deps = [
+    "//base:base",
+}
+
+test("gui_test") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "gui_unittest.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+  ]
+
+  libs = [
+    "$root_out_dir/sqlite3/lib/sqlite3.lib",
+  ]
+
+  deps = [
+    ":view",
+  ]
+}

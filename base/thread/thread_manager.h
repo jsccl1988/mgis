@@ -28,7 +28,7 @@ class ThreadMap {
 
  private:
   ThreadMap() {}
-  NLock lock_;
+  Lock lock_;
   std::map<int, FrameworkThread *> threads_;
 };
 
