@@ -1,7 +1,7 @@
 // Copyright (c) 2023 The MGIS Authors.
 // All rights reserved.
 
-#include "gui/app/main_runner.h"
+#include "gui/main_runner.h"
 
 #include "gui/app/frame.h"
 #include "gui/base/path/base_paths.h"
@@ -10,7 +10,6 @@
 #include "gui/content_impl/app/task_runner_impl.h"
 #include "gui/content_impl/map_content_factory.h"
 #include "gui/content_impl/map_content_manager.h"
-
 
 namespace gui {
 static const std::string kWorkerThread = "Worker";

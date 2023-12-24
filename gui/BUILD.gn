@@ -10,7 +10,6 @@ executable("smartgis") {
   sources = [
       "app/frame.cpp",
       "app/view.cpp",
-      "app/main_runner.cpp",
       "base/path/base_paths_win.cpp",
       "base/thread/message_loop.cpp",
       "base/thread/thread_manager.cpp",
@@ -22,6 +21,7 @@ executable("smartgis") {
       "content_impl/map_content_client_impl.cpp",
       "content_impl/map_content_factory.cpp",
       "content_impl/map_content_manager.cpp",
+      "main_runner.cpp",
       "main.cpp",
   ]
 

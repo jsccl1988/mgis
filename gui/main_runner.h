@@ -2,8 +2,8 @@
 // All rights reserved.
 
 
-#ifndef GUI_APP_MAIN_RUNNER_H
-#define GUI_APP_MAIN_RUNNER_H
+#ifndef GUI_MAIN_RUNNER_H
+#define GUI_MAIN_RUNNER_H
 
 #include <assert.h>
 
@@ -41,4 +41,4 @@ class MainRunner : public base::RefCountedThreadSafe<MainRunner> {
 };
 }  // namespace gui
 
-#endif  // GUI_APP_MAIN_RUNNER_H
+#endif  // GUI_MAIN_RUNNER_H
