@@ -5,8 +5,8 @@ using namespace core;
 namespace _3Drd {
 //////////////////////////////////////////////////////////////////////////
 // print implement
-long GLRenderDevice::DrawCube3D(Vector3 vCenter, float fWidth, Color smtClr) {
-  float width = fWidth / 2.;
+long GLRenderDevice::DrawCube3D(Vector3 vCenter, float width, Color smtClr) {
+  float width = width / 2.;
   Vector3 vTopLeftFront(vCenter.x - width, vCenter.y + width,
                         vCenter.z + width);
   Vector3 vTopLeftBack(vCenter.x - width, vCenter.y + width, vCenter.z - width);

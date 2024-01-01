@@ -1,0 +1,82 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+import("//testing/test.gni")
+
+static_library("render2d") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "renderer/renderer.cpp",
+    "renderer/style.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+    "$root_out_dir/gdal/include",
+  ]
+
+  libs = [
+    "$root_out_dir/gdal/lib/gdal.lib",
+  ]
+
+  deps = [
+    "//base:base",
+    "//third_party:gdal",
+  ]
+}
+
+shared_library("render_device_gdi") {
+  defines = [
+    "NOMINMAX",
+    "COMPONENT_BUILD",
+    "GFX_2D_RENDER_DEVICE_IMPLEMENTATION",
+  ]
+
+  sources = [
+    "render_device_gdi/render_buffer.cpp",
+    "render_device_gdi/render_device_gdi.cpp",
+    "render_device_gdi/utils.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/glog/include",
+    "$root_out_dir/gdal/include",
+  ]
+
+  libs = [
+    "$root_out_dir/glog/lib/glog.lib",
+    "$root_out_dir/gdal/lib/gdal.lib",
+  ]
+
+  deps = [
+    ":render2d",
+    "//third_party:gdal",
+  ]
+}
+
+test("render2d_test") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "render2d_unittest.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/gdal/include",
+  ]
+
+  libs = [
+    "$root_out_dir/gdal/lib/gdal.lib",
+  ]
+
+  deps = [
+    ":render2d",
+  ]
+}

@@ -1,81 +1,82 @@
-#ifndef GFX_2D_RENDER_DEVICE_BUFFER_H
-#define GFX_2D_RENDER_DEVICE_BUFFER_H
+#ifndef GFX_2D_RENDER_DEVICE_RENDER_BUFFER_H
+#define GFX_2D_RENDER_DEVICE_RENDER_BUFFER_H
 
-#include <wingdi.h>
-#include <wtypes.h>
+#include "base/base_config.h"
+#include "build/build_config.h"
+
+#include "gfx/2d/renderer/common.h"
 
 namespace gfx2d {
 class RenderBuffer {
  public:
-  enum SwapType {
+  enum eSwapType {
     BLT_STRETCH,
     BLT_TRANSPARENT,
   };
+
   RenderBuffer(void);
-  RenderBuffer(HWND hWnd);
+  RenderBuffer(HWND hwnd);
   ~RenderBuffer(void);
-
- public:
-  inline HWND GetHWND() const { return m_hWnd; }
-  inline long SetHWND(HWND hWnd);
-
-  long SetSize(int cx, int cy);
-  inline long GetWidth(void) const { return m_nWidth; }
-  inline long GetHeight(void) const { return m_nHeight; }
-
-  inline HBITMAP GetBuffer(void) { return m_hPaintBuf; }
-  long ShareBuffer(RenderBuffer &rbSrc);
-
-  long Swap(int destOrgx, int destOrgy, int destW, int destH, int srcOrgx,
-               int srcOrgy, int op = SRCCOPY);
-  long Swap(int destOrgx, int destOrgy, int destW, int destH, int srcOrgx,
-               int srcOrgy, int srcW, int srcH,
-               eSwapType type = BLT_TRANSPARENT, int op = SRCCOPY,
-               COLORREF clr = RGB(255, 255, 255));
-
-  long Swap(RenderBuffer &rbTarget, int destOrgx, int destOrgy, int destW,
-               int destH, int srcOrgx, int srcOrgy, int op = SRCCOPY);
-  long Swap(RenderBuffer &rbTarget, int destOrgx, int destOrgy, int destW,
-               int destH, int srcOrgx, int srcOrgy, int srcW, int srcH,
-               eSwapType type = BLT_TRANSPARENT, int op = SRCCOPY,
-               COLORREF clr = RGB(255, 255, 255));
-
-  HDC PrepareDC(bool bClip = true);
-
-  long EndDC(void);
-
-  long ClearBuf(int x, int y, int w, int h, COLORREF clr = RGB(255, 255, 255));
-
-  //////////////////////////////////////////////////////////////////////////
-  long DrawImage(const char *szImageBuffer, int nImageBufferSize, long lCodeType,
-                 long x = 0, long y = 0, long cx = -1, long cy = -1);
-  long StrethImage(const char *szImageBuffer, int nImageBufferSize, long lCodeType,
-                   long xoffset, long yoffset, long xsize, long ysize,
-                   DWORD dwRop = SRCCOPY);
-
-  long Save2Image(const char *szFilePath, bool bBgTransparent = false);
-  long Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize, long lCodeType,
-                     bool bBgTransparent = false);
-
-  static long Save2Image(HBITMAP hBitMap, const char *szFilePath,
-                         bool bBgTransparent = false);
-  static long Save2ImageBuffer(HBITMAP hBitMap, char *&szImageBuffer,
-                            long &lImageBufferSize, long lCodeType,
-                            bool bBgTransparent = false);
-  static long FreeImageBuffer(char *&szImageBuffer);
-
- public:
   RenderBuffer &operator=(const RenderBuffer &other);
 
- protected:
-  HWND m_hWnd;
-  HDC m_hPaintDC;
-  HBITMAP m_hOldPaintBuffer;
-  HBITMAP m_hPaintBuf;
+ public:
+  inline HWND GetHWND() const { return hwnd_; }
+  inline long SetHWND(HWND hwnd);
 
-  long m_nWidth;
-  long m_nHeight;
-  bool m_bOnwerBuf;
+  long SetSize(int cx, int cy);
+  inline long GetWidth(void) const { return width_; }
+  inline long GetHeight(void) const { return height_; }
+
+  inline HBITMAP GetBuffer(void) { return paint_buffer_; }
+  long ShareBuffer(RenderBuffer &source_render_buffer);
+
+  long Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
+            int src_org_x, int src_org_y, int op = SRCCOPY);
+  long Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
+            int src_org_x, int src_org_y, int src_w, int src_h,
+            eSwapType type = BLT_TRANSPARENT, int op = SRCCOPY,
+            COLORREF clr = RGB(255, 255, 255));
+
+  long Swap(RenderBuffer &target_render_buffer, int dest_org_x, int dest_org_y,
+            int dest_w, int dest_h, int src_org_x, int src_org_y,
+            int op = SRCCOPY);
+  long Swap(RenderBuffer &target_render_buffer, int dest_org_x, int dest_org_y,
+            int dest_w, int dest_h, int src_org_x, int src_org_y, int src_w,
+            int src_h, eSwapType type = BLT_TRANSPARENT, int op = SRCCOPY,
+            COLORREF clr = RGB(255, 255, 255));
+
+  long Clear(int x, int y, int w, int h, COLORREF clr = RGB(255, 255, 255));
+
+  HDC PrepareDC(bool is_clip = true);
+  long EndDC(void);
+
+  long DrawImage(const char *image_buffer, int image_buffer_size,
+                 long code_type_, long x = 0, long y = 0, long cx = -1,
+                 long cy = -1);
+  long StrethImage(const char *image_buffer, int image_buffer_size,
+                   long code_type_, long xoffset, long yoffset, long xsize,
+                   long ysize, DWORD rop = SRCCOPY);
+
+  long Save2Image(const char *file_path, bool backgroud_transparent = false);
+  long Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
+                        long code_type_, bool backgroud_transparent = false);
+
+  static long Save2Image(HBITMAP bitmap, const char *file_path,
+                         bool backgroud_transparent = false);
+  static long Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
+                               long &image_buffer_size, long code_type_,
+                               bool backgroud_transparent = false);
+  static long FreeImageBuffer(char *&image_buffer);
+
+ protected:
+  HWND hwnd_;
+  HDC paint_dc_;
+  HBITMAP old_paint_buffer_;
+  HBITMAP paint_buffer_;
+
+  long width_;
+  long height_;
+  bool owned_;
 };
 }  // namespace gfx2d
-#endif  // GFX_2D_RENDER_DEVICE_BUFFER_H
+#endif  // GFX_2D_RENDER_DEVICE_RENDER_BUFFER_H

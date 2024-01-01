@@ -1,6 +1,6 @@
 
-#ifndef CONTENT_CORE_DYNAMIC_LIBRARY_H
-#define CONTENT_CORE_DYNAMIC_LIBRARY_H
+#ifndef CONTENT_COMMON_DYNAMIC_LIBRARY_H
+#define CONTENT_COMMON_DYNAMIC_LIBRARY_H
 
 #include <string>
 
@@ -53,4 +53,4 @@ class CONTENT_EXPORT DynamicLibraryManager {
 };
 }  // namespace content
 
-#endif  // CONTENT_CORE_DYNAMIC_LIBRARY_H
+#endif  // CONTENT_COMMON_DYNAMIC_LIBRARY_H

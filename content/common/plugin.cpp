@@ -1,4 +1,4 @@
-#include "content/core/plugin.h"
+#include "content/common/plugin.h"
 
 #include <filesystem>
 #include <memory>

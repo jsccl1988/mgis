@@ -110,7 +110,7 @@
 #define OCT64_FORMAT "%llo"
 #endif  // OS_WIN
 
-#define EQUAL(a, b) (fabs(a - b) < 1E-5)
+#define EQUAL(a, b) (fabs(a - b) < kEpsilon)
 
 #define TO_STRING(x) #x
 #define MAKE_CHAR(x) #@ x

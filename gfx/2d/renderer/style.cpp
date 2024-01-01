@@ -1,163 +1,38 @@
-#include "bl_style.h"
+#include "gfx/2d/renderer/style.h"
 
 #include "base/logging.h"
 
-namespace core {
+namespace gfx2d {
 Style::Style(void) {
-  strcpy(name_, "Default");
-  m_stType = ST_PenDesc;
+  name_ = "Default";
+  style_type_ = ST_PenDesc;
 }
 
-Style::Style(const char *name, const PenDesc &penDesc,
-                   const BrushDesc &brushDesc,
-                   const AnnotationDesc &annoDesc,
-                   const SymbolDesc &symbolDesc)
-    : m_stPenDesc(penDesc),
-      m_stBrushDesc(brushDesc),
-      m_stAnnoDesc(annoDesc),
-      m_stSymbolDesc(symbolDesc) {
+Style::Style(const char *name, const PenDesc &pen_desc,
+             const BrushDesc &brush_desc, const AnnotationDesc &anno_desc,
+             const SymbolDesc &symbol_desc)
+    : pen_desc_(pen_desc),
+      brush_desc_(brush_desc),
+      anno_desc_(anno_desc),
+      symbol_desc_(symbol_desc) {
   SetStyleName(name);
 }
 
 Style::~Style() {}
 
-Style *Style::Clone(const char *szNewName) const {
-  Style *pNewStyle = new Style(szNewName, m_stPenDesc, m_stBrushDesc,
-                                     m_stAnnoDesc, m_stSymbolDesc);
-  if (pNewStyle != NULL) {
-    pNewStyle->SetStyleType(m_stType);
+Style *Style::Clone(const char *new_name) const {
+  Style *pNewStyle =
+      new Style(new_name, pen_desc_, brush_desc_, anno_desc_, symbol_desc_);
+  if (pNewStyle != nullptr) {
+    pNewStyle->SetStyleType(style_type_);
     return pNewStyle;
   } else
-    return NULL;
+    return nullptr;
 }
 
-StyleTable::StyleTable(void) {
-  m_nStyleCount = 0;
-  m_pStyleNames = NULL;
-}
-
-StyleTable::~StyleTable(void) {
-  int index = 0;
-  while (index < m_nStyleCount) {
-    free(m_pStyleNames[index]);
-    index++;
-  }
-
-  free(m_pStyleNames);
-
-  m_nStyleCount = 0;
-}
-
-StyleTable *StyleTable::Clone(void) const {
-  StyleTable *pStyleTable = new StyleTable();
-  if (pStyleTable == NULL) return NULL;
-
-  if (m_nStyleCount < 1) return NULL;
-
-  pStyleTable->m_pStyleNames = new char *[m_nStyleCount];
-
-  int i = 0;
-  while (i < m_nStyleCount) {
-    pStyleTable->m_pStyleNames[i] = strdup(m_pStyleNames[i]);
-    i++;
-  }
-
-  pStyleTable->m_nStyleCount = m_nStyleCount;
-
-  return pStyleTable;
-}
-
-//////////////////////////////////////////////////////////////////////////
-int StyleTable::FindStyleNameIndex(const char *stylename) const {
-  int index = 0;
-  while (index < m_nStyleCount) {
-    if (strcmp(m_pStyleNames[index], stylename) == 0) return index;
-    index++;
-  }
-
-  return -1;
-}
-
-int StyleTable::AddStyle(const char *stylename) {
-  int index = FindStyleNameIndex(stylename);
-  if (index > 0 && index < m_nStyleCount) return ERR_NONE;
-
-  StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
-  if (pStyleMgr->GetStyle(stylename) != NULL) {
-    m_pStyleNames =
-        (char **)realloc(m_pStyleNames, sizeof(void *) * (m_nStyleCount + 1));
-    m_pStyleNames[m_nStyleCount] = strdup(stylename);
-    m_nStyleCount++;
-
-    return ERR_NONE;
-  }
-
-  return ERR_FAILURE;
-}
-
-void StyleTable::RemoveStyle(const char *stylename) {
-  int index = FindStyleNameIndex(stylename);
-  if (index != -1 && index < m_nStyleCount) {
-    SAFE_DELETE_A(m_pStyleNames[index]);
-    memmove(m_pStyleNames + index, m_pStyleNames + index + 1,
-            sizeof(void *) * (m_nStyleCount - index - 1));
-    m_nStyleCount--;
-  }
-}
-
-Style *StyleTable::GetStyle(const char *stylename) {
-  StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
-  int index = FindStyleNameIndex(stylename);
-  if (index != -1) {
-    Style *pStyle = pStyleMgr->GetStyle(stylename);
-    if (NULL != pStyle) return pStyle;
-  }
-
-  return pStyleMgr->GetDefaultStyle();
-}
-
-const Style *StyleTable::GetStyle(const char *stylename) const {
-  StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
-  int index = FindStyleNameIndex(stylename);
-  if (index != -1) {
-    Style *pStyle = pStyleMgr->GetStyle(stylename);
-    if (NULL != pStyle) return pStyle;
-  }
-
-  return pStyleMgr->GetDefaultStyle();
-}
-
-Style *StyleTable::GetStyle(int index) {
-  StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
-  if (index > -1 && index < m_nStyleCount) {
-    Style *pStyle = pStyleMgr->GetStyle(m_pStyleNames[index]);
-    if (pStyle != NULL) return pStyle;
-  }
-
-  return pStyleMgr->GetDefaultStyle();
-}
-
-const Style *StyleTable::GetStyle(int index) const {
-  StyleManager *pStyleMgr = StyleManager::GetSingletonPtr();
-  if (index > -1 && index < m_nStyleCount) {
-    Style *pStyle = pStyleMgr->GetStyle(m_pStyleNames[index]);
-    if (pStyle != NULL) return pStyle;
-  }
-
-  return pStyleMgr->GetDefaultStyle();
-}
-
-const char *StyleTable::GetStyleName(int index) {
-  if (m_pStyleNames && index != -1 && index < m_nStyleCount)
-    return m_pStyleNames[index];
-  else
-    return "";
-}
-
-StyleManager *StyleManager::singleton_ = NULL;
-
+StyleManager *StyleManager::singleton_ = nullptr;
 StyleManager *StyleManager::GetSingletonPtr(void) {
-  if (singleton_ == NULL) {
+  if (singleton_ == nullptr) {
     singleton_ = new StyleManager();
   }
   return singleton_;
@@ -165,86 +40,82 @@ StyleManager *StyleManager::GetSingletonPtr(void) {
 
 void StyleManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
 
-//////////////////////////////////////////////////////////////////////////
 StyleManager::StyleManager(void) {
-  m_pDefaultStyle = NULL;
+  default_style_ = nullptr;
 
   DestroyAllStyle();
 }
 
 StyleManager::~StyleManager(void) { DestroyAllStyle(); }
 
-//////////////////////////////////////////////////////////////////////////
-
-void StyleManager::SetDefaultStyle(const char *defName, PenDesc &penDesc,
-                                      BrushDesc &brushDesc,
-                                      AnnotationDesc &annoDesc,
-                                      SymbolDesc &symbolDesc) {
-  m_pDefaultStyle =
-      new Style(defName, penDesc, brushDesc, annoDesc, symbolDesc);
-  m_StylePtrList.push_back(m_pDefaultStyle);
+void StyleManager::SetDefaultStyle(const char *defName, PenDesc &pen_desc,
+                                   BrushDesc &brush_desc,
+                                   AnnotationDesc &anno_desc,
+                                   SymbolDesc &symbol_desc) {
+  default_style_ =
+      new Style(defName, pen_desc, brush_desc, anno_desc, symbol_desc);
+  style_list_.push_back(default_style_);
 }
 
 void StyleManager::DestroyAllStyle() {
-  StylePtrList::iterator i = m_StylePtrList.begin();
+  StyleList::iterator i = style_list_.begin();
 
-  while (i != m_StylePtrList.end()) {
+  while (i != style_list_.end()) {
     SAFE_DELETE(*i);
     ++i;
   }
-  m_StylePtrList.clear();
+  style_list_.clear();
 }
 
-Style *StyleManager::CreateStyle(const char *defName, PenDesc &penDesc,
-                                       BrushDesc &brushDesc,
-                                       AnnotationDesc &annoDesc,
-                                       SymbolDesc &symbolDesc) {
-  Style *pStyle = NULL;
-  pStyle = GetStyle(defName);
-  if (!pStyle) {
-    pStyle = new Style(defName, penDesc, brushDesc, annoDesc, symbolDesc);
-    m_StylePtrList.push_back(pStyle);
+Style *StyleManager::CreateStyle(const char *defName, PenDesc &pen_desc,
+                                 BrushDesc &brush_desc,
+                                 AnnotationDesc &anno_desc,
+                                 SymbolDesc &symbol_desc) {
+  Style *style = GetStyle(defName);
+  if (!style) {
+    style = new Style(defName, pen_desc, brush_desc, anno_desc, symbol_desc);
+    style_list_.push_back(style);
   }
 
-  return pStyle;
+  return style;
 }
 
 void StyleManager::DestroyStyle(const char *name) {
-  Style *pStyle = NULL;
-  StylePtrList::iterator i = m_StylePtrList.begin();
+  Style *style = nullptr;
+  StyleList::iterator i = style_list_.begin();
 
-  while (i != m_StylePtrList.end()) {
+  while (i != style_list_.end()) {
     if (strcmp((**i).GetStyleName(), name) == 0) {
       SAFE_DELETE(*i);
-      m_StylePtrList.erase(i);
+      style_list_.erase(i);
       break;
     }
     ++i;
   }
 }
 
-void StyleManager::DestroyStyle(Style *pStyle) {
-  DestroyStyle(pStyle->GetStyleName());
+void StyleManager::DestroyStyle(Style *style) {
+  DestroyStyle(style->GetStyleName());
 }
 
 Style *StyleManager::GetStyle(const char *name) {
-  Style *pStyle = NULL;
-  StylePtrList::iterator i = m_StylePtrList.begin();
+  Style *style = nullptr;
+  StyleList::iterator i = style_list_.begin();
 
-  while (i != m_StylePtrList.end()) {
+  while (i != style_list_.end()) {
     if (strcmp((**i).GetStyleName(), name) == 0) {
-      pStyle = *i;
+      style = *i;
       break;
     }
     ++i;
   }
-  return pStyle;
+  return style;
 }
 
 Style *StyleManager::GetDefaultStyle(void) {
-  if (m_pDefaultStyle)
-    return m_pDefaultStyle;
+  if (default_style_)
+    return default_style_;
   else
-    return NULL;
+    return nullptr;
 }
-}  // namespace core
+}  // namespace gfx2d

@@ -8,10 +8,10 @@ static_library("content") {
   ]
 
   sources = [
-    "core/command.cpp",
-    "core/dynamic_library.cpp",
-    "core/message_listener.cpp",
-    "core/plugin.cpp",
+    "common/command.cpp",
+    "common/dynamic_library.cpp",
+    "common/message_listener.cpp",
+    "common/plugin.cpp",
   ]
 
   include_dirs += [

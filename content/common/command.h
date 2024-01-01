@@ -1,5 +1,5 @@
-#ifndef CONTENT_CORE_COMMAND_H
-#define CONTENT_CORE_COMMAND_H
+#ifndef CONTENT_COMMON_COMMAND_H
+#define CONTENT_COMMON_COMMAND_H
 
 #include <stack>
 #include <vector>
@@ -86,4 +86,4 @@ class CONTENT_EXPORT CommandManager {
 };
 }  // namespace content
 
-#endif  // CONTENT_CORE_COMMAND_H
+#endif  // CONTENT_COMMON_COMMAND_H

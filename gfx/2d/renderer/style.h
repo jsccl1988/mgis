@@ -1,203 +1,171 @@
-#ifndef CORE_STYLE_H
-#define CORE_STYLE_H
+#ifndef GFX_2D_RENDERER_STYLE_H
+#define GFX_2D_RENDERER_STYLE_H
 
-#include "core/core.h"
-#include "core/core_export.h"
+#include <map>
+#include <vector>
 
-#include "smt_bas_struct.h"
-#include "smt_core.h"
-#include "smt_env_struct.h"
+#include "base/base_config.h"
+#include "base/base_types.h"
+#include "base/error.h"
+#include "base/macros.h"
+#include "gfx/2d/renderer/render_export.h"
 
 namespace gfx2d {
-enum StType {
+enum GFX_2D_RENDERER_EXPORT StType {
   ST_PenDesc = 0x0001,
   ST_BrushDesc = 0x0002,
   ST_AnnoDesc = 0x0004,
   ST_SymbolDesc = 0x008
 };
 
-struct PenDesc {
-  long lPenColor;
-  long lPenStyle;
-  float fPenWidth;
+struct GFX_2D_RENDERER_EXPORT PenDesc {
+  long color;
+  long style;
+  float width;
 
   PenDesc(void) {
-    lPenColor = RGB(0, 255, 0);
-    lPenStyle = PS_SOLID;
-    fPenWidth = 0.002;
+    color = RGB(0, 255, 0);
+    style = PS_SOLID;
+    width = 0.002f;
   }
 };
 
-struct BrushDesc {
-  enum brushType { BT_Solid, BT_Hatch } brushTp;
+struct GFX_2D_RENDERER_EXPORT BrushDesc {
+  enum BrushType { BT_Solid, BT_Hatch } brush_type;
 
-  long lBrushColor;
-  long lBrushStyle;
+  long color;
+  long style;
 
   BrushDesc(void) {
-    brushTp = BT_Solid;
-    lBrushColor = RGB(0, 255, 255);
-    lBrushStyle = HS_FDIAGONAL;
+    brush_type = BT_Solid;
+    color = RGB(0, 255, 255);
+    style = HS_FDIAGONAL;
   }
 };
 
-struct AnnotationDesc {
-  float fHeight;
-  float fWidth;
-  long lEscapement;
-  long lOrientation;
-  long lWeight;
-  byte lItalic;
-  byte lUnderline;
-  byte lStrikeOut;
-  byte lCharSet;
-  byte lOutPrecision;
-  byte lClipPrecision;
-  byte lQuality;
-  byte lPitchAndFamily;
-  char szFaceName[32];
+struct GFX_2D_RENDERER_EXPORT AnnotationDesc {
+  float height;
+  float width;
+  long escapement;
+  long orientation;
+  long weight;
+  bool italic;
+  bool underline;
+  uint8_t strikeout;
+  uint8_t char_set;
+  uint8_t out_precision;
+  uint8_t clip_precision;
+  uint8_t quality;
+  uint8_t pitch_and_family;
+  std::string face_name;
 
-  long lAnnoClr;
-  float fAngle;
-  float fSpace;
+  long color;
+  float angle;
+  float space;
 
   AnnotationDesc(void) {
-    fHeight = 1.6;
-    fWidth = 1.6;
-    lEscapement = 0;
-    lOrientation = 0;
-    lWeight = 50;
-    lItalic = FALSE;
-    lUnderline = FALSE;
-    lStrikeOut = 0;
-    lCharSet = DEFAULT_CHARSET;
-    lOutPrecision = OUT_TT_PRECIS;
-    lClipPrecision = CLIP_CHARACTER_PRECIS;
-    lQuality = DEFAULT_QUALITY;
-    lPitchAndFamily = FIXED_PITCH;
-    strcpy(szFaceName, "Times New Roman");
+    height = 1.6f;
+    width = 1.6f;
+    escapement = 0;
+    orientation = 0;
+    weight = 50;
+    italic = FALSE;
+    underline = FALSE;
+    strikeout = 0;
+    char_set = DEFAULT_CHARSET;
+    out_precision = OUT_TT_PRECIS;
+    clip_precision = CLIP_CHARACTER_PRECIS;
+    quality = DEFAULT_QUALITY;
+    pitch_and_family = FIXED_PITCH;
+    face_name = "Times New Roman";
 
-    lAnnoClr = RGB(0, 0, 0);
-    fAngle = 0;
-    fSpace = 0.2;
+    color = RGB(0, 0, 0);
+    angle = 0.f;
+    space = 0.2f;
   }
 };
 
 struct SymbolDesc {
-  long lSymbolID;
-  float fSymbolWidth;
-  float fSymbolHeight;
+  uint32_t id;
+  float width;
+  float height;
 
   SymbolDesc(void) {
-    lSymbolID = 0;
-    fSymbolHeight = 0.4;
-    fSymbolWidth = 0.4;
+    id = 0;
+    height = 0.4f;
+    width = 0.4f;
   }
 };
 
-class CORE_EXPORT Style {
+class GFX_2D_RENDERER_EXPORT Style {
  public:
   Style(void);
-  Style(const char *name, const PenDesc &penDesc,
-           const BrushDesc &brushDesc, const AnnotationDesc &annoDesc,
-           const SymbolDesc &symbolDesc);
+  Style(const char *name, const PenDesc &pen_desc, const BrushDesc &brush_desc,
+        const AnnotationDesc &anno_desc, const SymbolDesc &symbol_desc);
 
   ~Style();
 
  public:
-  const char *GetStyleName() const { return name_; }
-  ulong GetStyleType(void) const { return m_stType; }
+  const char *GetStyleName() const { return name_.c_str(); }
+  uint32_t GetStyleType(void) const { return style_type_; }
 
-  void SetStyleType(ulong tp) { m_stType = tp; }
-  void SetStyleName(const char *name) { strcpy(name_, name); }
-  Style *Clone(const char *szNewName) const;
+  void SetStyleType(uint32_t tp) { style_type_ = tp; }
+  void SetStyleName(const char *name) { name_ = name; }
+  Style *Clone(const char *new_name) const;
 
-  //////////////////////////////////////////////////////////////////////////
-  inline void SetPenDesc(const PenDesc &penDesc) { m_stPenDesc = penDesc; }
-  inline void SetBrushDesc(const BrushDesc &brushDesc) {
-    m_stBrushDesc = brushDesc;
+  inline void SetPenDesc(const PenDesc &pen_desc) { pen_desc_ = pen_desc; }
+  inline void SetBrushDesc(const BrushDesc &brush_desc) {
+    brush_desc_ = brush_desc;
   }
-  inline void SetAnnoDesc(const AnnotationDesc &annoDesc) {
-    m_stAnnoDesc = annoDesc;
+  inline void SetAnnoDesc(const AnnotationDesc &anno_desc) {
+    anno_desc_ = anno_desc;
   }
-  inline void SetSymbolDesc(const SymbolDesc &symbolDesc) {
-    m_stSymbolDesc = symbolDesc;
+  inline void SetSymbolDesc(const SymbolDesc &symbol_desc) {
+    symbol_desc_ = symbol_desc;
   }
 
-  //////////////////////////////////////////////////////////////////////////
-  inline PenDesc &GetPenDesc(void) { return m_stPenDesc; }
-  inline BrushDesc &GetBrushDesc(void) { return m_stBrushDesc; }
-  inline AnnotationDesc &GetAnnoDesc(void) { return m_stAnnoDesc; }
-  inline SymbolDesc &GetSymbolDesc(void) { return m_stSymbolDesc; }
+  inline PenDesc &GetPenDesc(void) { return pen_desc_; }
+  inline BrushDesc &GetBrushDesc(void) { return brush_desc_; }
+  inline AnnotationDesc &GetAnnoDesc(void) { return anno_desc_; }
+  inline SymbolDesc &GetSymbolDesc(void) { return symbol_desc_; }
 
-  inline const PenDesc &GetPenDesc(void) const { return m_stPenDesc; }
-  inline const BrushDesc &GetBrushDesc(void) const { return m_stBrushDesc; }
-  inline const AnnotationDesc &GetAnnoDesc(void) const {
-    return m_stAnnoDesc;
-  }
-  inline const SymbolDesc &GetSymbolDesc(void) const {
-    return m_stSymbolDesc;
-  }
+  inline const PenDesc &GetPenDesc(void) const { return pen_desc_; }
+  inline const BrushDesc &GetBrushDesc(void) const { return brush_desc_; }
+  inline const AnnotationDesc &GetAnnoDesc(void) const { return anno_desc_; }
+  inline const SymbolDesc &GetSymbolDesc(void) const { return symbol_desc_; }
 
  protected:
-  char name_[MAX_STYLENAME_LENGTH];
-  ulong m_stType;
+  std::string name_;
+  uint32_t style_type_;
 
-  PenDesc m_stPenDesc;
-  BrushDesc m_stBrushDesc;
-  AnnotationDesc m_stAnnoDesc;
-  SymbolDesc m_stSymbolDesc;
+  PenDesc pen_desc_;
+  BrushDesc brush_desc_;
+  AnnotationDesc anno_desc_;
+  SymbolDesc symbol_desc_;
 };
 
-typedef vector<Style *> StylePtrList;
+using StyleList = std::vector<Style *>;
+using StyleMap = std::map<std::string, Style *>;
 
-class CORE_EXPORT StyleTable {
- public:
-  StyleTable(void);
-  ~StyleTable(void);
-
-  inline int GetStyleCount(void) const { return m_nStyleCount; }
-
-  StyleTable *Clone(void) const;
-
-  int AddStyle(const char *stylename);
-  void RemoveStyle(const char *stylename);
-
-  Style *GetStyle(const char *stylename);
-  const Style *GetStyle(const char *stylename) const;
-
-  Style *GetStyle(int index);
-  const Style *GetStyle(int index) const;
-
-  const char *GetStyleName(int index);
-
- protected:
-  int FindStyleNameIndex(const char *stylename) const;
-
- protected:
-  char **m_pStyleNames;
-  int m_nStyleCount;
-};
-
-class CORE_EXPORT StyleManager {
+class GFX_2D_RENDERER_EXPORT StyleManager {
  private:
   StyleManager(void);
 
  public:
   virtual ~StyleManager(void);
 
-  void SetDefaultStyle(const char *defName, PenDesc &penDesc,
-                       BrushDesc &brushDesc, AnnotationDesc &annoDesc,
-                       SymbolDesc &symbolDesc);
+  void SetDefaultStyle(const char *defName, PenDesc &pen_desc,
+                       BrushDesc &brush_desc, AnnotationDesc &anno_desc,
+                       SymbolDesc &symbol_desc);
   Style *GetDefaultStyle(void);
 
  public:
-  Style *CreateStyle(const char *defName, PenDesc &penDesc,
-                        BrushDesc &brushDesc, AnnotationDesc &annoDesc,
-                        SymbolDesc &symbolDesc);
+  Style *CreateStyle(const char *defName, PenDesc &pen_desc,
+                     BrushDesc &brush_desc, AnnotationDesc &anno_desc,
+                     SymbolDesc &symbol_desc);
 
   void DestroyStyle(const char *name);
-  void DestroyStyle(Style *pStyle);
+  void DestroyStyle(Style *style);
   void DestroyAllStyle();
 
   Style *GetStyle(const char *name);
@@ -208,11 +176,11 @@ class CORE_EXPORT StyleManager {
   static void DestoryInstance(void);
 
  private:
-  StylePtrList m_StylePtrList;
-  Style *m_pDefaultStyle;
+  StyleList style_list_;
+  Style *default_style_;
 
   static StyleManager *singleton_;
 };
-}  // namespace core
+}  // namespace gfx2d
 
-#endif  //CORE_STYLE_H
+#endif  // GFX_2D_RENDERER_STYLE_H

@@ -1,5 +1,5 @@
-#ifndef CONTENT_CORE_MESSAGE_H
-#define CONTENT_CORE_MESSAGE_H
+#ifndef CONTENT_COMMON_MESSAGE_H
+#define CONTENT_COMMON_MESSAGE_H
 
 #include "content/content.h"
 
@@ -52,4 +52,4 @@ using Messages = std::vector<long>;
 using Message2Ptr = std::map<long, void *>;
 using Message2PtrPair = std::pair<long, void *>;
 }  // namespace content
-#endif  // CONTENT_CORE_MESSAGE_H
+#endif  // CONTENT_COMMON_MESSAGE_H

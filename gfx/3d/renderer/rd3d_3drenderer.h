@@ -8,14 +8,14 @@ class CORE_EXPORT 3DRenderer {
   3DRenderer(HINSTANCE hInst);
   ~3DRenderer(void);
 
-  long CreateDevice(const char *chAPI);
-  LP3DRENDERDEVICE GetDevice(void) { return m_pDevice; }
+  long CreateDevice(const char *device_name);
+  LP3DRENDERDEVICE GetDevice(void) { return device_; }
   HINSTANCE GetModule(void) { return dll_; }
   void Release(void);
 
  private:
-  3DRenderDevice * m_pDevice;
-  HINSTANCE m_hInst;
+  3DRenderDevice * device_;
+  HINSTANCE instance_handle_;
   HMODULE dll_;
 };
 

@@ -1,33 +1,31 @@
 #ifndef GFX_2D_RENDERER_H
 #define GFX_2D_RENDERER_H
 
-#include "gfx/2d/renderer/export.h"
+#include <string>
 
-#include <wtypes.h>
+#include "gfx/2d/renderer/render_export.h"
+#include "gfx/2d/renderer/common.h"
+#include "gfx/2d/renderer/render_device.h"
+
 
 namespace gfx2d {
-enum RHI2D { RHI2D_GDI };
-struct RenderOptions {
-  bool show_mbr = true;
-  bool show_point = true;
-  long point_raduis = 2;
-};
 class GFX_2D_RENDERER_EXPORT Renderer {
  public:
-  Renderer(HINSTANCE hInst);
+  Renderer(HINSTANCE instance);
   ~Renderer(void);
 
-  int CreateDevice(const char* chAPI);
-  LPRENDERDEVICE GetDevice(void) { return m_pDevice; }
-  void Release(void);
+  HRENDERDEVICE GetDevice(void) { return device_; }
+  int CreateDevice(const char* device_name);
+  void ReleaseDevice(void);
 
  private:
-  LPRENDERDEVICE m_pDevice;
-  HINSTANCE m_hInst;
+  std::string device_name_;
+  HRENDERDEVICE device_;
+  HINSTANCE instance_handle_;
   HMODULE dll_;
 };
 
-typedef Renderer* LPRENDERER;
+using HRENDERER = Renderer*;
 }  // namespace gfx2d
 
-#endif  //GFX_2D_RENDERER_H
+#endif  // GFX_2D_RENDERER_H

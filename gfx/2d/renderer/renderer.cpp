@@ -1,56 +1,66 @@
-#include "rd_renderer.h"
+#include "gfx/2d/renderer/renderer.h"
+
+#include "base/logging.h"
 
 namespace gfx2d {
-Renderer::Renderer(HINSTANCE hInst) {
-  m_hInst = hInst;
-  dll_ = NULL;
-  m_pDevice = NULL;
+Renderer::Renderer(HINSTANCE instance) {
+  instance_handle_ = instance;
+  dll_ = nullptr;
+  device_ = nullptr;
 }
 
-Renderer::~Renderer(void) { Release(); }
+Renderer::~Renderer(void) { ReleaseDevice(); }
 
-int Renderer::CreateDevice(const char *chAPI) {
-  char buffer[300];
-
-  if (strcmp(chAPI, "RenderDeviceGDI") == 0) {
-    dll_ = LoadLibrary("RenderDeviceGDI.dll");
+int Renderer::CreateDevice(const char *device_name) {
+  device_name_ = device_name;
+  if (strcmp(device_name, "render_device_gdi") == 0) {
+    // dll_ = LoadLibrary("render_device_gdi.dll");
     if (!dll_) {
-      ::MessageBox(NULL, "Loading RenderDeviceGDI.dll from dll failed.",
-                   "SmartGis - error", MB_OK | MB_ICONERROR);
+      std::string err = "   Loading ";
+      err += device_name_;
+      err += " error!";
+      LOG(ERROR) << __FUNCTION__ << err;
       return ERR_FAILURE;
     }
 
-    _CreateRenderDevice _CreateRenderDev = 0;
+    CreateRenderDeviceFn create_render_device = 0;
     HRESULT hr;
 
-    _CreateRenderDev =
-        (_CreateRenderDevice)GetProcAddress(dll_, "CreateRenderDevice");
+    create_render_device =
+        (CreateRenderDeviceFn)GetProcAddress(dll_, "CreateRenderDevice");
 
-    if (NULL == _CreateRenderDev) return ERR_FAILURE;
+    if (nullptr == create_render_device) return ERR_FAILURE;
 
-    hr = _CreateRenderDev(dll_, m_pDevice);
+    hr = create_render_device(dll_, device_);
 
     if (FAILED(hr)) {
-      ::MessageBox(NULL, "CreateRenderDevice() from lib failed.", "Gis - error",
-                   MB_OK | MB_ICONERROR);
-      m_pDevice = NULL;
-
+      device_ = nullptr;
+      std::string err = "   Loading ";
+      err += device_name_;
+      err += " error!";
+      LOG(ERROR) << __FUNCTION__ << err;
       return ERR_FAILURE;
     }
-
-    return ERR_NONE;
   }
 
-  void Renderer::Release(void) {
-    _DestroyRenderDevice _ReleaseRenderDev = 0;
+  return ERR_NONE;
+}
 
-    if (dll_) {
-      _ReleaseRenderDev =
-          (_DestroyRenderDevice)GetProcAddress(dll_, "DestroyRenderDevice");
-    }
+void Renderer::ReleaseDevice(void) {
+  DestroyRenderDeviceFn destroy_render_device = 0;
 
-    if (m_pDevice && _ReleaseRenderDev) {
-      _ReleaseRenderDev(m_pDevice);
-    }
+  if (dll_) {
+    destroy_render_device =
+        (DestroyRenderDeviceFn)GetProcAddress(dll_, "DestroyRenderDevice");
+  } else {
+    std::string err = "   Release ";
+    err += device_name_;
+    err += " error!";
+    LOG(ERROR) << __FUNCTION__ << err;
   }
+
+  if (device_ && destroy_render_device) {
+    destroy_render_device(device_);
+  }
+}
 }  // namespace gfx2d

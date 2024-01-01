@@ -130,11 +130,11 @@ class GLRenderDevice : public 3DRenderDevice {
  public:
   //////////////////////////////////////////////////////////////////////////
   // vertex buffer
-  virtual VertexBuffer *CreateVertexBuffer(int nCount, ulong ulFormat,
+  virtual VertexBuffer *CreateVertexBuffer(int size, ulong ulFormat,
                                            bool bDynamic = true);
 
   // index buffer
-  virtual IndexBuffer *CreateIndexBuffer(int nCount);
+  virtual IndexBuffer *CreateIndexBuffer(int size);
 
   // video buffer
   virtual VideoBuffer *CreateVideoBuffer(ArrayType type);
@@ -238,7 +238,7 @@ class GLRenderDevice : public 3DRenderDevice {
 
  public:
   // fast draw
-  virtual long DrawCube3D(Vector3 vCenter, float fWidth, Color smtClr);
+  virtual long DrawCube3D(Vector3 vCenter, float width, Color smtClr);
 
  protected:
   long SetDeviceCaps(void);

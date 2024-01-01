@@ -1,4 +1,4 @@
-#include "content/core/dynamic_library.h"
+#include "content/common/dynamic_library.h"
 
 #include "base/logging.h"
 

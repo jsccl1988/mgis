@@ -1,8 +1,8 @@
 // Copyright (c) 2023 The Mogu Authors.
 // All rights reserved.
 
-#ifndef GFX_2D_RENDER_DEVICE_EXPORT_H
-#define GFX_2D_RENDER_DEVICE_EXPORT_H
+#ifndef GFX_2D_RENDER_RENDER_EXPORT_H
+#define GFX_2D_RENDER_RENDER_EXPORT_H
 
 #if defined(COMPONENT_BUILD)
 #if defined(WIN32)
@@ -18,4 +18,4 @@
 #define GFX_2D_RENDERER_EXPORT
 #endif  // defined(COMPONENT_BUILD)
 
-#endif  // GFX_2D_RENDER_DEVICE_EXPORT_H
+#endif  // GFX_2D_RENDER_RENDER_EXPORT_H

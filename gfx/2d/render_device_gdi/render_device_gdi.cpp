@@ -1,146 +1,136 @@
+
 #include "gfx/2d/render_device_gdi/render_device_gdi.h"
 
 #include <math.h>
 
-namespace gfx2d {
-const float C_fDELAY = 0.25;
+#include "base/logging.h"
+#include "gfx/2d/render_device_gdi/utils.h"
 
-int CreateRenderDevice(HINSTANCE hInst, LPRENDERDEVICE &pMrdDevice) {
-  if (!pMrdDevice) {
-    pMrdDevice = new RenderDeviceGDI(hInst);
+#pragma warning(disable : 4244)
+
+namespace gfx2d {
+const float kDelay = 0.25;
+
+int CreateRenderDevice(HINSTANCE instance, HRENDERDEVICE &render_device) {
+  if (!render_device) {
+    render_device = new RenderDeviceGDI(instance);
     return ERR_NONE;
   }
 
   return ERR_FAILURE;
 }
 
-int DestroyRenderDevice(LPRENDERDEVICE &pMrdDevice) {
-  if (!pMrdDevice) return ERR_FAILURE;
+int DestroyRenderDevice(HRENDERDEVICE &render_device) {
+  if (!render_device) {
+    return ERR_FAILURE;
+  }
 
-  SAFE_DELETE(pMrdDevice);
+  SAFE_DELETE(render_device);
 
   return ERR_NONE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-RenderDeviceGDI::RenderDeviceGDI(HINSTANCE hInst)
-    : RenderDevice(hInst),
-      m_hFont(NULL),
-      m_hPen(NULL),
-      m_hBrush(NULL),
-      m_hIcon(NULL),
-      m_hOldFont(NULL),
-      m_hOldPen(NULL),
-      m_hOldBrush(NULL),
-      m_hCurDC(NULL),
-      m_fAnnoAngle(0.),
-      m_nFeatureType(FeatureType::FtUnknown),
-      m_llLastRedrawCmdStamp(0),
-      m_llLastRedrawStamp(0),
-      m_bRedraw(false),
-      m_bCurUseStyle(false),
-      m_bLockStyle(false) {
-  m_rBaseApi = RD_GDI;
-
-  m_curDrawingOrg.x = 0;
-  m_curDrawingOrg.y = 0;
-  sprintf(m_szAnno, "Smart Gis");
+RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
+    : RenderDevice(instance),
+      font_(NULL),
+      pen_(NULL),
+      brush_(NULL),
+      icon_(NULL),
+      old_font_(NULL),
+      old_pen_(NULL),
+      old_brush_(NULL),
+      current_dc_(NULL),
+      anno_angle_(0.),
+      last_redraw_command_stamp_(0),
+      last_redraw_stamp_(0),
+      is_redraw_(false),
+      use_current_style_(false),
+      is_lock_style_(false) {
+  rhi_api_ = RHI2D_GDI;
+  current_dop_.x = 0;
+  current_dop_.y = 0;
+  anno_name_ = "Smart Gis";
 }
 
 RenderDeviceGDI::~RenderDeviceGDI(void) { Release(); }
 
-int RenderDeviceGDI::Init(HWND hWnd, const char *logname) {
-  if (hWnd == NULL || logname == NULL) return ERR_INVALID_PARAM;
+int RenderDeviceGDI::Init(HWND hwnd) {
+  if (hwnd == NULL) {
+    LOG(ERROR) << __FUNCTION__ << "hwnd is nullptr!";
+    return ERR_INVALID_PARAM;
+  }
 
-  m_hWnd = hWnd;
-
-  LogManager *pLogMgr = LogManager::GetSingletonPtr();
-  Log *pLog = pLogMgr->CreateLog(logname);
-
-  if (NULL == pLog) return ERR_FAILURE;
-
-  pLog->LogMessage("Init Gdi SimpleRenderDevice ok!");
-
-  m_strLogName = logname;
-
-  m_smtRenderBuf.SetHWND(m_hWnd);
-  m_smtMapRenderBuf.SetHWND(m_hWnd);
+  hwnd_ = hwnd;
+  render_buffer_.SetHWND(hwnd_);
+  composit_render_buffer_.SetHWND(hwnd_);
+  LOG(INFO) << __FUNCTION__ << "Init Gdi RenderDevice ok!";
 
   return ERR_NONE;
 }
 
 int RenderDeviceGDI::Destroy(void) {
-  LogManager *pLogMgr = LogManager::GetSingletonPtr();
-  Log *pLog = pLogMgr->GetLog(m_strLogName.c_str());
-  if (pLog != NULL) pLog->LogMessage("Destroy Gdi SimpleRenderDevice ok!");
-
+  LOG(INFO) << __FUNCTION__ << "Destroy Gdi RenderDevice ok!";
   return ERR_NONE;
 }
 
 int RenderDeviceGDI::Release(void) {
-  LogManager *pLogMgr = LogManager::GetSingletonPtr();
-  Log *pLog = pLogMgr->GetLog(m_strLogName.c_str());
-  if (pLog != NULL) pLog->LogMessage("Release Gdi SimpleRenderDevice ok!");
-
-  if (m_hFont) {
-    DeleteObject(m_hFont);
-    m_hFont = NULL;
+  if (font_) {
+    ::DeleteObject(font_);
+    font_ = NULL;
   }
 
-  if (m_hPen) {
-    DeleteObject(m_hPen);
-    m_hPen = NULL;
+  if (pen_) {
+    ::DeleteObject(pen_);
+    pen_ = NULL;
   }
 
-  if (m_hBrush) {
-    DeleteObject(m_hBrush);
-    m_hBrush = NULL;
+  if (brush_) {
+    ::DeleteObject(brush_);
+    brush_ = NULL;
   }
 
-  if (m_hIcon) {
-    DeleteObject(m_hIcon);
-    m_hIcon = NULL;
+  if (icon_) {
+    ::DeleteObject(icon_);
+    icon_ = NULL;
   }
+
+  LOG(INFO) << __FUNCTION__ << "Release Gdi RenderDevice ok!";
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::Resize(int orgx, int orgy, int cx, int cy) {
-  if (cx < 0 || cy < 0) return ERR_FAILURE;
-
-  if (IsEqual(m_Viewport.m_fVOX, orgx, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVOY, orgy, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVHeight, cy, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVWidth, cx, dEPSILON)) {
+int RenderDeviceGDI::Resize(DRect rect) {
+  if (rect.width < 0 || rect.height < 0) {
     return ERR_FAILURE;
   }
 
-  m_Viewport.m_fVOX = orgx;
-  m_Viewport.m_fVOY = orgy;
-  m_Viewport.m_fVHeight = cy;
-  m_Viewport.m_fVWidth = cx;
+  if (::gfx2d::equal(viewport_, rect)) {
+    return ERR_FAILURE;
+  }
 
-  m_virViewport1 = m_Viewport;
-  m_virViewport2 = m_Viewport;
+  viewport_.x = rect.x;
+  viewport_.y = rect.y;
+  viewport_.height = rect.height;
+  viewport_.width = rect.width;
+
+  virtual_viewport_for_zoomin_ = viewport_;
+  virtual_viewport_for_zoomout_ = viewport_;
 
   float xblc, yblc;
-  xblc = m_Viewport.m_fVWidth / m_Windowport.m_fWWidth;
-  yblc = m_Viewport.m_fVHeight / m_Windowport.m_fWHeight;
+  xblc = viewport_.width / windowport_.width;
+  yblc = viewport_.height / windowport_.height;
 
-  m_fblc = (xblc > yblc) ? yblc : xblc;
+  blc_ = (xblc > yblc) ? yblc : xblc;
 
-  if (ERR_NONE == m_smtRenderBuf.SetSize(m_Viewport.m_fVWidth,
-                                                m_Viewport.m_fVHeight) &&
-      ERR_NONE == m_smtMapRenderBuf.SetSize(m_Viewport.m_fVWidth,
-                                                   m_Viewport.m_fVHeight)) {
-    if (ERR_NONE ==
-            m_smtRenderBuf.Swap(m_Viewport.m_fVOX, m_Viewport.m_fVOY,
-                                   m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
-                                   m_Viewport.m_fVOX, m_Viewport.m_fVOY) &&
-        ERR_NONE == m_smtMapRenderBuf.Swap(
-                            m_Viewport.m_fVOX, m_Viewport.m_fVOY,
-                            m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
-                            m_Viewport.m_fVOX, m_Viewport.m_fVOY)) {
+  if (ERR_NONE == render_buffer_.SetSize(viewport_.width, viewport_.height) &&
+      ERR_NONE ==
+          composit_render_buffer_.SetSize(viewport_.width, viewport_.height)) {
+    if (ERR_NONE == render_buffer_.Swap(viewport_.x, viewport_.y,
+                                        viewport_.width, viewport_.height,
+                                        viewport_.x, viewport_.y) &&
+        ERR_NONE == composit_render_buffer_.Swap(
+                        viewport_.x, viewport_.y, viewport_.width,
+                        viewport_.height, viewport_.x, viewport_.y)) {
       return ERR_NONE;
     }
   }
@@ -148,403 +138,366 @@ int RenderDeviceGDI::Resize(int orgx, int orgy, int cx, int cy) {
   return ERR_FAILURE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::LPToDP(float x, float y, LONG &X, LONG &Y) const {
-  if (IsEqual(m_Windowport.m_fWWidth, 0, dEPSILON) &&
-      IsEqual(m_Windowport.m_fWHeight, 0, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVWidth, 0, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVHeight, 0, dEPSILON)) {
+int RenderDeviceGDI::LPToDP(float x, float y, long &X, long &Y) const {
+  if (::gfx2d::is_empty(windowport_) && ::gfx2d::is_empty(viewport_)) {
     X = x;
     Y = y;
-
     return ERR_FAILURE;
   }
 
-  X = LONG(m_Viewport.m_fVOX + (x - m_Windowport.m_fWOX) * m_fblc + 0.5);
-  Y = LONG(m_Viewport.m_fVOY + (y - m_Windowport.m_fWOY) * m_fblc + 0.5);
+  X = long(viewport_.x + (x - windowport_.x) * blc_ + 0.5);
+  Y = long(viewport_.y + (y - windowport_.y) * blc_ + 0.5);
 
-  Y = m_Viewport.m_fVHeight - Y;
+  Y = viewport_.height - Y;
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DPToLP(LONG X, LONG Y, float &x, float &y) const {
-  if (IsEqual(m_Windowport.m_fWWidth, 0, dEPSILON) &&
-      IsEqual(m_Windowport.m_fWHeight, 0, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVWidth, 0, dEPSILON) &&
-      IsEqual(m_Viewport.m_fVHeight, 0, dEPSILON)) {
+int RenderDeviceGDI::DPToLP(long X, long Y, float &x, float &y) const {
+  if (::gfx2d::is_empty(windowport_) && ::gfx2d::is_empty(viewport_)) {
     x = X;
     y = Y;
-
     return ERR_FAILURE;
   }
 
-  Y = m_Viewport.m_fVHeight - Y;
+  Y = viewport_.height - Y;
 
-  x = (X - m_Viewport.m_fVOX) / m_fblc + m_Windowport.m_fWOX;
-  y = (Y - m_Viewport.m_fVOY) / m_fblc + m_Windowport.m_fWOY;
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::LRectToDRect(const fRect &frect, lRect &lrect) const {
-  LPToDP(frect.lb.x, frect.lb.y, lrect.lb.x, lrect.lb.y);
-  LPToDP(frect.rt.x, frect.rt.y, lrect.rt.x, lrect.rt.y);
+  x = (X - viewport_.x) / blc_ + windowport_.x;
+  y = (Y - viewport_.y) / blc_ + windowport_.y;
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DRectToLRect(const lRect &lrect, fRect &frect) const {
-  DPToLP(lrect.lb.x, lrect.lb.y, frect.lb.x, frect.lb.y);
-  DPToLP(lrect.rt.x, lrect.rt.y, frect.rt.x, frect.rt.y);
+int RenderDeviceGDI::LRectToDRect(const LRect &lrect, DRect &drect) const {
+  long X = 0, Y = 0;
+  LPToDP(lrect.x, lrect.y, drect.x, drect.y);
+  LPToDP(lrect.x + lrect.width, lrect.y + lrect.height, X, Y);
+
+  drect.width = X - drect.x;
+  drect.height = Y - drect.y;
 
   return ERR_NONE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::Lock() {
-  m_cslock.Lock();
-  return ERR_NONE;
-}
+int RenderDeviceGDI::DRectToLRect(const DRect &drect, LRect &lrect) const {
+  float x = 0, y = 0;
+  DPToLP(drect.x, drect.y, lrect.x, lrect.y);
+  DPToLP(drect.x + drect.width, drect.y + drect.height, x, y);
 
-int RenderDeviceGDI::Unlock() {
-  m_cslock.Unlock();
+  lrect.width = x - lrect.x;
+  lrect.height = y - lrect.y;
+
   return ERR_NONE;
 }
 
 int RenderDeviceGDI::Refresh() {
-  //
-  int invalidatex1, invalidatey1, invalidatew1, invalidateh1;
-  int invalidatex2, invalidatey2, invalidatew2, invalidateh2;
-  if (m_curDrawingOrg.x >= 0) {
-    if (m_curDrawingOrg.y >= 0) {
-      invalidatex1 = invalidatey1 = 0;
-      invalidatew1 = m_Viewport.m_fVWidth, invalidateh1 = m_curDrawingOrg.y;
-      invalidatex2 = 0, invalidatey2 = m_curDrawingOrg.y;
-      invalidatew2 = m_curDrawingOrg.x,
-      invalidateh2 = m_Viewport.m_fVHeight - m_curDrawingOrg.y;
+  int invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1;
+  int invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2;
+  if (current_dop_.x >= 0) {
+    if (current_dop_.y >= 0) {
+      invalidate_x1 = invalidate_y1 = 0;
+      invalidate_w1 = viewport_.width, invalidate_h1 = current_dop_.y;
+      invalidate_x2 = 0, invalidate_y2 = current_dop_.y;
+      invalidate_w2 = current_dop_.x,
+      invalidate_h2 = viewport_.height - current_dop_.y;
     } else {
-      invalidatex1 = invalidatey1 = 0;
-      invalidatew1 = m_curDrawingOrg.x,
-      invalidateh1 = m_Viewport.m_fVHeight + m_curDrawingOrg.y;
-      invalidatex2 = 0,
-      invalidatey2 = m_Viewport.m_fVHeight + m_curDrawingOrg.y;
-      invalidatew2 = m_Viewport.m_fVWidth, invalidateh2 = -m_curDrawingOrg.y;
+      invalidate_x1 = invalidate_y1 = 0;
+      invalidate_w1 = current_dop_.x,
+      invalidate_h1 = viewport_.height + current_dop_.y;
+      invalidate_x2 = 0, invalidate_y2 = viewport_.height + current_dop_.y;
+      invalidate_w2 = viewport_.width, invalidate_h2 = -current_dop_.y;
     }
   } else {
-    if (m_curDrawingOrg.y >= 0) {
-      invalidatex1 = invalidatey1 = 0;
-      invalidatew1 = m_Viewport.m_fVWidth, invalidateh1 = m_curDrawingOrg.y;
-      invalidatex2 = m_Viewport.m_fVWidth + m_curDrawingOrg.x,
-      invalidatey2 = m_curDrawingOrg.y;
-      invalidatew2 = -m_curDrawingOrg.x,
-      invalidateh2 = m_Viewport.m_fVHeight - m_curDrawingOrg.y;
+    if (current_dop_.y >= 0) {
+      invalidate_x1 = invalidate_y1 = 0;
+      invalidate_w1 = viewport_.width, invalidate_h1 = current_dop_.y;
+      invalidate_x2 = viewport_.width + current_dop_.x,
+      invalidate_y2 = current_dop_.y;
+      invalidate_w2 = -current_dop_.x,
+      invalidate_h2 = viewport_.height - current_dop_.y;
     } else {
-      invalidatex1 = m_Viewport.m_fVWidth + m_curDrawingOrg.x, invalidatey1 = 0;
-      invalidatew1 = -m_curDrawingOrg.x,
-      invalidateh1 = m_Viewport.m_fVHeight + m_curDrawingOrg.y;
-      invalidatex2 = 0,
-      invalidatey2 = m_Viewport.m_fVHeight + m_curDrawingOrg.y;
-      invalidatew2 = m_Viewport.m_fVWidth, invalidateh2 = -m_curDrawingOrg.y;
+      invalidate_x1 = viewport_.width + current_dop_.x, invalidate_y1 = 0;
+      invalidate_w1 = -current_dop_.x,
+      invalidate_h1 = viewport_.height + current_dop_.y;
+      invalidate_x2 = 0, invalidate_y2 = viewport_.height + current_dop_.y;
+      invalidate_w2 = viewport_.width, invalidate_h2 = -current_dop_.y;
     }
   }
 
-  HDC hDC = GetDC(m_hWnd);
-  ClearRect(hDC, invalidatex1, invalidatey1, invalidatew1,
-            invalidateh1 /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
-  ClearRect(hDC, invalidatex2, invalidatey2, invalidatew2,
-            invalidateh2 /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
+  HDC dc = ::GetDC(hwnd_);
+  ClearRect(dc, invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1);
+  ClearRect(dc, invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2);
 
-  m_smtRenderBuf.ClearBuf(
-      m_Viewport.m_fVOX, m_Viewport.m_fVOY, m_Viewport.m_fVWidth,
-      m_Viewport.m_fVWidth /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
+  render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                       viewport_.width);
 
-  m_smtMapRenderBuf.Swap(m_smtRenderBuf, m_virViewport1.m_fVOX,
-                            m_virViewport1.m_fVOY, m_virViewport1.m_fVWidth,
-                            m_virViewport1.m_fVHeight, m_virViewport2.m_fVOX,
-                            m_virViewport2.m_fVOY, m_virViewport2.m_fVWidth,
-                            m_virViewport2.m_fVHeight, BLT_TRANSPARENT,
-                            SRCCOPY /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
+  composit_render_buffer_.Swap(
+      render_buffer_, virtual_viewport_for_zoomin_.x,
+      virtual_viewport_for_zoomin_.y, virtual_viewport_for_zoomin_.width,
+      virtual_viewport_for_zoomin_.height, virtual_viewport_for_zoomout_.x,
+      virtual_viewport_for_zoomout_.y, virtual_viewport_for_zoomout_.width,
+      virtual_viewport_for_zoomout_.height, RenderBuffer::BLT_TRANSPARENT,
+      SRCCOPY);
 
-  m_smtRenderBuf.Swap(m_curDrawingOrg.x, m_curDrawingOrg.y,
-                         m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
-                         m_Viewport.m_fVOX, m_Viewport.m_fVOY);
+  render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
+                      viewport_.height, viewport_.x, viewport_.y);
 
-  ::ReleaseDC(m_hWnd, hDC);
+  ::ReleaseDC(hwnd_, dc);
 
   RECT rt;
-  GetClientRect(m_hWnd, &rt);
-  InvalidateRect(m_hWnd, &rt, true);
+  GetClientRect(hwnd_, &rt);
+  InvalidateRect(hwnd_, &rt, true);
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::Refresh(const Map *pMap, fRect frect) {
-  lRect lrect;
-  LRectToDRect(frect, lrect);
-  RefreshDirectly(pMap, lrect);
+int RenderDeviceGDI::Refresh(LRect lrect) {
+  DRect drect;
+  LRectToDRect(lrect, drect);
+  RefreshDirectly(drect);
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::RefreshDirectly(const Map *pMap, lRect rect,
-                                     bool bRealTime) {
-  if (pMap) {
-    return RenderMap(pMap, m_Viewport.m_fVOX, m_Viewport.m_fVOY,
-                     m_Viewport.m_fVWidth, m_Viewport.m_fVHeight);
-  }
-
-  return ERR_INVALID_PARAM;
+int RenderDeviceGDI::RefreshDirectly(DRect rect, bool realtime) {
+  return Redraw();
 }
 
-int RenderDeviceGDI::ZoomMove(const Map *pMap, fPoint dbfPointOffset,
-                              bool bRealTime) {
-  m_virViewport1.m_fVOX += dbfPointOffset.x * m_fblc;
-  m_virViewport1.m_fVOY -= dbfPointOffset.y * m_fblc;
+int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
+  virtual_viewport_for_zoomin_.x += offset.x * blc_;
+  virtual_viewport_for_zoomin_.y -= offset.y * blc_;
 
-  m_Windowport.m_fWOX -= dbfPointOffset.x;
-  m_Windowport.m_fWOY -= dbfPointOffset.y;
+  windowport_.x -= offset.x;
+  windowport_.y -= offset.y;
 
-  if (pMap) {
-    return RenderMap(pMap, m_Viewport.m_fVOX, m_Viewport.m_fVOY,
-                     m_Viewport.m_fVWidth, m_Viewport.m_fVHeight);
-  }
-
-  return ERR_INVALID_PARAM;
+  return Redraw();
 }
 
-int RenderDeviceGDI::ZoomScale(const Map *pMap, lPoint orgPoint, float fscale,
-                               bool bRealTime) {
-  if (fscale > 1.) {  //改变m_virViewport1
-    m_virViewport1.m_fVHeight /= fscale;
-    m_virViewport1.m_fVWidth /= fscale;
-    m_virViewport1.m_fVOX =
-        orgPoint.x - (orgPoint.x - m_virViewport1.m_fVOX) / fscale;
-    m_virViewport1.m_fVOY =
-        orgPoint.y - (orgPoint.y - m_virViewport1.m_fVOY) / fscale;
-  } else {  //改变m_virViewport2
-    m_virViewport2.m_fVHeight *= fscale;
-    m_virViewport2.m_fVWidth *= fscale;
-    m_virViewport2.m_fVOX =
-        orgPoint.x + (m_virViewport2.m_fVOX - orgPoint.x) * fscale;
-    m_virViewport2.m_fVOY =
-        orgPoint.y + (m_virViewport2.m_fVOY - orgPoint.y) * fscale;
+int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
+                               bool realtime) {
+  if (scale > 1.) {
+    // for zoomin
+    virtual_viewport_for_zoomin_.height /= scale;
+    virtual_viewport_for_zoomin_.width /= scale;
+    virtual_viewport_for_zoomin_.x =
+        original_point.x -
+        (original_point.x - virtual_viewport_for_zoomin_.x) / scale;
+    virtual_viewport_for_zoomin_.y =
+        original_point.y -
+        (original_point.y - virtual_viewport_for_zoomin_.y) / scale;
+  } else {
+    // zoomout
+    virtual_viewport_for_zoomout_.height *= scale;
+    virtual_viewport_for_zoomout_.width *= scale;
+    virtual_viewport_for_zoomout_.x =
+        original_point.x +
+        (virtual_viewport_for_zoomout_.x - original_point.x) * scale;
+    virtual_viewport_for_zoomout_.y =
+        original_point.y +
+        (virtual_viewport_for_zoomout_.y - original_point.y) * scale;
   }
 
   float x1, y1, x2, y2;
-  DPToLP(orgPoint.x, orgPoint.y, x1, y1);
+  DPToLP(original_point.x, original_point.y, x1, y1);
 
-  m_Windowport.m_fWHeight *= fscale;
-  m_Windowport.m_fWWidth *= fscale;
+  windowport_.height *= scale;
+  windowport_.width *= scale;
 
-  m_fblc /= fscale;
+  blc_ /= scale;
 
-  DPToLP(orgPoint.x, orgPoint.y, x2, y2);
+  DPToLP(original_point.x, original_point.y, x2, y2);
 
-  m_Windowport.m_fWOX -= x2 - x1;
-  m_Windowport.m_fWOY -= y2 - y1;
+  windowport_.x -= x2 - x1;
+  windowport_.y -= y2 - y1;
 
-  if (pMap) {
-    return RenderMap(pMap, m_Viewport.m_fVOX, m_Viewport.m_fVOY,
-                     m_Viewport.m_fVWidth, m_Viewport.m_fVHeight);
-  }
-
-  return ERR_INVALID_PARAM;
+  return Redraw();
 }
 
-int RenderDeviceGDI::ZoomToRect(const Map *pMap, fRect rect, bool bRealTime) {
-  lRect rt;
-  LRectToDRect(rect, rt);
-  m_virViewport2.m_fVOX = rt.lb.x;
-  m_virViewport2.m_fVOY = rt.rt.y;
-  m_virViewport2.m_fVHeight = rt.Height();
-  m_virViewport2.m_fVWidth = rt.Width();
+int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
+  DRect drect;
+  LRectToDRect(lrect, drect);
+  virtual_viewport_for_zoomout_.x = drect.x;
+  virtual_viewport_for_zoomout_.y = drect.y + drect.height;
+  virtual_viewport_for_zoomout_.height = drect.height;
+  virtual_viewport_for_zoomout_.width = drect.width;
 
-  m_Windowport.m_fWOX = rect.lb.x;
-  m_Windowport.m_fWOY = rect.lb.y;
-  m_Windowport.m_fWHeight = rect.Height();
-  m_Windowport.m_fWWidth = rect.Width();
+  windowport_.x = lrect.x;
+  windowport_.y = lrect.y;
+  windowport_.height = lrect.height;
+  windowport_.width = lrect.width;
 
-  float xblc, yblc;
-  xblc = m_Viewport.m_fVWidth / m_Windowport.m_fWWidth;
-  yblc = m_Viewport.m_fVHeight / m_Windowport.m_fWHeight;
+  float xblc = 0., yblc = 0.;
+  xblc = viewport_.width / windowport_.width;
+  yblc = viewport_.height / windowport_.height;
 
-  m_fblc = (xblc > yblc) ? yblc : xblc;
+  blc_ = (xblc > yblc) ? yblc : xblc;
 
   if (xblc < yblc) {
-    m_virViewport2.m_fVOY += rt.Height() * (1 - yblc / xblc);
-    m_Windowport.m_fWHeight = rect.Height() * yblc / xblc;
-    m_virViewport2.m_fVHeight = rt.Height() * yblc / xblc;
+    virtual_viewport_for_zoomout_.y += drect.height * (1 - yblc / xblc);
+    windowport_.height = lrect.height * yblc / xblc;
+    virtual_viewport_for_zoomout_.height = drect.height * yblc / xblc;
   } else {
-    m_Windowport.m_fWWidth = rect.Width() * xblc / yblc;
-    m_virViewport2.m_fVWidth = rt.Width() * xblc / yblc;
+    windowport_.width = lrect.width * xblc / yblc;
+    virtual_viewport_for_zoomout_.width = drect.width * xblc / yblc;
   }
 
-  if (pMap) {
-    return RenderMap(pMap, m_Viewport.m_fVOX, m_Viewport.m_fVOY,
-                     m_Viewport.m_fVWidth, m_Viewport.m_fVHeight);
-  }
-
-  return ERR_FAILURE;
+  return Redraw();
 }
 
 int RenderDeviceGDI::Timer() {
-  if (m_bRedraw) {
-    double dbfElapse = 0.;
-    LONGLONG llStamp = 0, llPerCount = 0;
+  if (is_redraw_) {
+    double elapse = 0.;
+    LONGLONG stamp = 0, per_count = 0;
 
-    QueryPerformanceFrequency((LARGE_INTEGER *)&llPerCount);
-    QueryPerformanceCounter((LARGE_INTEGER *)&llStamp);
+    QueryPerformanceFrequency((LARGE_INTEGER *)&per_count);
+    QueryPerformanceCounter((LARGE_INTEGER *)&stamp);
 
-    dbfElapse = (llStamp - m_llLastRedrawCmdStamp) / (double)llPerCount;
+    elapse = (stamp - last_redraw_command_stamp_) / (double)per_count;
 
-    if (dbfElapse > C_fDELAY) {  //激活重绘
-      m_bRedraw = false;
-      //重绘
-      m_smtMapRenderBuf.ClearBuf(m_nOX, m_nOY, m_nWidth, m_nHeight,
-                                 (COLORREF)::GetSysColor(COLOR_WINDOW));
+    if (elapse > kDelay) {
+      is_redraw_ = false;
+      composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                    viewport_.height,
+                                    (COLORREF)::GetSysColor(COLOR_WINDOW));
 
-      HDC hPaintBufferDC = m_smtMapRenderBuf.PrepareDC();
+      HDC hPaintBufferDC = composit_render_buffer_.PrepareDC();
 
-      BeginRender(MRD_BL_MAP);
+      BeginRender(RB_COMPOSIT);
 
-      if (m_pCurMap != NULL) {
-        m_pCurMap->MoveFirst();
-        while (!m_pCurMap->IsEnd()) {
-          RenderLayer(m_pCurMap->GetLayer(), m_nOp);
-          m_pCurMap->MoveNext();
-        }
+      if (layer_ != NULL) {
+        return RenderLayer(layer_, op_);
       }
 
-      EndRender(MRD_BL_MAP);
+      EndRender(RB_COMPOSIT);
 
-      m_virViewport1 = m_Viewport;
-      m_virViewport2 = m_Viewport;
+      virtual_viewport_for_zoomin_ = viewport_;
+      virtual_viewport_for_zoomout_ = viewport_;
     }
   }
 
-  RECT rt;
-  GetClientRect(m_hWnd, &rt);
-  InvalidateRect(m_hWnd, &rt, true);
+  RECT rect;
+  GetClientRect(hwnd_, &rect);
+  InvalidateRect(hwnd_, &rect, true);
 
   return ERR_NONE;
 }
 
 //////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::BeginRender(eRDBufferLayer eMRDBufLyr, bool bClear,
-                                 const Style *pStyle, int op) {
-  m_bLockStyle = (NULL != pStyle);
+int RenderDeviceGDI::BeginRender(eRenderBufferLayer rbl_type, bool clear,
+                                 const Style *style, int op) {
+  is_lock_style_ = (NULL != style);
 
-  switch (eMRDBufLyr) {
-    case MRD_BL_MAP: {
-      if (bClear)
-        m_smtMapRenderBuf.ClearBuf(
-            m_Viewport.m_fVOX, m_Viewport.m_fVOY, m_Viewport.m_fVWidth,
-            m_Viewport.m_fVHeight /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
+  switch (rbl_type) {
+    case RB_COMPOSIT: {
+      if (clear)
+        composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                      viewport_.height);
 
-      m_hCurDC = m_smtMapRenderBuf.PrepareDC();
+      current_dc_ = composit_render_buffer_.PrepareDC();
     } break;
-    case MRD_BL_DIRECT: {
-      if (bClear) {
-        RECT rt;
-        GetClientRect(m_hWnd, &rt);
-        InvalidateRect(m_hWnd, &rt, true);
+    case RB_DIRECT: {
+      if (clear) {
+        RECT rect;
+        ::GetClientRect(hwnd_, &rect);
+        ::InvalidateRect(hwnd_, &rect, true);
       }
 
-      m_hCurDC = GetDC(m_hWnd);
+      current_dc_ = ::GetDC(hwnd_);
     } break;
   }
 
-  if (m_bLockStyle) PrepareForDrawing(pStyle, op);
+  if (is_lock_style_) {
+    PrepareForDrawing(style, op);
+  }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::EndRender(eRDBufferLayer eMRDBufLyr) {
-  if (m_bLockStyle) EndDrawing();
+int RenderDeviceGDI::EndRender(eRenderBufferLayer rbl_type) {
+  if (is_lock_style_) EndDrawing();
 
-  switch (eMRDBufLyr) {
-    case MRD_BL_MAP: {
-      m_smtMapRenderBuf.EndDC();
+  switch (rbl_type) {
+    case RB_COMPOSIT: {
+      composit_render_buffer_.EndDC();
     } break;
-    case MRD_BL_DIRECT: {
-      ReleaseDC(m_hWnd, m_hCurDC);
+    case RB_DIRECT: {
+      ::ReleaseDC(hwnd_, current_dc_);
     } break;
   }
 
-  m_hCurDC = NULL;
-  m_bLockStyle = false;
+  current_dc_ = NULL;
+  is_lock_style_ = false;
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::PrepareForDrawing(const Style *pStyle, int nDrawMode) {
-  ::SetROP2(m_hCurDC, nDrawMode);
+int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
+  ::SetROP2(current_dc_, draw_mode);
 
-  m_bCurUseStyle = (NULL != pStyle);
+  use_current_style_ = (NULL != style);
 
-  if (m_bCurUseStyle) {
-    ulong format = pStyle->GetStyleType();
+  if (use_current_style_) {
+    uint64_t format = style->GetStyleType();
     if (format & ST_PenDesc) {
-      PenDesc pen = pStyle->GetPenDesc();
+      PenDesc pen = style->GetPenDesc();
 
-      if (m_hPen) {
-        DeleteObject(m_hPen);
-        m_hPen = NULL;
+      if (pen_) {
+        ::DeleteObject(pen_);
+        pen_ = NULL;
       }
 
-      m_hPen = CreatePen(pen.lPenStyle, pen.fPenWidth, pen.lPenColor);
-      m_hOldPen = (HPEN)::SelectObject(m_hCurDC, m_hPen);
+      pen_ = ::CreatePen(pen.style, pen.width, pen.color);
+      old_pen_ = (HPEN)::SelectObject(current_dc_, pen_);
     }
 
     if (format & ST_BrushDesc) {
-      BrushDesc brush = pStyle->GetBrushDesc();
+      BrushDesc brush = style->GetBrushDesc();
 
-      if (m_hBrush) {
-        DeleteObject(m_hBrush);
-        m_hBrush = NULL;
+      if (brush_) {
+        ::DeleteObject(brush_);
+        brush_ = NULL;
       }
 
-      if (brush.brushTp == BrushDesc::BT_Hatch) {
-        m_hBrush = CreateHatchBrush(brush.lBrushStyle, brush.lBrushColor);
+      if (brush.brush_type == BrushDesc::BT_Hatch) {
+        brush_ = ::CreateHatchBrush(brush.style, brush.color);
       } else
-        m_hBrush = CreateSolidBrush(brush.lBrushColor);
+        brush_ = ::CreateSolidBrush(brush.color);
 
-      m_hOldBrush = (HBRUSH)::SelectObject(m_hCurDC, m_hBrush);
+      old_brush_ = (HBRUSH)::SelectObject(current_dc_, brush_);
     }
 
     if (format & ST_SymbolDesc) {
-      SymbolDesc symbol = pStyle->GetSymbolDesc();
+      SymbolDesc symbol = style->GetSymbolDesc();
 
-      if (m_hIcon) {
-        DeleteObject(m_hIcon);
-        m_hIcon = NULL;
+      if (icon_) {
+        ::DeleteObject(icon_);
+        icon_ = NULL;
       }
 
-      m_hIcon =
-          LoadIcon(m_hInst, MAKEINTRESOURCE(symbol.lSymbolID + IDI_ICON_A));
+      // icon_ =
+      //     ::LoadIcon(instance_handle_, MAKEINTRESOURCE(symbol.id +
+      //     IDI_ICON_A));
     }
 
     if (format & ST_AnnoDesc) {
-      AnnotationDesc anno = pStyle->GetAnnoDesc();
+      AnnotationDesc anno = style->GetAnnoDesc();
 
-      if (m_hFont) {
-        DeleteObject(m_hFont);
-        m_hFont = NULL;
+      if (font_) {
+        ::DeleteObject(font_);
+        font_ = NULL;
       }
 
-      m_hFont =
-          CreateFont(anno.fHeight * m_fblc, anno.fWidth * m_fblc,
-                     anno.lEscapement, anno.lOrientation, anno.lWeight,
-                     anno.lItalic, anno.lUnderline, anno.lStrikeOut,
-                     anno.lCharSet, anno.lOutPrecision, anno.lClipPrecision,
-                     anno.lQuality, anno.lPitchAndFamily, anno.szFaceName);
+      // font_ =
+      //     ::CreateFont(anno.height * blc_, anno.width * blc_,
+      //     anno.escapement,
+      //                  anno.orientation, anno.weight, anno.italic,
+      //                  anno.underline, anno.strikeout, anno.char_set,
+      //                  anno.out_precision, anno.clip_precision, anno.quality,
+      //                  anno.pitch_and_family, anno.face_name);
 
-      m_hOldFont = (HFONT)::SelectObject(m_hCurDC, m_hFont);
-      SetBkMode(m_hCurDC, TRANSPARENT);
-      SetTextColor(m_hCurDC, anno.lAnnoClr);
-
-      // m_fAnnoAngle = anno.fAngle;
+      // old_font_ = (HFONT)::SelectObject(current_dc_, font_);
+      ::SetBkMode(current_dc_, TRANSPARENT);
+      ::SetTextColor(current_dc_, anno.color);
     }
   }
 
@@ -552,1218 +505,436 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *pStyle, int nDrawMode) {
 }
 
 int RenderDeviceGDI::EndDrawing() {
-  if (m_bCurUseStyle) {
-    ::SelectObject(m_hCurDC, m_hOldBrush);
-    ::SelectObject(m_hCurDC, m_hOldPen);
-    ::SelectObject(m_hCurDC, m_hOldFont);
+  if (use_current_style_) {
+    ::SelectObject(current_dc_, old_brush_);
+    ::SelectObject(current_dc_, old_pen_);
+    ::SelectObject(current_dc_, old_font_);
   }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::RenderMap(void) {
-  m_smtRenderBuf.ClearBuf(
-      m_Viewport.m_fVOX, m_Viewport.m_fVOY, m_Viewport.m_fVWidth,
-      m_Viewport.m_fVHeight /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
-
-  m_smtMapRenderBuf.Swap(m_smtRenderBuf, m_virViewport1.m_fVOX,
-                            m_virViewport1.m_fVOY, m_virViewport1.m_fVWidth,
-                            m_virViewport1.m_fVHeight, m_virViewport2.m_fVOX,
-                            m_virViewport2.m_fVOY, m_virViewport2.m_fVWidth,
-                            m_virViewport2.m_fVHeight, BLT_TRANSPARENT,
-                            SRCCOPY /*,(COLORREF)::GetSysColor(COLOR_WINDOW)*/);
-
-  m_smtRenderBuf.Swap(m_curDrawingOrg.x, m_curDrawingOrg.y,
-                         m_Viewport.m_fVWidth, m_Viewport.m_fVHeight,
-                         m_Viewport.m_fVOX, m_Viewport.m_fVOY);
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::RenderMap(const Map *pMap, int x, int y, int w, int h,
-                               int op) {
-  if (w == 0 || h == 0) return ERR_INVALID_PARAM;
-
-  m_pCurMap = pMap;
-  m_nOX = x;
-  m_nOY = y;
-  m_nWidth = w;
-  m_nHeight = h;
-  m_nOp = op;
-
-  if (!m_bRedraw) {
-    m_bRedraw = true;
-    QueryPerformanceCounter((LARGE_INTEGER *)&m_llLastRedrawStamp);
+int RenderDeviceGDI::Redraw() {
+  if (!is_redraw_) {
+    is_redraw_ = true;
+    QueryPerformanceCounter((LARGE_INTEGER *)&last_redraw_stamp_);
   }
 
-  QueryPerformanceCounter((LARGE_INTEGER *)&m_llLastRedrawCmdStamp);
+  QueryPerformanceCounter((LARGE_INTEGER *)&last_redraw_command_stamp_);
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::RenderMap(const Map *pMap, int op) {
-  if (NULL == pMap) return ERR_INVALID_PARAM;
+int RenderDeviceGDI::Render(void) {
+  render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                       viewport_.height);
 
-  pMap->MoveFirst();
-  while (!pMap->IsEnd()) {
-    RenderLayer(pMap->GetLayer(), op);
-    pMap->MoveNext();
+  composit_render_buffer_.Swap(
+      render_buffer_, virtual_viewport_for_zoomin_.x,
+      virtual_viewport_for_zoomin_.y, virtual_viewport_for_zoomin_.width,
+      virtual_viewport_for_zoomin_.height, virtual_viewport_for_zoomout_.x,
+      virtual_viewport_for_zoomout_.y, virtual_viewport_for_zoomout_.width,
+      virtual_viewport_for_zoomout_.height, RenderBuffer::BLT_TRANSPARENT,
+      SRCCOPY);
+
+  render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
+                      viewport_.height, viewport_.x, viewport_.y);
+
+  return ERR_NONE;
+}
+
+int RenderDeviceGDI::RenderLayer(const OGRLayer *const_layer, int op) {
+  OGRLayer *layer = const_cast<OGRLayer *>(const_layer);
+  if (NULL == layer) {
+    return ERR_INVALID_PARAM;
   }
 
-  return ERR_NONE;
-}
+  const auto *layer_defn = layer->GetLayerDefn();
+  auto geomtry_count = layer_defn->GetGeomFieldCount();
 
-int RenderDeviceGDI::RenderLayer(const Layer *pLayer, int op) {
-  if (NULL == pLayer) return ERR_INVALID_PARAM;
-
-  if (pLayer->GetLayerType() == LYR_VECTOR)
-    return RenderLayer((VectorLayer *)pLayer, op);
-  else if (pLayer->GetLayerType() == LYR_RASTER)
-    return RenderLayer((RasterLayer *)pLayer, op);
-  else if (pLayer->GetLayerType() == LYR_TITLE)
-    return RenderLayer((TileLayer *)pLayer, op);
-
-  return ERR_FAILURE;
-}
-
-int RenderDeviceGDI::RenderLayer(const VectorLayer *pLayer, int op) {
-  if (NULL == pLayer) return ERR_INVALID_PARAM;
-
-  if (!pLayer->IsVisible()) return ERR_NONE;
-
-  Envelope envLayer;
-  pLayer->GetEnvelope(envLayer);
-  Envelope envViewp;
-
-  lRect lViewp;
-  fRect fViewp;
-
-  ViewportToRect(lViewp, m_Viewport);
-  DRectToLRect(lViewp, fViewp);
-  RectToEnvelope(envViewp, fViewp);
-
-  if (!envLayer.Intersects(envViewp)) return ERR_NONE;
-
-  pLayer->MoveFirst();
-  while (!pLayer->IsEnd()) {
-    RenderFeature(pLayer->GetFeature(), op);
-    pLayer->MoveNext();
-  }
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::RenderLayer(const RasterLayer *pLayer, int op) {
-  if (NULL == pLayer) return ERR_INVALID_PARAM;
-
-  if (!pLayer->IsVisible()) return ERR_NONE;
-
-  Envelope envLayer;
-  pLayer->GetEnvelope(envLayer);
-  Envelope envViewp;
-
-  lRect lViewp;
-  fRect fViewp;
-
-  ViewportToRect(lViewp, m_Viewport);
-  DRectToLRect(lViewp, fViewp);
-  RectToEnvelope(envViewp, fViewp);
-
-  if (!envLayer.Intersects(envViewp)) return ERR_NONE;
-
-  char *pRasterBuf = NULL;
-  long lRasterBufSize = 0;
-  long lCodeType = -1;
-  fRect locRect;
-
-  if (ERR_NONE == pLayer->GetRasterNoClone(pRasterBuf, lRasterBufSize,
-                                               locRect, lCodeType)) {
-    lRect lrt;
-    LRectToDRect(locRect, lrt);
-
-    CxImage tmpImage;
-    tmpImage.Decode((BYTE *)pRasterBuf, lRasterBufSize, lCodeType);
-    tmpImage.Stretch(m_hCurDC, lrt.lb.x, lrt.rt.y, lrt.Width(), lrt.Height());
-  }
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::RenderLayer(const TileLayer *pLayer, int op) {
-  if (NULL == pLayer) return ERR_INVALID_PARAM;
-
-  if (!pLayer->IsVisible()) return ERR_NONE;
-
-  Envelope envLayer;
-  pLayer->GetEnvelope(envLayer);
-  Envelope envViewp;
-
-  lRect lViewp;
-  fRect fViewp;
-  lRect titleDPRect;
-
-  ViewportToRect(lViewp, m_Viewport);
-  DRectToLRect(lViewp, fViewp);
-  RectToEnvelope(envViewp, fViewp);
-
-  if (!envLayer.Intersects(envViewp)) return ERR_NONE;
-
-  pLayer->MoveFirst();
-  while (!pLayer->IsEnd()) {
-    Tile *pTile = pLayer->GetTile();
-    if (NULL != pTile && pTile->visible) {
-      /*	Envelope envTile,envViewp;
-              RectToEnvelope(envTile,pTile->tile_rect);
-              LRectToDRect(pTile->tile_rect,titleDPRect);
-
-              if (!envTile.Intersects(envViewp) ||
-                      (titleDPRect.Height() < 2 && titleDPRect.Width() < 2))
-                      return ERR_NONE;*/
-
-      CxImage tmpImage;
-      tmpImage.Decode((BYTE *)pTile->buffer, pTile->buffer_size,
-                      pTile->codec);
-      tmpImage.Stretch(m_hCurDC, titleDPRect.lb.x, titleDPRect.rt.y,
-                       titleDPRect.Width(), titleDPRect.Height());
+  OGRFeature *feature = nullptr;
+  layer->ResetReading();
+  while ((feature = layer->GetNextFeature()) != nullptr) {
+    for (int i = 0; i < geomtry_count; i++) {
+      auto *geometry = feature->GetGeomFieldRef(i);
+      RenderGeometry(geometry, op);
     }
-
-    pLayer->MoveNext();
   }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::RenderFeature(const Feature *pFeature, int op) {
-  if (NULL == pFeature) return ERR_INVALID_PARAM;
-
-  const Style *pStyle = pFeature->GetStyle();
-  const Geometry *pGeom = pFeature->GetGeometryRef();
-  const Attribute *pAtt = pFeature->GetAttributeRef();
-
-  m_nFeatureType = pFeature->GetFeatureType();
-
-  switch (m_nFeatureType) {
-    case FeatureType::FtAnno: {
-      const Field *pFld = NULL;
-
-      pFld = pAtt->GetFieldPtr(pAtt->GetFieldIndex("anno"));
-      sprintf(m_szAnno, pFld->GetValueAsString());
-
-      pFld = pAtt->GetFieldPtr(pAtt->GetFieldIndex("angle"));
-      m_fAnnoAngle = pFld->GetValueAsDouble();
-    } break;
-    case FeatureType::FtChildImage: {
-    } break;
-    case FeatureType::FtSurface: {
-      // nDrawMode = R2_MASKPEN;
-    } break;
-    default:
-      break;
-  }
-
-  return RenderGeometry(pGeom, pStyle, op);
+int RenderDeviceGDI::RenderFeature(const OGRFeature *feature, int op) {
+  return ERR_NONE;
 }
 
-int RenderDeviceGDI::RenderGeometry(const Geometry *pGeom, const Style *pStyle,
-                                    int op) {
-  if (!pGeom) return ERR_INVALID_PARAM;
-
-  GeometryType type = pGeom->GetGeometryType();
-
-  Envelope envFeature, envViewp;
-  pGeom->GetEnvelope(&envFeature);
-
-  lRect lViewp;
-  fRect fViewp;
-  fRect fenv;
-  lRect lenv;
-
-  ViewportToRect(lViewp, m_Viewport);
-  DRectToLRect(lViewp, fViewp);
-  RectToEnvelope(envViewp, fViewp);
-
-  EnvelopeToRect(fenv, envFeature);
-  LRectToDRect(fenv, lenv);
-
-  if (!envFeature.Intersects(envViewp) ||
-      (type != GTPoint && lenv.Height() < 2 && lenv.Width() < 2))
-    return ERR_NONE;
-
-  ::SaveDC(m_hCurDC);
-
-  if (!m_bLockStyle) PrepareForDrawing(pStyle);
-
-  if (m_rdPra.show_mbr) {
-    long lX = 0, lY = 0;
-
-    LPToDP(envFeature.MinX, envFeature.MinY, lX, lY);
-    MoveToEx(m_hCurDC, lX, lY, NULL);
-
-    LPToDP(envFeature.MaxX, envFeature.MinY, lX, lY);
-    LineTo(m_hCurDC, lX, lY);
-
-    LPToDP(envFeature.MaxX, envFeature.MaxY, lX, lY);
-    LineTo(m_hCurDC, lX, lY);
-
-    LPToDP(envFeature.MinX, envFeature.MaxY, lX, lY);
-    LineTo(m_hCurDC, lX, lY);
-
-    LPToDP(envFeature.MinX, envFeature.MinY, lX, lY);
-    LineTo(m_hCurDC, lX, lY);
+int RenderDeviceGDI::RenderGeometry(const OGRGeometry *geometry, int op) {
+  if (!geometry) {
+    return ERR_INVALID_PARAM;
   }
 
+  OGREnvelope envelope;
+  geometry->getEnvelope(&envelope);
+
+  ::SaveDC(current_dc_);
+  // if (!is_lock_style_) {
+  //   PrepareForDrawing(style);
+  // }
+
+  if (options_.show_mbr) {
+    long X = 0, Y = 0;
+
+    LPToDP(envelope.MinX, envelope.MinY, X, Y);
+    ::MoveToEx(current_dc_, X, Y, NULL);
+
+    LPToDP(envelope.MaxX, envelope.MinY, X, Y);
+    ::LineTo(current_dc_, X, Y);
+
+    LPToDP(envelope.MaxX, envelope.MaxY, X, Y);
+    ::LineTo(current_dc_, X, Y);
+
+    LPToDP(envelope.MinX, envelope.MaxY, X, Y);
+    ::LineTo(current_dc_, X, Y);
+
+    LPToDP(envelope.MinX, envelope.MinY, X, Y);
+    ::LineTo(current_dc_, X, Y);
+  }
+
+  auto type = geometry->getGeometryType();
   switch (type) {
-    case GTPoint:
-      DrawPoint(pStyle, (Point *)pGeom);
+    case wkbPoint:
+      DrawPoint((OGRPoint *)geometry);
       break;
 
-    case GTLineString:
-      DrawLineString((LineString *)pGeom);
-      break;
-    case GTArc:
-      DrawArc((Arc *)pGeom);
+    case wkbLineString:
+      DrawLineString((OGRLineString *)geometry);
       break;
 
-    case GTPolygon:
-      DrawPloygon((Polygon *)pGeom);
+    case wkbPolygon:
+      DrawPolygon((OGRPolygon *)geometry);
       break;
 
-    case GTFan:
-      DrawFan((Fan *)pGeom);
+    case wkbMultiPoint:
+      DrawMultiPoint((OGRMultiPoint *)geometry);
       break;
 
-    case GTMultiPoint:
-      DrawMultiPoint(pStyle, (MultiPoint *)pGeom);
+    case wkbMultiLineString:
+      DrawMultiLineString((OGRMultiLineString *)geometry);
       break;
 
-    case GTMultiLineString:
-      DrawMultiLineString((MultiLineString *)pGeom);
+    case wkbMultiPolygon:
+      DrawMultiPolygon((OGRMultiPolygon *)geometry);
       break;
 
-    case GTMultiPolygon:
-      DrawMultiPolygon((MultiPolygon *)pGeom);
+    case wkbLinearRing:
+      DrawLinearRing((OGRLinearRing *)geometry);
       break;
 
-    case GTSpline:
-      DrawLineSpline((Spline *)pGeom);
-      break;
-
-    case GTLinearRing:
-      DrawLinearRing((LinearRing *)pGeom);
-      break;
-
-    case GTGrid:
-      DrawGrid((Grid *)pGeom);
-      break;
-
-    case GTTin:
-      DrawTin((Tin *)pGeom);
-      break;
-
-    case GTNone:
-    case GTUnknown:
+    case wkbNone:
+    case wkbUnknown:
     default:
       break;
   }
 
-  if (!m_bLockStyle) EndDrawing();
+  // if (!is_lock_style_) EndDrawing();
 
-  ::RestoreDC(m_hCurDC, -1);
+  ::RestoreDC(current_dc_, -1);
 
   return ERR_NONE;
 }
 
-//////////////////////////////////////////////////////////////////////////
 int RenderDeviceGDI::DrawMultiLineString(
-    const MultiLineString *pMultiLinestring) {
-  int nLines = pMultiLinestring->GetNumGeometries();
-
-  int i = 0;
-  while (i < nLines) {
-    DrawLineString((LineString *)pMultiLinestring->GetGeometryRef(i));
-    i++;
+    const OGRMultiLineString *multi_linestring) {
+  for (const auto i : *multi_linestring) {
+    DrawLineString((OGRLineString *)(i));
   }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawMultiPoint(const Style *pStyle,
-                                    const MultiPoint *pMultiPoint) {
-  int point_sizes = pMultiPoint->GetNumGeometries();
-
-  int i = 0;
-  while (i < point_sizes) {
-    DrawPoint(pStyle, (Point *)pMultiPoint->GetGeometryRef(i));
-    i++;
+int RenderDeviceGDI::DrawMultiPoint(const OGRMultiPoint *multi_point) {
+  for (const auto i : *multi_point) {
+    DrawPoint((OGRPoint *)(i));
   }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawMultiPolygon(const MultiPolygon *pMultiPolygon) {
-  int nPolygons = pMultiPolygon->GetNumGeometries();
-
-  int i = 0;
-  while (i < nPolygons) {
-    DrawPloygon((Polygon *)pMultiPolygon->GetGeometryRef(i));
-    i++;
+int RenderDeviceGDI::DrawMultiPolygon(const OGRMultiPolygon *multi_polygon) {
+  for (const auto i : *multi_polygon) {
+    DrawPolygon((OGRPolygon *)(i));
   }
 
   return ERR_NONE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::DrawPoint(const Style *pStyle, const Point *pPoint) {
-  ulong format = pStyle->GetStyleType();
-  if (m_nFeatureType == FeatureType::FtAnno) {
-    AnnotationDesc anno = pStyle->GetAnnoDesc();
-    return DrawAnno(m_szAnno, m_fAnnoAngle, abs(anno.fHeight), abs(anno.fWidth),
-                    abs(anno.fSpace), pPoint);
-  } else if (m_nFeatureType == FeatureType::FtChildImage) {
-    SymbolDesc symbol = pStyle->GetSymbolDesc();
-    return DrawSymbol(m_hIcon, symbol.fSymbolHeight, symbol.fSymbolWidth,
-                      pPoint);
-  } else if (m_nFeatureType == FeatureType::FtDot) {
-    int r = m_rdPra.point_raduis /**m_fblc*/;
-    long lX, lY;
-    LPToDP(pPoint->GetX(), pPoint->GetY(), lX, lY);
-    Ellipse(m_hCurDC, lX - r, lY - r, lX + r, lY + r);
+int RenderDeviceGDI::DrawPoint(const OGRPoint *point) {
+  int r = options_.point_radius;
+  long X = 0, Y = 0;
+  LPToDP(point->getX(), point->getY(), X, Y);
+  Ellipse(current_dc_, X - r, Y - r, X + r, Y + r);
 
-    if (m_rdPra.show_point) {
-      // Rectangle(m_hCurDC,lX - r,lY - r,lX + r,lY + r);
-      DrawCross(m_hCurDC, lX, lY, r);
-    }
-
-    return ERR_NONE;
+  if (options_.show_point) {
+    DrawCross(current_dc_, X, Y, r);
   }
 
-  return ERR_FAILURE;
+  return ERR_NONE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::DrawAnno(const char *szAnno, float fangel, float fCHeight,
-                              float fCWidth, float fCSpace,
-                              const Point *pPoint) {
-  if (szAnno == NULL) return ERR_INVALID_PARAM;
+int RenderDeviceGDI::DrawAnno(const OGRPoint *point, const char *anno,
+                              float angle, float height, float width,
+                              float space) {
+  if (anno == NULL) {
+    return ERR_INVALID_PARAM;
+  }
 
-  fCHeight *= m_fblc;
-  fCWidth *= m_fblc;
-  fCSpace *= m_fblc;
+  height *= blc_;
+  width *= blc_;
+  space *= blc_;
 
-  unsigned char c1, c2;
-  fPoint pt;
-  long x, y;
+  long X = 0, Y = 0;
   char bz[4];
-  const char *ls1;
-  ls1 = szAnno;
+  const char *c = anno;
 
-  LPToDP(pPoint->GetX(), pPoint->GetY(), x, y);
-  pt.x = x;
-  pt.y = y;
+  LPToDP(point->getX(), point->getY(), X, Y);
 
-  pt.x -= 2 * fCHeight * sin(fangel);
-  pt.y -= 2 * fCHeight * cos(fangel);
+  X -= 2 * height * sin(angle);
+  Y -= 2 * height * cos(angle);
 
-  int nStrLength = (int)strlen(ls1);
-  while (nStrLength > 0) {
-    c1 = *ls1;
-    c2 = *(ls1 + 1);
-    if (c1 > 127 && c2 > 127)  //如果下一个字符是汉字
-    {
-      strncpy(bz, ls1, 2);
+  int char_size = (int)strlen(c);
+  while (char_size > 0) {
+    if (*c > 127 && *(c + 1) > 127) {
+      // 濡傛灉涓嬩竴涓瓧绗︽槸姹夊瓧
+      strncpy(bz, c, 2);
       bz[2] = 0;
-      ls1 = ls1 + 2;
-      TextOut(m_hCurDC, pt.x, pt.y, (LPCSTR)bz, 2);
-      nStrLength -= 2;
-      pt.x += (fCWidth * 2 + fCSpace) * cos(fangel);
-      pt.y += (fCWidth * 2 + fCSpace) * sin(fangel);
+      c = c + 2;
+      ::TextOut(current_dc_, X, Y, (LPCWSTR)bz, 2);
+      char_size -= 2;
+      X += (width * 2 + space) * cos(angle);
+      Y += (width * 2 + space) * sin(angle);
     } else {
-      strncpy(bz, ls1, 1);
+      strncpy(bz, c, 1);
       bz[1] = 0;
-      ls1++;
-      TextOut(m_hCurDC, pt.x, pt.y, (LPCSTR)bz, 1);
-      nStrLength -= 1;
+      c++;
+      ::TextOut(current_dc_, X, Y, (LPCWSTR)bz, 1);
+      char_size -= 1;
 
-      pt.x += (fCWidth + fCSpace / 2.) * cos(fangel);
-      pt.y += (fCWidth + fCSpace / 2.) * sin(fangel);
+      X += (width + space / 2.) * cos(angle);
+      Y += (width + space / 2.) * sin(angle);
     }
   }
 
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    long lX, lY;
-    LPToDP(pPoint->GetX(), pPoint->GetY(), lX, lY);
-    // Ellipse(m_hCurDC,lX - r ,lY - r,lX + r ,lY + r);
-    // Rectangle(m_hCurDC,lX - r,lY - r,lX + r,lY + r);
-    DrawCross(m_hCurDC, lX, lY, r);
+  if (options_.show_point) {
+    long X = 0, Y = 0;
+    LPToDP(point->getX(), point->getY(), X, Y);
+    DrawCross(current_dc_, X, Y, options_.point_radius);
   }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawSymbol(HICON hIcon, long lHeight, long lWidth,
-                                const Point *pPoint) {
-  lHeight *= m_fblc;
-  lWidth *= m_fblc;
+int RenderDeviceGDI::DrawSymbol(const OGRPoint *point, HICON icon, long height,
+                                long width) {
+  height *= blc_;
+  width *= blc_;
 
-  long lX, lY;
-  LPToDP(pPoint->GetX(), pPoint->GetY(), lX, lY);
-  //::DrawIcon(m_hCurDC,pt.x-lWidth,pt.y-lHeight,hIcon);
-  ::DrawIconEx(m_hCurDC, lX - lWidth / 2, lY + lHeight / 2, hIcon, lWidth,
-               lHeight, 0, NULL, DI_NORMAL);
-  //::DrawState(m_hCurDC,NULL,NULL,(LPARAM)hIcon,0,pt.x-lWidth/2,pt.y+lHeight/2,lWidth,lHeight,
-  // DSS_NORMAL | DST_ICON);
+  long X = 0, Y = 0;
+  LPToDP(point->getX(), point->getY(), X, Y);
+  ::DrawIconEx(current_dc_, X - width / 2, Y + height / 2, icon, width, height,
+               0, NULL, DI_NORMAL);
 
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    long lX, lY;
-    LPToDP(pPoint->GetX(), pPoint->GetY(), lX, lY);
-    // Ellipse(m_hCurDC,lX - r ,lY - r,lX + r ,lY + r);
-    // Rectangle(m_hCurDC,lX - r,lY - r,lX + r,lY + r);
-    DrawCross(m_hCurDC, lX, lY, r);
+  if (options_.show_point) {
+    int r = options_.point_radius;
+    long X = 0, Y = 0;
+    LPToDP(point->getX(), point->getY(), X, Y);
+    DrawCross(current_dc_, X, Y, r);
   }
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawLineSpline(const Spline *pSpline) {
-  int point_sizes = pSpline->GetAnalyticPointCount();
-  if (point_sizes < 2) return ERR_INVALID_PARAM;
-
-  int i = 0;
-  POINT *lpPoint = NULL;
-
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) <
-      (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
-    m_bufPool.FreeAllBuf();
-    lpPoint = (POINT *)m_bufPool.NewBuf();
-  } else
-    lpPoint = new POINT[point_sizes];
-#else
-  lpPoint = new POINT[point_sizes];
-#endif
-
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    for (int i = 0; i < point_sizes; i++) {
-      LPToDP(pSpline->GetAnalyticX(i), pSpline->GetAnalyticY(i), lpPoint[i].x,
-             lpPoint[i].y);
-      DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-    }
-
-    MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-    PolylineTo(m_hCurDC, lpPoint, point_sizes);
-  } else {
-    for (int i = 0; i < point_sizes; i++) {
-      LPToDP(pSpline->GetAnalyticX(i), pSpline->GetAnalyticY(i), lpPoint[i].x,
-             lpPoint[i].y);
-    }
-
-    MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-    PolylineTo(m_hCurDC, lpPoint, point_sizes);
-  }
-
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) <
-      (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
-    m_bufPool.FreeAllBuf();
-  } else
-    SAFE_DELETE_A(lpPoint);
-#else
-  SAFE_DELETE_A(lpPoint);
-#endif
-
-  int r = m_rdPra.point_raduis;
-  long lX, lY;
-  for (int i = 0; i < pSpline->GetNumPoints(); i++) {
-    LPToDP(pSpline->GetX(i), pSpline->GetY(i), lX, lY);
-    Ellipse(m_hCurDC, lX - r, lY - r, lX + r, lY + r);
-  }
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawLineString(const LineString *pLinestring) {
-  int point_sizes = pLinestring->GetNumPoints();
-  if (point_sizes < 2) return ERR_INVALID_PARAM;
-
-  int i = 0;
-  POINT *lpPoint = NULL;
-
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) <
-      (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
-    m_bufPool.FreeAllBuf();
-    lpPoint = (POINT *)m_bufPool.NewBuf();
-  } else
-    lpPoint = new POINT[point_sizes];
-#else
-  lpPoint = new POINT[point_sizes];
-#endif
-
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    for (int i = 0; i < point_sizes; i++) {
-      LPToDP(pLinestring->GetX(i), pLinestring->GetY(i), lpPoint[i].x,
-             lpPoint[i].y);
-      // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
-      // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y -
-      // r,lpPoint[i].x + r ,lpPoint[i].y + r);
-      DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-    }
-  } else {
-    for (int i = 0; i < point_sizes; i++) {
-      LPToDP(pLinestring->GetX(i), pLinestring->GetY(i), lpPoint[i].x,
-             lpPoint[i].y);
-    }
-  }
-
-  MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-  PolylineTo(m_hCurDC, lpPoint, point_sizes);
-
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) <
-      (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
-    m_bufPool.FreeAllBuf();
-  } else
-    SAFE_DELETE_A(lpPoint);
-#else
-  SAFE_DELETE_A(lpPoint);
-#endif
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawLinearRing(const LinearRing *pLinearRing) {
-  int point_sizes = pLinearRing->GetNumPoints();
-  if (point_sizes < 2) return ERR_INVALID_PARAM;
-
-  int i = 0;
-  POINT *lpPoint = NULL;
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
-    m_bufPool.FreeAllBuf();
-    lpPoint = (POINT *)m_bufPool.NewBuf();
-  } else
-    lpPoint = new POINT[point_sizes];
-#else
-  lpPoint = new POINT[point_sizes];
-#endif
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    for (int i = 0; i < pLinearRing->GetNumPoints(); i++) {
-      LPToDP(pLinearRing->GetX(i), pLinearRing->GetY(i), lpPoint[i].x,
-             lpPoint[i].y);
-      // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
-      // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y -
-      // r,lpPoint[i].x + r ,lpPoint[i].y + r);
-      DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-    }
-  } else {
-    for (int i = 0; i < point_sizes; i++) {
-      LPToDP(pLinearRing->GetX(i), pLinearRing->GetY(i), lpPoint[i].x,
-             lpPoint[i].y);
-    }
-  }
-
-  MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-  PolylineTo(m_hCurDC, lpPoint, point_sizes);
-
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
-    m_bufPool.FreeAllBuf();
-  } else
-    SAFE_DELETE_A(lpPoint);
-#else
-  SAFE_DELETE_A(lpPoint);
-#endif
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawPloygon(const Polygon *pPloygon) {
-  int nAllPts = 0;
-  const LinearRing *pLinerring = pPloygon->GetExteriorRing();
-
-  int nExteriorPts = pLinerring->GetNumPoints();
-  if (nExteriorPts < 2) return ERR_INVALID_PARAM;
-
-  BOOL bRet = FALSE;
-
-  nAllPts += nExteriorPts;
-
-  int nInteriorRings = pPloygon->GetNumInteriorRings();
-  int *nRings = new int[nInteriorRings + 1];
-  nRings[0] = nExteriorPts;
-
-  for (int i = 0; i < nInteriorRings; i++) {
-    const LinearRing *pInteriorRing = pPloygon->GetInteriorRing(i);
-    nRings[i + 1] = pInteriorRing->GetNumPoints();
-    nAllPts += nRings[i + 1];
+int RenderDeviceGDI::DrawLineString(const OGRLineString *line_string) {
+  int point_size = line_string->getNumPoints();
+  if (point_size < 2) {
+    return ERR_INVALID_PARAM;
   }
 
   int i = 0;
-  POINT *lpPoint = NULL;
-
-#ifdef GDI_USE_BUFPOOL
-  if (nAllPts * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
-    m_bufPool.FreeAllBuf();
-    lpPoint = (POINT *)m_bufPool.NewBuf();
-  } else
-    lpPoint = new POINT[nAllPts];
-#else
-  lpPoint = new POINT[nAllPts];
-#endif
-
-  int nCount = 0;
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    for (int i = 0; i < nExteriorPts; i++, nCount++) {
-      LPToDP(pLinerring->GetX(i), pLinerring->GetY(i), lpPoint[i].x,
-             lpPoint[i].y);
-      // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
-      // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y -
-      // r,lpPoint[i].x + r ,lpPoint[i].y + r);
-      DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-    }
-
-    for (int i = 0; i < nInteriorRings; i++) {
-      const LinearRing *pInteriorRing = pPloygon->GetInteriorRing(i);
-      int nInteriorPts = pInteriorRing->GetNumPoints();
-      for (int j = 0; j < nInteriorPts; ++j, nCount++) {
-        LPToDP(pInteriorRing->GetX(i), pInteriorRing->GetY(i), lpPoint[i].x,
-               lpPoint[i].y);
-        // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
-        // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y
-        // - r,lpPoint[i].x + r ,lpPoint[i].y + r);
-        DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-      }
-    }
-
-    bRet = ::PolyPolygon(m_hCurDC, lpPoint, nRings, nInteriorRings + 1);
-  } else {
-    for (int i = 0; i < nExteriorPts; i++, nCount++) {
-      LPToDP(pLinerring->GetX(i), pLinerring->GetY(i), lpPoint[i].x,
-             lpPoint[i].y);
-    }
-
-    for (int i = 0; i < nInteriorRings; i++) {
-      const LinearRing *pInteriorRing = pPloygon->GetInteriorRing(i);
-      int nInteriorPts = pInteriorRing->GetNumPoints();
-      for (int j = 0; j < nInteriorPts; ++j, nCount++) {
-        LPToDP(pInteriorRing->GetX(i), pInteriorRing->GetY(i), lpPoint[i].x,
-               lpPoint[i].y);
-      }
-    }
-
-    bRet = ::PolyPolygon(m_hCurDC, lpPoint, nRings, nInteriorRings + 1);
+  POINT *points = new POINT[point_size];
+  for (int i = 0; i < point_size; ++i) {
   }
 
-#ifdef GDI_USE_BUFPOOL
-  if (nAllPts * (sizeof(POINT)) < m_bufPool.GetPoolSize()) {
-    m_bufPool.FreeAllBuf();
-  } else
-    SAFE_DELETE_A(lpPoint);
-#else
-  SAFE_DELETE_A(lpPoint);
-#endif
-
-  SAFE_DELETE_A(nRings);
-
-  return ERR_NONE;
-}
-
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::DrawTin(const Tin *pTin) {
-  DrawTinLines(pTin);
-
-  // if (m_rdPra.show_point)
-  { DrawTinNodes(pTin); }
-
-  return ERR_NONE;
-}
-
-//绘制Tin线
-int RenderDeviceGDI::DrawTinLines(const Tin *pTin) {
-  POINT lPt1, lPt2, lPt3;
-  Point oPt1, oPt2, oPt3;
-
-  Envelope envTri, envViewp;
-  lRect lViewp;
-  fRect fViewp;
-
-  ViewportToRect(lViewp, m_Viewport);
-  DRectToLRect(lViewp, fViewp);
-  RectToEnvelope(envViewp, fViewp);
-
-  for (int i = 0; i < pTin->GetTriangleCount(); i++) {
-    Triangle tri = pTin->GetTriangle(i);
-
-    if (!tri.bDelete) {
-      oPt1 = pTin->GetPoint(tri.a);
-      oPt2 = pTin->GetPoint(tri.b);
-      oPt3 = pTin->GetPoint(tri.c);
-
-      envTri.Merge(oPt1.GetX(), oPt1.GetY());
-      envTri.Merge(oPt2.GetX(), oPt2.GetY());
-      envTri.Merge(oPt3.GetX(), oPt3.GetY());
-
-      if (envTri.Intersects(envViewp)) {
-        LPToDP(oPt1.GetX(), oPt1.GetY(), lPt1.x, lPt1.y);
-        LPToDP(oPt2.GetX(), oPt2.GetY(), lPt2.x, lPt2.y);
-        LPToDP(oPt3.GetX(), oPt3.GetY(), lPt3.x, lPt3.y);
-
-        MoveToEx(m_hCurDC, lPt1.x, lPt1.y, NULL);
-        LineTo(m_hCurDC, lPt2.x, lPt2.y);
-        LineTo(m_hCurDC, lPt3.x, lPt3.y);
-        LineTo(m_hCurDC, lPt1.x, lPt1.y);
-      }
-    }
-  }
-
-  return ERR_NONE;
-}
-
-//绘制Tin节点
-int RenderDeviceGDI::DrawTinNodes(const Tin *pTin) {
-  POINT lPt;
-  Point oPt;
-  int r = m_rdPra.point_raduis;
-
-  lRect lViewp;
-  fRect fViewp;
-
-  ViewportToRect(lViewp, m_Viewport);
-  DRectToLRect(lViewp, fViewp);
-  AjustfRect(fViewp);
-
-  for (int i = 0; i < pTin->GetPointCount(); i++) {
-    oPt = pTin->GetPoint(i);
-    if (IsInfRect(oPt.GetX(), oPt.GetY(), fViewp)) {
-      LPToDP(oPt.GetX(), oPt.GetY(), lPt.x, lPt.y);
-      Ellipse(m_hCurDC, lPt.x - r, lPt.y - r, lPt.x + r, lPt.y + r);
-    }
-  }
-
-  return ERR_NONE;
-}
-
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::DrawGrid(const Grid *pGrid) {
-  DrawGridLines(pGrid);
-
-  // if (m_rdPra.show_point)
-  { DrawGridNodes(pGrid); }
-
-  return ERR_NONE;
-}
-
-//绘制网格线
-int RenderDeviceGDI::DrawGridLines(const Grid *pGrid) {
-  const Matrix2D<RawPoint> *pNodes = pGrid->GetGridNodes();
-
-  int nM, nN;
-  pGrid->GetSize(nM, nN);
-
-  POINT lPt;
-
-  for (int j = 0; j < nN; j++) {  //绘制列
-    RawPoint rawPt = pNodes->GetElement(0, j);
-    LPToDP(rawPt.x, rawPt.y, lPt.x, lPt.y);
-    MoveToEx(m_hCurDC, lPt.x, lPt.y, NULL);
-    for (int i = 0; i < nM; i++) {  //绘制行
-      RawPoint rawPt1 = pNodes->GetElement(i, j);
-      LPToDP(rawPt1.x, rawPt1.y, lPt.x, lPt.y);
-      LineTo(m_hCurDC, lPt.x, lPt.y);
-    }
-  }
-
-  for (int i = 0; i < nM; i++) {  //绘制列
-    RawPoint rawPt = pNodes->GetElement(i, 0);
-    LPToDP(rawPt.x, rawPt.y, lPt.x, lPt.y);
-    MoveToEx(m_hCurDC, lPt.x, lPt.y, NULL);
-
-    for (int j = 0; j < nN; j++) {  //绘制行
-      RawPoint rawPt1 = pNodes->GetElement(i, j);
-      LPToDP(rawPt1.x, rawPt1.y, lPt.x, lPt.y);
-      LineTo(m_hCurDC, lPt.x, lPt.y);
-    }
-  }
-
-  return ERR_NONE;
-}
-
-//绘制网格节点
-int RenderDeviceGDI::DrawGridNodes(const Grid *pGrid) {
-  const Matrix2D<RawPoint> *pNodes = pGrid->GetGridNodes();
-
-  int nM, nN;
-  pGrid->GetSize(nM, nN);
-
-  int r = m_rdPra.point_raduis;
-  POINT lPt;
-
-  for (int j = 0; j < nN; j++) {
-    for (int i = 0; i < nM; i++) {
-      RawPoint rawPt = pNodes->GetElement(i, j);
-      LPToDP(rawPt.x, rawPt.y, lPt.x, lPt.y);
-      Ellipse(m_hCurDC, lPt.x - r, lPt.y - r, lPt.x + r, lPt.y + r);
-    }
-  }
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawFan(const Fan *pFan) {
-  long x1, y1, x2, y2, x3, y3, x4, y4, x5, y5;
-  Point oStPoint, oEdbfPoint, oCtPoint;
-
-  const Arc *pArc = pFan->GetArc();
-  pArc->StartPoint(&oStPoint);
-  pArc->EndPoint(&oEdbfPoint);
-  pArc->GetCenterPoint(&oCtPoint);
-
-  LPToDP(oStPoint.GetX(), oStPoint.GetY(), x3, y3);
-  LPToDP(oEdbfPoint.GetX(), oEdbfPoint.GetY(), x4, y4);
-  LPToDP(oCtPoint.GetX(), oCtPoint.GetY(), x5, y5);
-
-  int dr = m_rdPra.point_raduis;
-  float r = Distance(x4, y4, x5, y5);
-
-  x1 = x5 - r;
-  y1 = y5 - r;
-  x2 = x5 + r;
-  y2 = y5 + r;
-
-  ::MoveToEx(m_hCurDC, x4, y4, NULL);
-  LineTo(m_hCurDC, x5, y5);
-  LineTo(m_hCurDC, x3, y3);
-  ::Pie(m_hCurDC, x1, y1, x2, y2, x3, y3, x4, y4);
-
-  Ellipse(m_hCurDC, x3 - dr, y3 - dr, x3 + dr, y3 + dr);
-  Ellipse(m_hCurDC, x4 - dr, y4 - dr, x4 + dr, y4 + dr);
-  Ellipse(m_hCurDC, x5 - dr, y5 - dr, x5 + dr, y5 + dr);
-
-  if (m_rdPra.show_point) {
-    // Rectangle(m_hCurDC,x3 - dr ,y3 - dr,x3 + dr ,y3 + dr);
-    // Rectangle(m_hCurDC,x4 - dr ,y4 - dr,x4 + dr ,y4 + dr);
-    // Rectangle(m_hCurDC,x5 - dr ,y5 - dr,x5 + dr ,y5 + dr);
-
-    DrawCross(m_hCurDC, x3, y3, dr);
-    DrawCross(m_hCurDC, x4, y4, dr);
-    DrawCross(m_hCurDC, x5, y5, dr);
-  }
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawArc(const Arc *pArc) {
-  long x1, y1, x2, y2, x3, y3, x4, y4, x5, y5;
-  Point oStPoint, oEdbfPoint, oCtPoint;
-
-  pArc->StartPoint(&oStPoint);
-  pArc->EndPoint(&oEdbfPoint);
-  pArc->GetCenterPoint(&oCtPoint);
-
-  LPToDP(oStPoint.GetX(), oStPoint.GetY(), x3, y3);
-  LPToDP(oEdbfPoint.GetX(), oEdbfPoint.GetY(), x4, y4);
-  LPToDP(oCtPoint.GetX(), oCtPoint.GetY(), x5, y5);
-
-  int dr = m_rdPra.point_raduis;
-  float r = Distance(x4, y4, x5, y5);
-
-  x1 = x5 - r;
-  y1 = y5 - r;
-  x2 = x5 + r;
-  y2 = y5 + r;
-
-  //::MoveToEx(m_hCurDC,x4,y4,NULL);
-  // LineTo(m_hCurDC,x5,y5);
-  // LineTo(m_hCurDC,x3,y3);
-  ::Arc(m_hCurDC, x1, y1, x2, y2, x3, y3, x4, y4);
-
-  Ellipse(m_hCurDC, x3 - dr, y3 - dr, x3 + dr, y3 + dr);
-  Ellipse(m_hCurDC, x4 - dr, y4 - dr, x4 + dr, y4 + dr);
-  Ellipse(m_hCurDC, x5 - dr, y5 - dr, x5 + dr, y5 + dr);
-
-  if (m_rdPra.show_point) {
-    // Rectangle(m_hCurDC,x3 - dr ,y3 - dr,x3 + dr ,y3 + dr);
-    // Rectangle(m_hCurDC,x4 - dr ,y4 - dr,x4 + dr ,y4 + dr);
-    // Rectangle(m_hCurDC,x5 - dr ,y5 - dr,x5 + dr ,y5 + dr);
-
-    DrawCross(m_hCurDC, x3, y3, dr);
-    DrawCross(m_hCurDC, x4, y4, dr);
-    DrawCross(m_hCurDC, x5, y5, dr);
-  }
-
-  return ERR_NONE;
-}
-
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::DrawEllipse(float left, float top, float right,
-                                 float bottom, bool bDP) {
-  lRect lrect;
-
-  fRect frect;
-  frect.lb.x = left;
-  frect.lb.y = bottom;
-  frect.rt.x = right;
-  frect.rt.y = top;
-
-  if (!bDP)
-    LRectToDRect(frect, lrect);
-  else
-    fRectTolRect(lrect, frect);
-
-  Ellipse(m_hCurDC, lrect.lb.x, lrect.lb.y, lrect.rt.x, lrect.rt.y);
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawRect(const fRect &rect, bool bDP) {
-  lRect tmpRectDP;
-
-  fRectTolRect(tmpRectDP, rect);
-
-  if (!bDP) {
-    fRect tmpRectLP;
-
-    lRectTofRect(tmpRectLP, tmpRectDP);
-    LRectToDRect(tmpRectLP, tmpRectDP);
-  }
-
-  MoveToEx(m_hCurDC, tmpRectDP.lb.x, tmpRectDP.lb.y, NULL);
-  LineTo(m_hCurDC, tmpRectDP.rt.x, tmpRectDP.lb.y);
-  LineTo(m_hCurDC, tmpRectDP.rt.x, tmpRectDP.rt.y);
-  LineTo(m_hCurDC, tmpRectDP.lb.x, tmpRectDP.rt.y);
-  LineTo(m_hCurDC, tmpRectDP.lb.x, tmpRectDP.lb.y);
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::DrawLine(fPoint *pfPoints, int nCount, bool bDP) {
-  int point_sizes = nCount;
-  if (point_sizes < 2) return ERR_INVALID_PARAM;
-
-  int i = 0;
-  POINT *lpPoint = NULL;
-
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) <
-      (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
-    m_bufPool.FreeAllBuf();
-    lpPoint = (POINT *)m_bufPool.NewBuf();
-  } else
-    lpPoint = new POINT[point_sizes];
-#else
-  lpPoint = new POINT[point_sizes];
-#endif
-
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    if (!bDP) {
-      for (int i = 0; i < point_sizes; i++) {
-        LPToDP(pfPoints[i].x, pfPoints[i].y, lpPoint[i].x, lpPoint[i].y);
-        // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
-        // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y
-        // - r,lpPoint[i].x + r ,lpPoint[i].y + r);
-        DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-      }
-    } else {
-      for (int i = 0; i < point_sizes; i++) {
-        lpPoint[i].x = pfPoints[i].x;
-        lpPoint[i].y = pfPoints[i].y;
-        // Ellipse(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y - r,lpPoint[i].x + r
-        // ,lpPoint[i].y + r); Rectangle(m_hCurDC,lpPoint[i].x - r ,lpPoint[i].y
-        // - r,lpPoint[i].x + r ,lpPoint[i].y + r);
-        DrawCross(m_hCurDC, lpPoint[i].x, lpPoint[i].y, r);
-      }
+  if (options_.show_point) {
+    OGRPoint point;
+    for (int i = 0; i < point_size; i++) {
+      line_string->getPoint(i, &point);
+      LPToDP(point.getX(), point.getY(), points[i].x, points[i].y);
+      DrawCross(current_dc_, points[i].x, points[i].y, options_.point_radius);
     }
   } else {
-    if (!bDP) {
-      for (int i = 0; i < point_sizes; i++) {
-        LPToDP(pfPoints[i].x, pfPoints[i].y, lpPoint[i].x, lpPoint[i].y);
-      }
-    } else {
-      for (int i = 0; i < point_sizes; i++) {
-        lpPoint[i].x = pfPoints[i].x;
-        lpPoint[i].y = pfPoints[i].y;
-      }
+    OGRPoint point;
+    for (int i = 0; i < point_size; i++) {
+      line_string->getPoint(i, &point);
+      LPToDP(point.getX(), point.getY(), points[i].x, points[i].y);
     }
   }
 
-  MoveToEx(m_hCurDC, lpPoint[0].x, lpPoint[0].y, NULL);
-  PolylineTo(m_hCurDC, lpPoint, point_sizes);
+  MoveToEx(current_dc_, points[0].x, points[0].y, NULL);
+  PolylineTo(current_dc_, points, point_size);
 
-#ifdef GDI_USE_BUFPOOL
-  if (point_sizes * (sizeof(POINT)) <
-      (m_bufPool.GetBufCount() * m_bufPool.GetSizePerBuf())) {
-    m_bufPool.FreeAllBuf();
-  } else
-    SAFE_DELETE_A(lpPoint);
-#else
-  SAFE_DELETE_A(lpPoint);
-#endif
+  SAFE_DELETE_A(points);
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawLine(const fPoint &ptA, const fPoint &ptB, bool bDP) {
-  lPoint point(ptA.x, ptA.y), pt2(ptB.x, ptB.y);
+int RenderDeviceGDI::DrawLinearRing(const OGRLinearRing *linear_ring) {
+  return DrawLineString(linear_ring->toUpperClass());
+}
 
-  if (!bDP) {
-    LPToDP(ptA.x, ptA.y, point.x, point.y);
-    LPToDP(ptB.x, ptB.y, pt2.x, pt2.y);
+int RenderDeviceGDI::DrawPolygon(const OGRPolygon *polygon) {
+  BOOL ret = FALSE;
+  int all_point_size = 0;
+
+  const auto *exterior_ring = polygon->getExteriorRing();
+  int exterior_point_size = exterior_ring->getNumPoints();
+  if (exterior_point_size < 2) {
+    return ERR_INVALID_PARAM;
+  }
+  all_point_size += exterior_point_size;
+
+  int interior_ring_size = polygon->getNumInteriorRings();
+  int *ring_point_sizes = new int[interior_ring_size + 1];
+  ring_point_sizes[0] = exterior_point_size;
+  for (int i = 0; i < interior_ring_size; i++) {
+    const auto *interior_ring = polygon->getInteriorRing(i);
+    ring_point_sizes[i + 1] = interior_ring->getNumPoints();
+    all_point_size += ring_point_sizes[i + 1];
   }
 
-  MoveToEx(m_hCurDC, point.x, point.y, NULL);
-  LineTo(m_hCurDC, pt2.x, pt2.y);
+  POINT *points = NULL;
+  points = new POINT[all_point_size];
 
-  return ERR_NONE;
-}
+  if (options_.show_point) {
+    int idx = 0;
+    OGRPoint point;
+    for (int i = 0; i < exterior_point_size; i++, idx++) {
+      exterior_ring->getPoint(i, &point);
+      LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
+      DrawCross(current_dc_, points[idx].x, points[idx].y,
+                options_.point_radius);
+    }
 
-int RenderDeviceGDI::DrawText(const char *szAnno, float fangel, float fCHeight,
-                              float fCWidth, float fCSpace, const fPoint &point,
-                              bool bDP) {
-  if (szAnno == NULL) return ERR_INVALID_PARAM;
+    for (int i = 0; i < interior_ring_size; i++) {
+      const auto *interior_ring = polygon->getInteriorRing(i);
+      int nInteriorPts = interior_ring->getNumPoints();
+      for (int j = 0; j < nInteriorPts; ++j, idx++) {
+        interior_ring->getPoint(i, &point);
+        LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
+        DrawCross(current_dc_, points[idx].x, points[idx].y,
+                  options_.point_radius);
+      }
+    }
 
-  fCHeight *= m_fblc;
-  fCWidth *= m_fblc;
-  fCSpace *= m_fblc;
-
-  unsigned char c1, c2;
-  fPoint pt;
-  long x, y;
-  char bz[4];
-  const char *ls1;
-  ls1 = szAnno;
-
-  lRect tmpRectDP;
-
-  if (!bDP) {
-    LPToDP(point.x, point.y, x, y);
-    pt.x = x;
-    pt.y = y;
+    ret = ::PolyPolygon(current_dc_, points, ring_point_sizes,
+                        interior_ring_size + 1);
   } else {
-    pt.x = point.x;
-    pt.y = point.y;
-  }
-
-  pt.x -= 2 * fCHeight * sin(fangel);
-  pt.y -= 2 * fCHeight * cos(fangel);
-
-  int nStrLength = (int)strlen(ls1);
-  while (nStrLength > 0) {
-    c1 = *ls1;
-    c2 = *(ls1 + 1);
-    if (c1 > 127 && c2 > 127)  //如果下一个字符是汉字
-    {
-      strncpy(bz, ls1, 2);
-      bz[2] = 0;
-      ls1 = ls1 + 2;
-      TextOut(m_hCurDC, pt.x, pt.y, (LPCSTR)bz, 2);
-      nStrLength -= 2;
-      pt.x += (fCWidth * 2 + fCSpace) * cos(fangel);
-      pt.y += (fCWidth * 2 + fCSpace) * sin(fangel);
-    } else {
-      strncpy(bz, ls1, 1);
-      bz[1] = 0;
-      ls1++;
-      TextOut(m_hCurDC, pt.x, pt.y, (LPCSTR)bz, 1);
-      nStrLength -= 1;
-
-      pt.x += (fCWidth + fCSpace / 2.) * cos(fangel);
-      pt.y += (fCWidth + fCSpace / 2.) * sin(fangel);
-    }
-  }
-
-  if (m_rdPra.show_point) {
-    int r = m_rdPra.point_raduis;
-    long lX, lY;
-    if (!bDP) {
-      LPToDP(point.x, point.y, lX, lY);
-    } else {
-      lX = point.x;
-      lY = point.y;
+    int idx = 0;
+    OGRPoint point;
+    for (int i = 0; i < exterior_point_size; i++, idx++) {
+      exterior_ring->getPoint(i, &point);
+      LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
     }
 
-    // Ellipse(m_hCurDC,lX - r ,lY - r,lX + r ,lY + r);
-    // Rectangle(m_hCurDC,lX - r,lY - r,lX + r,lY + r);
-    DrawCross(m_hCurDC, lX, lY, r);
+    for (int i = 0; i < interior_ring_size; i++) {
+      const auto *interior_ring = polygon->getInteriorRing(i);
+      int nInteriorPts = interior_ring->getNumPoints();
+      OGRPoint point;
+      for (int j = 0; j < nInteriorPts; ++j, idx++) {
+        interior_ring->getPoint(i, &point);
+        LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
+      }
+    }
+
+    ret = ::PolyPolygon(current_dc_, points, ring_point_sizes,
+                        interior_ring_size + 1);
   }
+
+  SAFE_DELETE_A(points);
+  SAFE_DELETE_A(ring_point_sizes);
 
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::DrawImage(const char *szImageBuffer, int nImageBufferSize,
-                               const fRect &frect, long lCodeType,
-                               eRDBufferLayer eMRDBufLyr) {
-  long lRtn = ERR_FAILURE;
+int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
+                               const LRect &lrect, long code_type_,
+                               eRenderBufferLayer rbl_type) {
+  long ret = ERR_FAILURE;
 
-  lRect lrt;
-  LRectToDRect(frect, lrt);
+  DRect drect;
+  LRectToDRect(lrect, drect);
 
-  switch (eMRDBufLyr) {
-    case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.DrawImage(szImageBuffer, nImageBufferSize, lCodeType,
-                                         lrt.lb.x, lrt.rt.y, lrt.Width(),
-                                         lrt.Height());
+  switch (rbl_type) {
+    case RB_COMPOSIT: {
+      ret = composit_render_buffer_.DrawImage(
+          image_buffer, image_buffer_size, code_type_, drect.x,
+          drect.y + drect.height, drect.width, drect.height);
     } break;
   }
 
-  return lRtn;
+  return ret;
 }
 
-int RenderDeviceGDI::StrethImage(const char *szImageBuffer, int nImageBufferSize,
-                                 const fRect &frect, long lCodeType,
-                                 eRDBufferLayer eMRDBufLyr) {
-  long lRtn = ERR_FAILURE;
+int RenderDeviceGDI::StrethImage(const char *image_buffer,
+                                 int image_buffer_size, const LRect &rect,
+                                 long code_type_, eRenderBufferLayer rbl_type) {
+  long ret = ERR_FAILURE;
 
-  lRect lrt;
+  DRect drect;
+  LRectToDRect(rect, drect);
 
-  LRectToDRect(frect, lrt);
-
-  switch (eMRDBufLyr) {
-    case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.StrethImage(szImageBuffer, nImageBufferSize, lCodeType,
-                                           lrt.lb.x, lrt.rt.y, lrt.Width(),
-                                           lrt.Height());
+  switch (rbl_type) {
+    case RB_COMPOSIT: {
+      ret = composit_render_buffer_.StrethImage(
+          image_buffer, image_buffer_size, code_type_, drect.x,
+          drect.y + drect.height, drect.width, drect.height);
     } break;
   }
 
-  return lRtn;
+  return ret;
 }
 
-int RenderDeviceGDI::SaveImage(const char *szFilePath,
-                               eRDBufferLayer eMRDBufLyr, bool bBgTransparent) {
-  long lRtn = ERR_FAILURE;
+int RenderDeviceGDI::SaveImage(const char *file_path,
+                               eRenderBufferLayer rbl_type,
+                               bool backgroud_transparent) {
+  long ret = ERR_FAILURE;
 
-  switch (eMRDBufLyr) {
-    case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.Save2Image(szFilePath, bBgTransparent);
+  switch (rbl_type) {
+    case RB_COMPOSIT: {
+      ret =
+          composit_render_buffer_.Save2Image(file_path, backgroud_transparent);
     } break;
   }
 
-  return lRtn;
+  return ret;
 }
 
-int RenderDeviceGDI::Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize,
-                                   long lCodeType, eRDBufferLayer eMRDBufLyr,
-                                   bool bBgTransparent) {
-  long lRtn = ERR_FAILURE;
+int RenderDeviceGDI::Save2ImageBuffer(char *&image_buffer,
+                                      long &image_buffer_size, long code_type_,
+                                      eRenderBufferLayer rbl_type,
+                                      bool backgroud_transparent) {
+  long ret = ERR_FAILURE;
 
-  switch (eMRDBufLyr) {
-    case MRD_BL_MAP: {
-      lRtn = m_smtMapRenderBuf.Save2ImageBuffer(szImageBuffer, lImageBufferSize,
-                                             lCodeType, bBgTransparent);
+  switch (rbl_type) {
+    case RB_COMPOSIT: {
+      ret = composit_render_buffer_.Save2ImageBuffer(
+          image_buffer, image_buffer_size, code_type_, backgroud_transparent);
     } break;
   }
 
-  return lRtn;
+  return ret;
 }
 
-int RenderDeviceGDI::FreeImageBuffer(char *&szImageBuffer) {
-  return RenderBuf::FreeImageBuffer(szImageBuffer);
+int RenderDeviceGDI::FreeImageBuffer(char *&image_buffer) {
+  return RenderBuffer::FreeImageBuffer(image_buffer);
 }
 }  // namespace gfx2d

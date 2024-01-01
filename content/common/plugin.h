@@ -1,5 +1,5 @@
-#ifndef CONTENT_CORE_PLUGIN_H
-#define CONTENT_CORE_PLUGIN_H
+#ifndef CONTENT_COMMON_PLUGIN_H
+#define CONTENT_COMMON_PLUGIN_H
 
 #include <string>
 #include <vector>
@@ -8,7 +8,7 @@
 #include "base/synchronization/lock.h"
 #include "content/content.h"
 #include "content/content_export.h"
-#include "content/core/dynamic_library.h"
+#include "content/common/dynamic_library.h"
 
 
 namespace content {

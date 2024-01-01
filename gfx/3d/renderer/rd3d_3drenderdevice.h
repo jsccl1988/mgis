@@ -131,11 +131,11 @@ class 3DRenderDevice {
  public:
   //////////////////////////////////////////////////////////////////////////vbuf
   // vertex buffer
-  virtual VertexBuffer *CreateVertexBuffer(int nCount, ulong unFormat,
+  virtual VertexBuffer *CreateVertexBuffer(int size, ulong unFormat,
                                            bool bDynamic = true) = 0;
 
   // index buffer
-  virtual IndexBuffer *CreateIndexBuffer(int nCount) = 0;
+  virtual IndexBuffer *CreateIndexBuffer(int size) = 0;
 
   // video buffer
   virtual VideoBuffer *CreateVideoBuffer(ArrayType type) = 0;
@@ -246,7 +246,7 @@ class 3DRenderDevice {
 
  public:
   // fast draw
-  virtual long DrawCube3D(Vector3 vCenter, float fWidth, Color smtClr) = 0;
+  virtual long DrawCube3D(Vector3 vCenter, float width, Color smtClr) = 0;
 
  protected:
   HINSTANCE dll_;

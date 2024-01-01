@@ -1,5 +1,5 @@
-#ifndef CONTENT_CORE_ENVIRONMENT_H
-#define CONTENT_CORE_ENVIRONMENT_H
+#ifndef CONTENT_COMMON_ENVIRONMENT_H
+#define CONTENT_COMMON_ENVIRONMENT_H
 
 #include <string>
 
@@ -54,4 +54,4 @@ struct SystemOptions {
 };
 }  // namespace content
 
-#endif  // CONTENT_CORE_ENVIRONMENT_H
+#endif  // CONTENT_COMMON_ENVIRONMENT_H

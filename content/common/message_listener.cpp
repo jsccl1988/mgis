@@ -1,4 +1,4 @@
-#include "content/core/message_listener.h"
+#include "content/common/message_listener.h"
 
 #include <algorithm>
 

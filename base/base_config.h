@@ -7,6 +7,7 @@
 
 #if defined(OS_WIN)
 #include <windows.h>
+#include <windef.h>
 
 #include "build/winsdk_config.h"
 #endif

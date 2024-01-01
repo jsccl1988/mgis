@@ -1,67 +1,74 @@
 #include "gfx/2d/render_device_gdi/render_buffer.h"
 
-#include "ximage.h"
+// #include "ximage.h"
 
-#pragma comment(lib, "Msimg32.lib")  // TransparentBlt
+#pragma comment(lib, "msimg32.lib")  // TransparentBlt
 
 namespace gfx2d {
-RenderBuffer::RenderBuffer(HWND hWnd) : m_hWnd(hWnd), m_bOnwerBuf(true) {}
-RenderBuffer::RenderBuffer(void) : m_hWnd(NULL), m_bOnwerBuf(true) {}
+RenderBuffer::RenderBuffer(HWND hwnd) : hwnd_(hwnd), owned_(true) {}
+RenderBuffer::RenderBuffer(void) : hwnd_(NULL), owned_(true) {}
 
 RenderBuffer::~RenderBuffer(void) {
-  if (m_bOnwerBuf && m_hPaintBuf) {
-    DeleteObject(m_hPaintBuf);
-    m_hPaintBuf = NULL;
+  if (owned_ && paint_buffer_) {
+    ::DeleteObject(paint_buffer_);
+    paint_buffer_ = NULL;
   }
 }
 
-//////////////////////////////////////////////////////////////////////////
-inline long RenderBuffer::SetHWND(HWND hWnd) {
-  if (!m_bOnwerBuf) return ERR_FAILURE;
-  m_hWnd = hWnd;
+inline long RenderBuffer::SetHWND(HWND hwnd) {
+  if (!owned_) {
+    return ERR_FAILURE;
+  }
+  hwnd_ = hwnd;
   return ERR_NONE;
 }
 
 long RenderBuffer::SetSize(int cx, int cy) {
-  if (!m_bOnwerBuf || cx < 1 || cy < 1) return ERR_FAILURE;
-
-  if (m_hPaintBuf) {
-    DeleteObject(m_hPaintBuf);
-    m_hPaintBuf = NULL;
+  if (!owned_ || cx < 1 || cy < 1) {
+    return ERR_FAILURE;
   }
 
-  HDC hDC = GetDC(m_hWnd);
-  m_nWidth = cx;
-  m_nHeight = cy;
-  m_hPaintBuf = CreateCompatibleBitmap(hDC, m_nWidth, m_nHeight);
+  if (paint_buffer_) {
+    ::DeleteObject(paint_buffer_);
+    paint_buffer_ = NULL;
+  }
 
-  if (NULL == m_hPaintBuf) return ERR_FAILURE;
+  HDC dc_ = ::GetDC(hwnd_);
+  width_ = cx;
+  height_ = cy;
+  paint_buffer_ = ::CreateCompatibleBitmap(dc_, width_, height_);
 
-  ClearBuf(0, 0, m_nWidth, m_nHeight);
+  if (NULL == paint_buffer_) {
+    return ERR_FAILURE;
+  }
 
-  ::ReleaseDC(m_hWnd, hDC);
+  Clear(0, 0, width_, height_);
+
+  ::ReleaseDC(hwnd_, dc_);
 
   return ERR_NONE;
 }
 
-long RenderBuffer::ShareBuffer(RenderBuffer &rbSrc) {
-  if (m_bOnwerBuf && m_hPaintBuf) {
-    DeleteObject(m_hPaintBuf);
-    m_hPaintBuf = NULL;
+long RenderBuffer::ShareBuffer(RenderBuffer &source_render_buffer) {
+  if (owned_ && paint_buffer_) {
+    ::DeleteObject(paint_buffer_);
+    paint_buffer_ = NULL;
   }
 
-  this->SetHWND(rbSrc.GetHWND());
-  this->m_nHeight = rbSrc.GetHeight();
-  this->m_nWidth = rbSrc.GetWidth();
-  this->m_hPaintBuf = rbSrc.GetBuffer();
+  this->SetHWND(source_render_buffer.GetHWND());
+  this->height_ = source_render_buffer.GetHeight();
+  this->width_ = source_render_buffer.GetWidth();
+  this->paint_buffer_ = source_render_buffer.GetBuffer();
 
-  m_bOnwerBuf = false;
+  owned_ = false;
 
   return ERR_NONE;
 }
 
-long RenderBuffer::ClearBuf(int x, int y, int w, int h, COLORREF clr) {
-  if (w < 1 || h < 1) return ERR_FAILURE;
+long RenderBuffer::Clear(int x, int y, int w, int h, COLORREF clr) {
+  if (w < 1 || h < 1) {
+    return ERR_FAILURE;
+  }
 
   RECT rect;
   rect.left = x;
@@ -69,149 +76,163 @@ long RenderBuffer::ClearBuf(int x, int y, int w, int h, COLORREF clr) {
   rect.right = x + w;
   rect.top = y + h;
 
-  HDC hDC = GetDC(m_hWnd);
-  HDC hPaintBufDC = CreateCompatibleDC(hDC);
-  HBITMAP hPrePaintBuf = (HBITMAP)::SelectObject(hPaintBufDC, m_hPaintBuf);
+  HDC dc_ = ::GetDC(hwnd_);
+  HDC paint_buffer_dc = ::CreateCompatibleDC(dc_);
+  HBITMAP pre_paint_buffer =
+      (HBITMAP)::SelectObject(paint_buffer_dc, paint_buffer_);
 
-  HBRUSH hBrush = CreateSolidBrush(clr);
-  HBRUSH hOldBrush = (HBRUSH)::SelectObject(hPaintBufDC, hBrush);
+  HBRUSH brush = ::CreateSolidBrush(clr);
+  HBRUSH old_brush = (HBRUSH)::SelectObject(paint_buffer_dc, brush);
 
-  ::FillRect(hPaintBufDC, &rect, hBrush);
+  ::FillRect(paint_buffer_dc, &rect, brush);
 
-  ::SelectObject(hPaintBufDC, hOldBrush);
-  ::DeleteObject(hBrush);
+  ::SelectObject(paint_buffer_dc, old_brush);
+  ::DeleteObject(brush);
 
-  ::SelectObject(hPaintBufDC, hPrePaintBuf);
-  ::DeleteObject(hPaintBufDC);
+  ::SelectObject(paint_buffer_dc, pre_paint_buffer);
+  ::DeleteObject(paint_buffer_dc);
 
-  ::ReleaseDC(m_hWnd, hDC);
+  ::ReleaseDC(hwnd_, dc_);
 
   return ERR_NONE;
 }
 
-long RenderBuffer::Swap(int destOrgx, int destOrgy, int destW, int destH,
-                           int srcOrgx, int srcOrgy, int op) {
-  if (m_hPaintBuf == NULL) return ERR_FAILURE;
+long RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
+                        int src_org_x, int src_org_y, int op) {
+  if (paint_buffer_ == NULL) {
+    return ERR_FAILURE;
+  }
 
-  HDC hDC = GetDC(m_hWnd);
-  HDC hSrcDC = this->PrepareDC(false);
+  HDC dc_ = ::GetDC(hwnd_);
+  HDC source_dc_ = this->PrepareDC(false);
 
-  BOOL bRet = ::BitBlt(hDC, destOrgx, destOrgy, destW, destH, hSrcDC, srcOrgx,
-                       srcOrgy, op);
+  BOOL ret = ::BitBlt(dc_, dest_org_x, dest_org_y, dest_w, dest_h, source_dc_,
+                      src_org_x, src_org_y, op);
 
   this->EndDC();
-  ::ReleaseDC(m_hWnd, hDC);
+  ::ReleaseDC(hwnd_, dc_);
 
-  if (bRet)
+  if (ret) {
     return ERR_NONE;
-  else
+  } else {
     return ERR_FAILURE;
+  }
 }
 
-long RenderBuffer::Swap(int destOrgx, int destOrgy, int destW, int destH,
-                           int srcOrgx, int srcOrgy, int srcW, int srcH,
-                           eSwapType type, int op, COLORREF clr) {
-  if (m_hPaintBuf == NULL) return ERR_FAILURE;
+long RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
+                        int src_org_x, int src_org_y, int src_w, int src_h,
+                        eSwapType type, int op, COLORREF clr) {
+  if (paint_buffer_ == NULL) {
+    return ERR_FAILURE;
+  }
 
-  HDC hDC = GetDC(m_hWnd);
-  HDC hSrcDC = this->PrepareDC(false);
-  BOOL bRet = TRUE;
+  HDC dc_ = ::GetDC(hwnd_);
+  HDC source_dc_ = this->PrepareDC(false);
+  BOOL ret = TRUE;
 
   switch (type) {
     case BLT_STRETCH:
-      bRet = ::StretchBlt(hDC, destOrgx, destOrgy, destW, destH, hSrcDC,
-                          srcOrgx, srcOrgy, srcW, srcH, op);
+      ret = ::StretchBlt(dc_, dest_org_x, dest_org_y, dest_w, dest_h,
+                         source_dc_, src_org_x, src_org_y, src_w, src_h, op);
       break;
     case BLT_TRANSPARENT:
-      bRet = ::TransparentBlt(hDC, destOrgx, destOrgy, destW, destH, hSrcDC,
-                              srcOrgx, srcOrgy, destW, destH, clr);
+      ret = ::TransparentBlt(dc_, dest_org_x, dest_org_y, dest_w, dest_h,
+                             source_dc_, src_org_x, src_org_y, dest_w, dest_h,
+                             clr);
       break;
   }
 
   this->EndDC();
-  ::ReleaseDC(m_hWnd, hDC);
+  ::ReleaseDC(hwnd_, dc_);
 
-  if (bRet)
+  if (ret) {
     return ERR_NONE;
-  else
+  } else {
     return ERR_FAILURE;
+  }
 }
 
-long RenderBuffer::Swap(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
-                           int destW, int destH, int srcOrgx, int srcOrgy,
-                           int op) {
-  if (m_hPaintBuf == NULL) return ERR_FAILURE;
+long RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
+                        int dest_org_y, int dest_w, int dest_h, int src_org_x,
+                        int src_org_y, int op) {
+  if (paint_buffer_ == NULL) {
+    return ERR_FAILURE;
+  }
 
-  HDC hTargetDC = rbTarget.PrepareDC(false);
-  HDC hSrcDC = this->PrepareDC(false);
+  HDC target_dc = target_render_buffer.PrepareDC(false);
+  HDC source_dc_ = this->PrepareDC(false);
 
-  BOOL bRet = ::BitBlt(hTargetDC, destOrgx, destOrgy, destW, destH, hSrcDC,
-                       srcOrgx, srcOrgy, op);
+  BOOL ret = ::BitBlt(target_dc, dest_org_x, dest_org_y, dest_w, dest_h,
+                      source_dc_, src_org_x, src_org_y, op);
 
   this->EndDC();
-  rbTarget.EndDC();
+  target_render_buffer.EndDC();
 
-  if (bRet)
+  if (ret) {
     return ERR_NONE;
-  else
+  } else {
     return ERR_FAILURE;
+  }
 }
 
-long RenderBuffer::Swap(RenderBuffer &rbTarget, int destOrgx, int destOrgy,
-                           int destW, int destH, int srcOrgx, int srcOrgy,
-                           int srcW, int srcH, eSwapType type, int op,
-                           COLORREF clr) {
-  if (m_hPaintBuf == NULL) return ERR_FAILURE;
+long RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
+                        int dest_org_y, int dest_w, int dest_h, int src_org_x,
+                        int src_org_y, int src_w, int src_h, eSwapType type,
+                        int op, COLORREF clr) {
+  if (paint_buffer_ == NULL) {
+    return ERR_FAILURE;
+  }
 
-  HDC hTargetDC = rbTarget.PrepareDC(false);
-  HDC hSrcDC = this->PrepareDC(false);
+  HDC target_dc = target_render_buffer.PrepareDC(false);
+  HDC source_dc_ = this->PrepareDC(false);
 
-  BOOL bRet = TRUE;
+  BOOL ret = TRUE;
 
   switch (type) {
     case BLT_STRETCH:
-      bRet = ::StretchBlt(hTargetDC, destOrgx, destOrgy, destW, destH, hSrcDC,
-                          srcOrgx, srcOrgy, srcW, srcH, op);
+      ret = ::StretchBlt(target_dc, dest_org_x, dest_org_y, dest_w, dest_h,
+                         source_dc_, src_org_x, src_org_y, src_w, src_h, op);
       break;
     case BLT_TRANSPARENT:
-      bRet = ::TransparentBlt(hTargetDC, destOrgx, destOrgy, destW, destH,
-                              hSrcDC, srcOrgx, srcOrgy, srcW, srcH, clr);
+      ret =
+          ::TransparentBlt(target_dc, dest_org_x, dest_org_y, dest_w, dest_h,
+                           source_dc_, src_org_x, src_org_y, src_w, src_h, clr);
       break;
   }
 
   this->EndDC();
-  rbTarget.EndDC();
+  target_render_buffer.EndDC();
 
-  if (bRet)
+  if (ret)
     return ERR_NONE;
   else
     return ERR_FAILURE;
 }
 
-HDC RenderBuffer::PrepareDC(bool bClip) {
-  HDC hDC = GetDC(m_hWnd);
-  m_hPaintDC = CreateCompatibleDC(hDC);
-  ::ReleaseDC(m_hWnd, hDC);
+HDC RenderBuffer::PrepareDC(bool is_clip) {
+  HDC dc_ = ::GetDC(hwnd_);
+  paint_dc_ = ::CreateCompatibleDC(dc_);
+  ::ReleaseDC(hwnd_, dc_);
 
-  m_hOldPaintBuffer = (HBITMAP)SelectObject(m_hPaintDC, m_hPaintBuf);
+  old_paint_buffer_ = (HBITMAP)::SelectObject(paint_dc_, paint_buffer_);
 
-  if (bClip) {
-    RECT rtClip;
-    HRGN hNewRgn = ::CreateRectRgn(0, 0, m_nWidth, m_nHeight);
-    ::GetClipBox(m_hPaintDC, &rtClip);
-    ::SelectClipRgn(m_hPaintDC, hNewRgn);
-    ::DeleteObject(hNewRgn);
+  if (is_clip) {
+    RECT clip_rect;
+    HRGN new_rgn = ::CreateRectRgn(0, 0, width_, height_);
+    ::GetClipBox(paint_dc_, &clip_rect);
+    ::SelectClipRgn(paint_dc_, new_rgn);
+    ::DeleteObject(new_rgn);
   }
 
-  return m_hPaintDC;
+  return paint_dc_;
 }
 
 long RenderBuffer::EndDC(void) {
-  if (m_hPaintDC) {
-    SelectObject(m_hPaintDC, m_hOldPaintBuffer);
-    DeleteDC(m_hPaintDC);
+  if (paint_dc_) {
+    ::SelectObject(paint_dc_, old_paint_buffer_);
+    ::DeleteDC(paint_dc_);
 
-    m_hPaintDC = NULL;
+    paint_dc_ = NULL;
   }
 
   return ERR_NONE;
@@ -220,9 +241,9 @@ long RenderBuffer::EndDC(void) {
 RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
   if (&other == this) return *this;
 
-  if (m_bOnwerBuf && NULL != m_hPaintBuf) {
-    DeleteObject(m_hPaintBuf);
-    m_hPaintBuf = NULL;
+  if (owned_ && NULL != paint_buffer_) {
+    ::DeleteObject(paint_buffer_);
+    paint_buffer_ = NULL;
   }
 
   this->SetHWND(other.GetHWND());
@@ -230,115 +251,122 @@ RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
   return *this;
 }
 
-//////////////////////////////////////////////////////////////////////////
-long RenderBuffer::DrawImage(const char *szImageBuffer, int nImageBufferSize,
-                             long lCodeType, long x, long y, long cx, long cy) {
-  if (NULL == szImageBuffer || 0 == nImageBufferSize) return ERR_INVALID_PARAM;
+long RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
+                             long code_type_, long x, long y, long cx,
+                             long cy) {
+  if (NULL == image_buffer || 0 == image_buffer_size) {
+    return ERR_FAILURE;
+  }
 
-  CxImage tmpImage;
-  tmpImage.Decode((BYTE *)szImageBuffer, nImageBufferSize, lCodeType);
+  // CxImage image;
+  // image.Decode((BYTE *)image_buffer, image_buffer_size, code_type_);
 
-  HDC hDC = PrepareDC();
-  tmpImage.Draw(hDC, x, y, cx, cy);
+  HDC dc_ = PrepareDC();
+  // image.Draw(dc_, x, y, cx, cy);
   EndDC();
 
   return ERR_NONE;
 }
 
-long RenderBuffer::StrethImage(const char *szImageBuffer, int nImageBufferSize,
-                               long lCodeType, long xoffset, long yoffset,
-                               long xsize, long ysize, DWORD dwRop) {
-  if (NULL == szImageBuffer || 0 == nImageBufferSize) return ERR_INVALID_PARAM;
+long RenderBuffer::StrethImage(const char *image_buffer, int image_buffer_size,
+                               long code_type_, long xoffset, long yoffset,
+                               long xsize, long ysize, DWORD rop) {
+  if (NULL == image_buffer || 0 == image_buffer_size) {
+    return ERR_FAILURE;
+  }
 
-  CxImage tmpImage;
-  tmpImage.Decode((BYTE *)szImageBuffer, nImageBufferSize, lCodeType);
+  // CxImage image;
+  // image.Decode((BYTE *)image_buffer, image_buffer_size, code_type_);
 
-  HDC hDC = PrepareDC();
-  tmpImage.Stretch(hDC, xoffset, yoffset, xsize, ysize, dwRop);
-  EndDC();
+  // HDC dc_ = PrepareDC();
+  // image.Stretch(dc_, xoffset, yoffset, xsize, ysize, rop);
+  // EndDC();
 
   return ERR_NONE;
 }
 
-long RenderBuffer::Save2Image(const char *szFilePath, bool bBgTransparent) {
-  long lRtn = Save2Image(m_hPaintBuf, szFilePath, bBgTransparent);
-  return lRtn;
+long RenderBuffer::Save2Image(const char *file_path,
+                              bool backgroud_transparent) {
+  long ret = Save2Image(paint_buffer_, file_path, backgroud_transparent);
+  return ret;
 }
 
-long RenderBuffer::Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize,
-                                 long lCodeType, bool bBgTransparent) {
-  long lRtn = Save2ImageBuffer(m_hPaintBuf, szImageBuffer, lImageBufferSize, lCodeType,
-                            bBgTransparent);
-  return lRtn;
+long RenderBuffer::Save2ImageBuffer(char *&image_buffer,
+                                    long &image_buffer_size, long code_type_,
+                                    bool backgroud_transparent) {
+  long ret = Save2ImageBuffer(paint_buffer_, image_buffer, image_buffer_size,
+                              code_type_, backgroud_transparent);
+  return ret;
 }
 
-//////////////////////////////////////////////////////////////////////////
-long RenderBuffer::Save2Image(HBITMAP hBitMap, const char *szFilePath,
-                              bool bBgTransparent) {
-  if (hBitMap == NULL || strlen(szFilePath) == 0) return ERR_FAILURE;
-
-  CxImage image;
-
-  if (image.CreateFromHBITMAP(hBitMap)) {
-    if (bBgTransparent) {
-      COLORREF bgClr =
-          RGB(255, 255, 255) /*(COLORREF)::GetSysColor(COLOR_WINDOW)*/;
-      RGBQUAD transClr;
-      transClr.rgbRed = GetRValue(bgClr);
-      transClr.rgbGreen = GetGValue(bgClr);
-      transClr.rgbBlue = GetBValue(bgClr);
-      transClr.rgbReserved = 0;
-
-      image.SetTransIndex(0);
-      image.SetTransColor(transClr);
-    }
-
-    if (image.Save(szFilePath, GetImageTypeByFileExt(szFilePath))) {
-      return ERR_NONE;
-    }
+long RenderBuffer::Save2Image(HBITMAP bitmap, const char *file_path,
+                              bool backgroud_transparent) {
+  if (bitmap == NULL || strlen(file_path) == 0) {
+    return ERR_FAILURE;
   }
+
+  // CxImage image;
+
+  // if (image.CreateFromHBITMAP(bitmap)) {
+  //   if (backgroud_transparent) {
+  //     COLORREF bgClr =
+  //         RGB(255, 255, 255);
+  //     RGBQUAD transClr;
+  //     transClr.rgbRed = GetRValue(bgClr);
+  //     transClr.rgbGreen = GetGValue(bgClr);
+  //     transClr.rgbBlue = GetBValue(bgClr);
+  //     transClr.rgbReserved = 0;
+
+  //     image.SetTransIndex(0);
+  //     image.SetTransColor(transClr);
+  //   }
+
+  //   if (image.Save(file_path, GetImageTypeByFileExt(file_path))) {
+  //     return ERR_NONE;
+  //   }
+  // }
 
   return ERR_FAILURE;
 }
 
-long RenderBuffer::Save2ImageBuffer(HBITMAP hBitMap, char *&szImageBuffer,
-                                 long &lImageBufferSize, long lCodeType,
-                                 bool bBgTransparent) {
-  if (hBitMap == NULL || szImageBuffer != NULL) return ERR_FAILURE;
-
-  BYTE *pImageBuf = NULL;
-  long lSize = 0;
-  CxImage image;
-
-  if (image.CreateFromHBITMAP(hBitMap)) {
-    if (bBgTransparent) {
-      COLORREF bgClr = RGB(255, 255, 255) RGBQUAD transClr;
-      transClr.rgbRed = GetRValue(bgClr);
-      transClr.rgbGreen = GetGValue(bgClr);
-      transClr.rgbBlue = GetBValue(bgClr);
-      transClr.rgbReserved = 0;
-
-      image.SetTransIndex(0);
-      image.SetTransColor(transClr);
-    }
-
-    if (image.Encode(pImageBuf, lSize, lCodeType)) {
-      szImageBuffer = (char *)pImageBuf;
-      lImageBufferSize = lSize;
-
-      return ERR_NONE;
-    }
-
-    return ERR_NONE;
+long RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
+                                    long &image_buffer_size, long code_type_,
+                                    bool backgroud_transparent) {
+  if (bitmap == NULL || image_buffer != NULL) {
+    return ERR_FAILURE;
   }
+
+  // BYTE *pImageBuf = NULL;
+  // long lSize = 0;
+  // CxImage image;
+
+  // if (image.CreateFromHBITMAP(bitmap)) {
+  //   if (backgroud_transparent) {
+  //     COLORREF bgClr = RGB(255, 255, 255);
+  //     RGBQUAD transClr;
+  //     transClr.rgbRed = GetRValue(bgClr);
+  //     transClr.rgbGreen = GetGValue(bgClr);
+  //     transClr.rgbBlue = GetBValue(bgClr);
+  //     transClr.rgbReserved = 0;
+
+  //     image.SetTransIndex(0);
+  //     image.SetTransColor(transClr);
+  //   }
+
+  //   if (image.Encode(pImageBuf, lSize, code_type_)) {
+  //     image_buffer = (char *)pImageBuf;
+  //     image_buffer_size = lSize;
+
+  //     return ERR_NONE;
+  //   }
+  //   return ERR_NONE;
+  // }
 
   return ERR_FAILURE;
 }
 
-long RenderBuffer::FreeImageBuffer(char *&szImageBuffer) {
-  SAFE_DELETE_A(szImageBuffer);
-
+long RenderBuffer::FreeImageBuffer(char *&image_buffer) {
+  SAFE_DELETE_A(image_buffer);
   return ERR_NONE;
 }
-
 }  // namespace gfx2d

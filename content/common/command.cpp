@@ -1,4 +1,4 @@
-#include "content/core/command.h"
+#include "content/common/command.h"
 
 #include <algorithm>
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef CONTENT_CORE_LISTENER_H
-#define CONTENT_CORE_LISTENER_H
+#ifndef CONTENT_COMMON_LISTENER_H
+#define CONTENT_COMMON_LISTENER_H
 
 #include <map>
 #include <string>
@@ -9,7 +9,7 @@
 #include "base/synchronization/lock.h"
 #include "content/content.h"
 #include "content/content_export.h"
-#include "content/core/message.h"
+#include "content/common/message.h"
 
 namespace content {
 class CONTENT_EXPORT MessageListener {
@@ -134,4 +134,4 @@ long PostListenerMessage(MessageListener* message_listener, long message,
     listener_manager->Notify(listener, message, param);         \
   }
 }  // namespace content
-#endif  // CONTENT_CORE_LISTENER_H
+#endif  // CONTENT_COMMON_LISTENER_H

@@ -6,15 +6,15 @@
 using namespace core;
 
 namespace _3Drd {
-VertexBuffer* GLRenderDevice::CreateVertexBuffer(int nCount, DWORD dwFormat,
+VertexBuffer* GLRenderDevice::CreateVertexBuffer(int size, DWORD dwFormat,
                                                  bool bDynamic) {
-  GLVertexBuffer* pVB = new GLVertexBuffer(nCount, dwFormat, bDynamic);
+  GLVertexBuffer* pVB = new GLVertexBuffer(size, dwFormat, bDynamic);
 
   return pVB;
 }
 
-IndexBuffer* GLRenderDevice::CreateIndexBuffer(int nCount) {
-  GLIndexBuffer* pIndex = new GLIndexBuffer(nCount);
+IndexBuffer* GLRenderDevice::CreateIndexBuffer(int size) {
+  GLIndexBuffer* pIndex = new GLIndexBuffer(size);
 
   return pIndex;
 }

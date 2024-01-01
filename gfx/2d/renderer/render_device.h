@@ -1,170 +1,145 @@
 #ifndef GFX_2D_RENDERER_RENDER_DEVICE_H
 #define GFX_2D_RENDERER_RENDER_DEVICE_H
 
-namespace gfx2d {
-enum eRDBufferLayer { MRD_BL_MAP, MRD_BL_DYNAMIC, MRD_BL_QUICK, MRD_BL_DIRECT };
+#include "gfx/2d/renderer/common.h"
+#include "gfx/2d/renderer/style.h"
+#include "ogrsf_frmts.h"
 
+
+namespace gfx2d {
 class RenderDevice {
  public:
-  RenderDevice(HINSTANCE hInst)
-      : m_rBaseApi(RD_GDI),
-        m_hInst(hInst),
-        m_strLogName(""),
-        m_hWnd(NULL),
-        m_nMapMode(MM_TEXT),
-        m_fblc(1.) {
+  enum eRenderBufferLayer { RB_COMPOSIT, RB_DIRECT };
+  RenderDevice(HINSTANCE instance)
+      : rhi_api_(RHI2D_GDI),
+        instance_handle_(instance),
+        hwnd_(nullptr),
+        map_mode_(MM_TEXT),
+        blc_(1.) {
     ;
   }
 
   virtual ~RenderDevice(void) {}
 
  public:
-  virtual int Init(HWND hWnd, const char *logname) = 0;
+  virtual int Init(HWND hwnd) = 0;
   virtual int Destroy(void) = 0;
   virtual int Release(void) = 0;
 
-  virtual int Resize(int orgx, int orgy, int cx, int cy) = 0;
+  void SetViewport(const Viewport &viewport) { viewport_ = viewport; }
+  Viewport GetViewport(void) const { return viewport_; }
 
-  void SetViewport(const Viewport &viewport) { m_Viewport = viewport; }
-  Viewport GetViewport(void) const { return m_Viewport; }
+  void SetWindowport(const Windowport &windowport) { windowport_ = windowport; }
+  Windowport GetWindowport(void) const { return windowport_; }
 
-  void SetWindowport(const Windowport &windowport) {
-    m_Windowport = windowport;
-  }
-  Windowport GetWindowport(void) const { return m_Windowport; }
+  void SetCurrentDOP(const LPoint &point) { current_dop_ = point; }
+  LPoint GetCurrentDOP(void) const { return current_dop_; }
 
-  void SetCurDrawingOrg(const lPoint &ptPos) { m_curDrawingOrg = ptPos; }
-  lPoint GetCurDrawingOrg(void) const { return m_curDrawingOrg; }
+  void SetMapMode(int mode) { map_mode_ = mode; }
+  int GetMapMode(void) const { return map_mode_; }
 
-  void SetMapMode(int nMode) { m_nMapMode = nMode; }
-  int GetMapMode(void) const { return m_nMapMode; }
+  void SetRenderOptions(const RenderOptions &options) { options_ = options; }
+  RenderOptions GetRenderOptions(void) const { return options_; }
 
-  void SetRenderPra(const RenderOptions &options) { options_ = options; }
-  RenderOptions GetRenderPra(void) const { return options_; }
-
-  inline double GetBlc(void) const { return m_fblc; }
+  inline float GetBLC(void) const { return blc_; }
 
  public:
-  virtual int Lock() = 0;
-  virtual int Unlock() = 0;
-
+  virtual int Resize(DRect rect) = 0;
   virtual int Refresh(void) = 0;
-  virtual int Refresh(const Map *pMap, fRect rect) = 0;
-  virtual int RefreshDirectly(const Map *pMap, lRect rect,
-                              bool bRealTime = false) = 0;
+  virtual int Refresh(LRect rect) = 0;
+  virtual int RefreshDirectly(DRect rect, bool realtime = false) = 0;
 
-  virtual int ZoomMove(const Map *pMap, fPoint dbfPointOffset,
-                       bool bRealTime = false) = 0;
-  virtual int ZoomScale(const Map *pMap, lPoint orgPoint, float fscale,
-                        bool bRealTime = false) = 0;
-  virtual int ZoomToRect(const Map *pMap, fRect rect,
-                         bool bRealTime = false) = 0;
+  virtual int ZoomMove(LPoint offset, bool realtime = false) = 0;
+  virtual int ZoomScale(LPoint original_point, float scale,
+                        bool realtime = false) = 0;
+  virtual int ZoomToRect(LRect rect, bool realtime = false) = 0;
 
   virtual int Timer() = 0;
 
  public:
   virtual int LPToDP(float x, float y, long &X, long &Y) const = 0;
-  virtual int DPToLP(LONG X, LONG Y, float &x, float &y) const = 0;
-  virtual int LRectToDRect(const fRect &frect, lRect &lrect) const = 0;
-  virtual int DRectToLRect(const lRect &lrect, fRect &frect) const = 0;
+  virtual int DPToLP(long X, long Y, float &x, float &y) const = 0;
+  virtual int LRectToDRect(const LRect &rect, DRect &lrect) const = 0;
+  virtual int DRectToLRect(const DRect &lrect, LRect &rect) const = 0;
 
  public:
-  virtual int BeginRender(eRDBufferLayer eMRDBufLyr, bool bClear = false,
-                          const Style *pStyle = NULL, int op = R2_COPYPEN) = 0;
-  virtual int EndRender(eRDBufferLayer eMRDBufLyr) = 0;
+  virtual int BeginRender(eRenderBufferLayer rbl_type, bool clear = false,
+                          const Style *style = nullptr,
+                          int op = R2_COPYPEN) = 0;
+  virtual int EndRender(eRenderBufferLayer rbl_type) = 0;
+  virtual int Render(void) = 0;
 
  public:
-  virtual int RenderMap(void) = 0;
-
-  virtual int RenderMap(const Map *pMap, int op = R2_COPYPEN) = 0;
-  virtual int RenderLayer(const Layer *pLayer, int op = R2_COPYPEN) = 0;
-  virtual int RenderLayer(const VectorLayer *pLayer, int op = R2_COPYPEN) = 0;
-  virtual int RenderLayer(const RasterLayer *pLayer, int op = R2_COPYPEN) = 0;
-  virtual int RenderLayer(const TileLayer *pLayer, int op = R2_COPYPEN) = 0;
-  virtual int RenderFeature(const Feature *pFeature, int op = R2_COPYPEN) = 0;
-  virtual int RenderGeometry(const Geometry *pGeom, const Style *pStyle,
+  virtual int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN) = 0;
+  virtual int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN) = 0;
+  virtual int RenderGeometry(const OGRGeometry *geomtry,
                              int op = R2_COPYPEN) = 0;
 
-  virtual int DrawMultiLineString(const MultiLineString *pMultiLinestring) = 0;
-  virtual int DrawMultiPoint(const Style *pStyle,
-                             const MultiPoint *pMultiPoint) = 0;
-  virtual int DrawMultiPolygon(const MultiPolygon *pMultiPolygon) = 0;
+  virtual int DrawMultiLineString(
+      const OGRMultiLineString *multi_linestring) = 0;
+  virtual int DrawMultiPoint(const OGRMultiPoint *multi_point) = 0;
+  virtual int DrawMultiPolygon(const OGRMultiPolygon *multi_polygon) = 0;
 
-  virtual int DrawPoint(const Style *pStyle, const Point *pPoint) = 0;
-  virtual int DrawAnno(const char *szAnno, float fangel, float fCHeight,
-                       float fCWidth, float fCSpace, const Point *pPoint) = 0;
-  virtual int DrawSymbol(HICON hIcon, long lHeight, long lWhidth,
-                         const Point *pPoint) = 0;
+  virtual int DrawPoint(const OGRPoint *point) = 0;
+  virtual int DrawAnno(const OGRPoint *point, const char *anno, float angle,
+                       float height, float width, float space) = 0;
+  virtual int DrawSymbol(const OGRPoint *point, HICON icon, long height,
+                         long width) = 0;
 
-  virtual int DrawLineString(const LineString *pLinestring) = 0;
-  virtual int DrawLineSpline(const Spline *pSpline) = 0;
-  virtual int DrawLinearRing(const LinearRing *pLinearRing) = 0;
-  virtual int DrawPloygon(const Polygon *pPloygon) = 0;
+  virtual int DrawLineString(const OGRLineString *line_string) = 0;
+  virtual int DrawLinearRing(const OGRLinearRing *linear_ring) = 0;
 
-  virtual int DrawTin(const Tin *pTin) = 0;
-  virtual int DrawGrid(const Grid *pGrid) = 0;
-  virtual int DrawArc(const Arc *pArc) = 0;
-  virtual int DrawFan(const Fan *pFan) = 0;
+  virtual int DrawPolygon(const OGRPolygon *polygon) = 0;
 
  public:
-  virtual int DrawEllipse(float left, float top, float right, float bottom,
-                          bool bDP = false) = 0;
-  virtual int DrawRect(const fRect &rect, bool bDP = false) = 0;
-  virtual int DrawLine(fPoint *pfPoints, int nCount, bool bDP = false) = 0;
-  virtual int DrawLine(const fPoint &ptA, const fPoint &ptB,
-                       bool bDP = false) = 0;
-  virtual int DrawText(const char *szAnno, float fangel, float fCHeight,
-                       float fCWidth, float fCSpace, const fPoint &point,
-                       bool bDP = false) = 0;
-  virtual int DrawImage(const char *szImageBuffer, int nImageBufferSize,
-                        const fRect &frect, long lCodeType,
-                        eRDBufferLayer eMRDBufLyr = MRD_BL_MAP) = 0;
-  virtual int StrethImage(const char *szImageBuffer, int nImageBufferSize,
-                          const fRect &frect, long lCodeType,
-                          eRDBufferLayer eMRDBufLyr = MRD_BL_MAP) = 0;
+  virtual int DrawImage(const char *image_buffer, int image_buffer_size,
+                        const LRect &rect, long code_type_,
+                        eRenderBufferLayer rbl_type = RB_COMPOSIT) = 0;
+  virtual int StrethImage(const char *image_buffer, int image_buffer_size,
+                          const LRect &rect, long code_type_,
+                          eRenderBufferLayer rbl_type = RB_COMPOSIT) = 0;
 
  public:
-  virtual int SaveImage(const char *szFilePath,
-                        eRDBufferLayer eMRDBufLyr = MRD_BL_MAP,
-                        bool bBgTransparent = false) = 0;
-  virtual int Save2ImageBuffer(char *&szImageBuffer, long &lImageBufferSize,
-                            long lCodeType,
-                            eRDBufferLayer eMRDBufLyr = MRD_BL_MAP,
-                            bool bBgTransparent = false) = 0;
-  virtual int FreeImageBuffer(char *&szImageBuffer) = 0;
+  virtual int SaveImage(const char *file_path,
+                        eRenderBufferLayer rbl_type = RB_COMPOSIT,
+                        bool backgroud_transparent = false) = 0;
+  virtual int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
+                               long code_type_,
+                               eRenderBufferLayer rbl_type = RB_COMPOSIT,
+                               bool backgroud_transparent = false) = 0;
+  virtual int FreeImageBuffer(char *&image_buffer) = 0;
 
  protected:
-  HINSTANCE m_hInst;
-  RenderBaseApi m_rBaseApi;
-  string m_strLogName;
+  HINSTANCE instance_handle_;
+  RHI2D rhi_api_;
 
-  Viewport m_Viewport;
-  Windowport m_Windowport;
-  float m_fblc;
+  Viewport viewport_;
+  Windowport windowport_;
+  float blc_;
 
-  HWND m_hWnd;
-  int m_nMapMode;
+  HWND hwnd_;
+  int map_mode_;
   RenderOptions options_;
 
-  lPoint m_curDrawingOrg;
+  LPoint current_dop_;
 };
 
-typedef RenderDevice *LPRENDERDEVICE;
+using HRENDERDEVICE = RenderDevice *;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-int EXPORT_DLL CreateRenderDevice(HINSTANCE hInst,
-                                      LPRENDERDEVICE &pMrdDevice);
-int EXPORT_DLL DestroyRenderDevice(LPRENDERDEVICE &pMrdDevice);
+int GFX_2D_RENDERER_EXPORT CreateRenderDevice(HINSTANCE instance,
+                                              HRENDERDEVICE &render_device);
+int GFX_2D_RENDERER_EXPORT DestroyRenderDevice(HRENDERDEVICE &render_device);
 
-typedef HRESULT (*_CreateRenderDevice)(HINSTANCE hInst,
-                                       LPRENDERDEVICE &pMrdDevice);
-typedef HRESULT (*_DestroyRenderDevice)(LPRENDERDEVICE &pMrdDevice);
+using CreateRenderDeviceFn = HRESULT (*)(HINSTANCE instance,
+                                         HRENDERDEVICE &render_device);
+using DestroyRenderDeviceFn = HRESULT (*)(HRENDERDEVICE &render_device);
 
 #ifdef __cplusplus
 }
 #endif
 }  // namespace gfx2d
 
-#endif  //GFX_2D_RENDERER_RENDER_DEVICE_H
+#endif  // GFX_2D_RENDERER_RENDER_DEVICE_H

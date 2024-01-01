@@ -2,17 +2,17 @@
 
 namespace _3Drd {
 3DRenderer ::3DRenderer(HINSTANCE hInst) {
-  m_hInst = hInst;
-  m_pDevice = NULL;
+  instance_handle_ = hInst;
+  device_ = NULL;
   dll_ = NULL;
 }
 
 3DRenderer ::~3DRenderer(void) { Release(); }
 
-long 3DRenderer ::CreateDevice(const char *chAPI) {
+long 3DRenderer ::CreateDevice(const char *device_name) {
   char buffer[300];
 
-  if (strcmp(chAPI, "OpenGL") == 0) {
+  if (strcmp(device_name, "OpenGL") == 0) {
 #ifdef _DEBUG
     dll_ = LoadLibrary("GLRenderDeviceD.dll");
     if (!dll_) {
@@ -28,7 +28,7 @@ long 3DRenderer ::CreateDevice(const char *chAPI) {
       return FALSE;
     }
 #endif
-  } else if (strcmp(chAPI, "Direct3D") == 0) {
+  } else if (strcmp(device_name, "Direct3D") == 0) {
 #ifdef _DEBUG
     dll_ = LoadLibrary("D3DRenderDeviceD.dll");
     if (!dll_) {
@@ -45,7 +45,7 @@ long 3DRenderer ::CreateDevice(const char *chAPI) {
     }
 #endif
   } else {
-    _snprintf(buffer, 300, "API '%s' not yet supported.", chAPI);
+    _snprintf(buffer, 300, "API '%s' not yet supported.", device_name);
     ::MessageBox(NULL, buffer, "SmartGis - error", MB_OK | MB_ICONERROR);
     return FALSE;
   }
@@ -56,12 +56,12 @@ long 3DRenderer ::CreateDevice(const char *chAPI) {
   _CreateRDev =
       (_Create3DRenderDevice)GetProcAddress(dll_, "Create3DRenderDevice");
 
-  hr = _CreateRDev(dll_, m_pDevice);
+  hr = _CreateRDev(dll_, device_);
 
   if (FAILED(hr)) {
     ::MessageBox(NULL, "Create3DRenderDevice() from lib failed.",
                  "SmartGis - error", MB_OK | MB_ICONERROR);
-    m_pDevice = NULL;
+    device_ = NULL;
 
     return ERR_FAILURE;
   }
@@ -78,10 +78,10 @@ void 3DRenderer ::Release(void) {
         (_Release3DRenderDevice)GetProcAddress(dll_, "Release3DRenderDevice");
   }
 
-  if (m_pDevice) {
-    hr = _ReleaseRDev(m_pDevice);
+  if (device_) {
+    hr = _ReleaseRDev(device_);
     if (FAILED(hr)) {
-      m_pDevice = NULL;
+      device_ = NULL;
     }
   }
 }
