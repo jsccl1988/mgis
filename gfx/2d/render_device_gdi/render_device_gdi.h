@@ -8,7 +8,6 @@
 #include "gfx/2d/render_device_gdi/render_buffer.h"
 #include "gfx/2d/renderer/render_device.h"
 
-
 namespace gfx2d {
 class RenderDeviceGDI : public RenderDevice {
  public:
@@ -38,9 +37,9 @@ class RenderDeviceGDI : public RenderDevice {
   int DRectToLRect(const DRect &drect, LRect &lrect) const;
 
  public:
-  int BeginRender(eRenderBufferLayer rbl_type, bool clear = false,
+  int BeginRender(eRenderBuffer render_buffer, bool clear = false,
                   const Style *style = NULL, int op = R2_COPYPEN);
-  int EndRender(eRenderBufferLayer rbl_type);
+  int EndRender(eRenderBuffer render_buffer);
   int Render(void);
 
   int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN);
@@ -63,19 +62,19 @@ class RenderDeviceGDI : public RenderDevice {
 
  public:
   int DrawImage(const char *image_buffer, int image_buffer_size,
-                const LRect &rect, long code_type_,
-                eRenderBufferLayer rbl_type = RB_COMPOSIT);
+                const LRect &rect, long code_type,
+                eRenderBuffer render_buffer = RB_COMPOSIT);
   int StrethImage(const char *image_buffer, int image_buffer_size,
-                  const LRect &rect, long code_type_,
-                  eRenderBufferLayer rbl_type = RB_COMPOSIT);
+                  const LRect &rect, long code_type,
+                  eRenderBuffer render_buffer = RB_COMPOSIT);
 
  public:
   int SaveImage(const char *file_path,
-                eRenderBufferLayer rbl_type = RB_COMPOSIT,
+                eRenderBuffer render_buffer = RB_COMPOSIT,
                 bool backgroud_transparent = false);
   int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
-                       long code_type_,
-                       eRenderBufferLayer rbl_type = RB_COMPOSIT,
+                       long code_type,
+                       eRenderBuffer render_buffer = RB_COMPOSIT,
                        bool backgroud_transparent = false);
   int FreeImageBuffer(char *&image_buffer);
 
@@ -101,8 +100,8 @@ class RenderDeviceGDI : public RenderDevice {
   std::string anno_name_;
   float anno_angle_;
 
-  Viewport virtual_viewport_for_zoomin_;
-  Viewport virtual_viewport_for_zoomout_;
+  Viewport zoomin_viewport_;
+  Viewport zoomout_viewport_;
 
   LONGLONG last_redraw_command_stamp_;
   LONGLONG last_redraw_stamp_;

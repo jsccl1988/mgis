@@ -1,0 +1,15 @@
+*/Debug/*
+*/Release/*
+*/Unicode Debug/*
+*/Unicode Release/*
+
+# User-specific files
+*.user
+*.suo
+
+# Visual Studio 2015~ cache/options directory
+.vs/*
+
+# Visual C++ cache files
+*.aps
+*.ncb

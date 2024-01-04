@@ -9,6 +9,9 @@ void ClearRect(HDC dc_, int x, int y, int w, int h,
 void DrawRect(HDC dc_, RECT &rect, BOOL xor = TRUE);
 void DrawLine(HDC dc_, POINT *points, int size, BOOL xor = TRUE);
 void DrawCross(HDC dc_, long x, long y, long r, BOOL xor = TRUE);
+
+long	GetImageTypeByFileExt(const char *file_name);
+
 }  // namespace gfx2d
 
 #endif  // GFX_2D_RENDER_DEVICE_UTILS_H

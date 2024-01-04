@@ -113,8 +113,8 @@ int RenderDeviceGDI::Resize(DRect rect) {
   viewport_.height = rect.height;
   viewport_.width = rect.width;
 
-  virtual_viewport_for_zoomin_ = viewport_;
-  virtual_viewport_for_zoomout_ = viewport_;
+  zoomin_viewport_ = viewport_;
+  zoomout_viewport_ = viewport_;
 
   float xblc, yblc;
   xblc = viewport_.width / windowport_.width;
@@ -232,12 +232,10 @@ int RenderDeviceGDI::Refresh() {
                        viewport_.width);
 
   composit_render_buffer_.Swap(
-      render_buffer_, virtual_viewport_for_zoomin_.x,
-      virtual_viewport_for_zoomin_.y, virtual_viewport_for_zoomin_.width,
-      virtual_viewport_for_zoomin_.height, virtual_viewport_for_zoomout_.x,
-      virtual_viewport_for_zoomout_.y, virtual_viewport_for_zoomout_.width,
-      virtual_viewport_for_zoomout_.height, RenderBuffer::BLT_TRANSPARENT,
-      SRCCOPY);
+      render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
 
   render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
                       viewport_.height, viewport_.x, viewport_.y);
@@ -264,8 +262,8 @@ int RenderDeviceGDI::RefreshDirectly(DRect rect, bool realtime) {
 }
 
 int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
-  virtual_viewport_for_zoomin_.x += offset.x * blc_;
-  virtual_viewport_for_zoomin_.y -= offset.y * blc_;
+  zoomin_viewport_.x += offset.x * blc_;
+  zoomin_viewport_.y -= offset.y * blc_;
 
   windowport_.x -= offset.x;
   windowport_.y -= offset.y;
@@ -277,24 +275,20 @@ int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
                                bool realtime) {
   if (scale > 1.) {
     // for zoomin
-    virtual_viewport_for_zoomin_.height /= scale;
-    virtual_viewport_for_zoomin_.width /= scale;
-    virtual_viewport_for_zoomin_.x =
-        original_point.x -
-        (original_point.x - virtual_viewport_for_zoomin_.x) / scale;
-    virtual_viewport_for_zoomin_.y =
-        original_point.y -
-        (original_point.y - virtual_viewport_for_zoomin_.y) / scale;
+    zoomin_viewport_.height /= scale;
+    zoomin_viewport_.width /= scale;
+    zoomin_viewport_.x =
+        original_point.x - (original_point.x - zoomin_viewport_.x) / scale;
+    zoomin_viewport_.y =
+        original_point.y - (original_point.y - zoomin_viewport_.y) / scale;
   } else {
-    // zoomout
-    virtual_viewport_for_zoomout_.height *= scale;
-    virtual_viewport_for_zoomout_.width *= scale;
-    virtual_viewport_for_zoomout_.x =
-        original_point.x +
-        (virtual_viewport_for_zoomout_.x - original_point.x) * scale;
-    virtual_viewport_for_zoomout_.y =
-        original_point.y +
-        (virtual_viewport_for_zoomout_.y - original_point.y) * scale;
+    // for zoomout
+    zoomout_viewport_.height *= scale;
+    zoomout_viewport_.width *= scale;
+    zoomout_viewport_.x =
+        original_point.x + (zoomout_viewport_.x - original_point.x) * scale;
+    zoomout_viewport_.y =
+        original_point.y + (zoomout_viewport_.y - original_point.y) * scale;
   }
 
   float x1, y1, x2, y2;
@@ -316,10 +310,10 @@ int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
 int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
   DRect drect;
   LRectToDRect(lrect, drect);
-  virtual_viewport_for_zoomout_.x = drect.x;
-  virtual_viewport_for_zoomout_.y = drect.y + drect.height;
-  virtual_viewport_for_zoomout_.height = drect.height;
-  virtual_viewport_for_zoomout_.width = drect.width;
+  zoomout_viewport_.x = drect.x;
+  zoomout_viewport_.y = drect.y + drect.height;
+  zoomout_viewport_.height = drect.height;
+  zoomout_viewport_.width = drect.width;
 
   windowport_.x = lrect.x;
   windowport_.y = lrect.y;
@@ -333,12 +327,12 @@ int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
   blc_ = (xblc > yblc) ? yblc : xblc;
 
   if (xblc < yblc) {
-    virtual_viewport_for_zoomout_.y += drect.height * (1 - yblc / xblc);
+    zoomout_viewport_.y += drect.height * (1 - yblc / xblc);
     windowport_.height = lrect.height * yblc / xblc;
-    virtual_viewport_for_zoomout_.height = drect.height * yblc / xblc;
+    zoomout_viewport_.height = drect.height * yblc / xblc;
   } else {
     windowport_.width = lrect.width * xblc / yblc;
-    virtual_viewport_for_zoomout_.width = drect.width * xblc / yblc;
+    zoomout_viewport_.width = drect.width * xblc / yblc;
   }
 
   return Redraw();
@@ -361,7 +355,6 @@ int RenderDeviceGDI::Timer() {
                                     (COLORREF)::GetSysColor(COLOR_WINDOW));
 
       HDC hPaintBufferDC = composit_render_buffer_.PrepareDC();
-
       BeginRender(RB_COMPOSIT);
 
       if (layer_ != NULL) {
@@ -370,8 +363,8 @@ int RenderDeviceGDI::Timer() {
 
       EndRender(RB_COMPOSIT);
 
-      virtual_viewport_for_zoomin_ = viewport_;
-      virtual_viewport_for_zoomout_ = viewport_;
+      zoomin_viewport_ = viewport_;
+      zoomout_viewport_ = viewport_;
     }
   }
 
@@ -382,12 +375,11 @@ int RenderDeviceGDI::Timer() {
   return ERR_NONE;
 }
 
-//////////////////////////////////////////////////////////////////////////
-int RenderDeviceGDI::BeginRender(eRenderBufferLayer rbl_type, bool clear,
+int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
                                  const Style *style, int op) {
   is_lock_style_ = (NULL != style);
 
-  switch (rbl_type) {
+  switch (render_buffer) {
     case RB_COMPOSIT: {
       if (clear)
         composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
@@ -413,10 +405,10 @@ int RenderDeviceGDI::BeginRender(eRenderBufferLayer rbl_type, bool clear,
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::EndRender(eRenderBufferLayer rbl_type) {
+int RenderDeviceGDI::EndRender(eRenderBuffer render_buffer) {
   if (is_lock_style_) EndDrawing();
 
-  switch (rbl_type) {
+  switch (render_buffer) {
     case RB_COMPOSIT: {
       composit_render_buffer_.EndDC();
     } break;
@@ -530,12 +522,10 @@ int RenderDeviceGDI::Render(void) {
                        viewport_.height);
 
   composit_render_buffer_.Swap(
-      render_buffer_, virtual_viewport_for_zoomin_.x,
-      virtual_viewport_for_zoomin_.y, virtual_viewport_for_zoomin_.width,
-      virtual_viewport_for_zoomin_.height, virtual_viewport_for_zoomout_.x,
-      virtual_viewport_for_zoomout_.y, virtual_viewport_for_zoomout_.width,
-      virtual_viewport_for_zoomout_.height, RenderBuffer::BLT_TRANSPARENT,
-      SRCCOPY);
+      render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
 
   render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
                       viewport_.height, viewport_.x, viewport_.y);
@@ -549,6 +539,7 @@ int RenderDeviceGDI::RenderLayer(const OGRLayer *const_layer, int op) {
     return ERR_INVALID_PARAM;
   }
 
+  layer_ = layer;
   const auto *layer_defn = layer->GetLayerDefn();
   auto geomtry_count = layer_defn->GetGeomFieldCount();
 
@@ -867,13 +858,13 @@ int RenderDeviceGDI::DrawPolygon(const OGRPolygon *polygon) {
 
 int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
                                const LRect &lrect, long code_type_,
-                               eRenderBufferLayer rbl_type) {
+                               eRenderBuffer render_buffer) {
   long ret = ERR_FAILURE;
 
   DRect drect;
   LRectToDRect(lrect, drect);
 
-  switch (rbl_type) {
+  switch (render_buffer) {
     case RB_COMPOSIT: {
       ret = composit_render_buffer_.DrawImage(
           image_buffer, image_buffer_size, code_type_, drect.x,
@@ -886,13 +877,13 @@ int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
 
 int RenderDeviceGDI::StrethImage(const char *image_buffer,
                                  int image_buffer_size, const LRect &rect,
-                                 long code_type_, eRenderBufferLayer rbl_type) {
+                                 long code_type_, eRenderBuffer render_buffer) {
   long ret = ERR_FAILURE;
 
   DRect drect;
   LRectToDRect(rect, drect);
 
-  switch (rbl_type) {
+  switch (render_buffer) {
     case RB_COMPOSIT: {
       ret = composit_render_buffer_.StrethImage(
           image_buffer, image_buffer_size, code_type_, drect.x,
@@ -904,11 +895,11 @@ int RenderDeviceGDI::StrethImage(const char *image_buffer,
 }
 
 int RenderDeviceGDI::SaveImage(const char *file_path,
-                               eRenderBufferLayer rbl_type,
+                               eRenderBuffer render_buffer,
                                bool backgroud_transparent) {
   long ret = ERR_FAILURE;
 
-  switch (rbl_type) {
+  switch (render_buffer) {
     case RB_COMPOSIT: {
       ret =
           composit_render_buffer_.Save2Image(file_path, backgroud_transparent);
@@ -920,11 +911,11 @@ int RenderDeviceGDI::SaveImage(const char *file_path,
 
 int RenderDeviceGDI::Save2ImageBuffer(char *&image_buffer,
                                       long &image_buffer_size, long code_type_,
-                                      eRenderBufferLayer rbl_type,
+                                      eRenderBuffer render_buffer,
                                       bool backgroud_transparent) {
   long ret = ERR_FAILURE;
 
-  switch (rbl_type) {
+  switch (render_buffer) {
     case RB_COMPOSIT: {
       ret = composit_render_buffer_.Save2ImageBuffer(
           image_buffer, image_buffer_size, code_type_, backgroud_transparent);

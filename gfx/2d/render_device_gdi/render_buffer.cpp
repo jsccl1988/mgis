@@ -1,6 +1,8 @@
 #include "gfx/2d/render_device_gdi/render_buffer.h"
 
-// #include "ximage.h"
+#include "base/util/string_util.h"
+#include "gfx/2d/render_device_gdi/utils.h"
+#include "third_party/CxImage/CxImage/ximage.h"
 
 #pragma comment(lib, "msimg32.lib")  // TransparentBlt
 
@@ -252,35 +254,34 @@ RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
 }
 
 long RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
-                             long code_type_, long x, long y, long cx,
-                             long cy) {
+                             long code_type, long x, long y, long cx, long cy) {
   if (NULL == image_buffer || 0 == image_buffer_size) {
     return ERR_FAILURE;
   }
 
-  // CxImage image;
-  // image.Decode((BYTE *)image_buffer, image_buffer_size, code_type_);
+  CxImage image;
+  image.Decode((BYTE *)image_buffer, image_buffer_size, code_type);
 
   HDC dc_ = PrepareDC();
-  // image.Draw(dc_, x, y, cx, cy);
+  image.Draw(dc_, x, y, cx, cy);
   EndDC();
 
   return ERR_NONE;
 }
 
 long RenderBuffer::StrethImage(const char *image_buffer, int image_buffer_size,
-                               long code_type_, long xoffset, long yoffset,
+                               long code_type, long xoffset, long yoffset,
                                long xsize, long ysize, DWORD rop) {
   if (NULL == image_buffer || 0 == image_buffer_size) {
     return ERR_FAILURE;
   }
 
-  // CxImage image;
-  // image.Decode((BYTE *)image_buffer, image_buffer_size, code_type_);
+  CxImage image;
+  image.Decode((BYTE *)image_buffer, image_buffer_size, code_type);
 
-  // HDC dc_ = PrepareDC();
-  // image.Stretch(dc_, xoffset, yoffset, xsize, ysize, rop);
-  // EndDC();
+  HDC dc_ = PrepareDC();
+  image.Stretch(dc_, xoffset, yoffset, xsize, ysize, rop);
+  EndDC();
 
   return ERR_NONE;
 }
@@ -292,10 +293,10 @@ long RenderBuffer::Save2Image(const char *file_path,
 }
 
 long RenderBuffer::Save2ImageBuffer(char *&image_buffer,
-                                    long &image_buffer_size, long code_type_,
+                                    long &image_buffer_size, long code_type,
                                     bool backgroud_transparent) {
   long ret = Save2ImageBuffer(paint_buffer_, image_buffer, image_buffer_size,
-                              code_type_, backgroud_transparent);
+                              code_type, backgroud_transparent);
   return ret;
 }
 
@@ -305,62 +306,61 @@ long RenderBuffer::Save2Image(HBITMAP bitmap, const char *file_path,
     return ERR_FAILURE;
   }
 
-  // CxImage image;
+  CxImage image;
+  if (image.CreateFromHBITMAP(bitmap)) {
+    if (backgroud_transparent) {
+      COLORREF bgClr = RGB(255, 255, 255);
+      RGBQUAD transClr;
+      transClr.rgbRed = GetRValue(bgClr);
+      transClr.rgbGreen = GetGValue(bgClr);
+      transClr.rgbBlue = GetBValue(bgClr);
+      transClr.rgbReserved = 0;
 
-  // if (image.CreateFromHBITMAP(bitmap)) {
-  //   if (backgroud_transparent) {
-  //     COLORREF bgClr =
-  //         RGB(255, 255, 255);
-  //     RGBQUAD transClr;
-  //     transClr.rgbRed = GetRValue(bgClr);
-  //     transClr.rgbGreen = GetGValue(bgClr);
-  //     transClr.rgbBlue = GetBValue(bgClr);
-  //     transClr.rgbReserved = 0;
+      image.SetTransIndex(0);
+      image.SetTransColor(transClr);
+    }
 
-  //     image.SetTransIndex(0);
-  //     image.SetTransColor(transClr);
-  //   }
-
-  //   if (image.Save(file_path, GetImageTypeByFileExt(file_path))) {
-  //     return ERR_NONE;
-  //   }
-  // }
+    if (image.Save(file_path, GetImageTypeByFileExt(file_path))) {
+      return ERR_NONE;
+    }
+  }
 
   return ERR_FAILURE;
 }
 
 long RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
-                                    long &image_buffer_size, long code_type_,
+                                    long &image_buffer_size, long code_type,
                                     bool backgroud_transparent) {
   if (bitmap == NULL || image_buffer != NULL) {
     return ERR_FAILURE;
   }
 
-  // BYTE *pImageBuf = NULL;
-  // long lSize = 0;
-  // CxImage image;
+  BYTE *buffer = NULL;
+  int32_t size = 0;
+  CxImage image;
 
-  // if (image.CreateFromHBITMAP(bitmap)) {
-  //   if (backgroud_transparent) {
-  //     COLORREF bgClr = RGB(255, 255, 255);
-  //     RGBQUAD transClr;
-  //     transClr.rgbRed = GetRValue(bgClr);
-  //     transClr.rgbGreen = GetGValue(bgClr);
-  //     transClr.rgbBlue = GetBValue(bgClr);
-  //     transClr.rgbReserved = 0;
+  if (image.CreateFromHBITMAP(bitmap)) {
+    if (backgroud_transparent) {
+      COLORREF bgClr = RGB(255, 255, 255);
+      RGBQUAD transClr;
+      transClr.rgbRed = GetRValue(bgClr);
+      transClr.rgbGreen = GetGValue(bgClr);
+      transClr.rgbBlue = GetBValue(bgClr);
+      transClr.rgbReserved = 0;
 
-  //     image.SetTransIndex(0);
-  //     image.SetTransColor(transClr);
-  //   }
+      image.SetTransIndex(0);
+      image.SetTransColor(transClr);
+    }
 
-  //   if (image.Encode(pImageBuf, lSize, code_type_)) {
-  //     image_buffer = (char *)pImageBuf;
-  //     image_buffer_size = lSize;
+    if (image.Encode(buffer, size, code_type)) {
+      image_buffer = (char *)buffer;
+      image_buffer_size = size;
 
-  //     return ERR_NONE;
-  //   }
-  //   return ERR_NONE;
-  // }
+      return ERR_NONE;
+    }
+
+    return ERR_NONE;
+  }
 
   return ERR_FAILURE;
 }

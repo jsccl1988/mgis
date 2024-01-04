@@ -69,7 +69,6 @@ class BASE_EXPORT Exception : public std::runtime_error {
  private:
   uint32_t error_code_;
 };
-
 }  // namespace base
 
 #endif  // BASE_ERROR_H_

@@ -55,6 +55,7 @@ shared_library("render_device_gdi") {
   deps = [
     ":render2d",
     "//third_party:gdal",
+    "//third_party/CxImage:CxImage",
   ]
 }
 

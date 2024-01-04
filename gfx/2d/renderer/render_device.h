@@ -5,11 +5,10 @@
 #include "gfx/2d/renderer/style.h"
 #include "ogrsf_frmts.h"
 
-
 namespace gfx2d {
 class RenderDevice {
  public:
-  enum eRenderBufferLayer { RB_COMPOSIT, RB_DIRECT };
+  enum eRenderBuffer { RB_COMPOSIT, RB_DIRECT };
   RenderDevice(HINSTANCE instance)
       : rhi_api_(RHI2D_GDI),
         instance_handle_(instance),
@@ -63,10 +62,10 @@ class RenderDevice {
   virtual int DRectToLRect(const DRect &lrect, LRect &rect) const = 0;
 
  public:
-  virtual int BeginRender(eRenderBufferLayer rbl_type, bool clear = false,
+  virtual int BeginRender(eRenderBuffer render_buffer, bool clear = false,
                           const Style *style = nullptr,
                           int op = R2_COPYPEN) = 0;
-  virtual int EndRender(eRenderBufferLayer rbl_type) = 0;
+  virtual int EndRender(eRenderBuffer render_buffer) = 0;
   virtual int Render(void) = 0;
 
  public:
@@ -94,18 +93,18 @@ class RenderDevice {
  public:
   virtual int DrawImage(const char *image_buffer, int image_buffer_size,
                         const LRect &rect, long code_type_,
-                        eRenderBufferLayer rbl_type = RB_COMPOSIT) = 0;
+                        eRenderBuffer render_buffer = RB_COMPOSIT) = 0;
   virtual int StrethImage(const char *image_buffer, int image_buffer_size,
                           const LRect &rect, long code_type_,
-                          eRenderBufferLayer rbl_type = RB_COMPOSIT) = 0;
+                          eRenderBuffer render_buffer = RB_COMPOSIT) = 0;
 
  public:
   virtual int SaveImage(const char *file_path,
-                        eRenderBufferLayer rbl_type = RB_COMPOSIT,
+                        eRenderBuffer render_buffer = RB_COMPOSIT,
                         bool backgroud_transparent = false) = 0;
   virtual int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
                                long code_type_,
-                               eRenderBufferLayer rbl_type = RB_COMPOSIT,
+                               eRenderBuffer render_buffer = RB_COMPOSIT,
                                bool backgroud_transparent = false) = 0;
   virtual int FreeImageBuffer(char *&image_buffer) = 0;
 
