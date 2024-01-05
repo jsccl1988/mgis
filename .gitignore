@@ -1,0 +1,12 @@
+/out_*
+/out
+/build/Debug
+*.sln
+*.ncb
+*.vcxproj
+*.vcxproj.*
+.ide.*
+.vscode
+.vs
+*.pyc
+*.swp
