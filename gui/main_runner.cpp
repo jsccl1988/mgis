@@ -3,7 +3,7 @@
 
 #include "gui/main_runner.h"
 
-#include "gui/app/frame.h"
+#include "gui/app/window.h"
 #include "gui/base/path/base_paths.h"
 #include "gui/base/thread/message_loop.h"
 #include "gui/base/thread/thread_manager.h"
@@ -11,16 +11,17 @@
 #include "gui/content_impl/map_content_factory.h"
 #include "gui/content_impl/map_content_manager.h"
 
+CAppModule _Module;
+
 namespace gui {
 static const std::string kWorkerThread = "Worker";
 
-MainRunner::MainRunner() {}
-MainRunner::~MainRunner() { Stop(); }
+MainRunner::MainRunner() { }
+MainRunner::~MainRunner() {}
 
 bool MainRunner::Init() {
-  if (ui_message_loop_) {
-    return true;
-  }
+  _Module.Init(NULL, ::GetModuleHandle(NULL));
+  _Module.AddMessageLoop(&ui_message_loop_);
 
   // thread
   if (!CreateThreads()) {
@@ -36,41 +37,29 @@ bool MainRunner::Init() {
         this, content, task_runner_->AsWeakPtr());
   }
 
-  Frame* frame = new Frame();
-  frame->CreateEx();
-  frame->ShowWindow(SW_MAXIMIZE);
-  frame->Show();
+  window_.Create(NULL, CWindow::rcDefault, TEXT("SmartGIS"),
+             WS_OVERLAPPEDWINDOW | WS_VISIBLE);
 
   return true;
 }
 
 bool MainRunner::Run() {
-  if (!ui_message_loop_) {
-    return false;
-  }
-
-  ui_message_loop_->Run();
-
+  ui_message_loop_.Run();
   return true;
 }
 
 bool MainRunner::Stop() {
-  if (!ui_message_loop_) {
-    return false;
-  }
-
   if (!DestroyThreads()) {
     return false;
   }
+
+  _Module.RemoveMessageLoop();
+  _Module.Term();
 
   return true;
 }
 
 bool MainRunner::CreateThreads() {
-  // ui message loop
-  ui_message_loop_.reset(new MessageLoop(::GetCurrentThreadId()));
-  ThreadManager::SetMessageLoop(ThreadManager::UI, ui_message_loop_.get());
-
   // worker thread
   worker_thread_.reset(new gui::Thread());
   gui::Thread::Options io_opt(0, true);
@@ -83,9 +72,7 @@ bool MainRunner::CreateThreads() {
 }
 
 bool MainRunner::DestroyThreads() {
-  ui_message_loop_->Quit();
   ThreadManager::RemoveAllMessageLoop();
-  ui_message_loop_.reset(nullptr);
   worker_thread_.reset(nullptr);
 
   return true;

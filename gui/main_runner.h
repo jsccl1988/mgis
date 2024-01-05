@@ -9,14 +9,15 @@
 
 #include <memory>
 
+#include "gui/app/window.h"
 #include "content/public/app/task_runner.h"
 #include "gui/base/thread/thread.h"
 
 namespace gui {
-class MessageLoop;
-class MainRunner : public base::RefCountedThreadSafe<MainRunner> {
+class MainRunner {
  public:
   MainRunner();
+  ~MainRunner();
 
  public:
   bool Init();
@@ -24,16 +25,14 @@ class MainRunner : public base::RefCountedThreadSafe<MainRunner> {
   bool Stop();
 
  private:
-  ~MainRunner();
-  friend class base::RefCountedThreadSafe<MainRunner>;
-
   bool CreateThreads();
   bool DestroyThreads();
 
  protected:
-  base::ScopedPtr<MessageLoop> ui_message_loop_;
-  base::ScopedPtr<gui::Thread> worker_thread_;
+  Window window_;
+  CMessageLoop ui_message_loop_;
 
+  base::ScopedPtr<gui::Thread> worker_thread_;
   base::ScopedRefPtr<content::TaskRunner> task_runner_;
 
  private:
