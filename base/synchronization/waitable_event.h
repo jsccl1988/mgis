@@ -5,7 +5,7 @@
 #define BASE_SYNCHRONIZATION_WAITABLE_EVENT_H_
 
 #include "base/base_config.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

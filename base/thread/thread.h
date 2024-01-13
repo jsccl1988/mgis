@@ -14,7 +14,7 @@
 #include <pthread.h>
 #endif
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 namespace base {
 #if defined(OS_WIN)

@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The Baidu Authors.
+// Copyright (c) 2024 The mgis Authors.
 // All rights reserved.
 
 #ifndef DEMO_WEB_RENDER_APP_TASK_RUNNER_IMPL_H_

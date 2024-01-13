@@ -4,7 +4,7 @@
 #ifndef CONTENT_PUBLIC_MAP_TYPES_H
 #define CONTENT_PUBLIC_MAP_TYPES_H
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 namespace content {
 struct Point {

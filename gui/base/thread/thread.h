@@ -11,7 +11,7 @@
 #include <queue>
 #include <string>
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/platform.h"
 #include "base/synchronization/lock.h"
 #include "gui/base/thread/message_loop.h"

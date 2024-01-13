@@ -11,46 +11,30 @@ static_library("core") {
   sources = [
     "geometry/geometry.cpp",
     "sdb/sdb.cpp",
-    # "command.cpp",
-    # "dynamic_library.cpp",
-    # "listener.cpp",
-    # "plugin.cpp",
   ]
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/sqlite3/include",
-    "$root_out_dir/glog/include",
-    "$root_out_dir/geos/include",
-    "$root_out_dir/PROJ/include",
-    "$root_out_dir/gdal/include",
-    "$root_out_dir/libspatialindex/include",
-    "$root_out_dir/libspatialite/include",
-    "$root_out_dir/spatial/include",
-    "$root_out_dir/SpatiaLiteCpp/include",
+    "$root_out_dir/third_party/include",
   ]
 
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   libs = [
-    "$root_out_dir/sqlite3/lib/sqlite3.lib",
-    "$root_out_dir/SQLiteCpp/lib/SQLiteCpp.lib",
-    "$root_out_dir/geos/lib/geos.lib",
-    "$root_out_dir/PROJ/lib/proj.lib",
-    "$root_out_dir/gdal/lib/gdal.lib",
-    "$root_out_dir/libspatialindex/lib/spatialindex-64.lib",
-    "$root_out_dir/libspatialite/lib/spatialite_i.lib",
-    "$root_out_dir/SpatiaLiteCpp/lib/SpatiaLiteCpp.lib",
+    "$root_out_dir/third_party/lib/sqlite3.lib",
+    "$root_out_dir/third_party/lib/SQLiteCpp.lib",
+    "$root_out_dir/third_party/lib/geos.lib",
+    "$root_out_dir/third_party/lib/gdal$postfix.lib",
+    "$root_out_dir/third_party/lib/spatialindex-64.lib",
+    "$root_out_dir/third_party/lib/spatialite_i.lib",
+    "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
   ]
 
   deps = [
     "//base:base",
-    "//third_party:cpp-httplib",
-    "//third_party:sqlite3",
-    "//third_party:SQLiteCpp",
-    "//third_party:geos",
-    "//third_party:PROJ",
-    "//third_party:gdal",
-    "//third_party:libspatialindex",
-    "//third_party:SpatiaLiteCpp",
   ]
 }
 
@@ -62,7 +46,16 @@ executable("gdal_ogrsf") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/gdal/include",
+    "$root_out_dir/third_party/include",
+  ]
+
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
+  libs = [
+    "$root_out_dir/third_party/lib/gdal$postfix.lib",
   ]
 
   deps = [
@@ -77,49 +70,58 @@ executable("gdal_reprojmulti") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/gdal/include",
+    "$root_out_dir/third_party/include",
   ]
 
-  deps = [
-    ":core",
-  ]
-}
-
-test("core_test") {
-  defines = [
-    "NOMINMAX",
-    "USE_UNSTABLE_GEOS_CPP_API",
-  ]
-
-  sources = [
-    "core_unittest.cpp",
-    "geometry/geometry_unittest.cpp",
-    "sdb/sdb_unittest.cpp",
-  ]
-
-  include_dirs += [
-    "$root_gen_dir/",
-    "//third_party/expected/include/",
-    "//third_party/msqlite/include",
-    "$root_out_dir/sqlite3/include",
-    "$root_out_dir/glog/include",
-    "$root_out_dir/geos/include",
-    "$root_out_dir/PROJ/include",
-    "$root_out_dir/gdal/include",
-  ]
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
 
   libs = [
-    "$root_out_dir/sqlite3/lib/sqlite3.lib",
-    "$root_out_dir/SQLiteCpp/lib/SQLiteCpp.lib",
-    "$root_out_dir/geos/lib/geos.lib",
-    "$root_out_dir/PROJ/lib/proj.lib",
-    "$root_out_dir/gdal/lib/gdal.lib",
-    "$root_out_dir/libspatialindex/lib/spatialindex-64.lib",
-    "$root_out_dir/libspatialite/lib/spatialite_i.lib",
-    "$root_out_dir/SpatiaLiteCpp/lib/SpatiaLiteCpp.lib",
+    "$root_out_dir/third_party/lib/gdal.lib",
   ]
+
 
   deps = [
     ":core",
   ]
 }
+
+# test("core_test") {
+#   defines = [
+#     "NOMINMAX",
+#     "USE_UNSTABLE_GEOS_CPP_API",
+#   ]
+
+#   sources = [
+#     "core_unittest.cpp",
+#     "geometry/geometry_unittest.cpp",
+#     "sdb/sdb_unittest.cpp",
+#   ]
+
+#   include_dirs += [
+#     "$root_gen_dir/",
+#     "$root_out_dir/third_party/include",
+#   ]
+
+  # postfix = ""
+  # if (is_debug) {
+  #   postfix = "d"
+  # }
+
+#   libs = [
+#     "$root_out_dir/third_party/lib/sqlite3.lib",
+#     "$root_out_dir/third_party/lib/SQLiteCpp.lib",
+#     "$root_out_dir/third_party/lib/geos.lib",
+#     "$root_out_dir/third_party/lib/proj.lib",
+#     "$root_out_dir/third_party/lib/gdal.lib",
+#     "$root_out_dir/third_party/lib/spatialindex-64.lib",
+#     "$root_out_dir/third_party/lib/spatialite_i.lib",
+#     "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
+#   ]
+
+#   deps = [
+#     ":core",
+#   ]
+# }

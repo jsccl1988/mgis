@@ -1,3 +1,7 @@
+
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #include "gfx/2d/renderer/style.h"
 
 #include "base/logging.h"

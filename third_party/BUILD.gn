@@ -2,10 +2,17 @@
 # All rights reserved.
 
 cmake("glog") {
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   cmake_root_dir = "//third_party/glog"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/glog/bin/glog.dll",
-    "$root_out_dir/glog/lib/glog.lib",
+    "$root_out_dir/third_party/bin/glog$postfix.dll",
+    "$root_out_dir/third_party/lib/glog$postfix.lib",
   ]
   cmake_options = [
     "BUILD_SHARED_LIBS=OFF",
@@ -13,10 +20,18 @@ cmake("glog") {
 }
 
 cmake("gbenchmark") {
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   cmake_root_dir = "//third_party/googlebenchmark"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/gbenchmark/bin/googlebenchmark.dll",
-    "$root_out_dir/gbenchmark/lib/googlebenchmark.lib",
+    "$root_out_dir/third_party/bin/benchmark$postfix.dll",
+    "$root_out_dir/third_party/lib/benchmark_main$postfix.lib",
+    "$root_out_dir/third_party/lib/benchmark$postfix.lib",
   ]
   cmake_options = [
     "BUILD_SHARED_LIBS=OFF",
@@ -25,10 +40,18 @@ cmake("gbenchmark") {
 }
 
 cmake("gtest") {
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   cmake_root_dir = "//third_party/googletest"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/gtest/bin/googletest.dll",
-    "$root_out_dir/gtest/lib/googletest.lib",
+    "$root_out_dir/third_party/bin/gtest$postfix.dll",
+    "$root_out_dir/third_party/lib/gtest_main$postfix.lib",
+    "$root_out_dir/third_party/lib/gtest$postfix.lib",
   ]
   cmake_options = [
     "BUILD_SHARED_LIBS=OFF",
@@ -36,11 +59,27 @@ cmake("gtest") {
   ]
 }
 
+cmake("sqlite3") {
+  cmake_root_dir = "//third_party/sqlite3"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
+  cmake_outputs = [
+    "$root_out_dir/third_party/bin/sqlite3.exe",
+    "$root_out_dir/third_party/lib/sqlite3.lib",
+  ]
+
+  cmake_options = [
+    "BUILD_SHARED_LIBS=OFF",
+  ]
+}
+
 cmake("geos") {
   cmake_root_dir = "//third_party/geos"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/geos/bin/geos.dll",
-    "$root_out_dir/geos/lib/geos.lib",
+    "$root_out_dir/third_party/bin/geos.dll",
+    "$root_out_dir/third_party/lib/geos.lib",
   ]
 
   cmake_options = [
@@ -51,44 +90,93 @@ cmake("geos") {
 
 cmake("cpp-httplib") {
   cmake_root_dir = "//third_party/cpp-httplib"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/cpp-httplib/include/httplib.h",
-  ]
-}
-
-cmake("sqlite3") {
-  cmake_root_dir = "//third_party/sqlite3"
-  cmake_outputs = [
-    "$root_out_dir/sqlite3/bin/sqlite3.exe",
-    "$root_out_dir/sqlite3/lib/sqlite3.lib",
-  ]
-
-  cmake_options = [
-    "BUILD_SHARED_LIBS=OFF",
+    "$root_out_dir/third_party/include/cpp-httplib/httplib.h",
   ]
 }
 
 cmake("SQLiteCpp") {
   cmake_root_dir = "//third_party/SQLiteCpp"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/SQLiteCpp/lib/SQLiteCpp.lib",
+    "$root_out_dir/third_party/lib/SQLiteCpp.lib",
+    "$root_out_dir/third_party/bin/SQLiteCpp.dll",
   ]
 
-  # sqlite3_install = rebase_path("$root_out_dir/sqlite3")
+  sqlite3_install = rebase_path("$root_out_dir/third_party")
   cmake_options = [
     "BUILD_SHARED_LIBS=OFF",
-    "SQLITECPP_INTERNAL_SQLITE=ON",
+    "SQLITECPP_INTERNAL_SQLITE=OFF",
     "SQLITECPP_RUN_CPPLINT=OFF",
+    "SQLITE3_INCLUDE_DIR=$sqlite3_install/include",
+    "SQLITE3_LIBRARY=$sqlite3_install/lib/sqlite3.lib",
+  ]
+}
+
+cmake("libspatialindex") {
+  cmake_root_dir = "//third_party/libspatialindex"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
+  cmake_outputs = [
+    "$root_out_dir/third_party/bin/spatialindex_c-64.dll",
+    "$root_out_dir/third_party/lib/spatialindex-64.lib",
+  ]
+
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+  ]
+}
+
+cmake("libspatialite") {
+  cmake_root_dir = "//third_party/libspatialite"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
+  cmake_outputs = [
+    "$root_out_dir/third_party/lib/spatialite.lib",
+    "$root_out_dir/third_party/lib/spatialite_i.lib",
+    "$root_out_dir/third_party/bin/spatialite.dll",
+  ]
+
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+  ]
+}
+
+cmake("SpatiaLiteCpp") {
+  cmake_root_dir = "//third_party/SpatiaLiteCpp"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
+  cmake_outputs = [
+    "$root_out_dir/third_party/bin/SpatiaLiteCpp.dll",
+    "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
+  ]
+
+  spatialite_install = rebase_path("$root_out_dir/third_party")
+  cmake_options = [
+    "BUILD_SHARED_LIBS=ON",
+    "spatialite_dir_inc=$spatialite_install/include",
+    "spatialite_dir_lib=$spatialite_install/lib",
   ]
 }
 
 cmake("PROJ") {
+  postfix = ""
+  if (is_debug) {
+    postfix = "_d"
+  }
+
   cmake_root_dir = "//third_party/PROJ"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/PROJ/lib/proj.lib",
+    "$root_out_dir/third_party/lib/proj$postfix.lib",
+    "$root_out_dir/third_party/bin/proj_9_4$postfix.dll",
   ]
 
-  sqlite3_install = rebase_path("$root_out_dir/sqlite3")
+  sqlite3_install = rebase_path("$root_out_dir/third_party")
   cmake_options = [
     "BUILD_SHARED_LIBS=ON",
     "BUILD_TESTING=OFF",
@@ -103,12 +191,20 @@ cmake("PROJ") {
 }
 
 cmake("gdal") {
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   cmake_root_dir = "//third_party/gdal"
+  cmake_build_dir = target_out_dir + "/" + target_name
+  cmake_install_dir = root_out_dir + "/third_party/"
   cmake_outputs = [
-    "$root_out_dir/gdal/lib/gdal.lib",
+    "$root_out_dir/third_party/bin/gdal$postfix.dll",
+    "$root_out_dir/third_party/lib/gdal$postfix.lib",
   ]
 
-  proj_install = rebase_path("$root_out_dir/PROJ")
+  proj_install = rebase_path("$root_out_dir/third_party")
   cmake_options = [
     "BUILD_SHARED_LIBS=ON",
     "BUILD_TESTING=OFF",
@@ -116,52 +212,15 @@ cmake("gdal") {
     "OGR_BUILD_OPTIONAL_DRIVERS=OFF",
     "GDAL_USE_INTERNAL_LIBS=ON",
     "PROJ_INCLUDE_DIR=$proj_install/include",
-    "PROJ_LIBRARY_RELEASE=$proj_install/lib/proj.lib",
-  ]
-}
-
-cmake("libspatialindex") {
-  cmake_root_dir = "//third_party/libspatialindex"
-  cmake_outputs = [
-    "$root_out_dir/libspatialindex/bin/libspatialindex.dll",
-    "$root_out_dir/libspatialindex/lib/libspatialindex.lib",
-  ]
-
-  cmake_options = [
-    "BUILD_SHARED_LIBS=ON",
-  ]
-}
-
-cmake("libspatialite") {
-  cmake_root_dir = "//third_party/libspatialite"
-  cmake_outputs = [
-    "$root_out_dir/libspatialite/include",
-    "$root_out_dir/libspatialite/lib",
-    "$root_out_dir/libspatialite/bin",
-  ]
-
-  cmake_options = [
-    "BUILD_SHARED_LIBS=ON",
-  ]
-}
-
-cmake("SpatiaLiteCpp") {
-  cmake_root_dir = "//third_party/SpatiaLiteCpp"
-  cmake_outputs = [
-    "$root_out_dir/SpatiaLiteCpp/bin/SpatiaLiteCpp.dll",
-    "$root_out_dir/SpatiaLiteCpp/lib/SpatiaLiteCpp.lib",
-  ]
-
-  spatialite_install = rebase_path("$root_out_dir/libspatialite")
-  cmake_options = [
-    "BUILD_SHARED_LIBS=ON",
-    "spatialite_dir_inc=$spatialite_install/include",
-    "spatialite_dir_lib=$spatialite_install/lib",
+    "PROJ_LIBRARIES=$proj_install/lib",
   ]
 }
 
 group("all") {
   deps = [
+    ":glog",
+    ":gbenchmark",
+    ":gtest",
     ":cpp-httplib",
     ":sqlite3",
     ":SQLiteCpp",

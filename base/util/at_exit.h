@@ -8,7 +8,7 @@
 #include <stack>
 
 #include "base/base_export.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/callback/callback.h"
 #include "base/synchronization/lock.h"
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The Baidu Authors.
+// Copyright (c) 2024 The mgis Authors.
 // All rights reserved.
 
 #include "gui/content_impl/app/task_runner_impl.h"

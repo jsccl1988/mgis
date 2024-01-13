@@ -7,7 +7,7 @@
 #include <memory>
 #include <queue>
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/framework/default_message_pump.h"
 #include "base/framework/message_loop_proxy.h"
 #include "base/framework/observer_list.h"

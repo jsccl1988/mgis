@@ -8,7 +8,7 @@
 #include <string>
 
 #include "base/base_export.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/file/file_path.h"
 
 namespace base {

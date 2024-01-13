@@ -3,20 +3,22 @@
 
 #include "gui/main_runner.h"
 
-#include "gui/app/window.h"
-#include "gui/base/path/base_paths.h"
+#include "base/path/base_paths.h"
+
+#include "gui/app/window2d.h"
 #include "gui/base/thread/message_loop.h"
 #include "gui/base/thread/thread_manager.h"
 #include "gui/content_impl/app/task_runner_impl.h"
 #include "gui/content_impl/map_content_factory.h"
 #include "gui/content_impl/map_content_manager.h"
 
+
 CAppModule _Module;
 
 namespace gui {
 static const std::string kWorkerThread = "Worker";
 
-MainRunner::MainRunner() { }
+MainRunner::MainRunner() {}
 MainRunner::~MainRunner() {}
 
 bool MainRunner::Init() {
@@ -38,7 +40,7 @@ bool MainRunner::Init() {
   }
 
   window_.Create(NULL, CWindow::rcDefault, TEXT("SmartGIS"),
-             WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+                 WS_OVERLAPPEDWINDOW | WS_VISIBLE);
 
   return true;
 }

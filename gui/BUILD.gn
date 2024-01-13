@@ -8,7 +8,6 @@ executable("smartgis") {
   ]
 
   sources = [
-    "base/path/base_paths_win.cpp",
     "base/thread/message_loop.cpp",
     "base/thread/thread_manager.cpp",
     "base/thread/thread.cpp",
@@ -25,17 +24,24 @@ executable("smartgis") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
+    "$root_out_dir/third_party/include",
     "//gui/third_party/wtl8.0/",
   ]
 
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   libs += [
     "atls.lib",
-    "$root_out_dir/glog/lib/glog.lib",
+    "$root_out_dir/third_party/lib/glog$postfix.lib",
   ]
 
   deps = [
     "//base:base",
     "//third_party:glog",
+    "//gfx/2d:renderer2d",
+    "//gfx/3d:renderer3d",
   ]
 }

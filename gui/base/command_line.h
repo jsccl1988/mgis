@@ -7,7 +7,7 @@
 #include <map>
 #include <vector>
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/platform.h"
 
 namespace gui {

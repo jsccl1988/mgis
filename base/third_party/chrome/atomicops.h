@@ -27,7 +27,7 @@
 
 #ifndef BASE_ATOMICOPS_H_
 #define BASE_ATOMICOPS_H_
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 namespace base {
 namespace subtle {

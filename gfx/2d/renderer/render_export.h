@@ -4,6 +4,8 @@
 #ifndef GFX_2D_RENDER_RENDER_EXPORT_H
 #define GFX_2D_RENDER_RENDER_EXPORT_H
 
+#include "base/base_config.h"
+
 #if defined(COMPONENT_BUILD)
 #if defined(WIN32)
 #if defined(GFX_2D_RENDER_DEVICE_IMPLEMENTATION)

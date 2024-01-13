@@ -1,5 +1,9 @@
+cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+
 PROJECT(sqlite3)
-cmake_minimum_required(VERSION 2.8)
+
+set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
 
 include(GNUInstallDirs)
 include(ExternalProject)

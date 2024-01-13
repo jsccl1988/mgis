@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 #if defined(OS_WIN)
 #include <winsock2.h>

@@ -8,7 +8,7 @@
 
 #include "base/base_config.h"
 #include "base/base_export.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 namespace base {
 

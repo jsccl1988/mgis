@@ -1,3 +1,5 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
 
 #include "gfx/2d/render_device_gdi/render_device_gdi.h"
 
@@ -10,26 +12,6 @@
 
 namespace gfx2d {
 const float kDelay = 0.25;
-
-int CreateRenderDevice(HINSTANCE instance, HRENDERDEVICE &render_device) {
-  if (!render_device) {
-    render_device = new RenderDeviceGDI(instance);
-    return ERR_NONE;
-  }
-
-  return ERR_FAILURE;
-}
-
-int DestroyRenderDevice(HRENDERDEVICE &render_device) {
-  if (!render_device) {
-    return ERR_FAILURE;
-  }
-
-  SAFE_DELETE(render_device);
-
-  return ERR_NONE;
-}
-
 RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
     : RenderDevice(instance),
       font_(NULL),
@@ -116,7 +98,7 @@ int RenderDeviceGDI::Resize(DRect rect) {
   zoomin_viewport_ = viewport_;
   zoomout_viewport_ = viewport_;
 
-  float xblc, yblc;
+  float xblc{0.f}, yblc{0.f};
   xblc = viewport_.width / windowport_.width;
   yblc = viewport_.height / windowport_.height;
 
@@ -787,6 +769,10 @@ int RenderDeviceGDI::DrawPolygon(const OGRPolygon *polygon) {
   int all_point_size = 0;
 
   const auto *exterior_ring = polygon->getExteriorRing();
+  if (!exterior_ring) {
+    return ERR_INVALID_PARAM;
+  }
+
   int exterior_point_size = exterior_ring->getNumPoints();
   if (exterior_point_size < 2) {
     return ERR_INVALID_PARAM;

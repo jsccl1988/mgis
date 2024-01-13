@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #ifndef CONTENT_COMMON_ENVIRONMENT_H
 #define CONTENT_COMMON_ENVIRONMENT_H
 

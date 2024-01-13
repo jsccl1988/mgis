@@ -1,3 +1,7 @@
+
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #ifndef GFX_2D_RENDERER_RENDER_DEVICE_H
 #define GFX_2D_RENDERER_RENDER_DEVICE_H
 
@@ -122,23 +126,17 @@ class RenderDevice {
 
   LPoint current_dop_;
 };
+}  // namespace gfx2d
 
-using HRENDERDEVICE = RenderDevice *;
-
-#ifdef __cplusplus
 extern "C" {
-#endif
+using H2DRENDERDEVICE = gfx2d::RenderDevice *;
 int GFX_2D_RENDERER_EXPORT CreateRenderDevice(HINSTANCE instance,
-                                              HRENDERDEVICE &render_device);
-int GFX_2D_RENDERER_EXPORT DestroyRenderDevice(HRENDERDEVICE &render_device);
+                                              H2DRENDERDEVICE &render_device);
+int GFX_2D_RENDERER_EXPORT DestroyRenderDevice(H2DRENDERDEVICE &render_device);
 
 using CreateRenderDeviceFn = HRESULT (*)(HINSTANCE instance,
-                                         HRENDERDEVICE &render_device);
-using DestroyRenderDeviceFn = HRESULT (*)(HRENDERDEVICE &render_device);
-
-#ifdef __cplusplus
+                                         H2DRENDERDEVICE &render_device);
+using DestroyRenderDeviceFn = HRESULT (*)(H2DRENDERDEVICE &render_device);
 }
-#endif
-}  // namespace gfx2d
 
 #endif  // GFX_2D_RENDERER_RENDER_DEVICE_H

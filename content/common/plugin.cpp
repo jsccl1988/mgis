@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #include "content/common/plugin.h"
 
 #include <filesystem>
@@ -6,7 +9,7 @@
 #include "base/logging.h"
 
 namespace content {
-Plugin::Plugin(const char* name, const char* path)
+Plugin::Plugin(const base::NameChar* name, const base::PathChar* path)
     : DynamicLibrary(name, path),
       get_version_(nullptr),
       start_(nullptr),
@@ -46,7 +49,7 @@ PluginManager* PluginManager::GetSingletonPtr(void) {
 
 void PluginManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
 
-void PluginManager::LoadAllPlugin(const char* dir) {
+void PluginManager::LoadAllPlugin(const base::PathChar* dir) {
   // using fs = std::filesystem;
   // // get all plugins in file
   // for (auto dir_iter : fs::directory_iterator(dir)) {
@@ -67,11 +70,12 @@ void PluginManager::UnLoadAllPlugin() {
   plugins_.clear();
 }
 
-Plugin* PluginManager::LoadPlugin(const char* name, const char* path) {
+Plugin* PluginManager::LoadPlugin(const base::NameChar* name,
+                                  const base::PathChar* path) {
   Plugin* plugin = nullptr;
   Plugins::iterator i = plugins_.begin();
   while (i != plugins_.end()) {
-    if (strcmp((*i)->GetName(), name) == 0) {
+    if (wcscmp((*i)->GetName(), name) == 0) {
       plugin = *i;
       return plugin;
     }
@@ -88,18 +92,18 @@ Plugin* PluginManager::LoadPlugin(const char* name, const char* path) {
   return plugin;
 }
 
-void PluginManager::UnloadPlugin(const char* name) {
+void PluginManager::UnloadPlugin(const base::NameChar* name) {
   Plugin* plugin = nullptr;
 
   Plugins::iterator i = plugins_.begin();
   while (i != plugins_.end()) {
-    if (strcmp((*i)->GetName(), name) == 0) {
-        plugin = *i;
-        plugin->Unload();
-        SAFE_DELETE(plugin);
-        plugins_.erase(i);
-        break;
-      }
+    if (wcscmp((*i)->GetName(), name) == 0) {
+      plugin = *i;
+      plugin->Unload();
+      SAFE_DELETE(plugin);
+      plugins_.erase(i);
+      break;
+    }
     ++i;
   }
 }

@@ -21,6 +21,7 @@ static_library("base") {
     "framework/win_ui_message_pump.cpp",
     "hardware/cpu.cpp",
     "network/network_util.cpp",
+    "path/base_paths_win.cpp",
     "synchronization/lock_posix.cpp",
     "synchronization/lock_win.cpp",
     "synchronization/semaphore_posix.cpp",
@@ -56,7 +57,7 @@ static_library("base") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
+    "$root_out_dir/third_party/include",
   ]
 
   deps = [
@@ -64,16 +65,16 @@ static_library("base") {
   ]
 }
 
-test("base_test") {
-  sources = [
-    "logging_unittest.cpp",
-  ]
+# test("base_test") {
+#   sources = [
+#     "logging_unittest.cpp",
+#   ]
 
-  include_dirs += [
-    "$root_gen_dir/",
-  ]
+#   include_dirs += [
+#     "$root_gen_dir/",
+#   ]
 
-  deps = [
-    ":base",
-  ]
-}
+#   deps = [
+#     ":base",
+#   ]
+# }

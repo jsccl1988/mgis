@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #ifndef GEOMETRY_GEOMETRY_H
 #define GEOMETRY_GEOMETRY_H
 

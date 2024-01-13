@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "base_types.h"
+#include "basictypes.h"
 
 // check the pointer is null and return null
 #define PTR_NULL(p)             \

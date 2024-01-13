@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2023 The Mogu Authors.
 // All rights reserved.
 
-#include "string_util.h"
+#include "base/util/string_util.h"
 
 #include <assert.h> /* for assert */
 #include <ctype.h>

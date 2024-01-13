@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "base/base_export.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

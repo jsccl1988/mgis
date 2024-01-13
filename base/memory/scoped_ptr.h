@@ -90,7 +90,7 @@
 #include <algorithm>  // For std::swap().
 #include <iosfwd>
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/compiler_specific.h"
 #include "base/move.h"
 #include "base/memory/ref_counted.h"

@@ -5,11 +5,11 @@
 
 #include <map>
 
+#include "base/path/base_paths.h"
 #include "content/public/map_box/map_box.h"
 #include "content/public/map_content.h"
-#include "gui/app/main_runner.h"
-#include "gui/base/path/base_paths.h"
 #include "gui/content_impl/map_content_client_impl.h"
+#include "gui/main_runner.h"
 
 #define AUTO_GENERATE_DUMP
 

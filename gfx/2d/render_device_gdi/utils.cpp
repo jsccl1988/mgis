@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #include "gfx/2d/render_device_gdi/utils.h"
 
 #include <wingdi.h>

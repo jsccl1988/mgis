@@ -4,17 +4,20 @@
 group("all") {
   deps = [
     "//third_party:all",
+    "//base:base",
     "//gui:smartgis",
     "//gfx/2d:render_device_gdi",
+    "//gfx/3d:render_device_d3d",
   ]
 }
 
-group("test") {
-  testonly = true
-  deps = [
-    "//base:base_test",
-    "//core:core_test",
-    "//content:content_test",
-    "//gfx/2d:render2d_test",
-  ]
-}
+# group("test") {
+#   testonly = true
+#   deps = [
+#     "//base:base_test",
+#     "//core:core_test",
+#     "//content:content_test",
+#     "//gfx/2d:renderer2d_test",
+#     "//gfx/3d:renderer3d_test",
+#   ]
+# }

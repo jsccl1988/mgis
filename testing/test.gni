@@ -13,32 +13,35 @@ template("test") {
 
     include_dirs += [
       "$root_gen_dir/",
-      "$root_out_dir/glog/include",
-      "$root_out_dir/gbenchmark/include",
-      "$root_out_dir/gtest/include",
+      "$root_out_dir/third_party/include",
     ]
 
     if (is_win) {
+      postfix = ""
+      if (is_debug) {
+        postfix = "d"
+      }
+
       libs += [
-        "$root_out_dir/glog/lib/glog.lib",
-        "$root_out_dir/gbenchmark/lib/benchmark.lib",
-        "$root_out_dir/gbenchmark/lib/benchmark_main.lib",
-        "$root_out_dir/gtest/lib/gmock.lib",
-        "$root_out_dir/gtest/lib/gmock_main.lib",
-        "$root_out_dir/gtest/lib/gtest.lib",
-        "$root_out_dir/gtest/lib/gtest_main.lib",
+        "$root_out_dir/third_party/lib/glog$postfix.lib",
+        "$root_out_dir/third_party/lib/benchmark.lib",
+        "$root_out_dir/third_party/lib/benchmark_main.lib",
+        "$root_out_dir/third_party/lib/gmock$postfix.lib",
+        "$root_out_dir/third_party/lib/gmock_main$postfix.lib",
+        "$root_out_dir/third_party/lib/gtest$postfix.lib",
+        "$root_out_dir/third_party/lib/gtest_main$postfix.lib",
       ]
     } else {
       libs += [
         "/usr/lib/x86_64-linux-gnu/libgflags.so",
         "/usr/lib/x86_64-linux-gnu/libunwind.so",
-        "$root_out_dir/glog/lib/libglog.a",
-        "$root_out_dir/gbenchmark/lib/libbenchmark.a",
-        "$root_out_dir/gbenchmark/lib/libbenchmark_main.a",
-        "$root_out_dir/gtest/lib/libgmock.a",
-        "$root_out_dir/gtest/lib/libgmock_main.a",
-        "$root_out_dir/gtest/lib/libgtest.a",
-        "$root_out_dir/gtest/lib/libgtest_main.a",
+        "$root_out_dir/third_party/lib/libglog.a",
+        "$root_out_dir/third_party/lib/libbenchmark.a",
+        "$root_out_dir/third_party/lib/libbenchmark_main.a",
+        "$root_out_dir/third_party/lib/libgmock.a",
+        "$root_out_dir/third_party/lib/libgmock_main.a",
+        "$root_out_dir/third_party/lib/libgtest.a",
+        "$root_out_dir/third_party/lib/libgtest_main.a",
       ]
 
       ldflags = [

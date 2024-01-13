@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #ifndef GFX_2D_RENDER_DEVICE_UTILS_H
 #define GFX_2D_RENDER_DEVICE_UTILS_H
 

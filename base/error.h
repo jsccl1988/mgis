@@ -8,7 +8,7 @@
 #include <string>
 
 #include "base/base_export.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 #define BASE(n) 5000 + n
 

@@ -6,15 +6,14 @@
 #include <map>
 
 #include "base/logging.h"
+#include "base/path/base_paths.h"
 #include "base/util/string_util.h"
-
 #include "content/public/map_box/map_box.h"
 #include "content/public/map_content.h"
 #include "gui/base/command_line.h"
-#include "gui/base/path/base_paths.h"
 
 namespace gui {
-static const string16 kMapContentDLL = L"map_content.dll";
+static const base::PathString kMapContentDLL = L"map_content.dll";
 
 MapContentFactory::MapContentFactory() {}
 MapContentFactory::~MapContentFactory() {}
@@ -27,9 +26,9 @@ bool MapContentFactory::CreateMapContent(content::MapContent** map_content) {
   CommandLine command_line;
   command_line.ParseFromString(::GetCommandLineW());
 
-  string16 path = command_line.GetSwitchValue(CommandLine::kInstall);
+  base::PathString path = command_line.GetSwitchValue(CommandLine::kInstall);
   if (path.empty()) {
-    PathProvider(DIR_EXE, &path);
+    base::PathProvider(base::DIR_EXE, &path);
   }
 
   path += L"\\wrs\\";
@@ -46,7 +45,8 @@ bool MapContentFactory::CreateMapContent(content::MapContent** map_content) {
   }
 
   if (!hInst) {
-    LOG(ERROR) << "LoadLibrary,Last Error " << ::GetLastError() << base::UTF16ToUTF8(path);
+    LOG(ERROR) << "LoadLibrary,Last Error " << ::GetLastError()
+               << base::UTF16ToUTF8(path);
     return false;
   }
 

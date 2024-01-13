@@ -1,0 +1,80 @@
+# Copyright (c) 2023 The Mogu Authors.
+# All rights reserved.
+
+import("//testing/test.gni")
+
+static_library("renderer3d") {
+  defines = [
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "renderer/renderer.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/third_party/include",
+  ]
+
+  libs = [
+  ]
+
+  deps = [
+    "//base:base",
+  ]
+}
+
+shared_library("render_device_d3d") {
+  defines = [
+    "NOMINMAX",
+    "COMPONENT_BUILD",
+    "GFX_3D_RENDER_DEVICE_IMPLEMENTATION",
+  ]
+
+  sources = [
+    "render_device_d3d/export.cpp",
+    "render_device_d3d/render_device_d3d.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/third_party/include",
+  ]
+
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
+  libs = [
+    "$root_out_dir/third_party/lib/glog$postfix.lib",
+  ]
+
+  deps = [
+    "//base:base",
+    ":renderer3d",
+  ]
+}
+
+# test("renderer3d_test") {
+#   defines = [
+#     "NOMINMAX",
+#   ]
+
+#   sources = [
+#     "render3d_unittest.cpp",
+#   ]
+
+#   include_dirs += [
+#     "$root_gen_dir/",
+#     "$root_out_dir/third_party/include",
+#   ]
+
+#   libs = [
+#   ]
+
+#   deps = [
+#     ":renderer3d",
+#   ]
+# }

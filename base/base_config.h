@@ -3,12 +3,13 @@
 #ifndef BASE_BASE_CONFIG_H_
 #define BASE_BASE_CONFIG_H_
 
-#include "port.h"
+#include "base/port.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
 #include <windef.h>
 
+#include "build/build_config.h"
 #include "build/winsdk_config.h"
 #endif
 

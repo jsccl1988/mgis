@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #ifndef CONTENT_COMMON_PLUGIN_H
 #define CONTENT_COMMON_PLUGIN_H
 
@@ -14,7 +17,7 @@
 namespace content {
 class CONTENT_EXPORT Plugin : public DynamicLibrary {
  public:
-  Plugin(const char* name, const char* path);
+  Plugin(const base::NameChar* name, const base::PathChar* path);
   virtual ~Plugin(void);
 
  public:
@@ -46,14 +49,14 @@ class CONTENT_EXPORT PluginManager {
   static void DestoryInstance(void);
 
  public:
-  void LoadAllPlugin(const char* filePath);
+  void LoadAllPlugin(const base::PathChar* filePath);
   void UnLoadAllPlugin(void);
 
  protected:
   void StartAllPlugin(void);
   void StopAllPlugin(void);
-  Plugin* LoadPlugin(const char* name, const char* path);
-  void UnloadPlugin(const char* name);
+  Plugin* LoadPlugin(const base::NameChar* name, const base::PathChar* path);
+  void UnloadPlugin(const base::NameChar* name);
 
  protected:
   Plugins plugins_;

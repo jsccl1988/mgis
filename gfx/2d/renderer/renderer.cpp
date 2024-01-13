@@ -1,6 +1,10 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #include "gfx/2d/renderer/renderer.h"
 
 #include "base/logging.h"
+#include "base/util/string_util.h"
 
 namespace gfx2d {
 Renderer::Renderer(HINSTANCE instance) {
@@ -11,13 +15,13 @@ Renderer::Renderer(HINSTANCE instance) {
 
 Renderer::~Renderer(void) { ReleaseDevice(); }
 
-int Renderer::CreateDevice(const char *device_name) {
+int Renderer::CreateDevice(const base::NameChar *device_name) {
   device_name_ = device_name;
-  if (strcmp(device_name, "render_device_gdi") == 0) {
-    // dll_ = LoadLibrary("render_device_gdi.dll");
+  if (device_name_ ==  L"render_device_gdi") {
+    dll_ = LoadLibrary(L"render_device_gdi.dll");
     if (!dll_) {
       std::string err = "   Loading ";
-      err += device_name_;
+      err += base::UTF16ToUTF8(device_name_);
       err += " error!";
       LOG(ERROR) << __FUNCTION__ << err;
       return ERR_FAILURE;
@@ -29,14 +33,16 @@ int Renderer::CreateDevice(const char *device_name) {
     create_render_device =
         (CreateRenderDeviceFn)GetProcAddress(dll_, "CreateRenderDevice");
 
-    if (nullptr == create_render_device) return ERR_FAILURE;
+    if (nullptr == create_render_device) {
+      return ERR_FAILURE;
+    }
 
     hr = create_render_device(dll_, device_);
 
     if (FAILED(hr)) {
       device_ = nullptr;
       std::string err = "   Loading ";
-      err += device_name_;
+      err += base::UTF16ToUTF8(device_name_);
       err += " error!";
       LOG(ERROR) << __FUNCTION__ << err;
       return ERR_FAILURE;
@@ -54,7 +60,7 @@ void Renderer::ReleaseDevice(void) {
         (DestroyRenderDeviceFn)GetProcAddress(dll_, "DestroyRenderDevice");
   } else {
     std::string err = "   Release ";
-    err += device_name_;
+    err += base::UTF16ToUTF8(device_name_);
     err += " error!";
     LOG(ERROR) << __FUNCTION__ << err;
   }

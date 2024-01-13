@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "base/base_export.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 // ----------------------------------------------------------------------------
 // IMPORTANT MESSAGE FROM YOUR SPONSOR

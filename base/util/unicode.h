@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 
 typedef char UTF8Char;
 #if defined(WCHAR_T_IS_UTF16)

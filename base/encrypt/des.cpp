@@ -3,7 +3,7 @@
 
 #include "des.h"
 
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/util/string_util.h"
 
 // permuted choice table (PC1)

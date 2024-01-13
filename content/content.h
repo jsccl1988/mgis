@@ -1,3 +1,7 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
+
 #ifndef CONTENT_CONTENT_H
 #define CONTENT_CONTENT_H
 
@@ -13,7 +17,7 @@
 #include <vector>
 
 #include "base/base_config.h"
-#include "base/base_types.h"
+#include "base/basictypes.h"
 #include "base/error.h"
 #include "base/macros.h"
 #include "base/port.h"

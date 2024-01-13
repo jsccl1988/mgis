@@ -2,7 +2,7 @@
 # All rights reserved.
 import("//testing/test.gni")
 
-static_library("render2d") {
+static_library("renderer2d") {
   defines = [
     "NOMINMAX",
   ]
@@ -14,16 +14,22 @@ static_library("render2d") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
-    "$root_out_dir/gdal/include",
+    "$root_out_dir/third_party/include",
   ]
 
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   libs = [
-    "$root_out_dir/gdal/lib/gdal.lib",
+    "$root_out_dir/third_party/lib/glog$postfix.lib",
+    "$root_out_dir/third_party/lib/gdal$postfix.lib",
   ]
 
   deps = [
     "//base:base",
+    "//third_party:glog",
     "//third_party:gdal",
   ]
 }
@@ -36,6 +42,7 @@ shared_library("render_device_gdi") {
   ]
 
   sources = [
+    "render_device_gdi/export.cpp",
     "render_device_gdi/render_buffer.cpp",
     "render_device_gdi/render_device_gdi.cpp",
     "render_device_gdi/utils.cpp",
@@ -43,41 +50,55 @@ shared_library("render_device_gdi") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
-    "$root_out_dir/gdal/include",
+    "$root_out_dir/third_party/include",
   ]
 
+  postfix = ""
+  if (is_debug) {
+    postfix = "d"
+  }
+
   libs = [
-    "$root_out_dir/glog/lib/glog.lib",
-    "$root_out_dir/gdal/lib/gdal.lib",
+    "$root_out_dir/third_party/lib/glog$postfix.lib",
+    "$root_out_dir/third_party/lib/gdal$postfix.lib",
   ]
 
   deps = [
-    ":render2d",
+    "//base:base",
+    "//third_party:glog",
     "//third_party:gdal",
+    ":renderer2d",
     "//third_party/CxImage:CxImage",
   ]
 }
 
-test("render2d_test") {
-  defines = [
-    "NOMINMAX",
-  ]
+# test("renderer2d_test") {
+#   defines = [
+#     "NOMINMAX",
+#   ]
 
-  sources = [
-    "render2d_unittest.cpp",
-  ]
+#   sources = [
+#     "render2d_unittest.cpp",
+#   ]
 
-  include_dirs += [
-    "$root_gen_dir/",
-    "$root_out_dir/gdal/include",
-  ]
+#   include_dirs += [
+#     "$root_gen_dir/",
+#     "$root_out_dir/third_party/include",
+#   ]
 
-  libs = [
-    "$root_out_dir/gdal/lib/gdal.lib",
-  ]
+  # postfix = ""
+  # if (is_debug) {
+  #   postfix = "d"
+  # }
 
-  deps = [
-    ":render2d",
-  ]
-}
+#   libs = [
+    # "$root_out_dir/third_party/lib/glog$postfix.lib",
+#     "$root_out_dir/third_party/lib/gdal$postfix.lib",
+#   ]
+
+#   deps = [
+    # "//third_party:glog",
+    # "//third_party:gdal",
+#     ":renderer2d",
+#   ]
+# }

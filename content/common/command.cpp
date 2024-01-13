@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #include "content/common/command.h"
 
 #include <algorithm>

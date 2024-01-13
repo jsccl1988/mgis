@@ -1,5 +1,6 @@
 /out_*
 /out
+/vendor
 .ide.*
 .vscode
 .vs

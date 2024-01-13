@@ -1,3 +1,6 @@
+// Copyright (c) 2024 The mgis Authors.
+// All rights reserved.
+
 #include "content/common/message_listener.h"
 
 #include <algorithm>
