@@ -8,6 +8,7 @@ executable("smartgis") {
   ]
 
   sources = [
+    "app/window2d.cpp",
     "base/thread/message_loop.cpp",
     "base/thread/thread_manager.cpp",
     "base/thread/thread.cpp",
