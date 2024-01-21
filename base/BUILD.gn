@@ -65,16 +65,16 @@ static_library("base") {
   ]
 }
 
-# test("base_test") {
-#   sources = [
-#     "logging_unittest.cpp",
-#   ]
+test("base_test") {
+  sources = [
+    "logging_unittest.cpp",
+  ]
 
-#   include_dirs += [
-#     "$root_gen_dir/",
-#   ]
+  include_dirs += [
+    "$root_gen_dir/",
+  ]
 
-#   deps = [
-#     ":base",
-#   ]
-# }
+  deps = [
+    ":base",
+  ]
+}

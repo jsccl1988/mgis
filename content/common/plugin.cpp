@@ -10,7 +10,7 @@
 
 namespace content {
 Plugin::Plugin(const base::NameChar* name, const base::PathChar* path)
-    : DynamicLibrary(name, path),
+    : Library(name, path),
       get_version_(nullptr),
       start_(nullptr),
       stop_(nullptr) {}
@@ -18,7 +18,7 @@ Plugin::Plugin(const base::NameChar* name, const base::PathChar* path)
 Plugin::~Plugin(void) {}
 
 bool Plugin::Load() {
-  if (!DynamicLibrary::Load()) {
+  if (!Library::Load()) {
     return false;
   }
 
@@ -35,7 +35,7 @@ bool Plugin::Load() {
   return true;
 }
 
-bool Plugin::Unload() { return DynamicLibrary::Unload(); }
+bool Plugin::Unload() { return Library::Unload(); }
 
 PluginManager* PluginManager::singleton_ = nullptr;
 PluginManager::PluginManager(void) {}

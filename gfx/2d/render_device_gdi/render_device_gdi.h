@@ -45,6 +45,7 @@ class RenderDeviceGDI : public RenderDevice {
   int EndRender(eRenderBuffer render_buffer);
   int Render(void);
 
+  int RenderDebug();
   int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN);
   int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN);
   int RenderGeometry(const OGRGeometry *geomtry, int op = R2_COPYPEN);
@@ -115,6 +116,15 @@ class RenderDeviceGDI : public RenderDevice {
   int op_;
 
   OGRLayer *layer_;
+
+  // For Debug
+  std::string polygon_wkt_{
+      "POLYGON((50 50, 2350 50, 2350 2350, 50 2350, 50 50))"};
+  std::string text_anchor_wkt_{"POINT(1000 1000)"};
+
+  OGRPolygon polygon_;
+  OGRPoint text_anchor_;
+  std::string text_{"smart gis"};
 };
 }  // namespace gfx2d
 

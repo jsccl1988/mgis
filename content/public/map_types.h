@@ -5,23 +5,11 @@
 #define CONTENT_PUBLIC_MAP_TYPES_H
 
 #include "base/basictypes.h"
+#include "gfx/2d/renderer/common.h"
 
 namespace content {
-struct Point {
-  int32_t x;
-  int32_t y;
-};
-
-struct Rect {
-  int32_t x;
-  int32_t y;
-  int32_t width;
-  int32_t height;
-};
-
-struct Size {
-  int32_t width;
-  int32_t height;
-};
+using Point = gfx2d::DPoint;
+using Rect = gfx2d::DRect;
+using Size = gfx2d::DSize;
 }  // namespace content
 #endif  // CONTENT_PUBLIC_MAP_TYPES_H

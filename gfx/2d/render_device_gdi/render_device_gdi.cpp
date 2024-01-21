@@ -27,7 +27,8 @@ RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
       last_redraw_stamp_(0),
       is_redraw_(false),
       use_current_style_(false),
-      is_lock_style_(false) {
+      is_lock_style_(false),
+      layer_(nullptr) {
   rhi_api_ = RHI2D_GDI;
   current_dop_.x = 0;
   current_dop_.y = 0;
@@ -46,6 +47,19 @@ int RenderDeviceGDI::Init(HWND hwnd) {
   render_buffer_.SetHWND(hwnd_);
   composit_render_buffer_.SetHWND(hwnd_);
   LOG(INFO) << __FUNCTION__ << "Init Gdi RenderDevice ok!";
+
+  // For Debug
+  {
+    {
+      auto *buffer = polygon_wkt_.data();
+      polygon_.importFromWkt(&buffer);
+    }
+
+    {
+      auto *buffer = text_anchor_wkt_.data();
+      text_anchor_.importFromWkt(&buffer);
+    }
+  }
 
   return ERR_NONE;
 }
@@ -224,9 +238,9 @@ int RenderDeviceGDI::Refresh() {
 
   ::ReleaseDC(hwnd_, dc);
 
-  RECT rt;
-  GetClientRect(hwnd_, &rt);
-  InvalidateRect(hwnd_, &rt, true);
+  RECT client_rect;
+  ::GetClientRect(hwnd_, &client_rect);
+  ::InvalidateRect(hwnd_, &client_rect, true);
 
   return ERR_NONE;
 }
@@ -255,33 +269,36 @@ int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
 
 int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
                                bool realtime) {
+  DPoint device_point;
+  LPToDP(original_point.x, original_point.y, device_point.x, device_point.y);
+
   if (scale > 1.) {
     // for zoomin
     zoomin_viewport_.height /= scale;
     zoomin_viewport_.width /= scale;
     zoomin_viewport_.x =
-        original_point.x - (original_point.x - zoomin_viewport_.x) / scale;
+        device_point.x - (device_point.x - zoomin_viewport_.x) / scale;
     zoomin_viewport_.y =
-        original_point.y - (original_point.y - zoomin_viewport_.y) / scale;
+        device_point.y - (device_point.y - zoomin_viewport_.y) / scale;
   } else {
     // for zoomout
     zoomout_viewport_.height *= scale;
     zoomout_viewport_.width *= scale;
     zoomout_viewport_.x =
-        original_point.x + (zoomout_viewport_.x - original_point.x) * scale;
+        device_point.x + (zoomout_viewport_.x - device_point.x) * scale;
     zoomout_viewport_.y =
-        original_point.y + (zoomout_viewport_.y - original_point.y) * scale;
+        device_point.y + (zoomout_viewport_.y - device_point.y) * scale;
   }
 
   float x1, y1, x2, y2;
-  DPToLP(original_point.x, original_point.y, x1, y1);
+  DPToLP(device_point.x, device_point.y, x1, y1);
 
   windowport_.height *= scale;
   windowport_.width *= scale;
 
   blc_ /= scale;
 
-  DPToLP(original_point.x, original_point.y, x2, y2);
+  DPToLP(device_point.x, device_point.y, x2, y2);
 
   windowport_.x -= x2 - x1;
   windowport_.y -= y2 - y1;
@@ -336,12 +353,15 @@ int RenderDeviceGDI::Timer() {
                                     viewport_.height,
                                     (COLORREF)::GetSysColor(COLOR_WINDOW));
 
-      HDC hPaintBufferDC = composit_render_buffer_.PrepareDC();
+      HDC paint_buffer_dc = composit_render_buffer_.PrepareDC();
       BeginRender(RB_COMPOSIT);
 
       if (layer_ != NULL) {
         return RenderLayer(layer_, op_);
       }
+
+      // For Debug
+      { RenderDebug(); }
 
       EndRender(RB_COMPOSIT);
 
@@ -350,9 +370,9 @@ int RenderDeviceGDI::Timer() {
     }
   }
 
-  RECT rect;
-  GetClientRect(hwnd_, &rect);
-  InvalidateRect(hwnd_, &rect, true);
+  RECT client_rect;
+  ::GetClientRect(hwnd_, &client_rect);
+  ::InvalidateRect(hwnd_, &client_rect, true);
 
   return ERR_NONE;
 }
@@ -461,15 +481,14 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
         font_ = NULL;
       }
 
-      // font_ =
-      //     ::CreateFont(anno.height * blc_, anno.width * blc_,
-      //     anno.escapement,
-      //                  anno.orientation, anno.weight, anno.italic,
-      //                  anno.underline, anno.strikeout, anno.char_set,
-      //                  anno.out_precision, anno.clip_precision, anno.quality,
-      //                  anno.pitch_and_family, anno.face_name);
+      font_ =
+          ::CreateFont(anno.height * blc_, anno.width * blc_, anno.escapement,
+                       anno.orientation, anno.weight, anno.italic,
+                       anno.underline, anno.strikeout, anno.char_set,
+                       anno.out_precision, anno.clip_precision, anno.quality,
+                       anno.pitch_and_family, anno.face_name.c_str());
 
-      // old_font_ = (HFONT)::SelectObject(current_dc_, font_);
+      old_font_ = (HFONT)::SelectObject(current_dc_, font_);
       ::SetBkMode(current_dc_, TRANSPARENT);
       ::SetTextColor(current_dc_, anno.color);
     }
@@ -511,6 +530,13 @@ int RenderDeviceGDI::Render(void) {
 
   render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
                       viewport_.height, viewport_.x, viewport_.y);
+
+  return ERR_NONE;
+}
+
+int RenderDeviceGDI::RenderDebug() {
+  DrawPolygon(&polygon_);
+  DrawAnno(&text_anchor_, text_.c_str(), 0.f, 20, 20, 80);
 
   return ERR_NONE;
 }

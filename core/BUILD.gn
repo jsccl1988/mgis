@@ -18,16 +18,16 @@ static_library("core") {
     "$root_out_dir/third_party/include",
   ]
 
-  postfix = ""
+  suffix = ""
   if (is_debug) {
-    postfix = "d"
+    suffix = "d"
   }
 
   libs = [
     "$root_out_dir/third_party/lib/sqlite3.lib",
     "$root_out_dir/third_party/lib/SQLiteCpp.lib",
     "$root_out_dir/third_party/lib/geos.lib",
-    "$root_out_dir/third_party/lib/gdal$postfix.lib",
+    "$root_out_dir/third_party/lib/gdal$suffix.lib",
     "$root_out_dir/third_party/lib/spatialindex-64.lib",
     "$root_out_dir/third_party/lib/spatialite_i.lib",
     "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
@@ -38,10 +38,16 @@ static_library("core") {
   ]
 }
 
-executable("gdal_ogrsf") {
+test("core_test") {
+  defines = [
+    "NOMINMAX",
+    "USE_UNSTABLE_GEOS_CPP_API",
+  ]
+
   sources = [
-    "sdb/ogr/commonutils.cpp",
-    "sdb/ogr/test_ogrsf.cpp",
+    "core_unittest.cpp",
+    "geometry/geometry_unittest.cpp",
+    "sdb/sdb_unittest.cpp",
   ]
 
   include_dirs += [
@@ -49,79 +55,25 @@ executable("gdal_ogrsf") {
     "$root_out_dir/third_party/include",
   ]
 
-  postfix = ""
+  proj_suffix = ""
+  gdal_suffix = ""
   if (is_debug) {
-    postfix = "d"
+    proj_suffix = "_d"
+    gdal_suffix = "d"
   }
 
   libs = [
-    "$root_out_dir/third_party/lib/gdal$postfix.lib",
+    "$root_out_dir/third_party/lib/sqlite3.lib",
+    "$root_out_dir/third_party/lib/SQLiteCpp.lib",
+    "$root_out_dir/third_party/lib/geos.lib",
+    "$root_out_dir/third_party/lib/proj$proj_suffix.lib",
+    "$root_out_dir/third_party/lib/gdal$gdal_suffix.lib",
+    "$root_out_dir/third_party/lib/spatialindex-64.lib",
+    "$root_out_dir/third_party/lib/spatialite_i.lib",
+    "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
   ]
 
   deps = [
     ":core",
   ]
 }
-
-executable("gdal_reprojmulti") {
-  sources = [
-    "sdb/ogr/test_reprojmulti.cpp",
-  ]
-
-  include_dirs += [
-    "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
-
-  postfix = ""
-  if (is_debug) {
-    postfix = "d"
-  }
-
-  libs = [
-    "$root_out_dir/third_party/lib/gdal.lib",
-  ]
-
-
-  deps = [
-    ":core",
-  ]
-}
-
-# test("core_test") {
-#   defines = [
-#     "NOMINMAX",
-#     "USE_UNSTABLE_GEOS_CPP_API",
-#   ]
-
-#   sources = [
-#     "core_unittest.cpp",
-#     "geometry/geometry_unittest.cpp",
-#     "sdb/sdb_unittest.cpp",
-#   ]
-
-#   include_dirs += [
-#     "$root_gen_dir/",
-#     "$root_out_dir/third_party/include",
-#   ]
-
-  # postfix = ""
-  # if (is_debug) {
-  #   postfix = "d"
-  # }
-
-#   libs = [
-#     "$root_out_dir/third_party/lib/sqlite3.lib",
-#     "$root_out_dir/third_party/lib/SQLiteCpp.lib",
-#     "$root_out_dir/third_party/lib/geos.lib",
-#     "$root_out_dir/third_party/lib/proj.lib",
-#     "$root_out_dir/third_party/lib/gdal.lib",
-#     "$root_out_dir/third_party/lib/spatialindex-64.lib",
-#     "$root_out_dir/third_party/lib/spatialite_i.lib",
-#     "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
-#   ]
-
-#   deps = [
-#     ":core",
-#   ]
-# }

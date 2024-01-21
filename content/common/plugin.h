@@ -11,11 +11,11 @@
 #include "base/synchronization/lock.h"
 #include "content/content.h"
 #include "content/content_export.h"
-#include "content/common/dynamic_library.h"
+#include "content/common/library.h"
 
 
 namespace content {
-class CONTENT_EXPORT Plugin : public DynamicLibrary {
+class CONTENT_EXPORT Plugin : public Library {
  public:
   Plugin(const base::NameChar* name, const base::PathChar* path);
   virtual ~Plugin(void);

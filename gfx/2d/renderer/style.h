@@ -14,7 +14,7 @@
 #include "gfx/2d/renderer/render_export.h"
 
 namespace gfx2d {
-enum GFX_2D_RENDERER_EXPORT StType {
+enum GFX_2D_RENDERER_EXPORT eStyleType {
   ST_PenDesc = 0x0001,
   ST_BrushDesc = 0x0002,
   ST_AnnoDesc = 0x0004,
@@ -60,7 +60,7 @@ struct GFX_2D_RENDERER_EXPORT AnnotationDesc {
   uint8_t clip_precision;
   uint8_t quality;
   uint8_t pitch_and_family;
-  std::string face_name;
+  std::wstring face_name;
 
   long color;
   float angle;
@@ -80,7 +80,7 @@ struct GFX_2D_RENDERER_EXPORT AnnotationDesc {
     clip_precision = CLIP_CHARACTER_PRECIS;
     quality = DEFAULT_QUALITY;
     pitch_and_family = FIXED_PITCH;
-    face_name = "Times New Roman";
+    face_name = L"Times New Roman";
 
     color = RGB(0, 0, 0);
     angle = 0.f;
@@ -88,7 +88,7 @@ struct GFX_2D_RENDERER_EXPORT AnnotationDesc {
   }
 };
 
-struct SymbolDesc {
+struct GFX_2D_RENDERER_EXPORT SymbolDesc {
   uint32_t id;
   float width;
   float height;

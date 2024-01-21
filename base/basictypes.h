@@ -1,12 +1,13 @@
 // Copyright (c) 2023 The Mogu Authors.
 // All rights reserved.
 
-#ifndef BASE_BASE_TYPES_H
-#define BASE_BASE_TYPES_H
+#ifndef BASE_BASICTYPES_H
+#define BASE_BASICTYPES_H
 
 #include <sys/types.h>
 
 #include <string>
+
 #include "base/base_config.h"
 
 #ifndef COMPILER_MSVC
@@ -359,4 +360,13 @@ namespace base {
 enum LinkerInitialized { LINKER_INITIALIZED };
 }  // namespace base
 
-#endif  // BASE_BASE_TYPES_H
+namespace base {
+#if defined(OS_POSIX)
+typedef std::string NameString;
+#elif defined(OS_WIN)
+typedef std::wstring NameString;
+#endif
+
+typedef NameString::value_type NameChar;
+}  // namespace base
+#endif  // BASE_BASICTYPES_H

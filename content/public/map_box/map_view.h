@@ -15,31 +15,15 @@ class MapView : public base::RefCountedThreadSafe<MapView>,
                 public base::SupportsWeakPtr<MapView> {
  public:
   struct CreateParams {
-    CreateParams() {}
-    CreateParams(const CreateParams& other) { this->operator=(other); }
-
-    CreateParams& operator=(const CreateParams& other) {
-      if (this == &other) return *this;
-
-      return *this;
-    }
+    HWND parent_hwnd{nullptr};
   };
 
-  struct Preferences {
-    Preferences() {}
-    Preferences(const Preferences& other) { this->operator=(other); }
-
-    Preferences& operator=(const Preferences& other) {
-      if (this == &other) return *this;
-      return *this;
-    }
-  };
+  struct Preferences {};
 
  public:
   // Property
   virtual void GetCreateParams(MapView::CreateParams* params) = 0;
   virtual void GetPreferences(MapView::Preferences* preferences) = 0;
-  virtual void GetViewID(uint32_t* id) = 0;
 
   // Create/Destroy
   virtual void Create(const MapView::CreateParams& params,

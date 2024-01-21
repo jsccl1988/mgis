@@ -42,13 +42,13 @@ shared_library("render_device_d3d") {
     "$root_out_dir/third_party/include",
   ]
 
-  postfix = ""
+  suffix = ""
   if (is_debug) {
-    postfix = "d"
+    suffix = "d"
   }
 
   libs = [
-    "$root_out_dir/third_party/lib/glog$postfix.lib",
+    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
   deps = [
@@ -57,24 +57,24 @@ shared_library("render_device_d3d") {
   ]
 }
 
-# test("renderer3d_test") {
-#   defines = [
-#     "NOMINMAX",
-#   ]
+test("renderer3d_test") {
+  defines = [
+    "NOMINMAX",
+  ]
 
-#   sources = [
-#     "render3d_unittest.cpp",
-#   ]
+  sources = [
+    "render3d_unittest.cpp",
+  ]
 
-#   include_dirs += [
-#     "$root_gen_dir/",
-#     "$root_out_dir/third_party/include",
-#   ]
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/third_party/include",
+  ]
 
-#   libs = [
-#   ]
+  libs = [
+  ]
 
-#   deps = [
-#     ":renderer3d",
-#   ]
-# }
+  deps = [
+    ":renderer3d",
+  ]
+}

@@ -8,7 +8,6 @@ executable("smartgis") {
   ]
 
   sources = [
-    "app/window2d.cpp",
     "base/thread/message_loop.cpp",
     "base/thread/thread_manager.cpp",
     "base/thread/thread.cpp",
@@ -29,18 +28,20 @@ executable("smartgis") {
     "//gui/third_party/wtl8.0/",
   ]
 
-  postfix = ""
+  suffix = ""
   if (is_debug) {
-    postfix = "d"
+    suffix = "d"
   }
 
   libs += [
     "atls.lib",
-    "$root_out_dir/third_party/lib/glog$postfix.lib",
+    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
   deps = [
     "//base:base",
+    "//core:core",
+    "//content:content",
     "//third_party:glog",
     "//gfx/2d:renderer2d",
     "//gfx/3d:renderer3d",

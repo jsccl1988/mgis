@@ -11,13 +11,14 @@
 
 #include <vector>
 
-#include "build/build_config.h"
 #include "base/base_config.h"
 #include "base/basictypes.h"
 #include "base/error.h"
 #include "base/macros.h"
+#include "build/build_config.h"
 #include "gfx/2d/renderer/render_export.h"
 #include "ogrsf_frmts.h"
+
 
 namespace gfx2d {
 enum RHI2D { RHI2D_GDI, RHI2D_SKIA };
@@ -29,22 +30,25 @@ struct RenderOptions {
 
 template <typename T>
 struct point_t {
-  T x;
-  T y;
+  T x = T();
+  T y = T();
+
+  point_t() {}
+  point_t(T _x, T _y) : x(_x), y(_y){}
 };
 
 template <typename T>
 struct rect_t {
-  T x;
-  T y;
-  T width;
-  T height;
+  T x = T();
+  T y = T();
+  T width = T();
+  T height = T();
 };
 
 template <typename T>
 struct size_t {
-  T width;
-  T height;
+  T width = T();
+  T height = T();
 };
 
 template <typename T1, typename T2>

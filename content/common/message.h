@@ -4,7 +4,14 @@
 #ifndef CONTENT_COMMON_MESSAGE_H
 #define CONTENT_COMMON_MESSAGE_H
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include "base/memory/singleton.h"
+#include "base/synchronization/lock.h"
 #include "content/content.h"
+#include "content/content_export.h"
 
 #define MESSAGE_INVALID (-1)  //无效消息
 
@@ -22,21 +29,21 @@
 
 namespace content {
 struct FuntionItem {
-  std::string name{"default"};
-  long message{0};
+  base::NameString name{L"default"};
+  long message_id{0};
 };
 
-enum FuntionItemRoute {
-  FIM_2DVIEW = 1 << 0,
-  FIM_3DVIEW = 1 << 1,
-  FIM_3DEXVIEW = 1 << 2,
-  FIM_MAPDOCCATALOG = 1 << 3,
-  FIM_2DMFTOOLBAR = 1 << 4,
-  FIM_3DMFTOOLBAR = 1 << 5,
-  FIM_2DMFMENU = 1 << 6,
-  FIM_3DMFMENU = 1 << 7,
-  FIM_AUXMODULEBOX = 1 << 8,
-  FIM_AUXMODULETREE = 1 << 9,
+enum FuntionItemGroup {
+  FIG_2DVIEW = 1 << 0,
+  FIG_3DVIEW = 1 << 1,
+  FIG_3DEXVIEW = 1 << 2,
+  FIG_MAPDOCCATALOG = 1 << 3,
+  FIG_2DMFTOOLBAR = 1 << 4,
+  FIG_3DMFTOOLBAR = 1 << 5,
+  FIG_2DMFMENU = 1 << 6,
+  FIG_3DMFMENU = 1 << 7,
+  FIG_AUXMODULEBOX = 1 << 8,
+  FIG_AUXMODULETREE = 1 << 9,
 };
 
 using FunctionItems = std::vector<FuntionItem>;
@@ -52,7 +59,136 @@ using AMBoxFunctionItems = FunctionItems;
 using AMTreeFunctionItems = FunctionItems;
 
 using Messages = std::vector<long>;
-using Message2Ptr = std::map<long, void *>;
-using Message2PtrPair = std::pair<long, void *>;
+using Message2Ptr = std::map<long, void*>;
+using Message2PtrPair = std::pair<long, void*>;
+
+class CONTENT_EXPORT MessageListener {
+ public:
+  struct Message {
+    long id{0};
+    HWND source_window{nullptr};
+    WPARAM wparam{NULL};
+    LPARAM lparam{NULL};
+    void* to_follow{nullptr};
+    bool modify{false};
+
+    operator LPARAM() { return LPARAM(this); }
+    operator WPARAM() { return WPARAM(this); }
+  };
+
+  MessageListener(void);
+  virtual ~MessageListener(void);
+
+ public:
+  virtual int Register(void);
+  virtual int RegisterMessage(void);
+
+  virtual int UnRegister(void);
+  virtual int UnRegisterMessage(void);
+
+  virtual int SetActive();
+
+  virtual int Notify(MessageListener::Message& message) = 0;
+
+ public:
+  const base::NameChar* GetName() const;
+  void SetName(const base::NameChar* name);
+
+  bool AppendFunctionItems(const base::NameChar* function, long message_id,
+                           long group = FIG_2DVIEW | FIG_3DVIEW);
+  FunctionItems GetFunctionItems(FuntionItemGroup group);
+
+  Messages GetMessages(void) { return messages_; }
+
+ protected:
+  bool AppendFunctionItems(const base::NameChar* function, long message_id,
+                           FunctionItems& FunctionItems);
+  bool AppendMessage(long message_id);
+
+ protected:
+  base::NameString name_;
+
+  View2DFunctionItems view2d_function_items_;
+  View3DFunctionItems view3d_function_items_;
+  View3DExFunctionItems view3dex_function_items_;
+  MapDocCatalogFunctionItems map_doc_catalog_function_items_;
+  ToolBar2DFunctionItems toolbar2d_function_items_;
+  ToolBar3DFunctionItems toolbar3d_function_items_;
+  Menu2DFunctionItems menu2d_function_items_;
+  Menu3DFunctionItems menu3d_function_items_;
+  AMBoxFunctionItems am_box_function_items_;
+  AMTreeFunctionItems am_tree_function_items_;
+  Messages messages_;
+};
+
+#define MESSAGE_LISTENER_BROADCAST ((MessageListener*)0xFFFF)
+#define MESSAGE_LISTENER_INVALID ((MessageListener*)0x0000)
+
+#define MESSAGE_KEY(message_id, hwnd) (MAKELONG(message_id, hwnd))
+#define MESSAGE_KEY_HWND(key) (HIWORD(key))
+#define MESSAGE_KEY_LMESSAGE(key) (LOWORD(key))
+
+using MessageListeners = std::vector<MessageListener*>;
+using Name2MessageListener = std::map<std::string, MessageListener>;
+
+class CONTENT_EXPORT MessageCenter {
+ public:
+  virtual ~MessageCenter(void);
+
+ public:
+  static MessageCenter* GetSingletonPtr(void);
+  static void DestoryInstance(void);
+
+ public:
+  long Notify(MessageListener* message_listener,
+              MessageListener::Message& message);
+
+  long RegisterListener(MessageListener* message_listener);
+  long RemoveListener(MessageListener* message_listener);
+  long RemoveAllListener(void);
+
+  void SetActiveListener(MessageListener* message_listener) {
+    current_message_listener_ = message_listener;
+  }
+  MessageListener* GetActiveListener(void) { return current_message_listener_; }
+  const MessageListener* GetActiveListener(void) const {
+    return current_message_listener_;
+  }
+
+  size_t GetListenerSize(void) const { return message_listeners_.size(); }
+  MessageListener* GetListener(int index);
+  const MessageListener* GetListener(int index) const;
+
+  long RegisterListenerMessage(MessageListener* message_listener);
+  long UnRegisterListenerMessage(MessageListener* message_listener);
+
+ protected:
+  MessageListeners message_listeners_;
+  MessageListener* current_message_listener_;
+  Message2Ptr message2message_listeners_;
+
+ private:
+  MessageCenter(void);
+  static MessageCenter* singleton_;
+};
+
+HMENU CONTENT_EXPORT CreateListenerMenu(MessageListener* message_listener,
+                                        FuntionItemGroup group);
+
+void CONTENT_EXPORT AppendListenerMenu(HMENU ownwer_menu,
+                                       MessageListener* message_listener,
+                                       FuntionItemGroup group,
+                                       bool insert_seperator);
+
+long CONTENT_EXPORT PostListenerMessage(MessageListener* message_listener,
+                                        MessageListener::Message& message);
 }  // namespace content
+
+#define POST_MESSAGE_LISTENER_MESSAGE(listener, message) \
+  {                                                    \
+    content::MessageCenter* listener_manager =         \
+        content::MessageCenter::GetSingletonPtr();     \
+    listener_manager->Notify(listener, message);         \
+  }
+
 #endif  // CONTENT_COMMON_MESSAGE_H

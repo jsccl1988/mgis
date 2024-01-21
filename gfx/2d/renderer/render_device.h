@@ -73,6 +73,8 @@ class RenderDevice {
   virtual int Render(void) = 0;
 
  public:
+  virtual int RenderDebug() = 0;
+
   virtual int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN) = 0;
   virtual int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN) = 0;
   virtual int RenderGeometry(const OGRGeometry *geomtry,

@@ -4,14 +4,12 @@
 #include "gui/main_runner.h"
 
 #include "base/path/base_paths.h"
-
-#include "gui/app/window2d.h"
+#include "content/control/map_box/map_view_impl.h"
 #include "gui/base/thread/message_loop.h"
 #include "gui/base/thread/thread_manager.h"
 #include "gui/content_impl/app/task_runner_impl.h"
 #include "gui/content_impl/map_content_factory.h"
 #include "gui/content_impl/map_content_manager.h"
-
 
 CAppModule _Module;
 
@@ -39,8 +37,11 @@ bool MainRunner::Init() {
         this, content, task_runner_->AsWeakPtr());
   }
 
-  window_.Create(NULL, CWindow::rcDefault, TEXT("SmartGIS"),
-                 WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+  content::MapView::CreateParams params;
+  content::MapView::Preferences preferences;
+  params.parent_hwnd = NULL;
+  map_view_ = reinterpret_cast<content::MapView*>(new content::MapViewImpl());
+  map_view_->Create(params, preferences);
 
   return true;
 }

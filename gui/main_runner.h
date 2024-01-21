@@ -9,8 +9,12 @@
 #include <memory>
 
 #include "content/public/app/task_runner.h"
-#include "gui/app/window2d.h"
+#include "content/public/map_box/map_view.h"
 #include "gui/base/thread/thread.h"
+
+
+// (TODO) will be removed
+#include "content/control/map_box/map_app.h"
 
 namespace gui {
 class MainRunner : public base::RefCountedThreadSafe<MainRunner>,
@@ -29,9 +33,9 @@ class MainRunner : public base::RefCountedThreadSafe<MainRunner>,
   bool DestroyThreads();
 
  protected:
-  Window2D window_;
-  CMessageLoop ui_message_loop_;
+  base::ScopedRefPtr<content::MapView> map_view_;
 
+  CMessageLoop ui_message_loop_;
   base::ScopedPtr<gui::Thread> worker_thread_;
   base::ScopedRefPtr<content::TaskRunner> task_runner_;
 

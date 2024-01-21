@@ -9,14 +9,25 @@ static_library("content") {
 
   sources = [
     "common/command.cpp",
-    "common/dynamic_library.cpp",
-    "common/message_listener.cpp",
+    "common/environment.cpp",
+    "common/library.cpp",
+    "common/message.cpp",
     "common/plugin.cpp",
+    "common/tool.cpp",
+    "control/map_box/map_window.cpp",
+    "control/tool_factory.cpp",
+    "control/tool/flash_tool.cpp",
+    # "control/tool/input_line_tool.cpp",
+    # "control/tool/input_point_tool.cpp",
+    # "control/tool/input_surface_tool.cpp",
+    "control/tool/navigate_tool.cpp",
+    # "control/tool/select_tool.cpp",
   ]
 
   include_dirs += [
     "$root_gen_dir/",
     "$root_out_dir/third_party/include",
+    "//content/control/third_party/wtl8.0/",
   ]
 
   libs = [
@@ -27,17 +38,17 @@ static_library("content") {
   ]
 }
 
-# test("content_test") {
-#   sources = [
-#     "content_unittest.cpp",
-#   ]
+test("content_test") {
+  sources = [
+    "content_unittest.cpp",
+  ]
 
-#   include_dirs += [
-#     "$root_gen_dir/",
-#     "$root_out_dir/third_party/include",
-#   ]
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/third_party/include",
+  ]
 
-#   deps = [
-#     ":content",
-#   ]
-# }
+  deps = [
+    ":content",
+  ]
+}

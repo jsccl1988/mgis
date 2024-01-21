@@ -31,7 +31,7 @@ bool MapContentFactory::CreateMapContent(content::MapContent** map_content) {
     base::PathProvider(base::DIR_EXE, &path);
   }
 
-  path += L"\\wrs\\";
+  path += L"\\map_content\\";
   path += kMapContentDLL;
 
   HINSTANCE hInst = NULL;

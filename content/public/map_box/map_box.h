@@ -13,16 +13,7 @@ namespace content {
 class MapBox : public base::RefCountedThreadSafe<MapBox>,
                public base::SupportsWeakPtr<MapBox> {
  public:
-  struct Preferences {
-    Preferences() {}
-    Preferences(const Preferences& other) { this->operator=(other); }
-
-    Preferences& operator=(const Preferences& other) {
-      if (this == &other) return *this;
-
-      return *this;
-    }
-  };
+  struct Preferences {};
 
  public:
   // Property
