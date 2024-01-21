@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_COMMON_TOOL_H
@@ -21,7 +21,7 @@
 namespace content {
 using DelegateCommit = int (*)(MessageListener::Message &message);
 
-class CONTENT_EXPORT Tool : public MessageListener {
+class Tool : public MessageListener {
  public:
   Tool();
   virtual ~Tool(void);
@@ -119,7 +119,7 @@ class CONTENT_EXPORT Tool : public MessageListener {
 
 using ToolPtrs = std::vector<Tool *>;
 
-class CONTENT_EXPORT ToolManager {
+class ToolManager {
  public:
   virtual ~ToolManager(void);
 
@@ -155,7 +155,7 @@ class CONTENT_EXPORT ToolManager {
   static ToolManager *singleton_;
 };
 
-long CONTENT_EXPORT PostToolMessage(Tool *tool,
+long PostToolMessage(Tool *tool,
                                     MessageListener::Message &message);
 }  // namespace content
 

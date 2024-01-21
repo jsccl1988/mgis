@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #include "content/common/message.h"

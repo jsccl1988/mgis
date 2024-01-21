@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #include "gui/content_impl/app/task_runner_impl.h"
@@ -15,12 +15,9 @@ static void OnRunTask(content::Task* task) {
 }
 
 TaskRunnerImpl::TaskRunnerImpl() {}
-
 TaskRunnerImpl::~TaskRunnerImpl() {}
 
 int TaskRunnerImpl::PostTask(content::Task* task, int64_t delay) {
-  if (!task) return -1;
-
   ThreadManager::PostTask(ThreadManager::UI, std::bind(&OnRunTask, task),
                           delay);
 

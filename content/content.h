@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 
@@ -22,6 +22,8 @@
 #include "base/macros.h"
 #include "base/port.h"
 
-namespace content {}  // namespace content
+namespace content {
+static const std::string kVersion = "2.0.0";
+}  // namespace content
 
 #endif  // CONTENT_CONTENT_H

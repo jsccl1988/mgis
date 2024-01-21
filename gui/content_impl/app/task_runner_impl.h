@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef DEMO_WEB_RENDER_APP_TASK_RUNNER_IMPL_H_

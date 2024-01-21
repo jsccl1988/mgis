@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "content/public/delegate/map_view_delegate.h"
-#include "content/public/map_box/map_view.h"
+#include "content/public/map_view.h"
 
 namespace gui {
 class MapViewDelegateImpl : public content::MapViewDelegate {

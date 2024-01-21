@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 #ifndef CONTENT_CONTROL_TOOL_SELECT_TOOL_H
 #define CONTENT_CONTROL_TOOL_SELECT_TOOL_H
@@ -6,7 +6,7 @@
 #include "content/common/tool.h"
 
 namespace content {
-class CONTENT_EXPORT SelectTool : public Tool {
+class SelectTool : public Tool {
  public:
   SelectTool();
   virtual ~SelectTool();

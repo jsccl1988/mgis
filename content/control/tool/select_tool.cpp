@@ -1,8 +1,8 @@
-﻿// Copyright (c) 2024 The mgis Authors.
+﻿// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 #include "content/control/tool/select_tool.h"
 
-#include "content/control/tool_factory.h"
+#include "content/control/tool/tool_factory.h"
 
 namespace content {
 const static base::NameString kSelectToolName = L"选取";

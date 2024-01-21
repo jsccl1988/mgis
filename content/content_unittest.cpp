@@ -9,12 +9,12 @@
 #include "base/logging.h"
 #include "testing/test.h"
 
-class TestFramework : public ::testing::Test {
+class TestContent : public ::testing::Test {
  protected:
-  TestFramework() {}
-  ~TestFramework() override {}
+  TestContent() {}
+  ~TestContent() override {}
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(TestFramework, test_log) { LOG(INFO) << __FUNCTION__ << "() logged"; }
+TEST_F(TestContent, test_log) { LOG(INFO) << __FUNCTION__ << "() logged"; }

@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 #ifndef CONTENT_CONTROL_TOOL_INPUT_POINT_TOOL_H
 #define CONTENT_CONTROL_TOOL_INPUT_POINT_TOOL_H

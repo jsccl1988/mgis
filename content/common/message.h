@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_COMMON_MESSAGE_H
@@ -62,7 +62,7 @@ using Messages = std::vector<long>;
 using Message2Ptr = std::map<long, void*>;
 using Message2PtrPair = std::pair<long, void*>;
 
-class CONTENT_EXPORT MessageListener {
+class MessageListener {
  public:
   struct Message {
     long id{0};
@@ -131,7 +131,7 @@ class CONTENT_EXPORT MessageListener {
 using MessageListeners = std::vector<MessageListener*>;
 using Name2MessageListener = std::map<std::string, MessageListener>;
 
-class CONTENT_EXPORT MessageCenter {
+class MessageCenter {
  public:
   virtual ~MessageCenter(void);
 
@@ -172,15 +172,15 @@ class CONTENT_EXPORT MessageCenter {
   static MessageCenter* singleton_;
 };
 
-HMENU CONTENT_EXPORT CreateListenerMenu(MessageListener* message_listener,
+HMENU CreateListenerMenu(MessageListener* message_listener,
                                         FuntionItemGroup group);
 
-void CONTENT_EXPORT AppendListenerMenu(HMENU ownwer_menu,
+void AppendListenerMenu(HMENU ownwer_menu,
                                        MessageListener* message_listener,
                                        FuntionItemGroup group,
                                        bool insert_seperator);
 
-long CONTENT_EXPORT PostListenerMessage(MessageListener* message_listener,
+long PostListenerMessage(MessageListener* message_listener,
                                         MessageListener::Message& message);
 }  // namespace content
 

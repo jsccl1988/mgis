@@ -29,11 +29,9 @@ class MessageLoop {
   ThreadId GetThreadID() const { return thread_id_; }
 
  private:
-  // create the window for message loop
   void InitMessageWnd();
-  // A hidden message-only window.
   HWND message_wnd_;
-  // route to HandleWorkMessage or HandleTimerMessage
+
   static LRESULT CALLBACK WndProcThunk(HWND hwnd, UINT message, WPARAM wparam,
                                        LPARAM lparam);
 

@@ -6,14 +6,12 @@
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
-#include "delegate/map_box_delegate.h"
 #include "delegate/map_view_delegate.h"
 
 namespace content {
 class MapContentClient : public base::RefCountedThreadSafe<MapContentClient>,
                          public base::SupportsWeakPtr<MapContentClient> {
  public:
-  virtual void QueryMapBoxDelegate(MapBoxDelegate** delegate) = 0;
   virtual void QueryMapViewDelegate(MapViewDelegate** delegate) = 0;
 
  protected:

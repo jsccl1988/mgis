@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_CONTROL_TOOL_NAVIGATE_TOOL_H
@@ -15,7 +15,7 @@ enum eCursorType {
   CT_Identify
 };
 
-class CONTENT_EXPORT NavigateTool : public Tool {
+class NavigateTool : public Tool {
  public:
   NavigateTool();
   virtual ~NavigateTool();

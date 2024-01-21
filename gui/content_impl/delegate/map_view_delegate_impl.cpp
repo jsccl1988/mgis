@@ -10,7 +10,6 @@
 
 namespace gui {
 MapViewDelegateImpl::MapViewDelegateImpl() {}
-
 MapViewDelegateImpl::~MapViewDelegateImpl() {}
 
 void MapViewDelegateImpl::OnStatusChange(const std::string& status) {}

@@ -14,14 +14,14 @@
 #include "gfx/2d/renderer/render_export.h"
 
 namespace gfx2d {
-enum GFX_2D_RENDERER_EXPORT eStyleType {
+enum eStyleType {
   ST_PenDesc = 0x0001,
   ST_BrushDesc = 0x0002,
   ST_AnnoDesc = 0x0004,
   ST_SymbolDesc = 0x008
 };
 
-struct GFX_2D_RENDERER_EXPORT PenDesc {
+struct PenDesc {
   long color;
   long style;
   float width;
@@ -33,7 +33,7 @@ struct GFX_2D_RENDERER_EXPORT PenDesc {
   }
 };
 
-struct GFX_2D_RENDERER_EXPORT BrushDesc {
+struct BrushDesc {
   enum BrushType { BT_Solid, BT_Hatch } brush_type;
 
   long color;
@@ -46,7 +46,7 @@ struct GFX_2D_RENDERER_EXPORT BrushDesc {
   }
 };
 
-struct GFX_2D_RENDERER_EXPORT AnnotationDesc {
+struct AnnotationDesc {
   float height;
   float width;
   long escapement;
@@ -88,7 +88,7 @@ struct GFX_2D_RENDERER_EXPORT AnnotationDesc {
   }
 };
 
-struct GFX_2D_RENDERER_EXPORT SymbolDesc {
+struct SymbolDesc {
   uint32_t id;
   float width;
   float height;
@@ -100,7 +100,7 @@ struct GFX_2D_RENDERER_EXPORT SymbolDesc {
   }
 };
 
-class GFX_2D_RENDERER_EXPORT Style {
+class Style {
  public:
   Style(void);
   Style(const char *name, const PenDesc &pen_desc, const BrushDesc &brush_desc,
@@ -150,7 +150,7 @@ class GFX_2D_RENDERER_EXPORT Style {
 using StyleList = std::vector<Style *>;
 using StyleMap = std::map<std::string, Style *>;
 
-class GFX_2D_RENDERER_EXPORT StyleManager {
+class StyleManager {
  private:
   StyleManager(void);
 

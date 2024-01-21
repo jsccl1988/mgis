@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_COMMON_ENVIRONMENT_H
@@ -10,17 +10,17 @@
 #include "content/content_export.h"
 
 namespace content {
-struct CONTENT_EXPORT MapDocInfo {
+struct MapDocInfo {
   std::string name{"DefMap"};
   std::string path{"DefMap"};
 };
 
-struct CONTENT_EXPORT ProjectInfo {
+struct ProjectInfo {
   int head{0};
   MapDocInfo map_doc_info;
 };
 
-struct CONTENT_EXPORT StyleOptions {
+struct StyleOptions {
   std::string point_style{"DefPointStyle"};
   std::string curve_style{"DefLineStyle"};
   std::string region_style{"DefSurfaceStyle"};
@@ -34,13 +34,13 @@ struct CONTENT_EXPORT StyleOptions {
   std::string region_flash_style2{"DefSurfaceFlashStyle2"};
 };
 
-struct CONTENT_EXPORT FlashOptions {
+struct FlashOptions {
   long color1{RGB(255, 0, 0)};
   long color2{RGB(0, 255, 0)};
   long elapse{100};
 };
 
-struct CONTENT_EXPORT SystemOptions {
+struct SystemOptions {
   StyleOptions style_options;
   FlashOptions flash_options;
   float select_margin{0.5};
@@ -57,7 +57,7 @@ struct CONTENT_EXPORT SystemOptions {
   std::string render_device_3d{"RenderDevice3DGL"};
 };
 
-class CONTENT_EXPORT Environment {
+class Environment {
  public:
   static Environment *GetSingletonPtr(void);
   static void DestoryInstance(void);

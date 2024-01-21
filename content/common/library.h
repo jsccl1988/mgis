@@ -1,5 +1,5 @@
 
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_COMMON_LIBRARY_H
@@ -15,7 +15,7 @@
 
 namespace content {
 
-class CONTENT_EXPORT Library {
+class Library {
  public:
   Library(const base::NameChar* name, const base::PathChar* path);
   virtual ~Library(void);
@@ -34,7 +34,7 @@ class CONTENT_EXPORT Library {
 };
 
 using Librarys = std::vector<Library*>;
-class CONTENT_EXPORT LibraryManager {
+class LibraryManager {
  public:
   virtual ~LibraryManager(void);
 

@@ -1,5 +1,5 @@
 
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 #ifndef CONTENT_CONTROL_TOOL_FLASH_TOOL_H
 #define CONTENT_CONTROL_TOOL_FLASH_TOOL_H
@@ -8,7 +8,7 @@
 #include "content/control/tool/common.h"
 
 namespace content {
-class CONTENT_EXPORT FlashTool : public Tool {
+class FlashTool : public Tool {
  public:
   FlashTool();
   virtual ~FlashTool();

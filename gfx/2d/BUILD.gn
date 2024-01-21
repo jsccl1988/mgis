@@ -67,8 +67,8 @@ shared_library("render_device_gdi") {
     "//base:base",
     "//third_party:glog",
     "//third_party:gdal",
-    ":renderer2d",
     "//third_party/CxImage:CxImage",
+    ":renderer2d",
   ]
 }
 

@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 
 */
 
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #include <gdal_priv.h>

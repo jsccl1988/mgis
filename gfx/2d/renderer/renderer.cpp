@@ -17,7 +17,7 @@ Renderer::~Renderer(void) { ReleaseDevice(); }
 
 int Renderer::CreateDevice(const base::NameChar *device_name) {
   device_name_ = device_name;
-  if (device_name_ ==  L"render_device_gdi") {
+  if (device_name_ == L"render_device_gdi") {
     dll_ = LoadLibrary(L"render_device_gdi.dll");
     if (!dll_) {
       std::string err = "   Loading ";
@@ -28,8 +28,6 @@ int Renderer::CreateDevice(const base::NameChar *device_name) {
     }
 
     CreateRenderDeviceFn create_render_device = 0;
-    HRESULT hr;
-
     create_render_device =
         (CreateRenderDeviceFn)GetProcAddress(dll_, "CreateRenderDevice");
 
@@ -37,6 +35,7 @@ int Renderer::CreateDevice(const base::NameChar *device_name) {
       return ERR_FAILURE;
     }
 
+    HRESULT hr;
     hr = create_render_device(dll_, device_);
 
     if (FAILED(hr)) {

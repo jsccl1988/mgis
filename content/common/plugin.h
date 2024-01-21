@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_COMMON_PLUGIN_H
@@ -15,7 +15,7 @@
 
 
 namespace content {
-class CONTENT_EXPORT Plugin : public Library {
+class Plugin : public Library {
  public:
   Plugin(const base::NameChar* name, const base::PathChar* path);
   virtual ~Plugin(void);
@@ -40,7 +40,7 @@ class CONTENT_EXPORT Plugin : public Library {
 };
 
 using Plugins = std::vector<Plugin*>;
-class CONTENT_EXPORT PluginManager {
+class PluginManager {
  public:
   virtual ~PluginManager(void);
 

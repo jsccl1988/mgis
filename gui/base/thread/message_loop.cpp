@@ -35,26 +35,26 @@ MessageLoop::MessageLoop(ThreadId thread_id) : thread_id_(thread_id) {
 }
 
 MessageLoop::~MessageLoop() {
-  DestroyWindow(message_wnd_);
-  UnregisterClass(kWndClass, GetModuleHandle(NULL));
+  ::DestroyWindow(message_wnd_);
+  UnregisterClass(kWndClass, ::GetModuleHandle(NULL));
   ThreadManager::RemoveMessageLoop(thread_id_);
 }
 
 void MessageLoop::PostTask(const std::function<void(void)>& handler,
                            unsigned int delay) {
-  PostMessage(message_wnd_, WM_TASK, (WPARAM)(new Task(handler)),
-              (LPARAM)delay);
+  ::PostMessage(message_wnd_, WM_TASK, (WPARAM)(new Task(handler)),
+                (LPARAM)delay);
 }
 
 void MessageLoop::Quit() {
-  PostMessage(message_wnd_, WM_QUIT_MESSAGELOOP, NULL, NULL);
+  ::PostMessage(message_wnd_, WM_QUIT_MESSAGELOOP, NULL, NULL);
 }
 
 void MessageLoop::Run() {
   MSG msg;
   BOOL result;
 
-  while (result = GetMessage(&msg, NULL, 0, 0)) {
+  while (result = ::GetMessage(&msg, NULL, 0, 0)) {
     if (result == -1) {
       continue;
     }
@@ -63,15 +63,15 @@ void MessageLoop::Run() {
       break;
     }
 
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
+    ::TranslateMessage(&msg);
+    ::DispatchMessage(&msg);
   }
 }
 
 MessageLoop* MessageLoop::Current() { return g_tls_message_loop.Get(); }
 
 void MessageLoop::InitMessageWnd() {
-  HINSTANCE hinst = GetModuleHandle(NULL);
+  HINSTANCE hinst = ::GetModuleHandle(NULL);
 
   WNDCLASSEX wc = {0};
   wc.cbSize = sizeof(wc);
@@ -81,7 +81,7 @@ void MessageLoop::InitMessageWnd() {
   RegisterClassEx(&wc);
 
   message_wnd_ =
-      CreateWindow(kWndClass, 0, 0, 0, 0, 0, 0, HWND_MESSAGE, 0, hinst, 0);
+      ::CreateWindow(kWndClass, 0, 0, 0, 0, 0, 0, HWND_MESSAGE, 0, hinst, 0);
 }
 
 // static
@@ -96,6 +96,6 @@ LRESULT CALLBACK MessageLoop::WndProcThunk(HWND hwnd, UINT message,
     } break;
   }
 
-  return DefWindowProc(hwnd, message, wparam, lparam);
+  return ::DefWindowProc(hwnd, message, wparam, lparam);
 }
 }  // namespace gui

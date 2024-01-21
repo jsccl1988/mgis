@@ -13,7 +13,7 @@
 #include "gfx/2d/renderer/style.h"
 
 namespace gfx2d {
-class GFX_2D_RENDERER_EXPORT Renderer {
+class Renderer {
  public:
   Renderer(HINSTANCE instance);
   ~Renderer(void);

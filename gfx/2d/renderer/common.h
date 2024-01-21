@@ -19,7 +19,6 @@
 #include "gfx/2d/renderer/render_export.h"
 #include "ogrsf_frmts.h"
 
-
 namespace gfx2d {
 enum RHI2D { RHI2D_GDI, RHI2D_SKIA };
 struct RenderOptions {

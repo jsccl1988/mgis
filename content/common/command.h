@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
 
 #ifndef CONTENT_COMMON_COMMAND_H
@@ -11,7 +11,7 @@
 #include "content/content_export.h"
 
 namespace content {
-class CONTENT_EXPORT CommandReceiver {
+class CommandReceiver {
  public:
   CommandReceiver() {}
   virtual ~CommandReceiver() {}
@@ -20,7 +20,7 @@ class CONTENT_EXPORT CommandReceiver {
   virtual bool Action(bool is_undo) = 0;
 };
 
-class CONTENT_EXPORT Command {
+class Command {
  public:
   Command(CommandReceiver* receiver, bool auto_delete_receiver = true);
   virtual ~Command(void);
@@ -41,7 +41,7 @@ class CONTENT_EXPORT Command {
   bool auto_delete_receiver_;
 };
 
-class CONTENT_EXPORT MacroCommand : public Command {
+class MacroCommand : public Command {
  public:
   MacroCommand();
   ~MacroCommand();
@@ -60,7 +60,7 @@ class CONTENT_EXPORT MacroCommand : public Command {
   std::vector<Command*> commands_;
 };
 
-class CONTENT_EXPORT CommandManager {
+class CommandManager {
  public:
   CommandManager(void);
   virtual ~CommandManager();

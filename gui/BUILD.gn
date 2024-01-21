@@ -13,11 +13,10 @@ executable("smartgis") {
     "base/thread/thread.cpp",
     "base/command_line.cpp",
     "content_impl/app/task_runner_impl.cpp",
-    "content_impl/delegate/map_box_delegate_impl.cpp",
+    "content_impl/client/map_content_client_impl.cpp",
     "content_impl/delegate/map_view_delegate_impl.cpp",
-    "content_impl/map_content_client_impl.cpp",
-    "content_impl/map_content_factory.cpp",
-    "content_impl/map_content_manager.cpp",
+    "content_impl/factory/map_content_factory.cpp",
+    "content_impl/manager/map_content_manager.cpp",
     "main_runner.cpp",
     "main.cpp",
   ]
@@ -25,7 +24,7 @@ executable("smartgis") {
   include_dirs += [
     "$root_gen_dir/",
     "$root_out_dir/third_party/include",
-    "//gui/third_party/wtl8.0/",
+    # "//third_party/wtl8.0/",
   ]
 
   suffix = ""
@@ -40,10 +39,6 @@ executable("smartgis") {
 
   deps = [
     "//base:base",
-    "//core:core",
     "//content:content",
-    "//third_party:glog",
-    "//gfx/2d:renderer2d",
-    "//gfx/3d:renderer3d",
   ]
 }

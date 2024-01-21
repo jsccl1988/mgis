@@ -13,7 +13,7 @@
 
 #include "base/basictypes.h"
 #include "base/platform.h"
-#include "base/synchronization/lock.h"
+#include "gui/base/lock.h"
 #include "gui/base/thread/message_loop.h"
 #include "gui/base/thread/thread_local_pointer.h"
 #include "gui/base/thread/thread_name.h"

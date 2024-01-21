@@ -4,6 +4,8 @@
 #ifndef BASE_BASE_EXPORT_H
 #define BASE_BASE_EXPORT_H
 
+#include "base/base_config.h"
+
 #if defined(COMPONENT_BUILD)
 #if defined(WIN32)
 #if defined(BASE_IMPLEMENTATION)
