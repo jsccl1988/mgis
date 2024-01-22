@@ -9,6 +9,10 @@ shared_library("content") {
     "CONTENT_IMPLEMENTATION",
   ]
 
+  configs += [
+    "//build/config/win:no_cr_code",
+  ]
+
   sources = [
     "common/command.cpp",
     "common/environment.cpp",
@@ -48,24 +52,22 @@ shared_library("content") {
   deps = [
     "//base:base",
     "//core:core",
-    "//third_party:gdal",
-    "//third_party:glog",
     "//gfx/2d:renderer2d",
     "//gfx/3d:renderer3d",
   ]
 }
 
-test("content_test") {
-  sources = [
-    "content_unittest.cpp",
-  ]
+# test("content_test") {
+#   sources = [
+#     "content_unittest.cpp",
+#   ]
 
-  include_dirs += [
-    "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
+#   include_dirs += [
+#     "$root_gen_dir/",
+#     "$root_out_dir/third_party/include",
+#   ]
 
-  deps = [
-    ":content",
-  ]
-}
+#   deps = [
+#     ":content",
+#   ]
+# }

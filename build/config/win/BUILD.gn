@@ -99,6 +99,25 @@ config("optmize") {
   }
 }
 
+config("no_cr_code") {
+  cflags = []
+  ldflags = []
+  cflags += [
+    "/wd4091",
+    "/wd4244",
+    "/wd4251",
+    "/wd4267",  # TODO(jschuh): size_t to int.
+    "/wd4275",
+    "/wd4302",
+    "/wd4311",
+    "/wd4312",
+    "/wd4800",  # Disable warning when forcing value to bool.
+    "/wd4838",
+    "/wd4996",  # Deprecated function warning.
+    "/wd5033",
+  ]
+}
+
 config("crt_link") {
   cflags = []
   ldflags = []

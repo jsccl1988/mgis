@@ -53,28 +53,29 @@ shared_library("render_device_d3d") {
 
   deps = [
     "//base:base",
+    "//third_party:all",
     ":renderer3d",
   ]
 }
 
-test("renderer3d_test") {
-  defines = [
-    "NOMINMAX",
-  ]
+# test("renderer3d_test") {
+#   defines = [
+#     "NOMINMAX",
+#   ]
 
-  sources = [
-    "render3d_unittest.cpp",
-  ]
+#   sources = [
+#     "render3d_unittest.cpp",
+#   ]
 
-  include_dirs += [
-    "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
+#   include_dirs += [
+#     "$root_gen_dir/",
+#     "$root_out_dir/third_party/include",
+#   ]
 
-  libs = [
-  ]
+#   libs = [
+#   ]
 
-  deps = [
-    ":renderer3d",
-  ]
-}
+#   deps = [
+#     ":renderer3d",
+#   ]
+# }

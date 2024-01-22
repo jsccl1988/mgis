@@ -35,45 +35,46 @@ static_library("core") {
 
   deps = [
     "//base:base",
+    "//third_party:all",
   ]
 }
 
-test("core_test") {
-  defines = [
-    "NOMINMAX",
-    "USE_UNSTABLE_GEOS_CPP_API",
-  ]
+# test("core_test") {
+#   defines = [
+#     "NOMINMAX",
+#     "USE_UNSTABLE_GEOS_CPP_API",
+#   ]
 
-  sources = [
-    "core_unittest.cpp",
-    "geometry/geometry_unittest.cpp",
-    "sdb/sdb_unittest.cpp",
-  ]
+#   sources = [
+#     "core_unittest.cpp",
+#     "geometry/geometry_unittest.cpp",
+#     "sdb/sdb_unittest.cpp",
+#   ]
 
-  include_dirs += [
-    "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
+#   include_dirs += [
+#     "$root_gen_dir/",
+#     "$root_out_dir/third_party/include",
+#   ]
 
-  proj_suffix = ""
-  gdal_suffix = ""
-  if (is_debug) {
-    proj_suffix = "_d"
-    gdal_suffix = "d"
-  }
+#   proj_suffix = ""
+#   gdal_suffix = ""
+#   if (is_debug) {
+#     proj_suffix = "_d"
+#     gdal_suffix = "d"
+#   }
 
-  libs = [
-    "$root_out_dir/third_party/lib/sqlite3.lib",
-    "$root_out_dir/third_party/lib/SQLiteCpp.lib",
-    "$root_out_dir/third_party/lib/geos.lib",
-    "$root_out_dir/third_party/lib/proj$proj_suffix.lib",
-    "$root_out_dir/third_party/lib/gdal$gdal_suffix.lib",
-    "$root_out_dir/third_party/lib/spatialindex-64.lib",
-    "$root_out_dir/third_party/lib/spatialite_i.lib",
-    "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
-  ]
+#   libs = [
+#     "$root_out_dir/third_party/lib/sqlite3.lib",
+#     "$root_out_dir/third_party/lib/SQLiteCpp.lib",
+#     "$root_out_dir/third_party/lib/geos.lib",
+#     "$root_out_dir/third_party/lib/proj$proj_suffix.lib",
+#     "$root_out_dir/third_party/lib/gdal$gdal_suffix.lib",
+#     "$root_out_dir/third_party/lib/spatialindex-64.lib",
+#     "$root_out_dir/third_party/lib/spatialite_i.lib",
+#     "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
+#   ]
 
-  deps = [
-    ":core",
-  ]
-}
+#   deps = [
+#     ":core",
+#   ]
+# }

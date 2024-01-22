@@ -230,5 +230,6 @@ group("all") {
     ":libspatialindex",
     ":libspatialite",
     ":SpatiaLiteCpp",
+    "CxImage:CxImage",
   ]
 }

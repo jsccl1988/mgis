@@ -3,10 +3,7 @@
 
 #include "gui/content_impl/delegate/map_view_delegate_impl.h"
 
-#include <vector>
-
-#include "gui/base/thread/thread_manager.h"
-#include "gui/content_impl/map_content_manager.h"
+#include <string>
 
 namespace gui {
 MapViewDelegateImpl::MapViewDelegateImpl() {}

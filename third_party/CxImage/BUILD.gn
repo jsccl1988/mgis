@@ -8,6 +8,10 @@ static_library("zlib") {
     "NOMINMAX",
   ]
 
+  configs += [
+    "//build/config/win:no_cr_code",
+  ]
+
   sources = [
     "zlib/adler32.c",
     "zlib/compress.c",

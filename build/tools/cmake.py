@@ -39,8 +39,9 @@ def cmake_build(
                             cmake_options.split(',')))
     if sys.platform == 'win32':
         if len(winver) > 0:
-            options += ' -DCMAKE_C_FLAGS_INIT="/D _WIN32_WINNT=%s" -DCMAKE_CXX_FLAGS_INIT="/D _WIN32_WINNT=%s"' % (
-                winver, winver)
+            disable_warning = "/wd4819 "
+            options += ' -DCMAKE_C_FLAGS_INIT="/D _WIN32_WINNT=%s %s" -DCMAKE_CXX_FLAGS_INIT="/D _WIN32_WINNT=%s %s"' % (
+                winver, disable_warning, winver, disable_warning)
         # if len(toolset) > 0:
         #     options += ' -T %s' % toolset
     config_cmd = 'cmake %s -S %s -B %s' % (
