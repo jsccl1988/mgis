@@ -18,7 +18,7 @@ Makefile
 *.swp
 *.trs
 *.exe
-*.cmake
+# *.cmake
 CMakeFiles
 CMakeCache.txt
 CMakeLists.txt.user
