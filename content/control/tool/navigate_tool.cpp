@@ -348,7 +348,7 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
           device_rect.x = std::min(origin_point_.x, current_point_.x);
           device_rect.y = std::max(origin_point_.y, current_point_.y);
           device_rect.width = std::abs(origin_point_.x - current_point_.x);
-          device_rect.height = std::abs(origin_point_.y - current_point_.y);
+          device_rect.height = -std::abs(origin_point_.y - current_point_.y);
 
           render_device_->DRectToLRect(device_rect, logic_rect);
           render_device_->ZoomToRect(logic_rect);

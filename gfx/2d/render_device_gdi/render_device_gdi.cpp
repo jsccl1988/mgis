@@ -443,7 +443,7 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
 
       font_ =
           ::CreateFont(anno.height * blc_, anno.width * blc_, anno.escapement,
-                       anno.orientation, anno.weight, anno.italic,
+                       anno.orientation, anno.weight * blc_, anno.italic,
                        anno.underline, anno.strikeout, anno.char_set,
                        anno.out_precision, anno.clip_precision, anno.quality,
                        anno.pitch_and_family, anno.face_name.c_str());
