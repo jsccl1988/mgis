@@ -32,10 +32,10 @@ int InputPointTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
   auto *style = style_manager->GetStyle(style_name_.c_str());
   style->SetStyleType(ST_PenDesc | ST_BrushDesc | ST_SymbolDesc | ST_AnnoDesc);
 
-  TOOL_APPEND_MSG(TOOL_MESSAGE_SET_INPUT_POINT_TYPE);
-  TOOL_APPEND_MSG(TOOL_MESSAGE_GET_INPUT_POINT_TYPE);
+  TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_POINT_TYPE);
+  TOOL_APPEND_MESSAGE(TOOL_MESSAGE_GET_INPUT_POINT_TYPE);
 
-  RegisterMsg();
+  RegisterMessage();
 
   return ERR_NONE;
 }
@@ -65,7 +65,7 @@ int InputPointTool::Notify(MessageListener::Message &message) {
   return ERR_NONE;
 }
 
-int InputPointTool::LButtonDown(uint32_t nFlags, Point point) {
+int InputPointTool::LButtonDown(uint32_t flags, Point point) {
   SetOperatorDone(false);
 
   switch (append_type_) {
@@ -84,7 +84,7 @@ int InputPointTool::LButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputPointTool::MouseMove(uint32_t nFlags, Point point) {
+int InputPointTool::MouseMove(uint32_t flags, Point point) {
   switch (append_type_) {
     case PT_Image:
       AppendImage(MS_MouseMove, point);
@@ -101,7 +101,7 @@ int InputPointTool::MouseMove(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputPointTool::LButtonUp(uint32_t nFlags, Point point) {
+int InputPointTool::LButtonUp(uint32_t flags, Point point) {
   switch (append_type_) {
     case PT_Image:
       AppendImage(MS_LButtonUp, point);
@@ -118,7 +118,7 @@ int InputPointTool::LButtonUp(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputPointTool::RButtonDown(uint32_t nFlags, Point point) {
+int InputPointTool::RButtonDown(uint32_t flags, Point point) {
   switch (append_type_) {
     case PT_Image:
       AppendImage(MS_RButtonDown, point);
@@ -144,7 +144,7 @@ int InputPointTool::RButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputPointTool::MouseWheel(uint32_t nFlags, int16_t zDelta, Point point) {
+int InputPointTool::MouseWheel(uint32_t flags, int16_t z_delta, Point point) {
   return ERR_NONE;
 }
 

@@ -18,11 +18,11 @@ class InputSurfaceTool : public Tool {
  public:
   int Notify(MessageListener::Message &message);
 
-  int LButtonDown(uint32_t nFlags, Point point);
-  int MouseMove(uint32_t nFlags, Point point);
-  int LButtonUp(uint32_t nFlags, Point point);
-  int RButtonDown(uint32_t nFlags, Point point);
-  int MouseWheel(uint32_t nFlags, int16_t zDelta, Point point);
+  int LButtonDown(uint32_t flags, Point point);
+  int MouseMove(uint32_t flags, Point point);
+  int LButtonUp(uint32_t flags, Point point);
+  int RButtonDown(uint32_t flags, Point point);
+  int MouseWheel(uint32_t flags, int16_t z_delta, Point point);
 
  private:
   void AppendFan(uint32_t mouse_status, Point point);

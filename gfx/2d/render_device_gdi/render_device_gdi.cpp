@@ -23,9 +23,6 @@ RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
       old_brush_(NULL),
       current_dc_(NULL),
       anno_angle_(0.),
-      last_redraw_command_stamp_(0),
-      last_redraw_stamp_(0),
-      is_redraw_(false),
       use_current_style_(false),
       is_lock_style_(false),
       layer_(nullptr) {
@@ -238,9 +235,9 @@ int RenderDeviceGDI::Refresh() {
 
   ::ReleaseDC(hwnd_, dc);
 
-  RECT client_rect;
-  ::GetClientRect(hwnd_, &client_rect);
-  ::InvalidateRect(hwnd_, &client_rect, true);
+  // RECT client_rect;
+  // ::GetClientRect(hwnd_, &client_rect);
+  // ::InvalidateRect(hwnd_, &client_rect, true);
 
   return ERR_NONE;
 }
@@ -254,7 +251,7 @@ int RenderDeviceGDI::Refresh(LRect lrect) {
 }
 
 int RenderDeviceGDI::RefreshDirectly(DRect rect, bool realtime) {
-  return Redraw();
+  return Render();
 }
 
 int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
@@ -264,7 +261,7 @@ int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
   windowport_.x -= offset.x;
   windowport_.y -= offset.y;
 
-  return Redraw();
+  return Render();
 }
 
 int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
@@ -303,7 +300,7 @@ int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
   windowport_.x -= x2 - x1;
   windowport_.y -= y2 - y1;
 
-  return Redraw();
+  return Render();
 }
 
 int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
@@ -334,47 +331,7 @@ int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
     zoomout_viewport_.width = drect.width * xblc / yblc;
   }
 
-  return Redraw();
-}
-
-int RenderDeviceGDI::Timer() {
-  if (is_redraw_) {
-    double elapse = 0.;
-    LONGLONG stamp = 0, per_count = 0;
-
-    QueryPerformanceFrequency((LARGE_INTEGER *)&per_count);
-    QueryPerformanceCounter((LARGE_INTEGER *)&stamp);
-
-    elapse = (stamp - last_redraw_command_stamp_) / (double)per_count;
-
-    if (elapse > kDelay) {
-      is_redraw_ = false;
-      composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
-                                    viewport_.height,
-                                    (COLORREF)::GetSysColor(COLOR_WINDOW));
-
-      HDC paint_buffer_dc = composit_render_buffer_.PrepareDC();
-      BeginRender(RB_COMPOSIT);
-
-      if (layer_ != NULL) {
-        return RenderLayer(layer_, op_);
-      }
-
-      // For Debug
-      { RenderDebug(); }
-
-      EndRender(RB_COMPOSIT);
-
-      zoomin_viewport_ = viewport_;
-      zoomout_viewport_ = viewport_;
-    }
-  }
-
-  RECT client_rect;
-  ::GetClientRect(hwnd_, &client_rect);
-  ::InvalidateRect(hwnd_, &client_rect, true);
-
-  return ERR_NONE;
+  return Render();
 }
 
 int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
@@ -408,7 +365,9 @@ int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
 }
 
 int RenderDeviceGDI::EndRender(eRenderBuffer render_buffer) {
-  if (is_lock_style_) EndDrawing();
+  if (is_lock_style_) {
+    EndDrawing();
+  }
 
   switch (render_buffer) {
     case RB_COMPOSIT: {
@@ -454,8 +413,9 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
 
       if (brush.brush_type == BrushDesc::BT_Hatch) {
         brush_ = ::CreateHatchBrush(brush.style, brush.color);
-      } else
+      } else {
         brush_ = ::CreateSolidBrush(brush.color);
+      }
 
       old_brush_ = (HBRUSH)::SelectObject(current_dc_, brush_);
     }
@@ -507,18 +467,7 @@ int RenderDeviceGDI::EndDrawing() {
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::Redraw() {
-  if (!is_redraw_) {
-    is_redraw_ = true;
-    QueryPerformanceCounter((LARGE_INTEGER *)&last_redraw_stamp_);
-  }
-
-  QueryPerformanceCounter((LARGE_INTEGER *)&last_redraw_command_stamp_);
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::Render(void) {
+int RenderDeviceGDI::Swap(void) {
   render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
                        viewport_.height);
 
@@ -534,7 +483,33 @@ int RenderDeviceGDI::Render(void) {
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::RenderDebug() {
+int RenderDeviceGDI::Render() {
+  composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                viewport_.height,
+                                (COLORREF)::GetSysColor(COLOR_WINDOW));
+
+  BeginRender(RB_COMPOSIT);
+
+  if (layer_ != NULL) {
+    return RenderLayer(layer_, op_);
+  }
+
+  // For Debug
+  { RenderForDebug(); }
+
+  EndRender(RB_COMPOSIT);
+
+  zoomin_viewport_ = viewport_;
+  zoomout_viewport_ = viewport_;
+
+  RECT client_rect;
+  ::GetClientRect(hwnd_, &client_rect);
+  ::InvalidateRect(hwnd_, &client_rect, true);
+
+  return ERR_NONE;
+}
+
+int RenderDeviceGDI::RenderForDebug() {
   DrawPolygon(&polygon_);
   DrawAnno(&text_anchor_, text_.c_str(), 0.f, 20, 20, 80);
 

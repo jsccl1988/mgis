@@ -273,9 +273,9 @@ void SelectTool::OnSetSelMode(void) {
   }
 }
 
-int SelectTool::KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t nFlags) {
+int SelectTool::KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t flags) {
   if (delegate_target_ != NULL && !delegate_target_->IsOperatorDone())
-    return delegate_target_->KeyDown(nChar, nRepCnt, nFlags);
+    return delegate_target_->KeyDown(nChar, nRepCnt, flags);
   else {
     if (!(GetKeyState(VK_CONTROL) & 0x8000)) {
       switch (nChar) {
@@ -296,6 +296,6 @@ int SelectTool::KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t nFlags) {
     }
   }
 
-  return Tool::KeyDown(nChar, nRepCnt, nFlags);
+  return Tool::KeyDown(nChar, nRepCnt, flags);
 }
 }  // namespace content

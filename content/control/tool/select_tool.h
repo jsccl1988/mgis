@@ -17,7 +17,7 @@ class SelectTool : public Tool {
   int Timer();
 
  public:
-  int KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t nFlags);
+  int KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t flags);
 
  public:
   int Notify(MessageListener::Message &message);

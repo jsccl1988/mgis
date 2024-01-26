@@ -93,7 +93,7 @@ class Tool : public MessageListener {
   virtual int RButtonDClick(uint32_t nFlags, Point point);
 
   virtual int MouseMove(uint32_t nFlags, Point point);
-  virtual int MouseWheel(uint32_t nFlags, int16_t zDelta, Point point);
+  virtual int MouseWheel(uint32_t nFlags, int16_t z_delta, Point point);
 
   virtual int KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t nFlags);
   virtual int KeyUp(uint32_t nChar, uint32_t nRepCnt, uint32_t nFlags);

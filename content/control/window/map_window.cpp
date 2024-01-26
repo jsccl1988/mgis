@@ -87,8 +87,8 @@ void MapWindow::OnDestroy() {
   delete renderer_;
 }
 
-void MapWindow::OnTimer(UINT_PTR nIDEvent) {
-  switch (nIDEvent) {
+void MapWindow::OnTimer(UINT_PTR event) {
+  switch (event) {
     case kRefreshTimer: {
       auto* tool_manager = content::ToolManager::GetSingletonPtr();
       auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
@@ -106,9 +106,6 @@ void MapWindow::OnTimer(UINT_PTR nIDEvent) {
         options.point_radius = system_options.point_radius;
 
         render_device_->SetRenderOptions(options);
-        render_device_->Timer();
-
-        ::PostMessage(m_hWnd, WM_PAINT, NULL, NULL);
       }
     } break;
     default:
@@ -132,22 +129,20 @@ void MapWindow::OnSize(UINT nType, CSize size) {
     options.point_radius = system_options.point_radius;
 
     render_device_->SetRenderOptions(options);
-    render_device_->BeginRender(gfx2d::RenderDevice::RB_COMPOSIT);
-    render_device_->RenderDebug();
-    render_device_->EndRender(gfx2d::RenderDevice::RB_COMPOSIT);
     render_device_->RefreshDirectly(rect);
   }
 }
 void MapWindow::OnPaint(HDC /*hDC*/) {
-  render_device_->Render();
-
   auto* environment = content::Environment::GetSingletonPtr();
   auto* tool_manager = content::ToolManager::GetSingletonPtr();
   content::Tool* tool =
       dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->AuxDraw();
   }
+
+  render_device_->Swap();
 }
 
 void MapWindow::OnMouseMove(UINT nFlags, CPoint point) {
@@ -187,10 +182,12 @@ void MapWindow::OnLButtonDblClk(UINT nFlags, CPoint point) {
   }
 }
 void MapWindow::OnRButtonDown(UINT nFlags, CPoint point) {
+}
+void MapWindow::OnRButtonUp(UINT nFlags, CPoint point) {
   auto* tool_manager = content::ToolManager::GetSingletonPtr();
   auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
-    tool->RButtonDown(nFlags, ToDPoint(point));
+    tool->RButtonUp(nFlags, ToDPoint(point));
 
     if (tool->IsEnableContexMenu()) {
       CMenu contex_menu;
@@ -200,13 +197,6 @@ void MapWindow::OnRButtonDown(UINT nFlags, CPoint point) {
           m_hWnd);
       contex_menu.Detach();
     }
-  }
-}
-void MapWindow::OnRButtonUp(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
-  if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
-    tool->RButtonUp(nFlags, ToDPoint(point));
   }
 }
 void MapWindow::OnRButtonDblClk(UINT nFlags, CPoint point) {

@@ -17,75 +17,73 @@ class RenderDeviceGDI : public RenderDevice {
   RenderDeviceGDI(HINSTANCE instance);
   virtual ~RenderDeviceGDI(void);
 
-  int Init(HWND hwnd);
-  int Destroy(void);
-  int Release(void);
+  int Init(HWND hwnd) override;
+  int Destroy(void) override;
+  int Release(void) override;
 
  public:
-  int Resize(DRect rect);
-  int Refresh(void);
+  int Resize(DRect rect) override;
+  int Refresh(void) override;
   int Refresh(LRect rect);
-  int RefreshDirectly(DRect rect, bool realtime = false);
+  int RefreshDirectly(DRect rect, bool realtime = false) override;
 
-  int ZoomMove(LPoint offset, bool realtime = false);
-  int ZoomScale(LPoint original_point, float scale, bool realtime = false);
-  int ZoomToRect(LRect rect, bool realtime = false);
-
-  int Timer();
+  int ZoomMove(LPoint offset, bool realtime = false) override;
+  int ZoomScale(LPoint original_point, float scale, bool realtime = false) override;
+  int ZoomToRect(LRect rect, bool realtime = false) override;
 
  public:
-  int LPToDP(float x, float y, long &X, long &Y) const;
+  int LPToDP(float x, float y, long &X, long &Y) const override;
   int DPToLP(long X, long Y, float &x, float &y) const;
-  int LRectToDRect(const LRect &lrect, DRect &drect) const;
-  int DRectToLRect(const DRect &drect, LRect &lrect) const;
+  int LRectToDRect(const LRect &lrect, DRect &drect) const override;
+  int DRectToLRect(const DRect &drect, LRect &lrect) const override;
 
  public:
   int BeginRender(eRenderBuffer render_buffer, bool clear = false,
-                  const Style *style = NULL, int op = R2_COPYPEN);
-  int EndRender(eRenderBuffer render_buffer);
-  int Render(void);
+                  const Style *style = NULL, int op = R2_COPYPEN) override;
+  int Render(void) override;
+  int EndRender(eRenderBuffer render_buffer) override;
+  int Swap(void) override;
 
-  int RenderDebug();
-  int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN);
-  int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN);
-  int RenderGeometry(const OGRGeometry *geomtry, int op = R2_COPYPEN);
+  int RenderForDebug() override;
+  int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN) override;
+  int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN) override;
+  int RenderGeometry(const OGRGeometry *geomtry, int op = R2_COPYPEN) override;
 
  public:
-  int DrawMultiLineString(const OGRMultiLineString *multi_linestring);
-  int DrawMultiPoint(const OGRMultiPoint *multi_point);
-  int DrawMultiPolygon(const OGRMultiPolygon *multi_polygon);
+  int DrawMultiLineString(const OGRMultiLineString *multi_linestring) override;
+  int DrawMultiPoint(const OGRMultiPoint *multi_point) override;
+  int DrawMultiPolygon(const OGRMultiPolygon *multi_polygon) override;
 
-  int DrawPoint(const OGRPoint *point);
+  int DrawPoint(const OGRPoint *point) override;
   int DrawAnno(const OGRPoint *point, const char *anno, float angle,
-               float height, float width, float space);
-  int DrawSymbol(const OGRPoint *point, HICON icon, long height, long width);
+               float height, float width, float space) override;
+  int DrawSymbol(const OGRPoint *point, HICON icon, long height, long width) override;
 
-  int DrawLineString(const OGRLineString *line_string);
-  int DrawLinearRing(const OGRLinearRing *linear_ring);
-  int DrawPolygon(const OGRPolygon *polygon);
+  int DrawLineString(const OGRLineString *line_string) override;
+  int DrawLinearRing(const OGRLinearRing *linear_ring) override;
+  int DrawPolygon(const OGRPolygon *polygon) override;
 
  public:
   int DrawImage(const char *image_buffer, int image_buffer_size,
                 const LRect &rect, long code_type,
-                eRenderBuffer render_buffer = RB_COMPOSIT);
+                eRenderBuffer render_buffer = RB_COMPOSIT) override;
   int StrethImage(const char *image_buffer, int image_buffer_size,
                   const LRect &rect, long code_type,
-                  eRenderBuffer render_buffer = RB_COMPOSIT);
+                  eRenderBuffer render_buffer = RB_COMPOSIT) override;
 
  public:
   int SaveImage(const char *file_path,
                 eRenderBuffer render_buffer = RB_COMPOSIT,
-                bool backgroud_transparent = false);
+                bool backgroud_transparent = false) override;
   int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
                        long code_type,
                        eRenderBuffer render_buffer = RB_COMPOSIT,
-                       bool backgroud_transparent = false);
-  int FreeImageBuffer(char *&image_buffer);
+                       bool backgroud_transparent = false) override;
+  int FreeImageBuffer(char *&image_buffer) override;
 
  protected:
   int PrepareForDrawing(const Style *style, int draw_mode = R2_COPYPEN);
   int EndDrawing();
-  int Redraw();
 
  protected:
   HFONT font_;
@@ -106,10 +104,6 @@ class RenderDeviceGDI : public RenderDevice {
 
   Viewport zoomin_viewport_;
   Viewport zoomout_viewport_;
-
-  LONGLONG last_redraw_command_stamp_;
-  LONGLONG last_redraw_stamp_;
-  bool is_redraw_;
 
   RenderBuffer composit_render_buffer_;
   RenderBuffer render_buffer_;

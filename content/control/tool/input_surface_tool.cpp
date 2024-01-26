@@ -32,10 +32,10 @@ int InputSurfaceTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
   auto *style = style_manager->GetStyle(style_name_.c_str());
   style->SetStyleType(ST_PenDesc | ST_BrushDesc);
 
-  TOOL_APPEND_MSG(TOOL_MESSAGE_SET_INPUT_SURFACE_TYPE);
-  TOOL_APPEND_MSG(TOOL_MESSAGE_GET_INPUT_SURFACE_TYPE);
+  TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_SURFACE_TYPE);
+  TOOL_APPEND_MESSAGE(TOOL_MESSAGE_GET_INPUT_SURFACE_TYPE);
 
-  RegisterMsg();
+  RegisterMessage();
 
   return ERR_NONE;
 }
@@ -59,7 +59,7 @@ int InputSurfaceTool::Notify(MessageListener::Message &message) {
   return ERR_NONE;
 }
 
-int InputSurfaceTool::LButtonDown(uint32_t nFlags, Point point) {
+int InputSurfaceTool::LButtonDown(uint32_t flags, Point point) {
   SetOperatorDone(false);
 
   switch (append_type_) {
@@ -75,7 +75,7 @@ int InputSurfaceTool::LButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputSurfaceTool::MouseMove(uint32_t nFlags, Point point) {
+int InputSurfaceTool::MouseMove(uint32_t flags, Point point) {
   switch (append_type_) {
     case ST_Rect:
       AppendRect(MS_MouseMove, point);
@@ -89,7 +89,7 @@ int InputSurfaceTool::MouseMove(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputSurfaceTool::LButtonUp(uint32_t nFlags, Point point) {
+int InputSurfaceTool::LButtonUp(uint32_t flags, Point point) {
   switch (append_type_) {
     case ST_Rect:
       AppendRect(MS_LButtonUp, point);
@@ -103,7 +103,7 @@ int InputSurfaceTool::LButtonUp(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputSurfaceTool::RButtonDown(uint32_t nFlags, Point point) {
+int InputSurfaceTool::RButtonDown(uint32_t flags, Point point) {
   switch (append_type_) {
     case ST_Rect:
       AppendRect(MS_RButtonDown, point);
@@ -125,7 +125,7 @@ int InputSurfaceTool::RButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputSurfaceTool::MouseWheel(uint32_t nFlags, int16_t zDelta, Point point) {
+int InputSurfaceTool::MouseWheel(uint32_t flags, int16_t z_delta, Point point) {
   return ERR_NONE;
 }
 

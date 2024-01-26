@@ -57,8 +57,6 @@ class RenderDevice {
                         bool realtime = false) = 0;
   virtual int ZoomToRect(LRect rect, bool realtime = false) = 0;
 
-  virtual int Timer() = 0;
-
  public:
   virtual int LPToDP(float x, float y, long &X, long &Y) const = 0;
   virtual int DPToLP(long X, long Y, float &x, float &y) const = 0;
@@ -69,11 +67,12 @@ class RenderDevice {
   virtual int BeginRender(eRenderBuffer render_buffer, bool clear = false,
                           const Style *style = nullptr,
                           int op = R2_COPYPEN) = 0;
-  virtual int EndRender(eRenderBuffer render_buffer) = 0;
   virtual int Render(void) = 0;
+  virtual int EndRender(eRenderBuffer render_buffer) = 0;
+  virtual int Swap(void) = 0;
 
  public:
-  virtual int RenderDebug() = 0;
+  virtual int RenderForDebug() = 0;
 
   virtual int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN) = 0;
   virtual int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN) = 0;

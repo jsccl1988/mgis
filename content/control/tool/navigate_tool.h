@@ -29,11 +29,11 @@ class NavigateTool : public Tool {
   int Notify(MessageListener::Message &message);
 
   int SetCursor(void);
-  int LButtonDown(uint32_t nFlags, Point point);
-  int MouseMove(uint32_t nFlags, Point point);
-  int LButtonUp(uint32_t nFlags, Point point);
-  int RButtonDown(uint32_t nFlags, Point point);
-  int MouseWheel(uint32_t nFlags, int16_t zDelta, Point point);
+  int LButtonDown(uint32_t flags, Point point);
+  int MouseMove(uint32_t flags, Point point);
+  int LButtonUp(uint32_t flags, Point point);
+  int RButtonDown(uint32_t flags, Point point);
+  int MouseWheel(uint32_t flags, int16_t z_delta, Point point);
 
  protected:
   void ZoomMove(int16_t mouse_status, Point point);
@@ -50,7 +50,7 @@ class NavigateTool : public Tool {
   Point origin_point_;
   Point current_point_;
   Point prev_point_;
-  BOOL captured_;
+  bool captured_;
   HCURSOR cursors_[4];
 };
 }  // namespace content

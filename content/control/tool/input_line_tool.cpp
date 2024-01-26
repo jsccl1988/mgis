@@ -32,10 +32,10 @@ int InputLineTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     style->SetStyleType(ST_PenDesc);
   }
 
-  TOOL_APPEND_MSG(TOOL_MESSAGE_SET_INPUT_LINE_TYPE);
-  TOOL_APPEND_MSG(TOOL_MESSAGE_GET_INPUT_LINE_TYPE);
+  TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_LINE_TYPE);
+  TOOL_APPEND_MESSAGE(TOOL_MESSAGE_GET_INPUT_LINE_TYPE);
 
-  RegisterMsg();
+  RegisterMessage();
 
   return ERR_NONE;
 }
@@ -43,7 +43,9 @@ int InputLineTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
 int InputLineTool::AuxDraw() { return ERR_NONE; }
 
 int InputLineTool::Notify(MessageListener::Message &message) {
-  if (message.source_window != hwnd_) return ERR_NONE;
+  if (message.source_window != hwnd_) {
+    return ERR_NONE;
+  }
 
   switch (message.id) {
     case TOOL_MESSAGE_DEFAULT_PROCESS: {
@@ -60,7 +62,7 @@ int InputLineTool::Notify(MessageListener::Message &message) {
   return ERR_NONE;
 }
 
-int InputLineTool::LButtonDown(uint32_t nFlags, Point point) {
+int InputLineTool::LButtonDown(uint32_t flags, Point point) {
   switch (append_type_) {
     case LT_Rect:
       AppendRect(MS_LButtonDown, point);
@@ -78,7 +80,7 @@ int InputLineTool::LButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputLineTool::MouseMove(uint32_t nFlags, Point point) {
+int InputLineTool::MouseMove(uint32_t flags, Point point) {
   switch (append_type_) {
     case LT_Rect:
       AppendRect(MS_MouseMove, point);
@@ -96,7 +98,7 @@ int InputLineTool::MouseMove(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputLineTool::LButtonUp(uint32_t nFlags, Point point) {
+int InputLineTool::LButtonUp(uint32_t flags, Point point) {
   switch (append_type_) {
     case LT_Rect:
       AppendRect(MS_LButtonUp, point);
@@ -114,7 +116,7 @@ int InputLineTool::LButtonUp(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputLineTool::RButtonDown(uint32_t nFlags, Point point) {
+int InputLineTool::RButtonDown(uint32_t flags, Point point) {
   switch (append_type_) {
     case LT_Rect:
       AppendRect(MS_RButtonDown, point);
@@ -140,7 +142,7 @@ int InputLineTool::RButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int InputLineTool::MouseWheel(uint32_t nFlags, int16_t zDelta, Point point) {
+int InputLineTool::MouseWheel(uint32_t flags, int16_t z_delta, Point point) {
   return ERR_NONE;
 }
 
@@ -261,12 +263,14 @@ void InputLineTool::AppendRect(uint32_t mouse_status, Point point) {
           linear_ring1.setPoint(1, x2, y1);
           linear_ring1.setPoint(2, x2, y2);
           linear_ring1.setPoint(3, x1, y2);
+          linear_ring1.closeRings();
 
           render_device_->DPToLP(current_point_.x, current_point_.y, x2, y2);
           linear_ring2.setPoint(0, x1, y1);
           linear_ring2.setPoint(1, x2, y1);
           linear_ring2.setPoint(2, x2, y2);
           linear_ring2.setPoint(3, x1, y2);
+          linear_ring2.closeRings();
 
           render_device_->DrawLinearRing(&linear_ring1);
           render_device_->DrawLinearRing(&linear_ring2);

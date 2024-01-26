@@ -9,7 +9,7 @@
 namespace content {
 const static base::NameString kNavigateTool = L"地图浏览";
 NavigateTool::NavigateTool()
-    : captured_(FALSE), flashed_(0), view_model_(VM_ZoomOff) {
+    : captured_(false), flashed_(0), view_model_(VM_ZoomOff) {
   SetName(kNavigateTool.c_str());
 }
 
@@ -74,7 +74,7 @@ int NavigateTool::Notify(MessageListener::Message& message) {
         ZoomRefresh();
       } break;
       case TOOL_MESSAGE_VIEW_ACTIVE: {
-        SetForegroundWindow(hwnd_);
+        ::SetForegroundWindow(hwnd_);
       } break;
     }
   } else {
@@ -156,7 +156,7 @@ int NavigateTool::SetCursor(void) {
   return ERR_NONE;
 }
 
-int NavigateTool::LButtonDown(uint32_t nFlags, Point point) {
+int NavigateTool::LButtonDown(uint32_t flags, Point point) {
   SetOperatorDone(false);
 
   switch (view_model_) {
@@ -175,7 +175,7 @@ int NavigateTool::LButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int NavigateTool::MouseMove(uint32_t nFlags, Point point) {
+int NavigateTool::MouseMove(uint32_t flags, Point point) {
   switch (view_model_) {
     case VM_ZoomMove:
       ZoomMove(MS_MouseMove, point);
@@ -192,7 +192,7 @@ int NavigateTool::MouseMove(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int NavigateTool::LButtonUp(uint32_t nFlags, Point point) {
+int NavigateTool::LButtonUp(uint32_t flags, Point point) {
   switch (view_model_) {
     case VM_ZoomMove:
       ZoomMove(MS_LButtonUp, point);
@@ -209,7 +209,7 @@ int NavigateTool::LButtonUp(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int NavigateTool::RButtonDown(uint32_t nFlags, Point point) {
+int NavigateTool::RButtonDown(uint32_t flags, Point point) {
   switch (view_model_) {
     case VM_ZoomMove:
       ZoomMove(MS_RButtonDown, point);
@@ -229,9 +229,9 @@ int NavigateTool::RButtonDown(uint32_t nFlags, Point point) {
   return ERR_NONE;
 }
 
-int NavigateTool::MouseWheel(uint32_t nFlags, int16_t zDelta, Point point) {
+int NavigateTool::MouseWheel(uint32_t flags, int16_t z_delta, Point point) {
   float scale{0.f};
-  if (zDelta < 0) {
+  if (z_delta < 0) {
     scale = 1 + scale_delta_;
   } else {
     scale = 1 - scale_delta_;
@@ -254,7 +254,7 @@ int NavigateTool::MouseWheel(uint32_t nFlags, int16_t zDelta, Point point) {
 void NavigateTool::ZoomMove(int16_t mouse_status, Point point) {
   switch (mouse_status) {
     case MS_LButtonDown: {
-      captured_ = TRUE;
+      captured_ = true;
       ::SetCapture(hwnd_);
       origin_point_ = point;
       prev_point_ = point;
@@ -288,7 +288,7 @@ void NavigateTool::ZoomMove(int16_t mouse_status, Point point) {
       prev_point_ = current_point_;
       current_point_ = point;
       if (captured_) {
-        captured_ = FALSE;
+        captured_ = false;
         ::ReleaseCapture();
 
         gfx2d::LPoint current_dop;
@@ -314,8 +314,9 @@ void NavigateTool::ZoomMove(int16_t mouse_status, Point point) {
       }
     } break;
     case MS_RButtonDown: {
+      current_point_ = point;
       if (captured_) {
-        captured_ = FALSE;
+        captured_ = false;
         ::ReleaseCapture();
       }
 
@@ -329,7 +330,7 @@ void NavigateTool::ZoomMove(int16_t mouse_status, Point point) {
 void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
   switch (mouse_status) {
     case MS_LButtonDown: {
-      captured_ = TRUE;
+      captured_ = true;
       ::SetCapture(hwnd_);
       origin_point_ = point;
       prev_point_ = point;
@@ -339,7 +340,7 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
       if (captured_) {
         prev_point_ = current_point_;
         current_point_ = point;
-        captured_ = FALSE;
+        captured_ = false;
         ::ReleaseCapture();
         if (!gfx2d::equal(origin_point_, point)) {
           gfx2d::LRect logic_rect;
@@ -359,7 +360,7 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
         }
 
         if (ERR_NONE == render_device_->BeginRender(
-                            gfx2d::RenderDevice::RB_DIRECT, true, false))
+                            gfx2d::RenderDevice::RB_DIRECT, true, nullptr))
           render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
 
         render_device_->Refresh();
@@ -382,12 +383,14 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
           linear_ring1.setPoint(1, x2, y1);
           linear_ring1.setPoint(2, x2, y2);
           linear_ring1.setPoint(3, x1, y2);
+          linear_ring1.closeRings();
 
           render_device_->DPToLP(current_point_.x, current_point_.y, x2, y2);
           linear_ring2.setPoint(0, x1, y1);
           linear_ring2.setPoint(1, x2, y1);
           linear_ring2.setPoint(2, x2, y2);
           linear_ring2.setPoint(3, x1, y2);
+          linear_ring2.closeRings();
 
           render_device_->DrawLinearRing(&linear_ring1);
           render_device_->DrawLinearRing(&linear_ring2);
@@ -399,26 +402,8 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
     case MS_RButtonDown: {
       current_point_ = point;
       if (captured_) {
-        captured_ = FALSE;
+        captured_ = false;
         ::ReleaseCapture();
-
-        auto* style_manager = gfx2d::StyleManager::GetSingletonPtr();
-        auto* style = style_manager->GetStyle(style_name_.c_str());
-        if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
-                                        style, R2_NOTXORPEN)) {
-          float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
-          OGRLinearRing linear_ring;
-          render_device_->DPToLP(origin_point_.x, origin_point_.y, x1, y1);
-          render_device_->DPToLP(current_point_.x, current_point_.y, x2, y2);
-          linear_ring.setPoint(0, x1, y1);
-          linear_ring.setPoint(1, x2, y1);
-          linear_ring.setPoint(2, x2, y2);
-          linear_ring.setPoint(3, x1, y2);
-
-          render_device_->DrawLinearRing(&linear_ring);
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
-        }
       }
 
       view_model_ = VM_ZoomOff;
