@@ -24,8 +24,8 @@ int FlashTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     return ERR_FAILURE;
   }
 
-  auto *environment = content::Environment::GetSingletonPtr();
-  auto system_options = environment->GetSystemOptions();
+  auto& environment = content::Environment::GetInstance();
+  auto system_options = environment.get()->GetSystemOptions();
 
   scale_delta_ = system_options.zoom_scale_delt;
 
@@ -50,10 +50,10 @@ int FlashTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
 
 int FlashTool::AuxDraw() {
   if (is_flash_) {
-    auto *environment = content::Environment::GetSingletonPtr();
-    auto system_options = environment->GetSystemOptions();
-    auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-    auto *style = style_manager->GetStyle(flash_style_.c_str());
+    auto& environment = content::Environment::GetInstance();
+    auto system_options = environment.get()->GetSystemOptions();
+    auto &style_manager = gfx2d::StyleManager::GetInstance();
+    auto *style = style_manager.get()->GetStyle(flash_style_.c_str());
     if (ERR_NONE == render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT,
                                                 true, style, R2_COPYPEN)) {
       render_device_->RenderLayer(result_layer_, R2_COPYPEN);
@@ -114,8 +114,8 @@ int FlashTool::Notify(MessageListener::Message &message) {
       // result_layer_->DeleteAll();
       // CopyLayer(result_layer_, pSrcLayer);
 
-      auto *environment = content::Environment::GetSingletonPtr();
-      auto system_options = environment->GetSystemOptions();
+      auto& environment = content::Environment::GetInstance();
+      auto system_options = environment.get()->GetSystemOptions();
 
       // switch (nLayerFeaType) {
       //   case FeatureType::FtChildImage:

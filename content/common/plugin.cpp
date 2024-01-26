@@ -37,18 +37,6 @@ bool Plugin::Load() {
 
 bool Plugin::Unload() { return Library::Unload(); }
 
-PluginManager* PluginManager::singleton_ = nullptr;
-PluginManager::PluginManager(void) {}
-PluginManager::~PluginManager(void) { UnLoadAllPlugin(); }
-PluginManager* PluginManager::GetSingletonPtr(void) {
-  if (singleton_ == nullptr) {
-    singleton_ = new PluginManager();
-  }
-  return singleton_;
-}
-
-void PluginManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
-
 void PluginManager::LoadAllPlugin(const base::PathChar* dir) {
   // using fs = std::filesystem;
   // // get all plugins in file

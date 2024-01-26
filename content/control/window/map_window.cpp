@@ -10,7 +10,7 @@ static const UINT kRefreshTimer = 69;
 static const UINT kNotifyTimer = 70;
 
 LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
-  auto* environment = content::Environment::GetSingletonPtr();
+  auto& environment = content::Environment::GetInstance();
   // message loop
   CMessageLoop* loop = _Module.GetMessageLoop();
   if (loop) {
@@ -64,7 +64,7 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
                               content::FIG_2DVIEW, false);
 
   // timer
-  auto system_options = environment->GetSystemOptions();
+  auto system_options = environment.get()->GetSystemOptions();
   m_uiRefreshTimer = ::SetTimer(m_hWnd, kRefreshTimer,
                                 system_options.view2d_refresh_elapse, 0);
   m_uiNotifyTimer =
@@ -90,16 +90,17 @@ void MapWindow::OnDestroy() {
 void MapWindow::OnTimer(UINT_PTR event) {
   switch (event) {
     case kRefreshTimer: {
-      auto* tool_manager = content::ToolManager::GetSingletonPtr();
-      auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+      auto& tool_manager = content::ToolManager::GetInstance();
+      auto* tool =
+          dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
       if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
         tool->Timer();
       }
     } break;
     case kNotifyTimer: {
       if (render_device_) {
-        auto* environment = content::Environment::GetSingletonPtr();
-        auto system_options = environment->GetSystemOptions();
+        auto& environment = content::Environment::GetInstance();
+        auto system_options = environment.get()->GetSystemOptions();
         gfx2d::RenderOptions options;
         options.show_mbr = system_options.show_mbr;
         options.show_point = system_options.show_point;
@@ -114,7 +115,7 @@ void MapWindow::OnTimer(UINT_PTR event) {
 }
 
 void MapWindow::OnSize(UINT nType, CSize size) {
-  auto* environment = content::Environment::GetSingletonPtr();
+  auto& environment = content::Environment::GetInstance();
   if (render_device_) {
     gfx2d::DRect rect;
     rect.x = rect.y = 0;
@@ -122,7 +123,7 @@ void MapWindow::OnSize(UINT nType, CSize size) {
     rect.height = size.cy;
     render_device_->Resize(rect);
 
-    auto system_options = environment->GetSystemOptions();
+    auto system_options = environment.get()->GetSystemOptions();
     gfx2d::RenderOptions options;
     options.show_mbr = system_options.show_mbr;
     options.show_point = system_options.show_point;
@@ -133,10 +134,10 @@ void MapWindow::OnSize(UINT nType, CSize size) {
   }
 }
 void MapWindow::OnPaint(HDC /*hDC*/) {
-  auto* environment = content::Environment::GetSingletonPtr();
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
+  auto& environment = content::Environment::GetInstance();
+  auto& tool_manager = content::ToolManager::GetInstance();
   content::Tool* tool =
-      dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
 
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->AuxDraw();
@@ -146,46 +147,51 @@ void MapWindow::OnPaint(HDC /*hDC*/) {
 }
 
 void MapWindow::OnMouseMove(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->MouseMove(nFlags, ToDPoint(point));
   }
 }
 BOOL MapWindow::OnMouseWheel(UINT nFlags, short zDelta, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->MouseWheel(nFlags, zDelta, ToDPoint(point));
   }
   return TRUE;
 }
 void MapWindow::OnLButtonDown(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->LButtonDown(nFlags, ToDPoint(point));
   }
 }
 void MapWindow::OnLButtonUp(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->LButtonUp(nFlags, ToDPoint(point));
   }
 }
 void MapWindow::OnLButtonDblClk(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->LButtonDClick(nFlags, ToDPoint(point));
   }
 }
-void MapWindow::OnRButtonDown(UINT nFlags, CPoint point) {
-}
+void MapWindow::OnRButtonDown(UINT nFlags, CPoint point) {}
 void MapWindow::OnRButtonUp(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->RButtonUp(nFlags, ToDPoint(point));
 
@@ -200,29 +206,33 @@ void MapWindow::OnRButtonUp(UINT nFlags, CPoint point) {
   }
 }
 void MapWindow::OnRButtonDblClk(UINT nFlags, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->RButtonDClick(nFlags, ToDPoint(point));
   }
 }
 void MapWindow::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->KeyDown(nChar, nRepCnt, nFlags);
   }
 }
 void MapWindow::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     tool->KeyUp(nChar, nRepCnt, nFlags);
   }
 }
 void MapWindow::OnContextMenu(CWindow wnd, CPoint point) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     if (tool->IsEnableContexMenu()) {
       CMenu contex_menu;
@@ -240,36 +250,40 @@ void MapWindow::OnCommand(UINT uNotifyCode, int nID, CWindow wndCtl) {
   message.source_window = m_hWnd;
 
   if (nID >= MESSAGE_CMD_BEGIN && nID <= MESSAGE_CMD_END) {
-    auto* tool_manager = content::ToolManager::GetSingletonPtr();
-    tool_manager->Notify(TOOL_BROADCAST, message);
+    auto& tool_manager = content::ToolManager::GetInstance();
+    tool_manager.get()->Notify(TOOL_BROADCAST, message);
   }
 }
 
 void MapWindow::OnEnterSizeMove() {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     // tool->MouseMove(nFlags, ToDPoint(point));
   }
 }
 void MapWindow::OnExitSizeMove() {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     // tool->MouseMove(nFlags, ToDPoint(point));
   }
 }
 #if (_WIN32_WINNT >= 0x0400)
 void MapWindow::OnMouseHover(WPARAM wParam, CPoint ptPos) {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     // tool->MouseMove(nFlags, ToDPoint(point));
   }
 }
 void MapWindow::OnMouseLeave() {
-  auto* tool_manager = content::ToolManager::GetSingletonPtr();
-  auto* tool = dynamic_cast<content::Tool*>(tool_manager->GetActiveTool());
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
   if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
     // tool->MouseMove(nFlags, ToDPoint(point));
   }

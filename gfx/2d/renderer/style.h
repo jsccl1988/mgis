@@ -11,7 +11,9 @@
 #include "base/basictypes.h"
 #include "base/error.h"
 #include "base/macros.h"
+#include "base/memory/singleton.h"
 #include "gfx/2d/renderer/render_export.h"
+
 
 namespace gfx2d {
 enum eStyleType {
@@ -150,19 +152,13 @@ class Style {
 using StyleList = std::vector<Style *>;
 using StyleMap = std::map<std::string, Style *>;
 
-class StyleManager {
- private:
-  StyleManager(void);
-
+class StyleManager : public base::Singleton<StyleManager> {
  public:
-  virtual ~StyleManager(void);
-
   void SetDefaultStyle(const char *defName, PenDesc &pen_desc,
                        BrushDesc &brush_desc, AnnotationDesc &anno_desc,
                        SymbolDesc &symbol_desc);
   Style *GetDefaultStyle(void);
 
- public:
   Style *CreateStyle(const char *defName, PenDesc &pen_desc,
                      BrushDesc &brush_desc, AnnotationDesc &anno_desc,
                      SymbolDesc &symbol_desc);
@@ -173,16 +169,9 @@ class StyleManager {
 
   Style *GetStyle(const char *name);
 
- public:
-  static StyleManager *GetSingletonPtr(void);
-
-  static void DestoryInstance(void);
-
  private:
   StyleList style_list_;
   Style *default_style_;
-
-  static StyleManager *singleton_;
 };
 }  // namespace gfx2d
 

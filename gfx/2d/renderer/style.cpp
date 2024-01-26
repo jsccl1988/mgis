@@ -34,24 +34,6 @@ Style *Style::Clone(const char *new_name) const {
     return nullptr;
 }
 
-StyleManager *StyleManager::singleton_ = nullptr;
-StyleManager *StyleManager::GetSingletonPtr(void) {
-  if (singleton_ == nullptr) {
-    singleton_ = new StyleManager();
-  }
-  return singleton_;
-}
-
-void StyleManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
-
-StyleManager::StyleManager(void) {
-  default_style_ = nullptr;
-
-  DestroyAllStyle();
-}
-
-StyleManager::~StyleManager(void) { DestroyAllStyle(); }
-
 void StyleManager::SetDefaultStyle(const char *defName, PenDesc &pen_desc,
                                    BrushDesc &brush_desc,
                                    AnnotationDesc &anno_desc,

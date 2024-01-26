@@ -104,8 +104,8 @@ const double kPI = 3.1415926;
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&);               \
-  void operator=(const TypeName&)
+  TypeName(const TypeName&) = delete;               \
+  void operator=(const TypeName&) = delete
 
 // An older, deprecated, politically incorrect name for the above.
 #define DISALLOW_EVIL_CONSTRUCTORS(TypeName) DISALLOW_COPY_AND_ASSIGN(TypeName)

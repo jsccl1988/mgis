@@ -14,7 +14,6 @@
 #include "content/content_export.h"
 
 namespace content {
-
 class Library {
  public:
   Library(const base::NameChar* name, const base::PathChar* path);
@@ -34,26 +33,13 @@ class Library {
 };
 
 using Librarys = std::vector<Library*>;
-class LibraryManager {
- public:
-  virtual ~LibraryManager(void);
-
- public:
-  static LibraryManager* GetSingletonPtr(void);
-  static void DestoryInstance(void);
-
+class LibraryManager : public base::Singleton<LibraryManager> {
  public:
   Library* LoadLibrary(const base::NameChar* name, const base::PathChar* path);
   void UnloadLibrary(const base::NameChar* name);
 
  protected:
   Librarys librarys_;
-
- private:
-  LibraryManager(void);
-
- private:
-  static LibraryManager* singleton_;
 };
 }  // namespace content
 

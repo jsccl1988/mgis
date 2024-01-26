@@ -67,7 +67,7 @@ declare_args() {
 
 declare_args() {
   is_winxp = false  # targeting to Windows XP
-  static_link_crt = is_win  # static or dynamic link crt
+  static_link_crt = false  # static or dynamic link crt
   winver = ""  # to define WINVER, _WIN32_WINNT and NTDDI_VERSION
 }
 

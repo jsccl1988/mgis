@@ -7,6 +7,7 @@
 #include <stack>
 #include <vector>
 
+#include "base/memory/singleton.h"
 #include "content/common/message.h"
 #include "content/content.h"
 #include "content/content_export.h"
@@ -119,14 +120,7 @@ class Tool : public MessageListener {
 
 using ToolPtrs = std::vector<Tool *>;
 
-class ToolManager {
- public:
-  virtual ~ToolManager(void);
-
- public:
-  static ToolManager *GetSingletonPtr(void);
-  static void DestoryInstance(void);
-
+class ToolManager : public base::Singleton<ToolManager> {
  public:
   long Notify(Tool *tool, MessageListener::Message &message);
 
@@ -149,24 +143,18 @@ class ToolManager {
   ToolPtrs toolptrs_;
   Tool *current_tool_;
   Message2Ptr message_2_tools_;
-
- private:
-  ToolManager(void);
-  static ToolManager *singleton_;
 };
 
-long PostToolMessage(Tool *tool,
-                                    MessageListener::Message &message);
+long PostToolMessage(Tool *tool, MessageListener::Message &message);
 }  // namespace content
 
 #define TOOL_BROADCAST ((content::Tool *)0xFFFF)
 #define TOOL_INVALID ((content::Tool *)0x0000)
 
-#define TOOL_POST_MESSAGE(tool, message)           \
-  {                                              \
-    content::ToolManager *tool_manager =         \
-        content::ToolManager::GetSingletonPtr(); \
-    tool_manager->Notify(tool, message);           \
+#define TOOL_POST_MESSAGE(tool, message)                       \
+  {                                                            \
+    auto &tool_manager = content::ToolManager::GetSingleton(); \
+    tool_manager.Notify(tool, message);                        \
   }
 
 #endif  // CONTENT_COMMON_TOOL_H

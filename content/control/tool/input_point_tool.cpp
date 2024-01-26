@@ -28,8 +28,8 @@ int InputPointTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     return ERR_FAILURE;
   }
 
-  auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-  auto *style = style_manager->GetStyle(style_name_.c_str());
+  auto &style_manager = gfx2d::StyleManager::GetInstance();
+  auto *style = style_manager.get()->GetStyle(style_name_.c_str());
   style->SetStyleType(ST_PenDesc | ST_BrushDesc | ST_SymbolDesc | ST_AnnoDesc);
 
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_POINT_TYPE);
@@ -184,8 +184,8 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
         is_drag_ = 0;
         current_point_ = point;
 
-        auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-        auto *style = style_manager->GetStyle(style_name_.c_str());
+        auto &style_manager = gfx2d::StyleManager::GetInstance();
+        auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
             render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
                                         style, R2_NOTXORPEN)) {
@@ -216,8 +216,8 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
       prev_point_ = current_point_;
       current_point_ = point;
       if (is_drag_) {
-        auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-        auto *style = style_manager->GetStyle(style_name_.c_str());
+        auto &style_manager = gfx2d::StyleManager::GetInstance();
+        auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
             render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
                                         style, R2_NOTXORPEN)) {

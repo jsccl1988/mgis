@@ -13,13 +13,13 @@ Tool::Tool()
       delegate_target_(NULL),
       scale_delta_(0.15),
       render_device_(NULL) {
-  ToolManager *tool_manager = ToolManager::GetSingletonPtr();
-  tool_manager->RegisterTool(this);
+  auto &tool_manager = ToolManager::GetInstance();
+  tool_manager.get()->RegisterTool(this);
 }
 
 Tool::~Tool() {
-  ToolManager *tool_manager = ToolManager::GetSingletonPtr();
-  tool_manager->RemoveTool(this);
+  auto &tool_manager = ToolManager::GetInstance();
+  tool_manager.get()->RemoveTool(this);
 }
 
 int Tool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
@@ -28,8 +28,8 @@ int Tool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     return ERR_INVALID_PARAM;
   }
 
-  auto *environment = content::Environment::GetSingletonPtr();
-  auto system_options = environment->GetSystemOptions();
+  auto &environment = content::Environment::GetInstance();
+  auto system_options = environment.get()->GetSystemOptions();
 
   delegate_commit_ = delegate_commit;
   to_follow_ = to_follow;
@@ -42,22 +42,22 @@ int Tool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
 }
 
 int Tool::RegisterMessage() {
-  ToolManager *tool_manager = ToolManager::GetSingletonPtr();
-  tool_manager->RegisterToolMessage(this);
+  auto &tool_manager = ToolManager::GetInstance();
+  tool_manager.get()->RegisterToolMessage(this);
 
   return ERR_NONE;
 }
 
 int Tool::UnRegisterMessage() {
-  ToolManager *tool_manager = ToolManager::GetSingletonPtr();
-  tool_manager->UnRegisterToolMessage(this);
+  auto &tool_manager = ToolManager::GetInstance();
+  tool_manager.get()->UnRegisterToolMessage(this);
 
   return ERR_NONE;
 }
 
 int Tool::SetActive() {
-  ToolManager *tool_manager = ToolManager::GetSingletonPtr();
-  tool_manager->SetActiveTool(this);
+  auto &tool_manager = ToolManager::GetInstance();
+  tool_manager.get()->SetActiveTool(this);
 
   return ERR_NONE;
 }
@@ -215,26 +215,26 @@ int Tool::KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t nFlags) {
       } break;
       case 'R': {
         POINT mouse_position;
-        POINT wndCenter;
+        POINT screen_center;
         RECT wndrt;
         ::GetWindowRect(hwnd_, &wndrt);
 
-        wndCenter.x = (wndrt.left + wndrt.right) >> 1;
-        wndCenter.y = (wndrt.top + wndrt.bottom) >> 1;
+        screen_center.x = (wndrt.left + wndrt.right) >> 1;
+        screen_center.y = (wndrt.top + wndrt.bottom) >> 1;
 
         ::GetCursorPos(&mouse_position);
 
-        if ((mouse_position.x == wndCenter.x) &&
-            (mouse_position.y == wndCenter.y)) {
+        if ((mouse_position.x == screen_center.x) &&
+            (mouse_position.y == screen_center.y)) {
           return ERR_NONE;
         }
 
         ::ScreenToClient(hwnd_, &mouse_position);
-        ::ScreenToClient(hwnd_, &wndCenter);
+        ::ScreenToClient(hwnd_, &screen_center);
 
         float x1, y1, x2, y2;
         render_device_->DPToLP(mouse_position.x, mouse_position.y, x1, y1);
-        render_device_->DPToLP(wndCenter.x, wndCenter.y, x2, y2);
+        render_device_->DPToLP(screen_center.x, screen_center.y, x2, y2);
 
         gfx2d::LPoint offset(x2 - x1, y2 - y1);
         render_device_->ZoomMove(offset);
@@ -311,19 +311,6 @@ int Tool::CommitDelegate(MessageListener::Message &message) {
 
   return ERR_NONE;
 }
-
-ToolManager *ToolManager::singleton_ = NULL;
-ToolManager *ToolManager::GetSingletonPtr(void) {
-  if (singleton_ == NULL) {
-    singleton_ = new ToolManager();
-  }
-  return singleton_;
-}
-
-void ToolManager::DestoryInstance(void) { SAFE_DELETE(singleton_); }
-
-ToolManager::ToolManager(void) { current_tool_ = NULL; }
-ToolManager::~ToolManager(void) { RemoveAllTool(); }
 
 long ToolManager::Notify(Tool *tool, MessageListener::Message &message) {
   if (tool == TOOL_INVALID) {
@@ -448,7 +435,7 @@ long ToolManager::UnRegisterToolMessage(Tool *tool) {
 }
 
 long PostToolMessage(Tool *tool, MessageListener::Message &message) {
-  ToolManager *tool_manager = ToolManager::GetSingletonPtr();
-  return tool_manager->Notify(tool, message);
+  auto &tool_manager = ToolManager::GetInstance();
+  return tool_manager.get()->Notify(tool, message);
 }
 }  // namespace content

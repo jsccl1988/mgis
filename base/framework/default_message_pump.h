@@ -10,7 +10,7 @@
 
 namespace base {
 
-class DefaultMessagePump : public MessagePump {
+class BASE_EXPORT DefaultMessagePump : public MessagePump {
  public:
   DefaultMessagePump();
   virtual ~DefaultMessagePump() {}

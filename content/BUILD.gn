@@ -15,7 +15,6 @@ shared_library("content") {
 
   sources = [
     "common/command.cpp",
-    "common/environment.cpp",
     "common/library.cpp",
     "common/message.cpp",
     "common/plugin.cpp",

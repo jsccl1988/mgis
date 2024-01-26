@@ -29,8 +29,7 @@ static_library("renderer2d") {
 
   deps = [
     "//base:base",
-    "//third_party:glog",
-    "//third_party:gdal",
+    "//third_party:all",
   ]
 }
 

@@ -15,9 +15,8 @@ namespace base {
 class MessageLoop;
 class MessageLoopProxy;
 
-class ThreadMap {
+class ThreadMap:public base::Singleton<ThreadMap> {
  public:
-  SINGLETON_DEFINE(ThreadMap);
   static bool AquireAccess();
 
   bool RegisterThread(int self_identifier);
@@ -27,7 +26,6 @@ class ThreadMap {
   FrameworkThread *QueryThreadInternal(int identifier) const;
 
  private:
-  ThreadMap() {}
   Lock lock_;
   std::map<int, FrameworkThread *> threads_;
 };
@@ -70,7 +68,7 @@ class BASE_EXPORT ThreadManager {
   static bool Await(int identifier, const std::function<T1> &task,
                     const std::function<T2> &reply) {
     std::shared_ptr<MessageLoopProxy> message_loop =
-        ThreadMap::GetInstance()->GetMessageLoop(identifier);
+        ThreadMap::GetInstance().get()->GetMessageLoop(identifier);
     if (message_loop == NULL) return false;
     message_loop->PostTaskAndReply(task, reply);
     return true;

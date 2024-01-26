@@ -131,14 +131,7 @@ class MessageListener {
 using MessageListeners = std::vector<MessageListener*>;
 using Name2MessageListener = std::map<std::string, MessageListener>;
 
-class MessageCenter {
- public:
-  virtual ~MessageCenter(void);
-
- public:
-  static MessageCenter* GetSingletonPtr(void);
-  static void DestoryInstance(void);
-
+class MessageCenter : public base::Singleton<MessageCenter> {
  public:
   long Notify(MessageListener* message_listener,
               MessageListener::Message& message);
@@ -166,29 +159,23 @@ class MessageCenter {
   MessageListeners message_listeners_;
   MessageListener* current_message_listener_;
   Message2Ptr message2message_listeners_;
-
- private:
-  MessageCenter(void);
-  static MessageCenter* singleton_;
 };
 
 HMENU CreateListenerMenu(MessageListener* message_listener,
-                                        FuntionItemGroup group);
+                         FuntionItemGroup group);
 
-void AppendListenerMenu(HMENU ownwer_menu,
-                                       MessageListener* message_listener,
-                                       FuntionItemGroup group,
-                                       bool insert_seperator);
+void AppendListenerMenu(HMENU ownwer_menu, MessageListener* message_listener,
+                        FuntionItemGroup group, bool insert_seperator);
 
 long PostListenerMessage(MessageListener* message_listener,
-                                        MessageListener::Message& message);
+                         MessageListener::Message& message);
 }  // namespace content
 
 #define POST_MESSAGE_LISTENER_MESSAGE(listener, message) \
-  {                                                    \
-    content::MessageCenter* listener_manager =         \
-        content::MessageCenter::GetSingletonPtr();     \
-    listener_manager->Notify(listener, message);         \
+  {                                                      \
+    content::MessageCenter& listener_manager =           \
+        content::MessageCenter::GetSingleton();          \
+    listener_manager.get()->Notify(listener, message);   \
   }
 
 #endif  // CONTENT_COMMON_MESSAGE_H

@@ -7,6 +7,7 @@
 #include <stack>
 #include <vector>
 
+#include "base/memory/singleton.h"
 #include "content/content.h"
 #include "content/content_export.h"
 

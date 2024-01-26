@@ -31,7 +31,7 @@ bool ThreadMap::RegisterThread(int self_identifier) {
 
   AUTO_MAP_LOCK()
   std::pair<std::map<int, FrameworkThread *>::iterator, bool> pr =
-      ThreadMap::GetInstance()->threads_.insert(
+      ThreadMap::GetInstance().get()->threads_.insert(
           std::make_pair(self_identifier, tls->self));
   if (!pr.second) {
     if (pr.first->second != tls->self) {
@@ -98,15 +98,15 @@ std::shared_ptr<MessageLoopProxy> ThreadMap::GetMessageLoop(
 }
 
 bool ThreadManager::RegisterThread(int self_identifier) {
-  return ThreadMap::GetInstance()->RegisterThread(self_identifier);
+  return ThreadMap::GetInstance().get()->RegisterThread(self_identifier);
 }
 
 bool ThreadManager::UnregisterThread() {
-  return ThreadMap::GetInstance()->UnregisterThread();
+  return ThreadMap::GetInstance().get()->UnregisterThread();
 }
 
 int ThreadManager::QueryThreadId(const FrameworkThread *thread) {
-  return ThreadMap::GetInstance()->QueryThreadId(thread);
+  return ThreadMap::GetInstance().get()->QueryThreadId(thread);
 }
 
 FrameworkThread *ThreadManager::CurrentThread() {
@@ -122,7 +122,7 @@ bool ThreadManager::PostTask(const StdClosure &task) {
 
 bool ThreadManager::PostTask(int identifier, const StdClosure &task) {
   std::shared_ptr<MessageLoopProxy> message_loop =
-      ThreadMap::GetInstance()->GetMessageLoop(identifier);
+      ThreadMap::GetInstance().get()->GetMessageLoop(identifier);
   if (message_loop == NULL) return false;
   message_loop->PostTask(task);
   return true;
@@ -136,7 +136,7 @@ bool ThreadManager::PostDelayedTask(const StdClosure &task, TimeDelta delay) {
 bool ThreadManager::PostDelayedTask(int identifier, const StdClosure &task,
                                     TimeDelta delay) {
   std::shared_ptr<MessageLoopProxy> message_loop =
-      ThreadMap::GetInstance()->GetMessageLoop(identifier);
+      ThreadMap::GetInstance().get()->GetMessageLoop(identifier);
   if (message_loop == NULL) return false;
   message_loop->PostDelayedTask(task, delay);
   return true;
@@ -165,7 +165,7 @@ bool ThreadManager::PostNonNestableTask(const StdClosure &task) {
 bool ThreadManager::PostNonNestableTask(int identifier,
                                         const StdClosure &task) {
   std::shared_ptr<MessageLoopProxy> message_loop =
-      ThreadMap::GetInstance()->GetMessageLoop(identifier);
+      ThreadMap::GetInstance().get()->GetMessageLoop(identifier);
   if (message_loop == NULL) return false;
   message_loop->PostNonNestableTask(task);
   return true;
@@ -181,7 +181,7 @@ bool ThreadManager::PostNonNestableDelayedTask(int identifier,
                                                const StdClosure &task,
                                                TimeDelta delay) {
   std::shared_ptr<MessageLoopProxy> message_loop =
-      ThreadMap::GetInstance()->GetMessageLoop(identifier);
+      ThreadMap::GetInstance().get()->GetMessageLoop(identifier);
   if (message_loop == NULL) return false;
   message_loop->PostNonNestableDelayedTask(task, delay);
   return true;

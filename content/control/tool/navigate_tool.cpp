@@ -370,8 +370,8 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
       prev_point_ = current_point_;
       current_point_ = point;
       if (captured_) {
-        auto* style_manager = gfx2d::StyleManager::GetSingletonPtr();
-        auto* style = style_manager->GetStyle(style_name_.c_str());
+        auto& style_manager = gfx2d::StyleManager::GetInstance();
+        auto* style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
             render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
                                         style, R2_NOTXORPEN)) {

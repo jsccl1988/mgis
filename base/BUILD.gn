@@ -2,9 +2,11 @@
 # All rights reserved.
 import("//testing/test.gni")
 
-static_library("base") {
+shared_library("base") {
   defines = [
     "NOMINMAX",
+    "COMPONENT_BUILD",
+    "BASE_IMPLEMENTATION",
   ]
 
   configs += [
@@ -62,6 +64,20 @@ static_library("base") {
   include_dirs += [
     "$root_gen_dir/",
     "$root_out_dir/third_party/include",
+  ]
+
+  suffix = ""
+  if (is_debug) {
+    suffix = "d"
+  }
+
+  libs = [
+    "wsock32.lib",
+    "Iphlpapi.lib",
+    "ws2_32.lib",
+    "Snmpapi.lib",
+    "netapi32.lib",
+    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
   deps = [

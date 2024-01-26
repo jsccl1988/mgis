@@ -31,6 +31,8 @@ bool MapContentFactory::CreateMapContent(content::MapContent** map_content) {
   }
 
   path += L"\\";
+  base::DirectoryAsDLLSearchPath(path + L"third_party\\bin");
+
   path += kMapContentDLL;
 
   HINSTANCE hInst = NULL;

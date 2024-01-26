@@ -2,11 +2,13 @@
 // All rights reserved.
 #include "base/base_config.h"
 #include "base/path/base_paths.h"
+#include "base/util/at_exit.h"
 
 #include "content/initializer.h"
 #include "content/impl/map_content_impl.h"
 
 namespace {
+base::AtExitManager exit_manager;
 content::Initializer initiaizer;
 base::ScopedRefPtr<content::MapContent> g_map_content;
 }  // namespace

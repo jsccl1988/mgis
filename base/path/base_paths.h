@@ -13,6 +13,7 @@
 
 #include <string>
 
+#include "base/base_export.h"
 #include "base/file/file_path.h"
 #include "base/path/base_paths_win.h"
 
@@ -42,14 +43,14 @@ enum BasePathKey {
   PATH_END
 };
 
-bool PathProvider(int key, PathString* result);
-bool PathExists(const PathString& path);
+bool BASE_EXPORT PathProvider(int key, PathString* result);
+bool BASE_EXPORT PathExists(const PathString& path);
 
-bool DirectoryExists(const PathString& path);
-bool DirectoryAsDLLSearchPath(const PathString& path);
+bool BASE_EXPORT DirectoryExists(const PathString& path);
+bool BASE_EXPORT DirectoryAsDLLSearchPath(const PathString& path);
 
-bool GetCurrentDirectory(PathString* dir);
-bool SetCurrentDirectory(const PathString& directory);
+bool BASE_EXPORT GetCurrentDirectory(PathString* dir);
+bool BASE_EXPORT SetCurrentDirectory(const PathString& directory);
 
 }  // namespace base
 

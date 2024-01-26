@@ -28,8 +28,8 @@ int InputSurfaceTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     return ERR_FAILURE;
   }
 
-  auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-  auto *style = style_manager->GetStyle(style_name_.c_str());
+  auto &style_manager = gfx2d::StyleManager::GetInstance();
+  auto *style = style_manager.get()->GetStyle(style_name_.c_str());
   style->SetStyleType(ST_PenDesc | ST_BrushDesc);
 
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_SURFACE_TYPE);
@@ -173,8 +173,8 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
       current_point_ = point;
 
       if (is_drag_) {
-        auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-        auto *style = style_manager->GetStyle(style_name_.c_str());
+        auto &style_manager = gfx2d::StyleManager::GetInstance();
+        auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
             render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
                                         style, R2_NOTXORPEN)) {
@@ -272,8 +272,8 @@ void InputSurfaceTool::AppendPolygon(uint32_t mouse_status, Point point) {
       current_point_ = point;
 
       if (is_drag_) {
-        auto *style_manager = gfx2d::StyleManager::GetSingletonPtr();
-        auto *style = style_manager->GetStyle(style_name_.c_str());
+        auto &style_manager = gfx2d::StyleManager::GetInstance();
+        auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
             render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
                                         style, R2_NOTXORPEN)) {

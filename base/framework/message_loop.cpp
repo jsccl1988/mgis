@@ -16,6 +16,7 @@
 namespace base {
 
 LazyInstance<ThreadLocalPointer<MessageLoop> > g_lazy_ptr;
+MessageLoop::TaskObserver::~TaskObserver() {}
 
 MessageLoop::MessageLoop()
     : type_(kDefaultMessageLoop),

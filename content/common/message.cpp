@@ -131,49 +131,35 @@ bool MessageListener::AppendMessage(long message_id) {
 }
 
 int MessageListener::Register() {
-  MessageCenter *listener_manager = MessageCenter::GetSingletonPtr();
-  return listener_manager->RegisterListener(this);
+  auto &listener_manager = MessageCenter::GetInstance();
+  return listener_manager.get()->RegisterListener(this);
 }
 
 int MessageListener::RegisterMessage() {
-  MessageCenter *listener_manager = MessageCenter::GetSingletonPtr();
-  listener_manager->RegisterListenerMessage(this);
+  auto &listener_manager = MessageCenter::GetInstance();
+  listener_manager.get()->RegisterListenerMessage(this);
 
   return ERR_NONE;
 }
 
 int MessageListener::UnRegister() {
-  MessageCenter *listener_manager = MessageCenter::GetSingletonPtr();
-  return listener_manager->RemoveListener(this);
+  auto &listener_manager = MessageCenter::GetInstance();
+  return listener_manager.get()->RemoveListener(this);
 }
 
 int MessageListener::UnRegisterMessage() {
-  MessageCenter *listener_manager = MessageCenter::GetSingletonPtr();
-  listener_manager->UnRegisterListenerMessage(this);
+  auto &listener_manager = MessageCenter::GetInstance();
+  listener_manager.get()->UnRegisterListenerMessage(this);
 
   return ERR_NONE;
 }
 
 int MessageListener::SetActive() {
-  MessageCenter *listener_manager = MessageCenter::GetSingletonPtr();
-  listener_manager->SetActiveListener(this);
+  auto &listener_manager = MessageCenter::GetInstance();
+  listener_manager.get()->SetActiveListener(this);
 
   return ERR_NONE;
 }
-
-MessageCenter *MessageCenter::singleton_ = nullptr;
-MessageCenter *MessageCenter::GetSingletonPtr(void) {
-  if (singleton_ == nullptr) {
-    singleton_ = new MessageCenter();
-  }
-
-  return singleton_;
-}
-
-void MessageCenter::DestoryInstance(void) { SAFE_DELETE(singleton_); }
-
-MessageCenter::MessageCenter(void) { current_message_listener_ = nullptr; }
-MessageCenter::~MessageCenter(void) { RemoveAllListener(); }
 
 long MessageCenter::Notify(MessageListener *message_listener,
                            MessageListener::Message &message) {
@@ -331,7 +317,7 @@ void AppendListenerMenu(HMENU hmenu, MessageListener *message_listener,
 
 long PostListenerMessage(MessageListener *message_listener,
                          MessageListener::Message &message) {
-  MessageCenter *listener_center = MessageCenter::GetSingletonPtr();
-  return listener_center->Notify(message_listener, message);
+  auto &listener_center = MessageCenter::GetInstance();
+  return listener_center.get()->Notify(message_listener, message);
 }
 }  // namespace content

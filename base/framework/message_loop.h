@@ -239,6 +239,9 @@ class BASE_EXPORT UIMessageLoop : public MessageLoop {
 
   void AddUIObserver(UIObserver *observer);
   void RemoveUIObserver(UIObserver *observer);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UIMessageLoop);
 };
 
 #endif  // OS_WIN
@@ -279,6 +282,9 @@ class BASE_EXPORT IOMessageLoop : public MessageLoop {
                            FileDescriptorWatcher *controller,
                            Watcher *delegate);
 #endif
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(IOMessageLoop);
 };
 }  // namespace base
 

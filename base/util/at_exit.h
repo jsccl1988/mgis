@@ -29,7 +29,8 @@ namespace base {
 
 class BASE_EXPORT AtExitManager {
  public:
-  typedef void (*AtExitCallbackType)(void*);
+  using AtExitCallbackType = std::function<void(void*)>;
+  // typedef void (*AtExitCallbackType)(void*);
 
   AtExitManager();
 

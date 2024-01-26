@@ -40,14 +40,7 @@ class Plugin : public Library {
 };
 
 using Plugins = std::vector<Plugin*>;
-class PluginManager {
- public:
-  virtual ~PluginManager(void);
-
- public:
-  static PluginManager* GetSingletonPtr(void);
-  static void DestoryInstance(void);
-
+class PluginManager: public base::Singleton<PluginManager> {
  public:
   void LoadAllPlugin(const base::PathChar* filePath);
   void UnLoadAllPlugin(void);
@@ -60,12 +53,6 @@ class PluginManager {
 
  protected:
   Plugins plugins_;
-
- private:
-  PluginManager(void);
-
- private:
-  static PluginManager* singleton_;
 };
 }  // namespace content
 #endif  // CONTENT_CORE_PLUGIN_H

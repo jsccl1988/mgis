@@ -29,8 +29,8 @@ int SelectTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
   // result_layer_ = DataSourceMgr::CreateMemVecLayer();
   // result_layer_->Open("");
 
-  auto *environment = content::Environment::GetSingletonPtr();
-  auto &system_options = environment->GetSystemOptions();
+  auto& environment = content::Environment::GetInstance();
+  auto &system_options = environment.get()->GetSystemOptions();
 
   select_margin_ = system_options.select_margin;
 
@@ -201,7 +201,7 @@ void SelectTool::OnRetDelegate(int nRetType) {
 }
 
 void SelectTool::OnSetSelMode(void) {
-  auto *environment = content::Environment::GetSingletonPtr();
+  auto& environment = content::Environment::GetInstance();
 
   this->EndDelegate();
 

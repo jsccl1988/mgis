@@ -45,15 +45,6 @@ bool Library::Unload() {
   return true;
 }
 
-LibraryManager::~LibraryManager(void) {
-  for (Librarys::iterator it = librarys_.begin(); it != librarys_.end(); ++it) {
-    (*it)->Unload();
-    SAFE_DELETE(*it);
-  }
-
-  librarys_.clear();
-}
-
 Library* LibraryManager::LoadLibrary(const base::NameChar* name,
                                      const base::PathChar* path) {
   Library* lib = NULL;

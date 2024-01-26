@@ -6,6 +6,7 @@
 
 #include <string>
 
+#include "base/memory/singleton.h"
 #include "content/content.h"
 #include "content/content_export.h"
 
@@ -57,21 +58,21 @@ struct SystemOptions {
   std::string render_device_3d{"RenderDevice3DGL"};
 };
 
-class Environment {
+class Environment : public base::Singleton<Environment> {
  public:
-  static Environment *GetSingletonPtr(void);
-  static void DestoryInstance(void);
-
- public:
-  inline MapDocInfo GetMapDocInfo(void) const { return map_doc_info_; }
-  inline void SetMapDocInfo(MapDocInfo &mapDocInfo) {
+  inline const MapDocInfo &GetMapDocInfo(void) const { return map_doc_info_; }
+  inline void SetMapDocInfo(const MapDocInfo &mapDocInfo) {
     map_doc_info_ = mapDocInfo;
   }
 
-  inline ProjectInfo GetProjectInfo(void) const { return project_info_; }
-  inline void SetProjectInfo(ProjectInfo &prjInfo) { project_info_ = prjInfo; }
+  inline const ProjectInfo &GetProjectInfo(void) const { return project_info_; }
+  inline void SetProjectInfo(const ProjectInfo &prjInfo) {
+    project_info_ = prjInfo;
+  }
 
-  inline SystemOptions GetSystemOptions(void) const { return system_options_; }
+  inline const SystemOptions &GetSystemOptions(void) const {
+    return system_options_;
+  }
   inline void SetSystemOptions(const SystemOptions &system_options) {
     system_options_ = system_options;
   }
@@ -81,12 +82,6 @@ class Environment {
   ProjectInfo project_info_;
 
   SystemOptions system_options_;
-
- private:
-  Environment(void) {}
-  ~Environment(void) {}
-
-  static Environment *singleton_;
 };
 }  // namespace content
 
