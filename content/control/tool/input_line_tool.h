@@ -14,11 +14,11 @@ class InputLineTool : public Tool {
   virtual ~InputLineTool();
 
   int Init(HWND hwnd, H2DRENDERDEVICE render_device,
-           DelegateCommit delegate_commit = NULL, void *to_follow = NULL);
+           DelegateCommit delegate_commit = nullptr, void *to_follow = nullptr);
   int AuxDraw();
 
  public:
-  int Notify(long nMsg, MessageListener::Message &message);
+  int Notify(MessageListener::Message &message);
 
   int LButtonDown(uint32_t flags, Point point);
   int MouseMove(uint32_t flags, Point point);

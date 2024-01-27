@@ -32,8 +32,8 @@ int FlashTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
   // result_layer_ = DataSourceMgr::CreateMemVecLayer();
   // result_layer_->Open("");
 
-  AppendFunctionItems(L"开始闪烁¸", TOOL_MESSAGE_START_FLASH, FIG_2DVIEW);
-  AppendFunctionItems(L"停止闪烁¸", TOOL_MESSAGE_STOP_FLASH, FIG_2DVIEW);
+  AppendFunctionItems(L"开始闪烁", TOOL_MESSAGE_START_FLASH, FIG_2DVIEW);
+  AppendFunctionItems(L"停止闪烁", TOOL_MESSAGE_STOP_FLASH, FIG_2DVIEW);
 
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_START_FLASH);
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_STOP_FLASH);

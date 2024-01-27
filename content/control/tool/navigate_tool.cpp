@@ -3,6 +3,7 @@
 
 #include "content/control/tool/navigate_tool.h"
 
+#include "content/common/environment.h"
 #include "content/control/resource/resource.h"
 #include "gfx/2d/renderer/style.h"
 
@@ -27,8 +28,8 @@ int NavigateTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
   int nCount = sizeof(cursor_ids) / sizeof(UINT);
 
   for (int i = 0; i < nCount; i++) {
-    cursors_[i] =
-        ::LoadCursor(::GetModuleHandle(NULL), MAKEINTRESOURCE(cursor_ids[i]));
+    cursors_[i] = ::LoadCursor(::GetModuleHandle(nullptr),
+                               MAKEINTRESOURCE(cursor_ids[i]));
   }
 
   AppendFunctionItems(L"放大", TOOL_MESSAGE_VIEW_ZOOMIN,
@@ -130,7 +131,7 @@ int NavigateTool::Notify(MessageListener::Message& message) {
 int NavigateTool::SetCursor(void) {
   switch (view_model_) {
     case VM_ZoomOff:
-      ::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+      ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
       break;
     case VM_ZoomIn:
       ::SetCursor(cursors_[CT_LoupePlus]);
@@ -437,7 +438,7 @@ void NavigateTool::ZoomRestore() {
 
   render_device_->ZoomToRect(logic_rect);
   render_device_->Refresh();
-  // if (m_pOperMap != NULL) {
+  // if (m_pOperMap != nullptr) {
   //   Envelope envelope;
   //   fRect logic_rect;
 

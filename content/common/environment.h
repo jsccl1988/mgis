@@ -23,16 +23,16 @@ struct ProjectInfo {
 
 struct StyleOptions {
   std::string point_style{"DefPointStyle"};
-  std::string curve_style{"DefLineStyle"};
-  std::string region_style{"DefSurfaceStyle"};
+  std::string curve_style{"DefCurveStyle"};
+  std::string surface_style{"DefSurfaceStyle"};
   std::string aux_style{"DefAuxStyle"};
 
-  std::string dot_flash_style1{"DefAnnoFlashStyle1"};
-  std::string dot_flash_style2{"DefAnnoFlashStyle2"};
-  std::string line_flash_style1{"DefLineFlashStyle1"};
-  std::string line_flash_style2{"DefLineFlashStyle2"};
-  std::string region_flash_style1{"DefSurfaceFlashStyle1"};
-  std::string region_flash_style2{"DefSurfaceFlashStyle2"};
+  std::string point_flash_style1{"DefAnnoFlashStyle1"};
+  std::string point_flash_style2{"DefAnnoFlashStyle2"};
+  std::string curve_flash_style1{"DefCurveFlashStyle1"};
+  std::string curve_flash_style2{"DefCurveFlashStyle2"};
+  std::string surface_flash_style1{"DefSurfaceFlashStyle1"};
+  std::string surface_flash_style2{"DefSurfaceFlashStyle2"};
 };
 
 struct FlashOptions {

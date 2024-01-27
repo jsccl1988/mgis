@@ -8,7 +8,7 @@
 namespace content {
 const static base::NameString kInputPointTool = L"输入点";
 InputPointTool::InputPointTool()
-    : geometry_(NULL),
+    : geometry_(nullptr),
       is_drag_(false),
       is_delay_(false),
       append_type_(-1),
@@ -19,18 +19,19 @@ InputPointTool::InputPointTool()
 InputPointTool::~InputPointTool() {
   SAFE_DELETE(geometry_);
 
-  UnRegisterMsg();
+  UnRegisterMessage();
 }
 
 int InputPointTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
                          DelegateCommit delegate_commit, void *to_follow) {
-  if (ERR_NONE != Tool::Init(render_device, hwnd, delegate_commit, to_follow)) {
+  if (ERR_NONE != Tool::Init(hwnd, render_device, delegate_commit, to_follow)) {
     return ERR_FAILURE;
   }
 
   auto &style_manager = gfx2d::StyleManager::GetInstance();
   auto *style = style_manager.get()->GetStyle(style_name_.c_str());
-  style->SetStyleType(ST_PenDesc | ST_BrushDesc | ST_SymbolDesc | ST_AnnoDesc);
+  style->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc |
+                      gfx2d::ST_SymbolDesc | gfx2d::ST_AnnoDesc);
 
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_POINT_TYPE);
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_GET_INPUT_POINT_TYPE);
@@ -157,7 +158,7 @@ void InputPointTool::AppendImage(int16_t mouse_status, Point point) {
 
       float x, y;
       render_device_->DPToLP(origin_point_.x, origin_point_.y, x, y);
-      geometry_ = new Point(x, y);
+      geometry_ = new OGRPoint(x, y);
 
       SetOperatorDone(false);
       SetEnableContexMenu(false);
@@ -203,8 +204,8 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
         float x{0.f}, y{0.f};
         angle_ = 0;
         render_device_->DPToLP(origin_point_.x, origin_point_.y, x, y);
-        geometry_ = new Point(x, y);
-        if (origin_point_ != current_point_) {
+        geometry_ = new OGRPoint(x, y);
+        if (!gfx2d::equal(origin_point_, current_point_)) {
           angle_ = atanf(float(current_point_.y - origin_point_.y) /
                          float(current_point_.x - origin_point_.x));
         }
@@ -242,7 +243,7 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
   }
 }
 
-void InputPointTool::AppendDot(int16_t mouse_status, _Core::Point point) {
+void InputPointTool::AppendDot(int16_t mouse_status, Point point) {
   switch (mouse_status) {
     case MS_LButtonDown: {
       origin_point_ = point;
@@ -263,14 +264,14 @@ void InputPointTool::EndAppendPoint() {
   render_device_->Refresh();
 
   uint16_t ret_type = TOOL_MESSAGE_RET_INPUT_POINT;
-  MessageListener::Message message message;
+  MessageListener::Message message;
 
   message.id = TOOL_MESSAGE_RET_DELEGATE;
   message.source_window = hwnd_;
   message.wparam = WPARAM(geometry_);
-  message.lParam = LPARAM(&ret_type);
+  message.lparam = LPARAM(&ret_type);
 
-  CommitDelegate(TOOL_MESSAGE_RET_DELEGATE, message);
+  CommitDelegate(message);
 
   SAFE_DELETE(geometry_);
 

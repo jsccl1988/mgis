@@ -14,14 +14,14 @@ namespace gfx2d {
 const float kDelay = 0.25;
 RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
     : RenderDevice(instance),
-      font_(NULL),
-      pen_(NULL),
-      brush_(NULL),
-      icon_(NULL),
-      old_font_(NULL),
-      old_pen_(NULL),
-      old_brush_(NULL),
-      current_dc_(NULL),
+      font_(nullptr),
+      pen_(nullptr),
+      brush_(nullptr),
+      icon_(nullptr),
+      old_font_(nullptr),
+      old_pen_(nullptr),
+      old_brush_(nullptr),
+      current_dc_(nullptr),
       anno_angle_(0.),
       use_current_style_(false),
       is_lock_style_(false),
@@ -35,7 +35,7 @@ RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
 RenderDeviceGDI::~RenderDeviceGDI(void) { Release(); }
 
 int RenderDeviceGDI::Init(HWND hwnd) {
-  if (hwnd == NULL) {
+  if (hwnd == nullptr) {
     LOG(ERROR) << __FUNCTION__ << "hwnd is nullptr!";
     return ERR_INVALID_PARAM;
   }
@@ -69,22 +69,22 @@ int RenderDeviceGDI::Destroy(void) {
 int RenderDeviceGDI::Release(void) {
   if (font_) {
     ::DeleteObject(font_);
-    font_ = NULL;
+    font_ = nullptr;
   }
 
   if (pen_) {
     ::DeleteObject(pen_);
-    pen_ = NULL;
+    pen_ = nullptr;
   }
 
   if (brush_) {
     ::DeleteObject(brush_);
-    brush_ = NULL;
+    brush_ = nullptr;
   }
 
   if (icon_) {
     ::DeleteObject(icon_);
-    icon_ = NULL;
+    icon_ = nullptr;
   }
 
   LOG(INFO) << __FUNCTION__ << "Release Gdi RenderDevice ok!";
@@ -336,7 +336,7 @@ int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
 
 int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
                                  const Style *style, int op) {
-  is_lock_style_ = (NULL != style);
+  is_lock_style_ = (nullptr != style);
 
   switch (render_buffer) {
     case RB_COMPOSIT: {
@@ -378,7 +378,7 @@ int RenderDeviceGDI::EndRender(eRenderBuffer render_buffer) {
     } break;
   }
 
-  current_dc_ = NULL;
+  current_dc_ = nullptr;
   is_lock_style_ = false;
 
   return ERR_NONE;
@@ -387,7 +387,7 @@ int RenderDeviceGDI::EndRender(eRenderBuffer render_buffer) {
 int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
   ::SetROP2(current_dc_, draw_mode);
 
-  use_current_style_ = (NULL != style);
+  use_current_style_ = (nullptr != style);
 
   if (use_current_style_) {
     uint64_t format = style->GetStyleType();
@@ -396,7 +396,7 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
 
       if (pen_) {
         ::DeleteObject(pen_);
-        pen_ = NULL;
+        pen_ = nullptr;
       }
 
       pen_ = ::CreatePen(pen.style, pen.width, pen.color);
@@ -408,7 +408,7 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
 
       if (brush_) {
         ::DeleteObject(brush_);
-        brush_ = NULL;
+        brush_ = nullptr;
       }
 
       if (brush.brush_type == BrushDesc::BT_Hatch) {
@@ -425,7 +425,7 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
 
       if (icon_) {
         ::DeleteObject(icon_);
-        icon_ = NULL;
+        icon_ = nullptr;
       }
 
       // icon_ =
@@ -438,7 +438,7 @@ int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
 
       if (font_) {
         ::DeleteObject(font_);
-        font_ = NULL;
+        font_ = nullptr;
       }
 
       font_ =
@@ -490,7 +490,7 @@ int RenderDeviceGDI::Render() {
 
   BeginRender(RB_COMPOSIT);
 
-  if (layer_ != NULL) {
+  if (layer_ != nullptr) {
     return RenderLayer(layer_, op_);
   }
 
@@ -518,7 +518,7 @@ int RenderDeviceGDI::RenderForDebug() {
 
 int RenderDeviceGDI::RenderLayer(const OGRLayer *const_layer, int op) {
   OGRLayer *layer = const_cast<OGRLayer *>(const_layer);
-  if (NULL == layer) {
+  if (nullptr == layer) {
     return ERR_INVALID_PARAM;
   }
 
@@ -559,7 +559,7 @@ int RenderDeviceGDI::RenderGeometry(const OGRGeometry *geometry, int op) {
     long X = 0, Y = 0;
 
     LPToDP(envelope.MinX, envelope.MinY, X, Y);
-    ::MoveToEx(current_dc_, X, Y, NULL);
+    ::MoveToEx(current_dc_, X, Y, nullptr);
 
     LPToDP(envelope.MaxX, envelope.MinY, X, Y);
     ::LineTo(current_dc_, X, Y);
@@ -658,7 +658,7 @@ int RenderDeviceGDI::DrawPoint(const OGRPoint *point) {
 int RenderDeviceGDI::DrawAnno(const OGRPoint *point, const char *anno,
                               float angle, float height, float width,
                               float space) {
-  if (anno == NULL) {
+  if (anno == nullptr) {
     return ERR_INVALID_PARAM;
   }
 
@@ -715,7 +715,7 @@ int RenderDeviceGDI::DrawSymbol(const OGRPoint *point, HICON icon, long height,
   long X = 0, Y = 0;
   LPToDP(point->getX(), point->getY(), X, Y);
   ::DrawIconEx(current_dc_, X - width / 2, Y + height / 2, icon, width, height,
-               0, NULL, DI_NORMAL);
+               0, nullptr, DI_NORMAL);
 
   if (options_.show_point) {
     int r = options_.point_radius;
@@ -753,7 +753,7 @@ int RenderDeviceGDI::DrawLineString(const OGRLineString *line_string) {
     }
   }
 
-  MoveToEx(current_dc_, points[0].x, points[0].y, NULL);
+  MoveToEx(current_dc_, points[0].x, points[0].y, nullptr);
   PolylineTo(current_dc_, points, point_size);
 
   SAFE_DELETE_A(points);
@@ -789,7 +789,7 @@ int RenderDeviceGDI::DrawPolygon(const OGRPolygon *polygon) {
     all_point_size += ring_point_sizes[i + 1];
   }
 
-  POINT *points = NULL;
+  POINT *points = nullptr;
   points = new POINT[all_point_size];
 
   if (options_.show_point) {

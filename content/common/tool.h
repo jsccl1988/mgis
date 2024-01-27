@@ -29,8 +29,8 @@ class Tool : public MessageListener {
 
  public:
   virtual int Init(HWND hwnd, H2DRENDERDEVICE render_device,
-                   DelegateCommit delegate_commit = NULL,
-                   void *to_follow = NULL);
+                   DelegateCommit delegate_commit = nullptr,
+                   void *to_follow = nullptr);
   virtual int AuxDraw(void);
   virtual int Timer(void);
 
@@ -44,14 +44,14 @@ class Tool : public MessageListener {
   inline const char *GetToolStyleName(void) { return style_name_.c_str(); }
 
   inline bool IsOperatorDone(void) {
-    if (delegate_target_ != NULL) {
+    if (delegate_target_ != nullptr) {
       return delegate_target_->IsOperatorDone();
     }
 
     return done_;
   }
   inline void SetOperatorDone(bool done) {
-    if (delegate_target_ != NULL) {
+    if (delegate_target_ != nullptr) {
       delegate_target_->SetOperatorDone(done);
     }
 
@@ -59,14 +59,14 @@ class Tool : public MessageListener {
   }
 
   inline bool IsEnableContexMenu(void) {
-    if (delegate_target_ != NULL) {
+    if (delegate_target_ != nullptr) {
       return delegate_target_->IsEnableContexMenu();
     }
 
     return enable_context_menu_;
   }
   inline void SetEnableContexMenu(bool enable) {
-    if (delegate_target_ != NULL) {
+    if (delegate_target_ != nullptr) {
       delegate_target_->SetEnableContexMenu(enable);
     }
 

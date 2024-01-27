@@ -2,16 +2,18 @@
 // All rights reserved.
 #include "content/control/tool/select_tool.h"
 
+#include "content/common/environment.h"
 #include "content/control/tool/tool_factory.h"
+
 
 namespace content {
 const static base::NameString kSelectToolName = L"选取";
-SelectTool::SelectTool() : captured_(false), result_layer_(NULL) {
+SelectTool::SelectTool() : captured_(false), result_layer_(nullptr) {
   SetName(kSelectToolName.c_str());
 }
 
 SelectTool::~SelectTool() {
-  // SAFE_DELETE(m_gQDes.pQueryGeom);
+  // SAFE_DELETE(geometry_);
 
   this->EndDelegate();
 
@@ -22,14 +24,14 @@ SelectTool::~SelectTool() {
 
 int SelectTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
                      DelegateCommit delegate_commit, void *to_follow) {
-  if (ERR_NONE != Tool::Init(render_device, hwnd, delegate_commit, to_follow)) {
+  if (ERR_NONE != Tool::Init(hwnd, render_device, delegate_commit, to_follow)) {
     return ERR_FAILURE;
   }
 
   // result_layer_ = DataSourceMgr::CreateMemVecLayer();
   // result_layer_->Open("");
 
-  auto& environment = content::Environment::GetInstance();
+  auto &environment = content::Environment::GetInstance();
   auto &system_options = environment.get()->GetSystemOptions();
 
   select_margin_ = system_options.select_margin;
@@ -61,13 +63,15 @@ int SelectTool::AuxDraw() { return Tool::AuxDraw(); }
 int SelectTool::Timer() { return Tool::AuxDraw(); }
 
 int SelectTool::Notify(MessageListener::Message &message) {
-  if (message.source_window != hwnd_) return ERR_NONE;
+  if (message.source_window != hwnd_) {
+    return ERR_NONE;
+  }
 
   switch (message.id) {
     case TOOL_MESSAGE_DEFAULT_PROCESS: {
     } break;
     case TOOL_MESSAGE_SELECT_POINTSEL: {
-      select_mode_ = ST_Point;
+      select_mode_ = SM_Point;
 
       OnSetSelMode();
       message.modify = true;
@@ -75,7 +79,7 @@ int SelectTool::Notify(MessageListener::Message &message) {
       SetActive();
     } break;
     case TOOL_MESSAGE_SELECT_RECTSEL: {
-      select_mode_ = ST_Rect;
+      select_mode_ = SM_Rect;
 
       OnSetSelMode();
       message.modify = true;
@@ -83,7 +87,7 @@ int SelectTool::Notify(MessageListener::Message &message) {
       SetActive();
     } break;
     case TOOL_MESSAGE_SELECT_POLYGONSEL: {
-      select_mode_ = ST_Polygon;
+      select_mode_ = SM_Polygon;
 
       OnSetSelMode();
       message.modify = true;
@@ -97,8 +101,8 @@ int SelectTool::Notify(MessageListener::Message &message) {
       message.id = TOOL_MESSAGE_SET_FLASH_DATA;
       message.source_window = hwnd_;
       message.wparam = WPARAM(result_layer_);
-      message.lparam = LPARAM(&m_nLayerFeaType);
-      PostIAToolMessage(TOOL_BROADCAST, message);
+      message.lparam = LPARAM(&layer_feature_type_);
+      PostToolMessage(TOOL_BROADCAST, message);
 
       SetActive();
     } break;
@@ -115,7 +119,7 @@ int SelectTool::Notify(MessageListener::Message &message) {
     } break;
     case TOOL_MESSAGE_RET_DELEGATE: {
       uint16_t ret_type = *(uint16_t *)message.lparam;
-      // m_gQDes.pQueryGeom = ((OGRGeometry *)message.wparam)->Clone();
+      geometry_ = ((OGRGeometry *)message.wparam)->clone();
 
       OnRetDelegate(ret_type);
     } break;
@@ -134,20 +138,20 @@ void SelectTool::OnRetDelegate(int nRetType) {
 
       // m_gQDes.select_margin = select_margin_ / render_device_->GetBlc();
       // m_pOperMap->QueryFeature(&m_gQDes, &m_pQDes, result_layer_,
-      //                          m_nLayerFeaType);
+      //                          layer_feature_type_);
 
-      // SAFE_DELETE(m_gQDes.pQueryGeom);
+      SAFE_DELETE(geometry_);
 
       MessageListener::Message message;
       message.id = TOOL_MESSAGE_SET_FLASH_DATA;
       message.source_window = hwnd_;
       message.wparam = WPARAM(result_layer_);
-      message.lparam = LPARAM(&m_nLayerFeaType);
-      PostIAToolMessage(TOOL_BROADCAST, message);
+      message.lparam = LPARAM(&layer_feature_type_);
+      PostToolMessage(TOOL_BROADCAST, message);
 
       message.id = TOOL_MESSAGE_START_FLASH;
       message.wparam = message.lparam = NULL;
-      PostIAToolMessage(TOOL_BROADCAST, message);
+      PostToolMessage(TOOL_BROADCAST, message);
 
       // if (result_layer_->GetFeatureCount() == 1) {
       //   Show2DFeatureInfoDlg(result_layer_->GetFeature(0));
@@ -160,22 +164,22 @@ void SelectTool::OnRetDelegate(int nRetType) {
 
       // m_gQDes.select_margin = select_margin_ / render_device_->GetBlc();
       // m_pOperMap->QueryFeature(&m_gQDes, &m_pQDes, result_layer_,
-      //                          m_nLayerFeaType);
+      //                          layer_feature_type_);
 
-      // SAFE_DELETE(m_gQDes.pQueryGeom);
+      SAFE_DELETE(geometry_);
 
       MessageListener::Message message;
       message.id = TOOL_MESSAGE_SET_FLASH_DATA;
       message.source_window = hwnd_;
       message.wparam = WPARAM(result_layer_);
-      message.lparam = LPARAM(&m_nLayerFeaType);
-      PostIAToolMessage(TOOL_BROADCAST, message);
+      message.lparam = LPARAM(&layer_feature_type_);
+      PostToolMessage(TOOL_BROADCAST, message);
 
       message.id = TOOL_MESSAGE_START_FLASH;
       message.wparam = message.lparam = NULL;
-      PostIAToolMessage(TOOL_BROADCAST, message);
+      PostToolMessage(TOOL_BROADCAST, message);
 
-      uint32_t unID = C_INVALID_UINT_VALUE;
+      uint32_t unID = kUint64Max;
 
       // if (result_layer_->GetFeatureCount() > 1) {
       //   vector<uint32_t> vIDs;
@@ -201,20 +205,21 @@ void SelectTool::OnRetDelegate(int nRetType) {
 }
 
 void SelectTool::OnSetSelMode(void) {
-  auto& environment = content::Environment::GetInstance();
+  auto &environment = content::Environment::GetInstance();
+  auto &style_options = environment.get()->GetSystemOptions().style_options;
 
   this->EndDelegate();
 
-  Tool *input_tool = NULL;
+  Tool *input_tool = nullptr;
 
   switch (select_mode_) {
-    case ST_Point: {
-      ToolFactory::CreateTool(input_tool, ToolType::InputPoint);
+    case SM_Point: {
+      ToolFactory::CreateTool(input_tool, ToolFactory::InputPoint);
 
-      if (NULL != input_tool) {
-        input_tool->SetToolStyleName(styleSonfig.curve_style_);
+      if (nullptr != input_tool) {
+        input_tool->SetToolStyleName(style_options.curve_style.c_str());
 
-        if (ERR_NONE == input_tool->Init(render_device_, m_pOperMap, hwnd_)) {
+        if (ERR_NONE == input_tool->Init(hwnd_, render_device_)) {
           uint16_t upoint_sizeType = PT_Dot;
 
           MessageListener::Message message;
@@ -228,13 +233,13 @@ void SelectTool::OnSetSelMode(void) {
         }
       }
     } break;
-    case ST_Polygon: {
-      ToolFactory::CreateTool(input_tool, ToolType::InputLine);
+    case SM_Polygon: {
+      ToolFactory::CreateTool(input_tool, ToolFactory::InputLine);
 
-      if (NULL != input_tool) {
-        input_tool->SetToolStyleName(styleSonfig.curve_style_);
+      if (nullptr != input_tool) {
+        input_tool->SetToolStyleName(style_options.curve_style.c_str());
 
-        if (ERR_NONE == input_tool->Init(render_device_, m_pOperMap, hwnd_)) {
+        if (ERR_NONE == input_tool->Init(hwnd_, render_device_)) {
           uint16_t unLineType = LT_LinearRing;
 
           MessageListener::Message message;
@@ -249,13 +254,13 @@ void SelectTool::OnSetSelMode(void) {
         }
       }
     } break;
-    case ST_Rect: {
-      ToolFactory::CreateTool(input_tool, ToolType::InputLine);
+    case SM_Rect: {
+      ToolFactory::CreateTool(input_tool, ToolFactory::InputLine);
 
-      if (NULL != input_tool) {
-        input_tool->SetToolStyleName(styleSonfig.curve_style_);
+      if (nullptr != input_tool) {
+        input_tool->SetToolStyleName(style_options.curve_style.c_str());
 
-        if (ERR_NONE == input_tool->Init(render_device_, m_pOperMap, hwnd_)) {
+        if (ERR_NONE == input_tool->Init(hwnd_, render_device_)) {
           uint16_t unLineType = LT_Rect;
 
           MessageListener::Message message;
@@ -274,7 +279,7 @@ void SelectTool::OnSetSelMode(void) {
 }
 
 int SelectTool::KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t flags) {
-  if (delegate_target_ != NULL && !delegate_target_->IsOperatorDone())
+  if (delegate_target_ != nullptr && !delegate_target_->IsOperatorDone())
     return delegate_target_->KeyDown(nChar, nRepCnt, flags);
   else {
     if (!(GetKeyState(VK_CONTROL) & 0x8000)) {
@@ -287,8 +292,8 @@ int SelectTool::KeyDown(uint32_t nChar, uint32_t nRepCnt, uint32_t flags) {
           message.id = TOOL_MESSAGE_SET_FLASH_DATA;
           message.source_window = hwnd_;
           message.wparam = WPARAM(result_layer_);
-          message.lparam = LPARAM(&m_nLayerFeaType);
-          PostIAToolMessage(TOOL_BROADCAST, message);
+          message.lparam = LPARAM(&layer_feature_type_);
+          PostToolMessage(TOOL_BROADCAST, message);
 
           SetActive();
         } break;

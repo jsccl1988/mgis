@@ -10,26 +10,26 @@ static const base::NameString kInputLineTool = L"输入线";
 
 namespace content {
 InputLineTool::InputLineTool()
-    : geometry_(NULL), is_drag_(false), is_delay_(false), append_type_(-1) {
+    : geometry_(nullptr), is_drag_(false), is_delay_(false), append_type_(-1) {
   SetName(kInputLineTool.c_str());
 }
 
 InputLineTool::~InputLineTool() {
   SAFE_DELETE(geometry_);
 
-  UnRegisterMsg();
+  UnRegisterMessage();
 }
 
 int InputLineTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
                         DelegateCommit delegate_commit, void *to_follow) {
-  if (ERR_NONE != Tool::Init(render_device, hwnd, delegate_commit, to_follow)) {
+  if (ERR_NONE != Tool::Init(hwnd, render_device, delegate_commit, to_follow)) {
     return ERR_FAILURE;
   }
 
   auto &style_manager = gfx2d::StyleManager::GetInstance();
   auto *style = style_manager.get()->GetStyle(style_name_.c_str());
   if (style) {
-    style->SetStyleType(ST_PenDesc);
+    style->SetStyleType(gfx2d::ST_PenDesc);
   }
 
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_LINE_TYPE);
@@ -157,7 +157,6 @@ void InputLineTool::AppendLineString(uint32_t mouse_status, Point point) {
       if (!is_drag_) {
         float x{0.f}, y{0.f};
         OGRLineString *line_string = new OGRLineString();
-
         render_device_->DPToLP(point.x, point.y, x, y);
         line_string->addPoint(x, y);
 
@@ -167,6 +166,7 @@ void InputLineTool::AppendLineString(uint32_t mouse_status, Point point) {
         SetOperatorDone(false);
         SetEnableContexMenu(false);
       } else {
+        float x{0.f}, y{0.f};
         OGRLineString *line_string = (OGRLineString *)geometry_;
         render_device_->DPToLP(point.x, point.y, x, y);
         line_string->addPoint(x, y);
@@ -343,13 +343,13 @@ void InputLineTool::AppendLinearRing(uint32_t mouse_status, Point point) {
             render_device_->DPToLP(current_point_.x, current_point_.y, x, y);
             line_string.setPoint(1, linear_ring->getX(0), linear_ring->getY(0));
 
-            render_device_->DrawLine(fpts, 2, true);
+            render_device_->DrawLineString(&line_string);
             render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
 
             render_device_->Render();
           }
 
-          linear_ring->CloseRings();
+          linear_ring->closeRings();
           EndAppendLine();
 
           if (ERR_NONE ==
@@ -393,7 +393,7 @@ void InputLineTool::EndAppendLine(void) {
   render_device_->Refresh();
 
   uint16_t ret_type = TOOL_MESSAGE_RET_INPUT_LINE;
-  MessageListener::Message message message;
+  MessageListener::Message message;
 
   message.id = TOOL_MESSAGE_RET_DELEGATE;
   message.source_window = hwnd_;

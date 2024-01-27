@@ -80,6 +80,9 @@ class MapWindow : public CWindowImpl<MapWindow>,
 
   gfx2d::Renderer* renderer_{nullptr};
   content::Tool* navigate_tool_{nullptr};
+  content::Tool* select_tool_{nullptr};
+  content::Tool* flash_tool_{nullptr};
+  content::Tool* edit_tool_{nullptr};
   H2DRENDERDEVICE render_device_{nullptr};
 };
 }  // namespace content

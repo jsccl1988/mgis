@@ -12,6 +12,7 @@ class ToolFactory {
     Navigate,
     Flash,
     Select,
+    Edit,
     InputPoint,
     InputLine,
     InputSurface,

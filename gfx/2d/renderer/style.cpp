@@ -34,12 +34,12 @@ Style *Style::Clone(const char *new_name) const {
     return nullptr;
 }
 
-void StyleManager::SetDefaultStyle(const char *defName, PenDesc &pen_desc,
+void StyleManager::SetDefaultStyle(const char *default_name, PenDesc &pen_desc,
                                    BrushDesc &brush_desc,
                                    AnnotationDesc &anno_desc,
                                    SymbolDesc &symbol_desc) {
   default_style_ =
-      new Style(defName, pen_desc, brush_desc, anno_desc, symbol_desc);
+      new Style(default_name, pen_desc, brush_desc, anno_desc, symbol_desc);
   style_list_.push_back(default_style_);
 }
 
@@ -53,13 +53,13 @@ void StyleManager::DestroyAllStyle() {
   style_list_.clear();
 }
 
-Style *StyleManager::CreateStyle(const char *defName, PenDesc &pen_desc,
+Style *StyleManager::CreateStyle(const char *default_name, PenDesc &pen_desc,
                                  BrushDesc &brush_desc,
                                  AnnotationDesc &anno_desc,
                                  SymbolDesc &symbol_desc) {
-  Style *style = GetStyle(defName);
+  Style *style = GetStyle(default_name);
   if (!style) {
-    style = new Style(defName, pen_desc, brush_desc, anno_desc, symbol_desc);
+    style = new Style(default_name, pen_desc, brush_desc, anno_desc, symbol_desc);
     style_list_.push_back(style);
   }
 

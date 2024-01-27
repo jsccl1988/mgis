@@ -8,7 +8,7 @@
 namespace content {
 const static base::NameString kIuputSurfaceTool = L"输入面";
 InputSurfaceTool::InputSurfaceTool()
-    : geometry_(NULL),
+    : geometry_(nullptr),
       is_drag_(false),
       is_delay_(false),
       append_type_(-1),
@@ -19,18 +19,18 @@ InputSurfaceTool::InputSurfaceTool()
 InputSurfaceTool::~InputSurfaceTool() {
   SAFE_DELETE(geometry_);
 
-  UnRegisterMsg();
+  UnRegisterMessage();
 }
 
 int InputSurfaceTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
                            DelegateCommit delegate_commit, void *to_follow) {
-  if (ERR_NONE != Tool::Init(render_device, hwnd, delegate_commit, to_follow)) {
+  if (ERR_NONE != Tool::Init(hwnd, render_device, delegate_commit, to_follow)) {
     return ERR_FAILURE;
   }
 
   auto &style_manager = gfx2d::StyleManager::GetInstance();
   auto *style = style_manager.get()->GetStyle(style_name_.c_str());
-  style->SetStyleType(ST_PenDesc | ST_BrushDesc);
+  style->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc);
 
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_SET_INPUT_SURFACE_TYPE);
   TOOL_APPEND_MESSAGE(TOOL_MESSAGE_GET_INPUT_SURFACE_TYPE);
@@ -131,9 +131,6 @@ int InputSurfaceTool::MouseWheel(uint32_t flags, int16_t z_delta, Point point) {
 
 //////////////////////////////////////////////////////////////////////////
 void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
-  float x1, y1;
-  static Point lpts[2];
-
   switch (mouse_status) {
     case MS_LButtonDown: {
       origin_point_ = point;
@@ -156,8 +153,8 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
         is_drag_ = false;
         current_point_ = point;
 
-        OGRLinearRing *linear_ring = (OGRLinearRing *)geometry_;
-        OGRPolygon *polygon = new OGRPolygon();
+        auto *linear_ring = (OGRLinearRing *)geometry_;
+        auto *polygon = new OGRPolygon();
         polygon->addRingDirectly(linear_ring);
         geometry_ = polygon;
 
@@ -182,16 +179,16 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
           OGRLinearRing linear_ring1, linear_ring2;
           render_device_->DPToLP(origin_point_.x, origin_point_.y, x1, y1);
           render_device_->DPToLP(prev_point_.x, prev_point_.y, x2, y2);
-          linear_ring1->setPoint(0, x1, y1);
-          linear_ring1->setPoint(1, x2, y1);
-          linear_ring1->setPoint(2, x2, y2);
-          linear_ring1->setPoint(3, x1, y2);
+          linear_ring1.setPoint(0, x1, y1);
+          linear_ring1.setPoint(1, x2, y1);
+          linear_ring1.setPoint(2, x2, y2);
+          linear_ring1.setPoint(3, x1, y2);
 
           render_device_->DPToLP(current_point_.x, current_point_.y, x2, y2);
-          linear_ring2->setPoint(0, x1, y1);
-          linear_ring2->setPoint(1, x2, y1);
-          linear_ring2->setPoint(2, x2, y2);
-          linear_ring2->setPoint(3, x1, y2);
+          linear_ring2.setPoint(0, x1, y1);
+          linear_ring2.setPoint(1, x2, y1);
+          linear_ring2.setPoint(2, x2, y2);
+          linear_ring2.setPoint(3, x1, y2);
 
           render_device_->DrawLinearRing(&linear_ring1);
           render_device_->DrawLinearRing(&linear_ring2);
@@ -203,10 +200,10 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
         OGRLinearRing *linear_ring = (OGRLinearRing *)geometry_;
         render_device_->DPToLP(origin_point_.x, origin_point_.y, x1, y1);
         render_device_->DPToLP(current_point_.x, current_point_.y, x2, y2);
-        linear_ring->SetPoint(1, x2, y1);
-        linear_ring->SetPoint(2, x2, y2);
-        linear_ring->SetPoint(3, x1, y2);
-        linear_ring->CloseRings();
+        linear_ring->setPoint(1, x2, y1);
+        linear_ring->setPoint(2, x2, y2);
+        linear_ring->setPoint(3, x1, y2);
+        linear_ring->closeRings();
       }
     } break;
     default:
@@ -254,10 +251,10 @@ void InputSurfaceTool::AppendPolygon(uint32_t mouse_status, Point point) {
           is_delay_ = true;
           step_ = 0;
 
-          linear_ring->CloseRings();
+          linear_ring->closeRings();
 
-          Polygon *polygon = new Polygon();
-          polygon->AddRingDirectly(linear_ring);
+          auto *polygon = new OGRPolygon();
+          polygon->addRingDirectly(linear_ring);
           geometry_ = polygon;
           EndAppendSurface();
 
@@ -302,11 +299,11 @@ void InputSurfaceTool::EndAppendSurface() {
 
   uint16_t ret_type = TOOL_MESSAGE_RET_INPUT_SURFACE;
 
-  MessageListener::Message message message;
+  MessageListener::Message message;
   message.id = TOOL_MESSAGE_RET_DELEGATE;
   message.source_window = hwnd_;
   message.wparam = WPARAM(geometry_);
-  message.lParam = LPARAM(&ret_type);
+  message.lparam = LPARAM(&ret_type);
 
   CommitDelegate(message);
 

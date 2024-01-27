@@ -3,6 +3,8 @@
 
 #include "content/control/window/map_window.h"
 
+#include "gfx/2d/renderer/style.h"
+
 #define ToDPoint(point) gfx2d::DPoint(point.x, point.y)
 
 namespace content {
@@ -16,6 +18,159 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
   if (loop) {
     loop->AddMessageFilter(this);
     loop->AddIdleHandler(this);
+  }
+
+  // style
+  {
+    auto& style_manager = gfx2d::StyleManager::GetInstance();
+    auto& style_options = environment.get()->GetSystemOptions().style_options;
+    auto& flash_options = environment.get()->GetSystemOptions().flash_options;
+
+    gfx2d::PenDesc pen_desc;
+    gfx2d::BrushDesc brush_desc;
+    gfx2d::AnnotationDesc anno_desc;
+    gfx2d::SymbolDesc symbol_desc;
+
+    style_manager.get()->SetDefaultStyle("SmtDefault", pen_desc, brush_desc,
+                                         anno_desc, symbol_desc);
+
+    auto* style1 = style_manager.get()->CreateStyle(
+        style_options.point_style.c_str(), pen_desc, brush_desc, anno_desc,
+        symbol_desc);
+    auto* style2 = style_manager.get()->CreateStyle(
+        style_options.curve_style.c_str(), pen_desc, brush_desc, anno_desc,
+        symbol_desc);
+    auto* style3 = style_manager.get()->CreateStyle(
+        style_options.surface_style.c_str(), pen_desc, brush_desc, anno_desc,
+        symbol_desc);
+    auto* style4 = style_manager.get()->CreateStyle(
+        style_options.aux_style.c_str(), pen_desc, brush_desc, anno_desc,
+        symbol_desc);
+
+    auto* style5 = style_manager.get()->CreateStyle(
+        style_options.point_flash_style1.c_str(), pen_desc, brush_desc,
+        anno_desc, symbol_desc);
+    auto* style6 = style_manager.get()->CreateStyle(
+        style_options.point_flash_style2.c_str(), pen_desc, brush_desc,
+        anno_desc, symbol_desc);
+
+    auto* style7 = style_manager.get()->CreateStyle(
+        style_options.curve_flash_style1.c_str(), pen_desc, brush_desc,
+        anno_desc, symbol_desc);
+    auto* style8 = style_manager.get()->CreateStyle(
+        style_options.curve_flash_style2.c_str(), pen_desc, brush_desc,
+        anno_desc, symbol_desc);
+
+    auto* style9 = style_manager.get()->CreateStyle(
+        style_options.surface_flash_style1.c_str(), pen_desc, brush_desc,
+        anno_desc, symbol_desc);
+    auto* style10 = style_manager.get()->CreateStyle(
+        style_options.surface_flash_style2.c_str(), pen_desc, brush_desc,
+        anno_desc, symbol_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    style1->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc |
+                         gfx2d::ST_AnnoDesc | gfx2d::ST_SymbolDesc);
+    style2->SetStyleType(gfx2d::ST_PenDesc);
+    style3->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc);
+    style4->SetStyleType(gfx2d::ST_PenDesc);
+
+    style5->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc |
+                         gfx2d::ST_AnnoDesc | gfx2d::ST_SymbolDesc);
+    style6->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc |
+                         gfx2d::ST_AnnoDesc | gfx2d::ST_SymbolDesc);
+
+    style7->SetStyleType(gfx2d::ST_PenDesc);
+    style8->SetStyleType(gfx2d::ST_PenDesc);
+
+    style9->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc);
+    style10->SetStyleType(gfx2d::ST_PenDesc | gfx2d::ST_BrushDesc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 1
+    pen_desc.color = RGB(255, 0, 0);
+    style1->SetPenDesc(pen_desc);
+
+    brush_desc.color = RGB(0, 255, 255);
+    style1->SetBrushDesc(brush_desc);
+
+    symbol_desc.id = 0;
+    symbol_desc.width = symbol_desc.height = 1.6;
+    style1->SetSymbolDesc(symbol_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 2
+    pen_desc.color = RGB(0, 0, 255);
+    style2->SetPenDesc(pen_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 3
+    pen_desc.width = 0.001;
+    pen_desc.color = RGB(255, 0, 0);
+    style3->SetPenDesc(pen_desc);
+
+    // brush_desc.brushTp = SmtBrushDesc::BT_Hatch;
+    brush_desc.color = RGB(77, 255, 0);
+    style3->SetBrushDesc(brush_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 4
+    pen_desc.color = RGB(255, 0, 0);
+    style4->SetPenDesc(pen_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 5
+    pen_desc.color = flash_options.color1;
+    pen_desc.width = 0.002;
+    style5->SetPenDesc(pen_desc);
+
+    brush_desc.color = flash_options.color2;
+    style5->SetBrushDesc(brush_desc);
+
+    anno_desc.color = flash_options.color1;
+    style5->SetAnnoDesc(anno_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 6
+    pen_desc.color = flash_options.color2;
+    pen_desc.width = 0.002;
+    style6->SetPenDesc(pen_desc);
+
+    brush_desc.color = flash_options.color1;
+    style6->SetBrushDesc(brush_desc);
+
+    anno_desc.color = flash_options.color2;
+    style6->SetAnnoDesc(anno_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 7
+    pen_desc.color = flash_options.color1;
+    pen_desc.width = 0.002;
+    style7->SetPenDesc(pen_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 8
+    pen_desc.color = flash_options.color2;
+    pen_desc.width = 0.002;
+    style8->SetPenDesc(pen_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 9
+    pen_desc.color = flash_options.color1;
+    pen_desc.width = 0.002;
+    style9->SetPenDesc(pen_desc);
+
+    brush_desc.color = flash_options.color2;
+    style9->SetBrushDesc(brush_desc);
+
+    //////////////////////////////////////////////////////////////////////////
+    // 10
+    pen_desc.color = flash_options.color2;
+    pen_desc.width = 0.002;
+    style10->SetPenDesc(pen_desc);
+
+    brush_desc.color = flash_options.color1;
+    style10->SetBrushDesc(brush_desc);
   }
 
   // map
@@ -45,10 +200,25 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
   // tool
   content::ToolFactory::CreateTool(navigate_tool_,
                                    content::ToolFactory::Navigate);
-
+  content::ToolFactory::CreateTool(select_tool_, content::ToolFactory::Select);
+  content::ToolFactory::CreateTool(flash_tool_, content::ToolFactory::Flash);
+  content::ToolFactory::CreateTool(edit_tool_, content::ToolFactory::Edit);
   if (ERR_NONE != navigate_tool_->Init(m_hWnd, render_device_)) {
     return S_FALSE;
   }
+
+  if (ERR_NONE != select_tool_->Init(m_hWnd, render_device_)) {
+    return S_FALSE;
+  }
+
+  if (ERR_NONE != flash_tool_->Init(m_hWnd, render_device_)) {
+    return S_FALSE;
+  }
+
+  if (ERR_NONE != edit_tool_->Init(m_hWnd, render_device_)) {
+    return S_FALSE;
+  }
+
   navigate_tool_->SetActive();
 
   // navigate menu
@@ -62,6 +232,12 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
 
   content::AppendListenerMenu(m_hContexMenu, navigate_tool_,
                               content::FIG_2DVIEW, false);
+  content::AppendListenerMenu(m_hContexMenu, select_tool_, content::FIG_2DVIEW,
+                              true);
+  content::AppendListenerMenu(m_hContexMenu, flash_tool_, content::FIG_2DVIEW,
+                              true);
+  content::AppendListenerMenu(m_hContexMenu, edit_tool_, content::FIG_2DVIEW,
+                              true);
 
   // timer
   auto system_options = environment.get()->GetSystemOptions();
@@ -79,6 +255,9 @@ void MapWindow::OnDestroy() {
   ::KillTimer(m_hWnd, kNotifyTimer);
 
   content::ToolFactory::DestoryTool(navigate_tool_);
+  content::ToolFactory::DestoryTool(select_tool_);
+  content::ToolFactory::DestoryTool(flash_tool_);
+  content::ToolFactory::DestoryTool(edit_tool_);
 
   ::DestroyMenu(m_hMainMenu);
   ::DestroyMenu(m_hContexMenu);
@@ -187,7 +366,14 @@ void MapWindow::OnLButtonDblClk(UINT nFlags, CPoint point) {
     tool->LButtonDClick(nFlags, ToDPoint(point));
   }
 }
-void MapWindow::OnRButtonDown(UINT nFlags, CPoint point) {}
+void MapWindow::OnRButtonDown(UINT nFlags, CPoint point) {
+  auto& tool_manager = content::ToolManager::GetInstance();
+  auto* tool =
+      dynamic_cast<content::Tool*>(tool_manager.get()->GetActiveTool());
+  if (tool && (tool->GetOwnerWnd() == m_hWnd)) {
+    tool->RButtonDown(nFlags, ToDPoint(point));
+  }
+}
 void MapWindow::OnRButtonUp(UINT nFlags, CPoint point) {
   auto& tool_manager = content::ToolManager::GetInstance();
   auto* tool =

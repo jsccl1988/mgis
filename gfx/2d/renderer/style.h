@@ -154,12 +154,12 @@ using StyleMap = std::map<std::string, Style *>;
 
 class StyleManager : public base::Singleton<StyleManager> {
  public:
-  void SetDefaultStyle(const char *defName, PenDesc &pen_desc,
+  void SetDefaultStyle(const char *default_name, PenDesc &pen_desc,
                        BrushDesc &brush_desc, AnnotationDesc &anno_desc,
                        SymbolDesc &symbol_desc);
   Style *GetDefaultStyle(void);
 
-  Style *CreateStyle(const char *defName, PenDesc &pen_desc,
+  Style *CreateStyle(const char *default_name, PenDesc &pen_desc,
                      BrushDesc &brush_desc, AnnotationDesc &anno_desc,
                      SymbolDesc &symbol_desc);
 
