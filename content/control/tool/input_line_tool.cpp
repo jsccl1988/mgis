@@ -192,7 +192,7 @@ void InputLineTool::AppendLineString(uint32_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x{0.f}, y{0.f};
           OGRLineString line_string;
@@ -206,7 +206,7 @@ void InputLineTool::AppendLineString(uint32_t mouse_status, Point point) {
           line_string.setPoint(1, x, y);
           render_device_->DrawLineString(&line_string);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;
@@ -241,8 +241,8 @@ void InputLineTool::AppendRect(uint32_t mouse_status, Point point) {
         EndAppendLine();
 
         if (ERR_NONE == render_device_->BeginRender(
-                            gfx2d::RenderDevice::RB_DIRECT, true, false))
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+                            gfx2d::RenderDevice::RB_IMMEDIATELY, true, false))
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
       }
     } break;
     case MS_MouseMove: {
@@ -253,7 +253,7 @@ void InputLineTool::AppendRect(uint32_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
           OGRLinearRing linear_ring1, linear_ring2;
@@ -275,7 +275,7 @@ void InputLineTool::AppendRect(uint32_t mouse_status, Point point) {
           render_device_->DrawLinearRing(&linear_ring1);
           render_device_->DrawLinearRing(&linear_ring2);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
 
         float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
@@ -334,7 +334,7 @@ void InputLineTool::AppendLinearRing(uint32_t mouse_status, Point point) {
           auto &style_manager = gfx2d::StyleManager::GetInstance();
           auto *style = style_manager.get()->GetStyle(style_name_.c_str());
           if (ERR_NONE ==
-              render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+              render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                           style, R2_NOTXORPEN)) {
             float x{0.f}, y{0.f};
             OGRLineString line_string;
@@ -344,7 +344,7 @@ void InputLineTool::AppendLinearRing(uint32_t mouse_status, Point point) {
             line_string.setPoint(1, linear_ring->getX(0), linear_ring->getY(0));
 
             render_device_->DrawLineString(&line_string);
-            render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+            render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
 
             render_device_->Render();
           }
@@ -353,8 +353,8 @@ void InputLineTool::AppendLinearRing(uint32_t mouse_status, Point point) {
           EndAppendLine();
 
           if (ERR_NONE ==
-              render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, true))
-            render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+              render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, true))
+            render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;
@@ -366,7 +366,7 @@ void InputLineTool::AppendLinearRing(uint32_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           OGRLineString line_string;
           float x{0.f}, y{0.f};
@@ -380,7 +380,7 @@ void InputLineTool::AppendLinearRing(uint32_t mouse_status, Point point) {
           line_string.setPoint(1, x, y);
           render_device_->DrawLineString(&line_string);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;

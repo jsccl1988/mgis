@@ -148,10 +148,11 @@ void EditTool::OnInputPointFeature(uint16_t type) {
 
     if (ERR_NONE == input_tool->Init(hwnd_, render_device_)) {
       MessageListener::Message message;
-      message.id = TOOL_MESSAGE_SET_INPUT_SURFACE_TYPE;
+      message.id = TOOL_MESSAGE_SET_INPUT_POINT_TYPE;
       message.source_window = hwnd_;
       message.wparam = WPARAM(&type);
       input_tool->Notify(message);
+      this->BeginDelegate(input_tool);
     }
   }
 
@@ -172,7 +173,7 @@ void EditTool::OnInputLineFeature(uint16_t type) {
 
     if (ERR_NONE == input_tool->Init(hwnd_, render_device_)) {
       MessageListener::Message message;
-      message.id = TOOL_MESSAGE_SET_INPUT_SURFACE_TYPE;
+      message.id = TOOL_MESSAGE_SET_INPUT_LINE_TYPE;
       message.source_window = hwnd_;
       message.wparam = WPARAM(&type);
       input_tool->Notify(message);

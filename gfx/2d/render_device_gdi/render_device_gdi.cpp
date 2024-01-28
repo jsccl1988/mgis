@@ -41,8 +41,10 @@ int RenderDeviceGDI::Init(HWND hwnd) {
   }
 
   hwnd_ = hwnd;
-  render_buffer_.SetHWND(hwnd_);
   composit_render_buffer_.SetHWND(hwnd_);
+  map_render_buffer_.SetHWND(hwnd_);
+  immediately_render_buffer_.SetHWND(hwnd_);
+  dynamic_render_buffer_.SetHWND(hwnd_);
   LOG(INFO) << __FUNCTION__ << "Init Gdi RenderDevice ok!";
 
   // For Debug
@@ -115,13 +117,24 @@ int RenderDeviceGDI::Resize(DRect rect) {
 
   blc_ = (xblc > yblc) ? yblc : xblc;
 
-  if (ERR_NONE == render_buffer_.SetSize(viewport_.width, viewport_.height) &&
+  if (ERR_NONE ==
+          composit_render_buffer_.SetSize(viewport_.width, viewport_.height) &&
       ERR_NONE ==
-          composit_render_buffer_.SetSize(viewport_.width, viewport_.height)) {
-    if (ERR_NONE == render_buffer_.Swap(viewport_.x, viewport_.y,
-                                        viewport_.width, viewport_.height,
-                                        viewport_.x, viewport_.y) &&
-        ERR_NONE == composit_render_buffer_.Swap(
+          map_render_buffer_.SetSize(viewport_.width, viewport_.height)&&
+      ERR_NONE ==
+          immediately_render_buffer_.SetSize(viewport_.width, viewport_.height)&&
+      ERR_NONE ==
+          dynamic_render_buffer_.SetSize(viewport_.width, viewport_.height)) {
+    if (ERR_NONE == composit_render_buffer_.Swap(
+                        viewport_.x, viewport_.y, viewport_.width,
+                        viewport_.height, viewport_.x, viewport_.y) &&
+        ERR_NONE == map_render_buffer_.Swap(
+                        viewport_.x, viewport_.y, viewport_.width,
+                        viewport_.height, viewport_.x, viewport_.y) &&
+        ERR_NONE == immediately_render_buffer_.Swap(
+                        viewport_.x, viewport_.y, viewport_.width,
+                        viewport_.height, viewport_.x, viewport_.y) &&
+        ERR_NONE == dynamic_render_buffer_.Swap(
                         viewport_.x, viewport_.y, viewport_.width,
                         viewport_.height, viewport_.x, viewport_.y)) {
       return ERR_NONE;
@@ -221,23 +234,35 @@ int RenderDeviceGDI::Refresh() {
   ClearRect(dc, invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1);
   ClearRect(dc, invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2);
 
-  render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
-                       viewport_.width);
+  composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                viewport_.width);
 
-  composit_render_buffer_.Swap(
-      render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+  map_render_buffer_.Swap(
+      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
       zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
       zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
       RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
 
-  render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
-                      viewport_.height, viewport_.x, viewport_.y);
+  immediately_render_buffer_.Swap(
+      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+  dynamic_render_buffer_.Swap(
+      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+  composit_render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
+                               viewport_.height, viewport_.x, viewport_.y);
 
   ::ReleaseDC(hwnd_, dc);
 
-  // RECT client_rect;
-  // ::GetClientRect(hwnd_, &client_rect);
-  // ::InvalidateRect(hwnd_, &client_rect, true);
+  RECT client_rect;
+  ::GetClientRect(hwnd_, &client_rect);
+  ::InvalidateRect(hwnd_, &client_rect, true);
 
   return ERR_NONE;
 }
@@ -339,12 +364,26 @@ int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
   is_lock_style_ = (nullptr != style);
 
   switch (render_buffer) {
-    case RB_COMPOSIT: {
+    case RB_MAP: {
       if (clear)
-        composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
-                                      viewport_.height);
+        map_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                 viewport_.height);
 
-      current_dc_ = composit_render_buffer_.PrepareDC();
+      current_dc_ = map_render_buffer_.PrepareDC();
+    } break;
+    case RB_IMMEDIATELY: {
+      if (clear)
+        immediately_render_buffer_.Clear(viewport_.x, viewport_.y,
+                                         viewport_.width, viewport_.height);
+
+      current_dc_ = immediately_render_buffer_.PrepareDC();
+    } break;
+    case RB_DYNAMIC: {
+      if (clear)
+        dynamic_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                     viewport_.height);
+
+      current_dc_ = dynamic_render_buffer_.PrepareDC();
     } break;
     case RB_DIRECT: {
       if (clear) {
@@ -370,8 +409,14 @@ int RenderDeviceGDI::EndRender(eRenderBuffer render_buffer) {
   }
 
   switch (render_buffer) {
-    case RB_COMPOSIT: {
-      composit_render_buffer_.EndDC();
+    case RB_MAP: {
+      map_render_buffer_.EndDC();
+    } break;
+    case RB_IMMEDIATELY: {
+      immediately_render_buffer_.EndDC();
+    } break;
+    case RB_DYNAMIC: {
+      dynamic_render_buffer_.EndDC();
     } break;
     case RB_DIRECT: {
       ::ReleaseDC(hwnd_, current_dc_);
@@ -468,27 +513,39 @@ int RenderDeviceGDI::EndDrawing() {
 }
 
 int RenderDeviceGDI::Swap(void) {
-  render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
-                       viewport_.height);
+  composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                viewport_.height);
 
-  composit_render_buffer_.Swap(
-      render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+  map_render_buffer_.Swap(
+      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
       zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
       zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
       RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
 
-  render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
-                      viewport_.height, viewport_.x, viewport_.y);
+  immediately_render_buffer_.Swap(
+      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+  dynamic_render_buffer_.Swap(
+      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+  composit_render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
+                               viewport_.height, viewport_.x, viewport_.y);
 
   return ERR_NONE;
 }
 
 int RenderDeviceGDI::Render() {
-  composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
-                                viewport_.height,
-                                (COLORREF)::GetSysColor(COLOR_WINDOW));
+  map_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                           viewport_.height,
+                           (COLORREF)::GetSysColor(COLOR_WINDOW));
 
-  BeginRender(RB_COMPOSIT);
+  BeginRender(RB_MAP);
 
   if (layer_ != nullptr) {
     return RenderLayer(layer_, op_);
@@ -497,7 +554,7 @@ int RenderDeviceGDI::Render() {
   // For Debug
   { RenderForDebug(); }
 
-  EndRender(RB_COMPOSIT);
+  EndRender(RB_MAP);
 
   zoomin_viewport_ = viewport_;
   zoomout_viewport_ = viewport_;
@@ -852,8 +909,8 @@ int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
   LRectToDRect(lrect, drect);
 
   switch (render_buffer) {
-    case RB_COMPOSIT: {
-      ret = composit_render_buffer_.DrawImage(
+    case RB_MAP: {
+      ret = map_render_buffer_.DrawImage(
           image_buffer, image_buffer_size, code_type_, drect.x,
           drect.y + drect.height, drect.width, drect.height);
     } break;
@@ -871,7 +928,7 @@ int RenderDeviceGDI::StrethImage(const char *image_buffer,
   LRectToDRect(rect, drect);
 
   switch (render_buffer) {
-    case RB_COMPOSIT: {
+    case RB_MAP: {
       ret = composit_render_buffer_.StrethImage(
           image_buffer, image_buffer_size, code_type_, drect.x,
           drect.y + drect.height, drect.width, drect.height);
@@ -887,7 +944,7 @@ int RenderDeviceGDI::SaveImage(const char *file_path,
   long ret = ERR_FAILURE;
 
   switch (render_buffer) {
-    case RB_COMPOSIT: {
+    case RB_MAP: {
       ret =
           composit_render_buffer_.Save2Image(file_path, backgroud_transparent);
     } break;
@@ -903,7 +960,7 @@ int RenderDeviceGDI::Save2ImageBuffer(char *&image_buffer,
   long ret = ERR_FAILURE;
 
   switch (render_buffer) {
-    case RB_COMPOSIT: {
+    case RB_MAP: {
       ret = composit_render_buffer_.Save2ImageBuffer(
           image_buffer, image_buffer_size, code_type_, backgroud_transparent);
     } break;

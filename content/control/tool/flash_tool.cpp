@@ -54,10 +54,10 @@ int FlashTool::AuxDraw() {
     auto system_options = environment.get()->GetSystemOptions();
     auto &style_manager = gfx2d::StyleManager::GetInstance();
     auto *style = style_manager.get()->GetStyle(flash_style_.c_str());
-    if (ERR_NONE == render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT,
+    if (ERR_NONE == render_device_->BeginRender(gfx2d::RenderDevice::RB_DYNAMIC,
                                                 true, style, R2_COPYPEN)) {
       render_device_->RenderLayer(result_layer_, R2_COPYPEN);
-      render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+      render_device_->EndRender(gfx2d::RenderDevice::RB_DYNAMIC);
     }
   }
 
@@ -85,10 +85,10 @@ int FlashTool::Notify(MessageListener::Message &message) {
       is_flash_ = false;
 
       if (ERR_NONE ==
-          render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, true,
+          render_device_->BeginRender(gfx2d::RenderDevice::RB_DYNAMIC, true,
                                       NULL, R2_COPYPEN)) {
         render_device_->RenderLayer((OGRLayer *)NULL, R2_COPYPEN);
-        render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+        render_device_->EndRender(gfx2d::RenderDevice::RB_DYNAMIC);
       }
 
       render_device_->Refresh();

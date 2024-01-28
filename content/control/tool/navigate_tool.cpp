@@ -22,6 +22,12 @@ int NavigateTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     return ERR_FAILURE;
   }
 
+  auto &style_manager = gfx2d::StyleManager::GetInstance();
+  auto *style = style_manager.get()->GetStyle(style_name_.c_str());
+  if (style) {
+    style->SetStyleType(gfx2d::ST_PenDesc);
+  }
+
   UINT cursor_ids[] = {IDC_CURSOR_ZOOMIN, IDC_CURSOR_ZOOMOUT,
                        IDC_CURSOR_ZOOMMOVE, IDC_CURSOR_IDENTIFY};
 
@@ -361,8 +367,8 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
         }
 
         if (ERR_NONE == render_device_->BeginRender(
-                            gfx2d::RenderDevice::RB_DIRECT, true, nullptr))
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+                            gfx2d::RenderDevice::RB_IMMEDIATELY, true, nullptr))
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
 
         render_device_->Refresh();
       }
@@ -370,11 +376,12 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
     case MS_MouseMove: {
       prev_point_ = current_point_;
       current_point_ = point;
+
       if (captured_) {
         auto& style_manager = gfx2d::StyleManager::GetInstance();
         auto* style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
           OGRLinearRing linear_ring1, linear_ring2;
@@ -396,7 +403,7 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
           render_device_->DrawLinearRing(&linear_ring1);
           render_device_->DrawLinearRing(&linear_ring2);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;

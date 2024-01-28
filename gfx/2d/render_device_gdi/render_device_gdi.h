@@ -28,7 +28,8 @@ class RenderDeviceGDI : public RenderDevice {
   int RefreshDirectly(DRect rect, bool realtime = false) override;
 
   int ZoomMove(LPoint offset, bool realtime = false) override;
-  int ZoomScale(LPoint original_point, float scale, bool realtime = false) override;
+  int ZoomScale(LPoint original_point, float scale,
+                bool realtime = false) override;
   int ZoomToRect(LRect rect, bool realtime = false) override;
 
  public:
@@ -57,7 +58,8 @@ class RenderDeviceGDI : public RenderDevice {
   int DrawPoint(const OGRPoint *point) override;
   int DrawAnno(const OGRPoint *point, const char *anno, float angle,
                float height, float width, float space) override;
-  int DrawSymbol(const OGRPoint *point, HICON icon, long height, long width) override;
+  int DrawSymbol(const OGRPoint *point, HICON icon, long height,
+                 long width) override;
 
   int DrawLineString(const OGRLineString *line_string) override;
   int DrawLinearRing(const OGRLinearRing *linear_ring) override;
@@ -66,18 +68,16 @@ class RenderDeviceGDI : public RenderDevice {
  public:
   int DrawImage(const char *image_buffer, int image_buffer_size,
                 const LRect &rect, long code_type,
-                eRenderBuffer render_buffer = RB_COMPOSIT) override;
+                eRenderBuffer render_buffer = RB_MAP) override;
   int StrethImage(const char *image_buffer, int image_buffer_size,
                   const LRect &rect, long code_type,
-                  eRenderBuffer render_buffer = RB_COMPOSIT) override;
+                  eRenderBuffer render_buffer = RB_MAP) override;
 
  public:
-  int SaveImage(const char *file_path,
-                eRenderBuffer render_buffer = RB_COMPOSIT,
+  int SaveImage(const char *file_path, eRenderBuffer render_buffer = RB_MAP,
                 bool backgroud_transparent = false) override;
   int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
-                       long code_type,
-                       eRenderBuffer render_buffer = RB_COMPOSIT,
+                       long code_type, eRenderBuffer render_buffer = RB_MAP,
                        bool backgroud_transparent = false) override;
   int FreeImageBuffer(char *&image_buffer) override;
 
@@ -106,7 +106,9 @@ class RenderDeviceGDI : public RenderDevice {
   Viewport zoomout_viewport_;
 
   RenderBuffer composit_render_buffer_;
-  RenderBuffer render_buffer_;
+  RenderBuffer map_render_buffer_;
+  RenderBuffer immediately_render_buffer_;
+  RenderBuffer dynamic_render_buffer_;
   int op_;
 
   OGRLayer *layer_;

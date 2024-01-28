@@ -31,7 +31,7 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
     gfx2d::AnnotationDesc anno_desc;
     gfx2d::SymbolDesc symbol_desc;
 
-    style_manager.get()->SetDefaultStyle("SmtDefault", pen_desc, brush_desc,
+    style_manager.get()->SetDefaultStyle("Default", pen_desc, brush_desc,
                                          anno_desc, symbol_desc);
 
     auto* style1 = style_manager.get()->CreateStyle(
@@ -177,74 +177,90 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
   {}
 
   // renderer
-  renderer_ = new gfx2d::Renderer(::GetModuleHandle(NULL));
-  if (ERR_NONE == renderer_->CreateDevice(L"render_device_gdi")) {
-    render_device_ = renderer_->GetDevice();
-    render_device_->Init(m_hWnd);
-    render_device_->SetMapMode(MM_TEXT);
+  {
+    renderer_ = new gfx2d::Renderer(::GetModuleHandle(NULL));
+    if (ERR_NONE == renderer_->CreateDevice(L"render_device_gdi")) {
+      render_device_ = renderer_->GetDevice();
+      render_device_->Init(m_hWnd);
+      render_device_->SetMapMode(MM_TEXT);
 
-    gfx2d::LRect lrect;
-    lrect.x = lrect.y = 0;
-    lrect.width = 3840;
-    lrect.height = 2400;
+      gfx2d::LRect lrect;
+      lrect.x = lrect.y = 0;
+      lrect.width = 3840;
+      lrect.height = 2400;
 
-    gfx2d::DRect drect;
-    drect.x = drect.y = 0;
-    drect.width = 3840;
-    drect.height = 2400;
+      gfx2d::DRect drect;
+      drect.x = drect.y = 0;
+      drect.width = 3840;
+      drect.height = 2400;
 
-    render_device_->Resize(drect);
-    render_device_->ZoomToRect(lrect);
+      render_device_->Resize(drect);
+      render_device_->ZoomToRect(lrect);
+    }
   }
 
   // tool
-  content::ToolFactory::CreateTool(navigate_tool_,
-                                   content::ToolFactory::Navigate);
-  content::ToolFactory::CreateTool(select_tool_, content::ToolFactory::Select);
-  content::ToolFactory::CreateTool(flash_tool_, content::ToolFactory::Flash);
-  content::ToolFactory::CreateTool(edit_tool_, content::ToolFactory::Edit);
-  if (ERR_NONE != navigate_tool_->Init(m_hWnd, render_device_)) {
-    return S_FALSE;
-  }
+  {
+    auto& style_manager = gfx2d::StyleManager::GetInstance();
+    auto& style_options = environment.get()->GetSystemOptions().style_options;
+    content::ToolFactory::CreateTool(navigate_tool_,
+                                     content::ToolFactory::Navigate);
+    content::ToolFactory::CreateTool(select_tool_,
+                                     content::ToolFactory::Select);
+    content::ToolFactory::CreateTool(flash_tool_, content::ToolFactory::Flash);
+    content::ToolFactory::CreateTool(edit_tool_, content::ToolFactory::Edit);
 
-  if (ERR_NONE != select_tool_->Init(m_hWnd, render_device_)) {
-    return S_FALSE;
-  }
+    navigate_tool_->SetToolStyleName(style_options.aux_style.c_str());
+    if (ERR_NONE != navigate_tool_->Init(m_hWnd, render_device_)) {
+      return S_FALSE;
+    }
 
-  if (ERR_NONE != flash_tool_->Init(m_hWnd, render_device_)) {
-    return S_FALSE;
-  }
+    select_tool_->SetToolStyleName(style_options.aux_style.c_str());
+    if (ERR_NONE != select_tool_->Init(m_hWnd, render_device_)) {
+      return S_FALSE;
+    }
 
-  if (ERR_NONE != edit_tool_->Init(m_hWnd, render_device_)) {
-    return S_FALSE;
-  }
+    flash_tool_->SetToolStyleName(style_options.aux_style.c_str());
+    if (ERR_NONE != flash_tool_->Init(m_hWnd, render_device_)) {
+      return S_FALSE;
+    }
 
-  navigate_tool_->SetActive();
+    edit_tool_->SetToolStyleName(style_options.aux_style.c_str());
+    if (ERR_NONE != edit_tool_->Init(m_hWnd, render_device_)) {
+      return S_FALSE;
+    }
+
+    navigate_tool_->SetActive();
+  }
 
   // navigate menu
-  m_hMainMenu = ::CreatePopupMenu();
-  m_hContexMenu = ::CreatePopupMenu();
+  {
+    m_hMainMenu = ::CreatePopupMenu();
+    m_hContexMenu = ::CreatePopupMenu();
 
-  HMENU hMenu =
-      content::CreateListenerMenu(navigate_tool_, content::FIG_2DMFMENU);
-  if (GetMenuItemCount(hMenu) > 0)
-    AppendMenu(m_hMainMenu, MF_POPUP, (UINT)hMenu, navigate_tool_->GetName());
+    HMENU hMenu =
+        content::CreateListenerMenu(navigate_tool_, content::FIG_2DMFMENU);
+    if (GetMenuItemCount(hMenu) > 0)
+      AppendMenu(m_hMainMenu, MF_POPUP, (UINT)hMenu, navigate_tool_->GetName());
 
-  content::AppendListenerMenu(m_hContexMenu, navigate_tool_,
-                              content::FIG_2DVIEW, false);
-  content::AppendListenerMenu(m_hContexMenu, select_tool_, content::FIG_2DVIEW,
-                              true);
-  content::AppendListenerMenu(m_hContexMenu, flash_tool_, content::FIG_2DVIEW,
-                              true);
-  content::AppendListenerMenu(m_hContexMenu, edit_tool_, content::FIG_2DVIEW,
-                              true);
+    content::AppendListenerMenu(m_hContexMenu, navigate_tool_,
+                                content::FIG_2DVIEW, false);
+    content::AppendListenerMenu(m_hContexMenu, select_tool_,
+                                content::FIG_2DVIEW, true);
+    content::AppendListenerMenu(m_hContexMenu, flash_tool_, content::FIG_2DVIEW,
+                                true);
+    content::AppendListenerMenu(m_hContexMenu, edit_tool_, content::FIG_2DVIEW,
+                                true);
+  }
 
   // timer
-  auto system_options = environment.get()->GetSystemOptions();
-  m_uiRefreshTimer = ::SetTimer(m_hWnd, kRefreshTimer,
-                                system_options.view2d_refresh_elapse, 0);
-  m_uiNotifyTimer =
-      ::SetTimer(m_hWnd, kNotifyTimer, system_options.view2d_notify_elapse, 0);
+  {
+    auto system_options = environment.get()->GetSystemOptions();
+    m_uiRefreshTimer = ::SetTimer(m_hWnd, kRefreshTimer,
+                                  system_options.view2d_refresh_elapse, 0);
+    m_uiNotifyTimer = ::SetTimer(m_hWnd, kNotifyTimer,
+                                 system_options.view2d_notify_elapse, 0);
+  }
 
   return S_OK;
 }

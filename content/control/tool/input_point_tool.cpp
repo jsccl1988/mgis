@@ -188,7 +188,7 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x{0.f}, y{0.f};
           OGRLineString line_string;
@@ -198,7 +198,7 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
           line_string.setPoint(1, x, y);
 
           render_device_->DrawLineString(&line_string);
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
 
         float x{0.f}, y{0.f};
@@ -220,7 +220,7 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x{0.f}, y{0.f};
           OGRLineString line_string;
@@ -234,7 +234,7 @@ void InputPointTool::AppendText(int16_t mouse_status, Point point) {
           line_string.setPoint(1, x, y);
           render_device_->DrawLineString(&line_string);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;

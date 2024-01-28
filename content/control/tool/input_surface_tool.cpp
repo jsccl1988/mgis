@@ -161,8 +161,8 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
         EndAppendSurface();
 
         if (ERR_NONE == render_device_->BeginRender(
-                            gfx2d::RenderDevice::RB_DIRECT, true, false))
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+                            gfx2d::RenderDevice::RB_IMMEDIATELY, true, false))
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
       }
       break;
     case MS_MouseMove: {
@@ -173,7 +173,7 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
           OGRLinearRing linear_ring1, linear_ring2;
@@ -183,17 +183,19 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
           linear_ring1.setPoint(1, x2, y1);
           linear_ring1.setPoint(2, x2, y2);
           linear_ring1.setPoint(3, x1, y2);
+          linear_ring1.closeRings();
 
           render_device_->DPToLP(current_point_.x, current_point_.y, x2, y2);
           linear_ring2.setPoint(0, x1, y1);
           linear_ring2.setPoint(1, x2, y1);
           linear_ring2.setPoint(2, x2, y2);
           linear_ring2.setPoint(3, x1, y2);
+          linear_ring2.closeRings();
 
           render_device_->DrawLinearRing(&linear_ring1);
           render_device_->DrawLinearRing(&linear_ring2);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
 
         float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
@@ -259,8 +261,8 @@ void InputSurfaceTool::AppendPolygon(uint32_t mouse_status, Point point) {
           EndAppendSurface();
 
           if (ERR_NONE ==
-              render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, true))
-            render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+              render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, true))
+            render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;
@@ -272,7 +274,7 @@ void InputSurfaceTool::AppendPolygon(uint32_t mouse_status, Point point) {
         auto &style_manager = gfx2d::StyleManager::GetInstance();
         auto *style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_DIRECT, false,
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
                                         style, R2_NOTXORPEN)) {
           float x{0.f}, y{0.f};
           render_device_->DPToLP(origin_point_.x, origin_point_.y, x, y);
@@ -285,7 +287,7 @@ void InputSurfaceTool::AppendPolygon(uint32_t mouse_status, Point point) {
           line_string.setPoint(1, x, y);
           render_device_->DrawLineString(&line_string);
 
-          render_device_->EndRender(gfx2d::RenderDevice::RB_DIRECT);
+          render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
         }
       }
     } break;

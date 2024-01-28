@@ -12,7 +12,7 @@
 namespace gfx2d {
 class RenderDevice {
  public:
-  enum eRenderBuffer { RB_COMPOSIT, RB_DIRECT };
+  enum eRenderBuffer { RB_MAP, RB_IMMEDIATELY, RB_DYNAMIC, RB_DIRECT };
   RenderDevice(HINSTANCE instance)
       : rhi_api_(RHI2D_GDI),
         instance_handle_(instance),
@@ -98,18 +98,18 @@ class RenderDevice {
  public:
   virtual int DrawImage(const char *image_buffer, int image_buffer_size,
                         const LRect &rect, long code_type_,
-                        eRenderBuffer render_buffer = RB_COMPOSIT) = 0;
+                        eRenderBuffer render_buffer = RB_MAP) = 0;
   virtual int StrethImage(const char *image_buffer, int image_buffer_size,
                           const LRect &rect, long code_type_,
-                          eRenderBuffer render_buffer = RB_COMPOSIT) = 0;
+                          eRenderBuffer render_buffer = RB_MAP) = 0;
 
  public:
   virtual int SaveImage(const char *file_path,
-                        eRenderBuffer render_buffer = RB_COMPOSIT,
+                        eRenderBuffer render_buffer = RB_MAP,
                         bool backgroud_transparent = false) = 0;
   virtual int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
                                long code_type_,
-                               eRenderBuffer render_buffer = RB_COMPOSIT,
+                               eRenderBuffer render_buffer = RB_MAP,
                                bool backgroud_transparent = false) = 0;
   virtual int FreeImageBuffer(char *&image_buffer) = 0;
 
