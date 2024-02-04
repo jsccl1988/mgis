@@ -8,12 +8,12 @@
 
 namespace content {
 const static base::NameString kSelectToolName = L"选取";
-SelectTool::SelectTool() : captured_(false), result_layer_(nullptr) {
+SelectTool::SelectTool() : captured_(false), result_layer_(nullptr), geometry_(nullptr){
   SetName(kSelectToolName.c_str());
 }
 
 SelectTool::~SelectTool() {
-  // SAFE_DELETE(geometry_);
+  SAFE_DELETE(geometry_);
 
   this->EndDelegate();
 
@@ -179,7 +179,7 @@ void SelectTool::OnRetDelegate(int nRetType) {
       message.wparam = message.lparam = NULL;
       PostToolMessage(TOOL_BROADCAST, message);
 
-      uint32_t unID = kUint64Max;
+      uint64_t unID = kUint64Max;
 
       // if (result_layer_->GetFeatureCount() > 1) {
       //   vector<uint32_t> vIDs;

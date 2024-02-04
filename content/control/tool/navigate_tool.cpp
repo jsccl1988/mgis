@@ -3,6 +3,7 @@
 
 #include "content/control/tool/navigate_tool.h"
 
+#include "base/util/string_util.h"
 #include "content/common/environment.h"
 #include "content/control/resource/resource.h"
 #include "gfx/2d/renderer/style.h"
@@ -22,8 +23,8 @@ int NavigateTool::Init(HWND hwnd, H2DRENDERDEVICE render_device,
     return ERR_FAILURE;
   }
 
-  auto &style_manager = gfx2d::StyleManager::GetInstance();
-  auto *style = style_manager.get()->GetStyle(style_name_.c_str());
+  auto& style_manager = gfx2d::StyleManager::GetInstance();
+  auto* style = style_manager.get()->GetStyle(style_name_.c_str());
   if (style) {
     style->SetStyleType(gfx2d::ST_PenDesc);
   }
@@ -183,6 +184,13 @@ int NavigateTool::LButtonDown(uint32_t flags, Point point) {
 }
 
 int NavigateTool::MouseMove(uint32_t flags, Point point) {
+  gfx2d::LPoint logic_point;
+  render_device_->DPToLP(point.x, point.y, logic_point.x, logic_point.y);
+
+  std::string coord =
+      base::StringPrintf("{x=%.2f,y=%.2f}", logic_point.x, logic_point.y);
+  OGRPoint anchor(logic_point.x, logic_point.y);
+  render_device_->DrawAnno(&anchor, coord.c_str(), 0.f, 20, 20, 80);
   switch (view_model_) {
     case VM_ZoomMove:
       ZoomMove(MS_MouseMove, point);
@@ -381,8 +389,8 @@ void NavigateTool::ZoomIn(int16_t mouse_status, Point point) {
         auto& style_manager = gfx2d::StyleManager::GetInstance();
         auto* style = style_manager.get()->GetStyle(style_name_.c_str());
         if (ERR_NONE ==
-            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY, false,
-                                        style, R2_NOTXORPEN)) {
+            render_device_->BeginRender(gfx2d::RenderDevice::RB_IMMEDIATELY,
+                                        false, style, R2_NOTXORPEN)) {
           float x1{0.f}, y1{0.f}, x2{0.f}, y2{0.f};
           OGRLinearRing linear_ring1, linear_ring2;
           render_device_->DPToLP(origin_point_.x, origin_point_.y, x1, y1);
@@ -440,41 +448,12 @@ void NavigateTool::ZoomOut(int16_t mouse_status, Point point) {
 void NavigateTool::ZoomRestore() {
   gfx2d::LRect logic_rect;
   logic_rect.x = logic_rect.y = 0;
-  logic_rect.width = 3840;
-  logic_rect.height = 2400;
+  logic_rect.width = 180;
+  logic_rect.height = 180;
 
   render_device_->ZoomToRect(logic_rect);
   render_device_->Refresh();
-  // if (m_pOperMap != nullptr) {
-  //   Envelope envelope;
-  //   fRect logic_rect;
-
-  //   Layer *pLayer = m_pOperMap->GetActiveLayer();
-  //   if (pLayer) {
-  //     pLayer->CalEnvelope();
-  //     pLayer->GetEnvelope(envelope);
-  //     EnvelopeToRect(logic_rect, envelope);
-
-  //     float fWidthDiv = logic_rect.Width() / 40;
-  //     float fHeightDiv = logic_rect.Height() / 40;
-
-  //     logic_rect.rt.x += fWidthDiv;
-  //     logic_rect.rt.y += fHeightDiv;
-  //     logic_rect.lb.x -= fWidthDiv;
-  //     logic_rect.lb.y -= fHeightDiv;
-  //   }
-  // }
 }
 
-void NavigateTool::ZoomRefresh() {
-  RECT client_rect;
-  ::GetClientRect(hwnd_, &client_rect);
-
-  gfx2d::DRect rect;
-  rect.x = client_rect.left;
-  rect.y = client_rect.bottom;
-  rect.width = client_rect.right - client_rect.left;
-  rect.height = client_rect.top - client_rect.bottom;
-  render_device_->RefreshDirectly(rect);
-}
+void NavigateTool::ZoomRefresh() { render_device_->Refresh(true); }
 }  // namespace content

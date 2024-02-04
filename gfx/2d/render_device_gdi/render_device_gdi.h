@@ -23,14 +23,11 @@ class RenderDeviceGDI : public RenderDevice {
 
  public:
   int Resize(DRect rect) override;
-  int Refresh(void) override;
-  int Refresh(LRect rect);
-  int RefreshDirectly(DRect rect, bool realtime = false) override;
+  int Refresh(bool redraw = false) override;
 
-  int ZoomMove(LPoint offset, bool realtime = false) override;
-  int ZoomScale(LPoint original_point, float scale,
-                bool realtime = false) override;
-  int ZoomToRect(LRect rect, bool realtime = false) override;
+  int ZoomMove(LPoint offset) override;
+  int ZoomScale(LPoint original_point, float scale) override;
+  int ZoomToRect(LRect rect) override;
 
  public:
   int LPToDP(float x, float y, long &X, long &Y) const override;
@@ -39,18 +36,19 @@ class RenderDeviceGDI : public RenderDevice {
   int DRectToLRect(const DRect &drect, LRect &lrect) const override;
 
  public:
+  int Bind(const std::vector<OGRLayer *> &layers) override;
+  int Unbind() override;
   int BeginRender(eRenderBuffer render_buffer, bool clear = false,
                   const Style *style = NULL, int op = R2_COPYPEN) override;
   int Render(void) override;
   int EndRender(eRenderBuffer render_buffer) override;
   int Swap(void) override;
 
-  int RenderForDebug() override;
+ public:
   int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN) override;
   int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN) override;
-  int RenderGeometry(const OGRGeometry *geomtry, int op = R2_COPYPEN) override;
+  int RenderGeometry(const OGRGeometry *geometry, int op = R2_COPYPEN) override;
 
- public:
   int DrawMultiLineString(const OGRMultiLineString *multi_linestring) override;
   int DrawMultiPoint(const OGRMultiPoint *multi_point) override;
   int DrawMultiPolygon(const OGRMultiPolygon *multi_polygon) override;
@@ -67,17 +65,17 @@ class RenderDeviceGDI : public RenderDevice {
 
  public:
   int DrawImage(const char *image_buffer, int image_buffer_size,
-                const LRect &rect, long code_type,
+                const LRect &rect, long codec,
                 eRenderBuffer render_buffer = RB_MAP) override;
   int StrethImage(const char *image_buffer, int image_buffer_size,
-                  const LRect &rect, long code_type,
+                  const LRect &rect, long codec,
                   eRenderBuffer render_buffer = RB_MAP) override;
 
  public:
   int SaveImage(const char *file_path, eRenderBuffer render_buffer = RB_MAP,
                 bool backgroud_transparent = false) override;
-  int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
-                       long code_type, eRenderBuffer render_buffer = RB_MAP,
+  int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size, long codec,
+                       eRenderBuffer render_buffer = RB_MAP,
                        bool backgroud_transparent = false) override;
   int FreeImageBuffer(char *&image_buffer) override;
 
@@ -99,9 +97,6 @@ class RenderDeviceGDI : public RenderDevice {
   bool use_current_style_;
   bool is_lock_style_;
 
-  std::string anno_name_;
-  float anno_angle_;
-
   Viewport zoomin_viewport_;
   Viewport zoomout_viewport_;
 
@@ -111,16 +106,7 @@ class RenderDeviceGDI : public RenderDevice {
   RenderBuffer dynamic_render_buffer_;
   int op_;
 
-  OGRLayer *layer_;
-
-  // For Debug
-  std::string polygon_wkt_{
-      "POLYGON((50 50, 2350 50, 2350 2350, 50 2350, 50 50))"};
-  std::string text_anchor_wkt_{"POINT(1000 1000)"};
-
-  OGRPolygon polygon_;
-  OGRPoint text_anchor_;
-  std::string text_{"smart gis"};
+  std::vector<OGRLayer *> layers_;
 };
 }  // namespace gfx2d
 

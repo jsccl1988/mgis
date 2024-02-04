@@ -11,7 +11,6 @@
 #pragma warning(disable : 4244)
 
 namespace gfx2d {
-const float kDelay = 0.25;
 RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
     : RenderDevice(instance),
       font_(nullptr),
@@ -22,14 +21,22 @@ RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
       old_pen_(nullptr),
       old_brush_(nullptr),
       current_dc_(nullptr),
-      anno_angle_(0.),
       use_current_style_(false),
-      is_lock_style_(false),
-      layer_(nullptr) {
+      is_lock_style_(false) ,
+      op_(R2_COPYPEN) {
   rhi_api_ = RHI2D_GDI;
   current_dop_.x = 0;
   current_dop_.y = 0;
-  anno_name_ = "Smart Gis";
+
+  viewport_.x = 0;
+  viewport_.y = 0;
+  viewport_.height = 1;
+  viewport_.width = 1;
+
+  windowport_.x = 0;
+  windowport_.y = 0;
+  windowport_.height = 1;
+  windowport_.width = 1;
 }
 
 RenderDeviceGDI::~RenderDeviceGDI(void) { Release(); }
@@ -46,19 +53,6 @@ int RenderDeviceGDI::Init(HWND hwnd) {
   immediately_render_buffer_.SetHWND(hwnd_);
   dynamic_render_buffer_.SetHWND(hwnd_);
   LOG(INFO) << __FUNCTION__ << "Init Gdi RenderDevice ok!";
-
-  // For Debug
-  {
-    {
-      auto *buffer = polygon_wkt_.data();
-      polygon_.importFromWkt(&buffer);
-    }
-
-    {
-      auto *buffer = text_anchor_wkt_.data();
-      text_anchor_.importFromWkt(&buffer);
-    }
-  }
 
   return ERR_NONE;
 }
@@ -120,17 +114,17 @@ int RenderDeviceGDI::Resize(DRect rect) {
   if (ERR_NONE ==
           composit_render_buffer_.SetSize(viewport_.width, viewport_.height) &&
       ERR_NONE ==
-          map_render_buffer_.SetSize(viewport_.width, viewport_.height)&&
-      ERR_NONE ==
-          immediately_render_buffer_.SetSize(viewport_.width, viewport_.height)&&
+          map_render_buffer_.SetSize(viewport_.width, viewport_.height) &&
+      ERR_NONE == immediately_render_buffer_.SetSize(viewport_.width,
+                                                     viewport_.height) &&
       ERR_NONE ==
           dynamic_render_buffer_.SetSize(viewport_.width, viewport_.height)) {
     if (ERR_NONE == composit_render_buffer_.Swap(
                         viewport_.x, viewport_.y, viewport_.width,
                         viewport_.height, viewport_.x, viewport_.y) &&
-        ERR_NONE == map_render_buffer_.Swap(
-                        viewport_.x, viewport_.y, viewport_.width,
-                        viewport_.height, viewport_.x, viewport_.y) &&
+        ERR_NONE == map_render_buffer_.Swap(viewport_.x, viewport_.y,
+                                            viewport_.width, viewport_.height,
+                                            viewport_.x, viewport_.y) &&
         ERR_NONE == immediately_render_buffer_.Swap(
                         viewport_.x, viewport_.y, viewport_.width,
                         viewport_.height, viewport_.x, viewport_.y) &&
@@ -196,90 +190,83 @@ int RenderDeviceGDI::DRectToLRect(const DRect &drect, LRect &lrect) const {
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::Refresh() {
-  int invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1;
-  int invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2;
-  if (current_dop_.x >= 0) {
-    if (current_dop_.y >= 0) {
-      invalidate_x1 = invalidate_y1 = 0;
-      invalidate_w1 = viewport_.width, invalidate_h1 = current_dop_.y;
-      invalidate_x2 = 0, invalidate_y2 = current_dop_.y;
-      invalidate_w2 = current_dop_.x,
-      invalidate_h2 = viewport_.height - current_dop_.y;
-    } else {
-      invalidate_x1 = invalidate_y1 = 0;
-      invalidate_w1 = current_dop_.x,
-      invalidate_h1 = viewport_.height + current_dop_.y;
-      invalidate_x2 = 0, invalidate_y2 = viewport_.height + current_dop_.y;
-      invalidate_w2 = viewport_.width, invalidate_h2 = -current_dop_.y;
-    }
+int RenderDeviceGDI::Refresh(bool redraw) {
+  if (redraw) {
+    Render();
   } else {
-    if (current_dop_.y >= 0) {
-      invalidate_x1 = invalidate_y1 = 0;
-      invalidate_w1 = viewport_.width, invalidate_h1 = current_dop_.y;
-      invalidate_x2 = viewport_.width + current_dop_.x,
-      invalidate_y2 = current_dop_.y;
-      invalidate_w2 = -current_dop_.x,
-      invalidate_h2 = viewport_.height - current_dop_.y;
+    int invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1;
+    int invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2;
+    if (current_dop_.x >= 0) {
+      if (current_dop_.y >= 0) {
+        invalidate_x1 = invalidate_y1 = 0;
+        invalidate_w1 = viewport_.width, invalidate_h1 = current_dop_.y;
+        invalidate_x2 = 0, invalidate_y2 = current_dop_.y;
+        invalidate_w2 = current_dop_.x,
+        invalidate_h2 = viewport_.height - current_dop_.y;
+      } else {
+        invalidate_x1 = invalidate_y1 = 0;
+        invalidate_w1 = current_dop_.x,
+        invalidate_h1 = viewport_.height + current_dop_.y;
+        invalidate_x2 = 0, invalidate_y2 = viewport_.height + current_dop_.y;
+        invalidate_w2 = viewport_.width, invalidate_h2 = -current_dop_.y;
+      }
     } else {
-      invalidate_x1 = viewport_.width + current_dop_.x, invalidate_y1 = 0;
-      invalidate_w1 = -current_dop_.x,
-      invalidate_h1 = viewport_.height + current_dop_.y;
-      invalidate_x2 = 0, invalidate_y2 = viewport_.height + current_dop_.y;
-      invalidate_w2 = viewport_.width, invalidate_h2 = -current_dop_.y;
+      if (current_dop_.y >= 0) {
+        invalidate_x1 = invalidate_y1 = 0;
+        invalidate_w1 = viewport_.width, invalidate_h1 = current_dop_.y;
+        invalidate_x2 = viewport_.width + current_dop_.x,
+        invalidate_y2 = current_dop_.y;
+        invalidate_w2 = -current_dop_.x,
+        invalidate_h2 = viewport_.height - current_dop_.y;
+      } else {
+        invalidate_x1 = viewport_.width + current_dop_.x, invalidate_y1 = 0;
+        invalidate_w1 = -current_dop_.x,
+        invalidate_h1 = viewport_.height + current_dop_.y;
+        invalidate_x2 = 0, invalidate_y2 = viewport_.height + current_dop_.y;
+        invalidate_w2 = viewport_.width, invalidate_h2 = -current_dop_.y;
+      }
     }
+
+    HDC dc = ::GetDC(hwnd_);
+    ClearRect(dc, invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1);
+    ClearRect(dc, invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2);
+
+    composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
+                                  viewport_.width);
+
+    map_render_buffer_.Swap(
+        composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+        zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+        zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+        RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+    immediately_render_buffer_.Swap(
+        composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+        zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+        zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+        RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+    dynamic_render_buffer_.Swap(
+        composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
+        zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
+        zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
+        RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
+
+    composit_render_buffer_.Swap(current_dop_.x, current_dop_.y,
+                                 viewport_.width, viewport_.height, viewport_.x,
+                                 viewport_.y);
+
+    ::ReleaseDC(hwnd_, dc);
+
+    RECT client_rect;
+    ::GetClientRect(hwnd_, &client_rect);
+    ::InvalidateRect(hwnd_, &client_rect, true);
   }
 
-  HDC dc = ::GetDC(hwnd_);
-  ClearRect(dc, invalidate_x1, invalidate_y1, invalidate_w1, invalidate_h1);
-  ClearRect(dc, invalidate_x2, invalidate_y2, invalidate_w2, invalidate_h2);
-
-  composit_render_buffer_.Clear(viewport_.x, viewport_.y, viewport_.width,
-                                viewport_.width);
-
-  map_render_buffer_.Swap(
-      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
-      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
-      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
-      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
-
-  immediately_render_buffer_.Swap(
-      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
-      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
-      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
-      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
-
-  dynamic_render_buffer_.Swap(
-      composit_render_buffer_, zoomin_viewport_.x, zoomin_viewport_.y,
-      zoomin_viewport_.width, zoomin_viewport_.height, zoomout_viewport_.x,
-      zoomout_viewport_.y, zoomout_viewport_.width, zoomout_viewport_.height,
-      RenderBuffer::BLT_TRANSPARENT, SRCCOPY);
-
-  composit_render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
-                               viewport_.height, viewport_.x, viewport_.y);
-
-  ::ReleaseDC(hwnd_, dc);
-
-  RECT client_rect;
-  ::GetClientRect(hwnd_, &client_rect);
-  ::InvalidateRect(hwnd_, &client_rect, true);
-
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::Refresh(LRect lrect) {
-  DRect drect;
-  LRectToDRect(lrect, drect);
-  RefreshDirectly(drect);
-
-  return ERR_NONE;
-}
-
-int RenderDeviceGDI::RefreshDirectly(DRect rect, bool realtime) {
-  return Render();
-}
-
-int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
+int RenderDeviceGDI::ZoomMove(LPoint offset) {
   zoomin_viewport_.x += offset.x * blc_;
   zoomin_viewport_.y -= offset.y * blc_;
 
@@ -289,8 +276,7 @@ int RenderDeviceGDI::ZoomMove(LPoint offset, bool realtime) {
   return Render();
 }
 
-int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
-                               bool realtime) {
+int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale) {
   DPoint device_point;
   LPToDP(original_point.x, original_point.y, device_point.x, device_point.y);
 
@@ -328,7 +314,7 @@ int RenderDeviceGDI::ZoomScale(LPoint original_point, float scale,
   return Render();
 }
 
-int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
+int RenderDeviceGDI::ZoomToRect(LRect lrect) {
   DRect drect;
   LRectToDRect(lrect, drect);
   zoomout_viewport_.x = drect.x;
@@ -359,9 +345,19 @@ int RenderDeviceGDI::ZoomToRect(LRect lrect, bool realtime) {
   return Render();
 }
 
+int RenderDeviceGDI::Bind(const std::vector<OGRLayer *> &layers) {
+  layers_ = layers;
+  return ERR_NONE;
+}
+int RenderDeviceGDI::Unbind() {
+  layers_.clear();
+  return ERR_NONE;
+}
+
 int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
                                  const Style *style, int op) {
   is_lock_style_ = (nullptr != style);
+  op_ = op;
 
   switch (render_buffer) {
     case RB_MAP: {
@@ -547,12 +543,11 @@ int RenderDeviceGDI::Render() {
 
   BeginRender(RB_MAP);
 
-  if (layer_ != nullptr) {
-    return RenderLayer(layer_, op_);
+  for (auto *layer : layers_) {
+    if (layer != nullptr) {
+      RenderLayer(layer, op_);
+    }
   }
-
-  // For Debug
-  { RenderForDebug(); }
 
   EndRender(RB_MAP);
 
@@ -566,27 +561,19 @@ int RenderDeviceGDI::Render() {
   return ERR_NONE;
 }
 
-int RenderDeviceGDI::RenderForDebug() {
-  DrawPolygon(&polygon_);
-  DrawAnno(&text_anchor_, text_.c_str(), 0.f, 20, 20, 80);
-
-  return ERR_NONE;
-}
-
 int RenderDeviceGDI::RenderLayer(const OGRLayer *const_layer, int op) {
   OGRLayer *layer = const_cast<OGRLayer *>(const_layer);
   if (nullptr == layer) {
     return ERR_INVALID_PARAM;
   }
 
-  layer_ = layer;
   const auto *layer_defn = layer->GetLayerDefn();
-  auto geomtry_count = layer_defn->GetGeomFieldCount();
+  auto geometry_count = layer_defn->GetGeomFieldCount();
 
   OGRFeature *feature = nullptr;
   layer->ResetReading();
   while ((feature = layer->GetNextFeature()) != nullptr) {
-    for (int i = 0; i < geomtry_count; i++) {
+    for (int i = 0; i < geometry_count; i++) {
       auto *geometry = feature->GetGeomFieldRef(i);
       RenderGeometry(geometry, op);
     }
@@ -901,7 +888,7 @@ int RenderDeviceGDI::DrawPolygon(const OGRPolygon *polygon) {
 }
 
 int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
-                               const LRect &lrect, long code_type_,
+                               const LRect &lrect, long codec,
                                eRenderBuffer render_buffer) {
   long ret = ERR_FAILURE;
 
@@ -910,9 +897,9 @@ int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
 
   switch (render_buffer) {
     case RB_MAP: {
-      ret = map_render_buffer_.DrawImage(
-          image_buffer, image_buffer_size, code_type_, drect.x,
-          drect.y + drect.height, drect.width, drect.height);
+      ret = map_render_buffer_.DrawImage(image_buffer, image_buffer_size, codec,
+                                         drect.x, drect.y + drect.height,
+                                         drect.width, drect.height);
     } break;
   }
 
@@ -921,7 +908,7 @@ int RenderDeviceGDI::DrawImage(const char *image_buffer, int image_buffer_size,
 
 int RenderDeviceGDI::StrethImage(const char *image_buffer,
                                  int image_buffer_size, const LRect &rect,
-                                 long code_type_, eRenderBuffer render_buffer) {
+                                 long codec, eRenderBuffer render_buffer) {
   long ret = ERR_FAILURE;
 
   DRect drect;
@@ -930,7 +917,7 @@ int RenderDeviceGDI::StrethImage(const char *image_buffer,
   switch (render_buffer) {
     case RB_MAP: {
       ret = composit_render_buffer_.StrethImage(
-          image_buffer, image_buffer_size, code_type_, drect.x,
+          image_buffer, image_buffer_size, codec, drect.x,
           drect.y + drect.height, drect.width, drect.height);
     } break;
   }
@@ -954,7 +941,7 @@ int RenderDeviceGDI::SaveImage(const char *file_path,
 }
 
 int RenderDeviceGDI::Save2ImageBuffer(char *&image_buffer,
-                                      long &image_buffer_size, long code_type_,
+                                      long &image_buffer_size, long codec,
                                       eRenderBuffer render_buffer,
                                       bool backgroud_transparent) {
   long ret = ERR_FAILURE;
@@ -962,7 +949,7 @@ int RenderDeviceGDI::Save2ImageBuffer(char *&image_buffer,
   switch (render_buffer) {
     case RB_MAP: {
       ret = composit_render_buffer_.Save2ImageBuffer(
-          image_buffer, image_buffer_size, code_type_, backgroud_transparent);
+          image_buffer, image_buffer_size, codec, backgroud_transparent);
     } break;
   }
 

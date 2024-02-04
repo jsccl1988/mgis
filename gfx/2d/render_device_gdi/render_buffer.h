@@ -54,20 +54,20 @@ class RenderBuffer {
   long EndDC(void);
 
   long DrawImage(const char *image_buffer, int image_buffer_size,
-                 long code_type_, long x = 0, long y = 0, long cx = -1,
+                 long codec, long x = 0, long y = 0, long cx = -1,
                  long cy = -1);
   long StrethImage(const char *image_buffer, int image_buffer_size,
-                   long code_type_, long xoffset, long yoffset, long xsize,
+                   long codec, long xoffset, long yoffset, long xsize,
                    long ysize, DWORD rop = SRCCOPY);
 
   long Save2Image(const char *file_path, bool backgroud_transparent = false);
   long Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
-                        long code_type_, bool backgroud_transparent = false);
+                        long codec, bool backgroud_transparent = false);
 
   static long Save2Image(HBITMAP bitmap, const char *file_path,
                          bool backgroud_transparent = false);
   static long Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
-                               long &image_buffer_size, long code_type_,
+                               long &image_buffer_size, long codec,
                                bool backgroud_transparent = false);
   static long FreeImageBuffer(char *&image_buffer);
 

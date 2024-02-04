@@ -5,6 +5,8 @@
 #ifndef GFX_2D_RENDERER_RENDER_DEVICE_H
 #define GFX_2D_RENDERER_RENDER_DEVICE_H
 
+#include <vector>
+
 #include "gfx/2d/renderer/common.h"
 #include "gfx/2d/renderer/style.h"
 #include "ogrsf_frmts.h"
@@ -48,14 +50,11 @@ class RenderDevice {
 
  public:
   virtual int Resize(DRect rect) = 0;
-  virtual int Refresh(void) = 0;
-  virtual int Refresh(LRect rect) = 0;
-  virtual int RefreshDirectly(DRect rect, bool realtime = false) = 0;
+  virtual int Refresh(bool redraw = false) = 0;
 
-  virtual int ZoomMove(LPoint offset, bool realtime = false) = 0;
-  virtual int ZoomScale(LPoint original_point, float scale,
-                        bool realtime = false) = 0;
-  virtual int ZoomToRect(LRect rect, bool realtime = false) = 0;
+  virtual int ZoomMove(LPoint offset) = 0;
+  virtual int ZoomScale(LPoint original_point, float scale) = 0;
+  virtual int ZoomToRect(LRect rect) = 0;
 
  public:
   virtual int LPToDP(float x, float y, long &X, long &Y) const = 0;
@@ -64,19 +63,19 @@ class RenderDevice {
   virtual int DRectToLRect(const DRect &lrect, LRect &rect) const = 0;
 
  public:
+  virtual int Bind(const std::vector<OGRLayer *> &layers) = 0;
+  virtual int Unbind() = 0;
   virtual int BeginRender(eRenderBuffer render_buffer, bool clear = false,
                           const Style *style = nullptr,
                           int op = R2_COPYPEN) = 0;
-  virtual int Render(void) = 0;
+  virtual int Render() = 0;
   virtual int EndRender(eRenderBuffer render_buffer) = 0;
   virtual int Swap(void) = 0;
 
  public:
-  virtual int RenderForDebug() = 0;
-
   virtual int RenderLayer(const OGRLayer *layer, int op = R2_COPYPEN) = 0;
   virtual int RenderFeature(const OGRFeature *feature, int op = R2_COPYPEN) = 0;
-  virtual int RenderGeometry(const OGRGeometry *geomtry,
+  virtual int RenderGeometry(const OGRGeometry *geometry,
                              int op = R2_COPYPEN) = 0;
 
   virtual int DrawMultiLineString(
@@ -97,10 +96,10 @@ class RenderDevice {
 
  public:
   virtual int DrawImage(const char *image_buffer, int image_buffer_size,
-                        const LRect &rect, long code_type_,
+                        const LRect &rect, long codec,
                         eRenderBuffer render_buffer = RB_MAP) = 0;
   virtual int StrethImage(const char *image_buffer, int image_buffer_size,
-                          const LRect &rect, long code_type_,
+                          const LRect &rect, long codec,
                           eRenderBuffer render_buffer = RB_MAP) = 0;
 
  public:
@@ -108,8 +107,7 @@ class RenderDevice {
                         eRenderBuffer render_buffer = RB_MAP,
                         bool backgroud_transparent = false) = 0;
   virtual int Save2ImageBuffer(char *&image_buffer, long &image_buffer_size,
-                               long code_type_,
-                               eRenderBuffer render_buffer = RB_MAP,
+                               long codec, eRenderBuffer render_buffer = RB_MAP,
                                bool backgroud_transparent = false) = 0;
   virtual int FreeImageBuffer(char *&image_buffer) = 0;
 

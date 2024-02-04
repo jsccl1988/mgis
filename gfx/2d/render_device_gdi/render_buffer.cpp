@@ -257,13 +257,13 @@ RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
 }
 
 long RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
-                             long code_type, long x, long y, long cx, long cy) {
+                             long codec, long x, long y, long cx, long cy) {
   if (NULL == image_buffer || 0 == image_buffer_size) {
     return ERR_FAILURE;
   }
 
   CxImage image;
-  image.Decode((BYTE *)image_buffer, image_buffer_size, code_type);
+  image.Decode((BYTE *)image_buffer, image_buffer_size, codec);
 
   HDC dc_ = PrepareDC();
   image.Draw(dc_, x, y, cx, cy);
@@ -273,14 +273,14 @@ long RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
 }
 
 long RenderBuffer::StrethImage(const char *image_buffer, int image_buffer_size,
-                               long code_type, long xoffset, long yoffset,
+                               long codec, long xoffset, long yoffset,
                                long xsize, long ysize, DWORD rop) {
   if (NULL == image_buffer || 0 == image_buffer_size) {
     return ERR_FAILURE;
   }
 
   CxImage image;
-  image.Decode((BYTE *)image_buffer, image_buffer_size, code_type);
+  image.Decode((BYTE *)image_buffer, image_buffer_size, codec);
 
   HDC dc_ = PrepareDC();
   image.Stretch(dc_, xoffset, yoffset, xsize, ysize, rop);
@@ -296,10 +296,10 @@ long RenderBuffer::Save2Image(const char *file_path,
 }
 
 long RenderBuffer::Save2ImageBuffer(char *&image_buffer,
-                                    long &image_buffer_size, long code_type,
+                                    long &image_buffer_size, long codec,
                                     bool backgroud_transparent) {
   long ret = Save2ImageBuffer(paint_buffer_, image_buffer, image_buffer_size,
-                              code_type, backgroud_transparent);
+                              codec, backgroud_transparent);
   return ret;
 }
 
@@ -332,7 +332,7 @@ long RenderBuffer::Save2Image(HBITMAP bitmap, const char *file_path,
 }
 
 long RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
-                                    long &image_buffer_size, long code_type,
+                                    long &image_buffer_size, long codec,
                                     bool backgroud_transparent) {
   if (bitmap == NULL || image_buffer != NULL) {
     return ERR_FAILURE;
@@ -355,7 +355,7 @@ long RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
       image.SetTransColor(transClr);
     }
 
-    if (image.Encode(buffer, size, code_type)) {
+    if (image.Encode(buffer, size, codec)) {
       image_buffer = (char *)buffer;
       image_buffer_size = size;
 

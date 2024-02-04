@@ -5,9 +5,10 @@
 #define CONTENT_CONTROL_CONTROL_WINDOW_MAP_WINDOW_H
 
 #include "content/common/environment.h"
-#include "content/control/window/map_app.h"
 #include "content/control/tool/tool_factory.h"
+#include "content/control/window/map_app.h"
 #include "gfx/2d/renderer/renderer.h"
+#include "ogrsf_frmts.h"
 
 namespace content {
 class MapWindow : public CWindowImpl<MapWindow>,
@@ -16,7 +17,7 @@ class MapWindow : public CWindowImpl<MapWindow>,
  public:
   DECLARE_WND_CLASS(TEXT("SmartGIS"));
 
- private:
+ protected:
   BEGIN_MSG_MAP_EX(MapWindow)
   MSG_WM_SIZE(OnSize)
   MSG_WM_CREATE(OnCreate)
@@ -73,6 +74,14 @@ class MapWindow : public CWindowImpl<MapWindow>,
   void OnMouseLeave();
 #endif /* _WIN32_WINNT >= 0x0400 */
 
+ private:
+  bool InitStyle();
+  bool InitMap();
+  bool InitRenderer();
+  bool InitTool();
+  bool InitMenu();
+  bool InitTimer();
+
   HMENU m_hContexMenu{NULL};
   HMENU m_hMainMenu{NULL};
   UINT m_uiNotifyTimer{0};
@@ -84,6 +93,8 @@ class MapWindow : public CWindowImpl<MapWindow>,
   content::Tool* flash_tool_{nullptr};
   content::Tool* edit_tool_{nullptr};
   H2DRENDERDEVICE render_device_{nullptr};
+
+  GDALDataset* dataset_;
 };
 }  // namespace content
 

@@ -46,7 +46,7 @@ struct SystemOptions {
   FlashOptions flash_options;
   float select_margin{0.5};
   float zoom_scale_delt{0.25};
-  bool show_mbr{false};
+  bool show_mbr{true};
   bool show_point{false};
   long point_radius{4};
   long view2d_refresh_elapse{500};
