@@ -20,17 +20,17 @@ RenderBuffer::~RenderBuffer(void) {
   }
 }
 
-inline long RenderBuffer::SetHWND(HWND hwnd) {
+inline bool RenderBuffer::SetHWND(HWND hwnd) {
   if (!owned_) {
-    return ERR_FAILURE;
+    return false;
   }
   hwnd_ = hwnd;
-  return ERR_NONE;
+  return true;
 }
 
-long RenderBuffer::SetSize(int cx, int cy) {
+bool RenderBuffer::SetSize(int cx, int cy) {
   if (!owned_ || cx < 1 || cy < 1) {
-    return ERR_FAILURE;
+    return false;
   }
 
   if (paint_buffer_) {
@@ -44,17 +44,17 @@ long RenderBuffer::SetSize(int cx, int cy) {
   paint_buffer_ = ::CreateCompatibleBitmap(dc_, width_, height_);
 
   if (NULL == paint_buffer_) {
-    return ERR_FAILURE;
+    return false;
   }
 
   Clear(0, 0, width_, height_);
 
   ::ReleaseDC(hwnd_, dc_);
 
-  return ERR_NONE;
+  return true;
 }
 
-long RenderBuffer::ShareBuffer(RenderBuffer &source_render_buffer) {
+bool RenderBuffer::ShareBuffer(RenderBuffer &source_render_buffer) {
   if (owned_ && paint_buffer_) {
     ::DeleteObject(paint_buffer_);
     paint_buffer_ = NULL;
@@ -67,12 +67,12 @@ long RenderBuffer::ShareBuffer(RenderBuffer &source_render_buffer) {
 
   owned_ = false;
 
-  return ERR_NONE;
+  return true;
 }
 
-long RenderBuffer::Clear(int x, int y, int w, int h, COLORREF clr) {
+bool RenderBuffer::Clear(int x, int y, int w, int h, COLORREF clr) {
   if (w < 1 || h < 1) {
-    return ERR_FAILURE;
+    return false;
   }
 
   RECT rect;
@@ -99,13 +99,13 @@ long RenderBuffer::Clear(int x, int y, int w, int h, COLORREF clr) {
 
   ::ReleaseDC(hwnd_, dc_);
 
-  return ERR_NONE;
+  return true;
 }
 
-long RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
+bool RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
                         int src_org_x, int src_org_y, int op) {
   if (paint_buffer_ == NULL) {
-    return ERR_FAILURE;
+    return false;
   }
 
   HDC dc_ = ::GetDC(hwnd_);
@@ -117,18 +117,14 @@ long RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
   this->EndDC();
   ::ReleaseDC(hwnd_, dc_);
 
-  if (ret) {
-    return ERR_NONE;
-  } else {
-    return ERR_FAILURE;
-  }
+  return ret;
 }
 
-long RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
+bool RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
                         int src_org_x, int src_org_y, int src_w, int src_h,
                         eSwapType type, int op, COLORREF clr) {
   if (paint_buffer_ == NULL) {
-    return ERR_FAILURE;
+    return false;
   }
 
   HDC dc_ = ::GetDC(hwnd_);
@@ -150,18 +146,14 @@ long RenderBuffer::Swap(int dest_org_x, int dest_org_y, int dest_w, int dest_h,
   this->EndDC();
   ::ReleaseDC(hwnd_, dc_);
 
-  if (ret) {
-    return ERR_NONE;
-  } else {
-    return ERR_FAILURE;
-  }
+  return ret;
 }
 
-long RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
+bool RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
                         int dest_org_y, int dest_w, int dest_h, int src_org_x,
                         int src_org_y, int op) {
   if (paint_buffer_ == NULL) {
-    return ERR_FAILURE;
+    return false;
   }
 
   HDC target_dc = target_render_buffer.PrepareDC(false);
@@ -173,19 +165,15 @@ long RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
   this->EndDC();
   target_render_buffer.EndDC();
 
-  if (ret) {
-    return ERR_NONE;
-  } else {
-    return ERR_FAILURE;
-  }
+  return ret;
 }
 
-long RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
+bool RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
                         int dest_org_y, int dest_w, int dest_h, int src_org_x,
                         int src_org_y, int src_w, int src_h, eSwapType type,
                         int op, COLORREF clr) {
   if (paint_buffer_ == NULL) {
-    return ERR_FAILURE;
+    return false;
   }
 
   HDC target_dc = target_render_buffer.PrepareDC(false);
@@ -208,10 +196,7 @@ long RenderBuffer::Swap(RenderBuffer &target_render_buffer, int dest_org_x,
   this->EndDC();
   target_render_buffer.EndDC();
 
-  if (ret)
-    return ERR_NONE;
-  else
-    return ERR_FAILURE;
+  return ret;
 }
 
 HDC RenderBuffer::PrepareDC(bool is_clip) {
@@ -232,7 +217,7 @@ HDC RenderBuffer::PrepareDC(bool is_clip) {
   return paint_dc_;
 }
 
-long RenderBuffer::EndDC(void) {
+bool RenderBuffer::EndDC(void) {
   if (paint_dc_) {
     ::SelectObject(paint_dc_, old_paint_buffer_);
     ::DeleteDC(paint_dc_);
@@ -240,7 +225,7 @@ long RenderBuffer::EndDC(void) {
     paint_dc_ = NULL;
   }
 
-  return ERR_NONE;
+  return true;
 }
 
 RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
@@ -256,10 +241,10 @@ RenderBuffer &RenderBuffer::operator=(const RenderBuffer &other) {
   return *this;
 }
 
-long RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
+bool RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
                              long codec, long x, long y, long cx, long cy) {
   if (NULL == image_buffer || 0 == image_buffer_size) {
-    return ERR_FAILURE;
+    return false;
   }
 
   CxImage image;
@@ -269,14 +254,14 @@ long RenderBuffer::DrawImage(const char *image_buffer, int image_buffer_size,
   image.Draw(dc_, x, y, cx, cy);
   EndDC();
 
-  return ERR_NONE;
+  return true;
 }
 
-long RenderBuffer::StrethImage(const char *image_buffer, int image_buffer_size,
+bool RenderBuffer::StrethImage(const char *image_buffer, int image_buffer_size,
                                long codec, long xoffset, long yoffset,
                                long xsize, long ysize, DWORD rop) {
   if (NULL == image_buffer || 0 == image_buffer_size) {
-    return ERR_FAILURE;
+    return false;
   }
 
   CxImage image;
@@ -286,16 +271,16 @@ long RenderBuffer::StrethImage(const char *image_buffer, int image_buffer_size,
   image.Stretch(dc_, xoffset, yoffset, xsize, ysize, rop);
   EndDC();
 
-  return ERR_NONE;
+  return true;
 }
 
-long RenderBuffer::Save2Image(const char *file_path,
+bool RenderBuffer::Save2Image(const char *file_path,
                               bool backgroud_transparent) {
   long ret = Save2Image(paint_buffer_, file_path, backgroud_transparent);
   return ret;
 }
 
-long RenderBuffer::Save2ImageBuffer(char *&image_buffer,
+bool RenderBuffer::Save2ImageBuffer(char *&image_buffer,
                                     long &image_buffer_size, long codec,
                                     bool backgroud_transparent) {
   long ret = Save2ImageBuffer(paint_buffer_, image_buffer, image_buffer_size,
@@ -303,10 +288,10 @@ long RenderBuffer::Save2ImageBuffer(char *&image_buffer,
   return ret;
 }
 
-long RenderBuffer::Save2Image(HBITMAP bitmap, const char *file_path,
+bool RenderBuffer::Save2Image(HBITMAP bitmap, const char *file_path,
                               bool backgroud_transparent) {
   if (bitmap == NULL || strlen(file_path) == 0) {
-    return ERR_FAILURE;
+    return false;
   }
 
   CxImage image;
@@ -324,18 +309,18 @@ long RenderBuffer::Save2Image(HBITMAP bitmap, const char *file_path,
     }
 
     if (image.Save(file_path, GetImageTypeByFileExt(file_path))) {
-      return ERR_NONE;
+      return true;
     }
   }
 
-  return ERR_FAILURE;
+  return false;
 }
 
-long RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
+bool RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
                                     long &image_buffer_size, long codec,
                                     bool backgroud_transparent) {
   if (bitmap == NULL || image_buffer != NULL) {
-    return ERR_FAILURE;
+    return false;
   }
 
   BYTE *buffer = NULL;
@@ -359,17 +344,17 @@ long RenderBuffer::Save2ImageBuffer(HBITMAP bitmap, char *&image_buffer,
       image_buffer = (char *)buffer;
       image_buffer_size = size;
 
-      return ERR_NONE;
+      return true;
     }
 
-    return ERR_NONE;
+    return true;
   }
 
-  return ERR_FAILURE;
+  return false;
 }
 
-long RenderBuffer::FreeImageBuffer(char *&image_buffer) {
+bool RenderBuffer::FreeImageBuffer(char *&image_buffer) {
   SAFE_DELETE_A(image_buffer);
-  return ERR_NONE;
+  return true;
 }
 }  // namespace gfx2d

@@ -22,7 +22,7 @@ RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
       old_brush_(nullptr),
       current_dc_(nullptr),
       use_current_style_(false),
-      is_lock_style_(false) ,
+      is_lock_style_(false),
       op_(R2_COPYPEN) {
   rhi_api_ = RHI2D_GDI;
   current_dop_.x = 0;
@@ -111,31 +111,21 @@ int RenderDeviceGDI::Resize(DRect rect) {
 
   blc_ = (xblc > yblc) ? yblc : xblc;
 
-  if (ERR_NONE ==
-          composit_render_buffer_.SetSize(viewport_.width, viewport_.height) &&
-      ERR_NONE ==
-          map_render_buffer_.SetSize(viewport_.width, viewport_.height) &&
-      ERR_NONE == immediately_render_buffer_.SetSize(viewport_.width,
-                                                     viewport_.height) &&
-      ERR_NONE ==
-          dynamic_render_buffer_.SetSize(viewport_.width, viewport_.height)) {
-    if (ERR_NONE == composit_render_buffer_.Swap(
-                        viewport_.x, viewport_.y, viewport_.width,
-                        viewport_.height, viewport_.x, viewport_.y) &&
-        ERR_NONE == map_render_buffer_.Swap(viewport_.x, viewport_.y,
-                                            viewport_.width, viewport_.height,
-                                            viewport_.x, viewport_.y) &&
-        ERR_NONE == immediately_render_buffer_.Swap(
-                        viewport_.x, viewport_.y, viewport_.width,
-                        viewport_.height, viewport_.x, viewport_.y) &&
-        ERR_NONE == dynamic_render_buffer_.Swap(
-                        viewport_.x, viewport_.y, viewport_.width,
-                        viewport_.height, viewport_.x, viewport_.y)) {
-      return ERR_NONE;
-    }
-  }
+  composit_render_buffer_.SetSize(viewport_.width, viewport_.height);
+  map_render_buffer_.SetSize(viewport_.width, viewport_.height);
+  immediately_render_buffer_.SetSize(viewport_.width, viewport_.height);
+  dynamic_render_buffer_.SetSize(viewport_.width, viewport_.height);
 
-  return ERR_FAILURE;
+  composit_render_buffer_.Swap(viewport_.x, viewport_.y, viewport_.width,
+                               viewport_.height, viewport_.x, viewport_.y);
+  map_render_buffer_.Swap(viewport_.x, viewport_.y, viewport_.width,
+                          viewport_.height, viewport_.x, viewport_.y);
+  immediately_render_buffer_.Swap(viewport_.x, viewport_.y, viewport_.width,
+                                  viewport_.height, viewport_.x, viewport_.y);
+  dynamic_render_buffer_.Swap(viewport_.x, viewport_.y, viewport_.width,
+                              viewport_.height, viewport_.x, viewport_.y);
+
+  return ERR_NONE;
 }
 
 int RenderDeviceGDI::LPToDP(float x, float y, long &X, long &Y) const {
