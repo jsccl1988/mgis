@@ -296,7 +296,7 @@ void NavigateTool::ZoomMove(int16_t mouse_status, Point point) {
         current_dop.y = current_point_.y - origin_point_.y;
 
         render_device_->SetCurrentDOP(current_dop);
-        render_device_->Refresh();
+        render_device_->Refresh(false);
       }
     } break;
     case MS_LButtonUp: {

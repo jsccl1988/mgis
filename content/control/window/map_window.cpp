@@ -126,6 +126,7 @@ void MapWindow::OnPaint(HDC /*hDC*/) {
   render_device_->Swap();
 }
 
+BOOL MapWindow::OnEraseBkgnd(CDCHandle dc) { return TRUE; }
 void MapWindow::OnMouseMove(UINT nFlags, CPoint point) {
   auto& tool_manager = content::ToolManager::GetInstance();
   auto* tool =
@@ -441,9 +442,9 @@ bool MapWindow::InitMap() {
   std::string file_path =
       base::UTF16ToUTF8(module_dir) + "./data/sh/POLYGON.shp";
 
-  dataset_ = (GDALDataset*)GDALOpenEx(file_path.c_str(), GDAL_OF_VECTOR, NULL,
-                                      NULL, NULL);
-  if (dataset_ == NULL) {
+  dataset_ = (GDALDataset*)GDALOpenEx(file_path.c_str(), GDAL_OF_VECTOR,
+                                      nullptr, nullptr, nullptr);
+  if (dataset_ == nullptr) {
     return false;
   }
 

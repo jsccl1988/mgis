@@ -111,7 +111,6 @@ int Tool::EndDelegate(bool will_release_target_tool) {
 int Tool::SetCursor(void) {
   if (delegate_target_ != NULL) {
     return delegate_target_->SetCursor();
-
   } else {
     ::SetCursor(cross_cursor_);
   }
@@ -386,13 +385,17 @@ long ToolManager::RemoveAllTool(void) {
 }
 
 Tool *ToolManager::GetTool(int index) {
-  if (index < 0 || index >= toolptrs_.size()) return NULL;
+  if (index < 0 || index >= toolptrs_.size()) {
+    return NULL;
+  }
 
   return toolptrs_.at(index);
 }
 
 const Tool *ToolManager::GetTool(int index) const {
-  if (index < 0 || index >= toolptrs_.size()) return NULL;
+  if (index < 0 || index >= toolptrs_.size()) {
+    return NULL;
+  }
 
   return toolptrs_.at(index);
 }

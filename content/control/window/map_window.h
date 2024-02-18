@@ -24,6 +24,7 @@ class MapWindow : public CWindowImpl<MapWindow>,
   MSG_WM_DESTROY(OnDestroy)
   MSG_WM_TIMER(OnTimer)
   MSG_WM_PAINT(OnPaint)
+  MSG_WM_ERASEBKGND(OnEraseBkgnd)
   MSG_WM_MOUSEMOVE(OnMouseMove)
   MSG_WM_MOUSEWHEEL(OnMouseWheel)
   MSG_WM_LBUTTONDOWN(OnLButtonDown)
@@ -49,6 +50,7 @@ class MapWindow : public CWindowImpl<MapWindow>,
 
   void OnSize(UINT nType, CSize size);
   void OnPaint(HDC /*hDC*/);
+  BOOL OnEraseBkgnd(CDCHandle dc);
   LRESULT OnCreate(LPCREATESTRUCT lpcs);
   void OnDestroy();
   void OnTimer(UINT_PTR nIDEvent);
@@ -94,7 +96,7 @@ class MapWindow : public CWindowImpl<MapWindow>,
   content::Tool* edit_tool_{nullptr};
   H2DRENDERDEVICE render_device_{nullptr};
 
-  GDALDataset* dataset_;
+  GDALDataset* dataset_{nullptr};
 };
 }  // namespace content
 
