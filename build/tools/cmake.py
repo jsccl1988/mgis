@@ -74,7 +74,11 @@ def main():
         static_link_crt,
         toolset,
         winver,
+        dry_run,
     ] = sys.argv[1:]
+
+    if(dry_run == "true"):
+        return
 
     cmake_build(
         cmake_root,

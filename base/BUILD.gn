@@ -81,7 +81,6 @@ shared_library("base") {
   ]
 
   deps = [
-    "//third_party:glog",
   ]
 }
 

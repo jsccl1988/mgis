@@ -52,8 +52,6 @@ template("test") {
 
     deps += [
       "//base:base",
-      "//third_party:gbenchmark",
-      "//third_party:gtest",
     ]
   }
 }

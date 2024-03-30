@@ -53,6 +53,8 @@ declare_args() {
   is_lsan = false
   is_msan = false
   is_tsan = false
+
+  is_build_third_party = false
 }
 
 declare_args() {

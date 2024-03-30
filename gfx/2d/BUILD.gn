@@ -29,7 +29,6 @@ static_library("renderer2d") {
 
   deps = [
     "//base:base",
-    "//third_party:all",
   ]
 }
 
@@ -64,8 +63,8 @@ shared_library("render_device_gdi") {
 
   deps = [
     "//base:base",
-    "//third_party:all",
     ":renderer2d",
+    "//third_party/CxImage:CxImage",
   ]
 }
 

@@ -35,7 +35,6 @@ static_library("core") {
 
   deps = [
     "//base:base",
-    "//third_party:all",
   ]
 }
 

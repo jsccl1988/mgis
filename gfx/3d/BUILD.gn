@@ -53,7 +53,6 @@ shared_library("render_device_d3d") {
 
   deps = [
     "//base:base",
-    "//third_party:all",
     ":renderer3d",
   ]
 }

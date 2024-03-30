@@ -2,6 +2,7 @@
 # All rights reserved.
 
 cmake("glog") {
+  cmake_dry_run = !is_build_third_party
   postfix = ""
   if (is_debug) {
     postfix = "d"
@@ -20,6 +21,7 @@ cmake("glog") {
 }
 
 cmake("gbenchmark") {
+  cmake_dry_run = !is_build_third_party
   postfix = ""
   if (is_debug) {
     postfix = "d"
@@ -40,6 +42,7 @@ cmake("gbenchmark") {
 }
 
 cmake("gtest") {
+  cmake_dry_run = !is_build_third_party
   postfix = ""
   if (is_debug) {
     postfix = "d"
@@ -60,6 +63,7 @@ cmake("gtest") {
 }
 
 cmake("sqlite3") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/sqlite3"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -74,6 +78,7 @@ cmake("sqlite3") {
 }
 
 cmake("geos") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/geos"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -89,6 +94,7 @@ cmake("geos") {
 }
 
 cmake("cpp-httplib") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/cpp-httplib"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -98,6 +104,7 @@ cmake("cpp-httplib") {
 }
 
 cmake("SQLiteCpp") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/SQLiteCpp"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -117,6 +124,7 @@ cmake("SQLiteCpp") {
 }
 
 cmake("libspatialindex") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/libspatialindex"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -131,6 +139,7 @@ cmake("libspatialindex") {
 }
 
 cmake("libspatialite") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/libspatialite"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -146,6 +155,7 @@ cmake("libspatialite") {
 }
 
 cmake("SpatiaLiteCpp") {
+  cmake_dry_run = !is_build_third_party
   cmake_root_dir = "//third_party/SpatiaLiteCpp"
   cmake_build_dir = target_out_dir + "/" + target_name
   cmake_install_dir = root_out_dir + "/third_party/"
@@ -163,6 +173,7 @@ cmake("SpatiaLiteCpp") {
 }
 
 cmake("PROJ") {
+  cmake_dry_run = !is_build_third_party
   postfix = ""
   if (is_debug) {
     postfix = "_d"
@@ -191,6 +202,7 @@ cmake("PROJ") {
 }
 
 cmake("gdal") {
+  cmake_dry_run = !is_build_third_party
   postfix = ""
   if (is_debug) {
     postfix = "d"
@@ -218,18 +230,6 @@ cmake("gdal") {
 
 group("all") {
   deps = [
-    ":glog",
-    ":gbenchmark",
-    ":gtest",
-    ":cpp-httplib",
-    ":sqlite3",
-    ":SQLiteCpp",
-    ":geos",
-    ":PROJ",
-    ":gdal",
-    ":libspatialindex",
-    ":libspatialite",
-    ":SpatiaLiteCpp",
     "CxImage:CxImage",
   ]
 }

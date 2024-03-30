@@ -13,7 +13,7 @@ template("cmake") {
                              "input",
                              "output_name",
                            ])
-     toolset = "default"
+    toolset = "default"
     version = "default"
     if (is_win) {
       version = winver
@@ -49,6 +49,7 @@ template("cmake") {
       "$static_link_crt",
       toolset,
       version,
+      "$cmake_dry_run",
     ]
     inputs = [ cmake_root_dir ]
     outputs = cmake_outputs
