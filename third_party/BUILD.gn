@@ -228,7 +228,7 @@ cmake("gdal") {
   ]
 }
 
-group("all") {
+group("third_party_all") {
   deps = [
     "CxImage:CxImage",
   ]

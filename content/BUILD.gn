@@ -57,17 +57,17 @@ shared_library("content") {
   ]
 }
 
-# test("content_test") {
-#   sources = [
-#     "content_unittest.cpp",
-#   ]
+test("content_test") {
+  sources = [
+    "content_unittest.cpp",
+  ]
 
-#   include_dirs += [
-#     "$root_gen_dir/",
-#     "$root_out_dir/third_party/include",
-#   ]
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/third_party/include",
+  ]
 
-#   deps = [
-#     ":content",
-#   ]
-# }
+  deps = [
+    ":content",
+  ]
+}

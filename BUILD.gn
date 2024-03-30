@@ -2,11 +2,19 @@
 # All rights reserved.
 
 group("all") {
-  deps = [
-    "//third_party:all",
-    "//base:base",
-    "//gui:smartgis",
-    "//gfx/2d:render_device_gdi",
-    "//gfx/3d:render_device_d3d",
-  ]
+  deps = []
+  if (!is_build_third_party) {
+    deps += [
+      "//base:base",
+      "//gui:smartgis",
+      "//gfx/2d:render_device_gdi",
+      "//gfx/3d:render_device_d3d",
+    ]
+  }
+
+  if (is_build_third_party) {
+    deps += [
+      "//third_party:third_party_all",
+    ]
+  }
 }

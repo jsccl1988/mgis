@@ -68,33 +68,33 @@ shared_library("render_device_gdi") {
   ]
 }
 
-# test("renderer2d_test") {
-#   defines = [
-#     "NOMINMAX",
-#   ]
+test("renderer2d_test") {
+  defines = [
+    "NOMINMAX",
+  ]
 
-#   sources = [
-#     "render2d_unittest.cpp",
-#   ]
+  sources = [
+    "render2d_unittest.cpp",
+  ]
 
-#   include_dirs += [
-#     "$root_gen_dir/",
-#     "$root_out_dir/third_party/include",
-#   ]
+  include_dirs += [
+    "$root_gen_dir/",
+    "$root_out_dir/third_party/include",
+  ]
 
-#   suffix = ""
-#   if (is_debug) {
-#     suffix = "d"
-#   }
+  suffix = ""
+  if (is_debug) {
+    suffix = "d"
+  }
 
-#   libs = [
-#     "$root_out_dir/third_party/lib/glog$suffix.lib",
-#     "$root_out_dir/third_party/lib/gdal$suffix.lib",
-#   ]
+  libs = [
+    "$root_out_dir/third_party/lib/glog$suffix.lib",
+    "$root_out_dir/third_party/lib/gdal$suffix.lib",
+  ]
 
-#   deps = [
-#     "//third_party:glog",
-#     "//third_party:gdal",
-#     ":renderer2d",
-#   ]
-# }
+  deps = [
+    "//third_party:glog",
+    "//third_party:gdal",
+    ":renderer2d",
+  ]
+}
