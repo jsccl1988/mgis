@@ -1,0 +1,214 @@
+{
+  "schema": "incubator_third_party_manifest_v1",
+  "description": "mgis third_party pins. Overlap with mogu (glog / googletest / cpp-httplib) reuses mogu git_ref; GIS packages pin the existing Gitea mirrors and are not re-uploaded.",
+  "gitea_mirror": {
+    "base_url": "http://localhost:3000/ccl",
+    "repo_prefix": "",
+    "note": "Org Gitea from mogu third_party/manifest.json. GIS packages use these remotes as git_url. mogu-overlap tags already exist (glog v0.6.0, googletest v1.14.0, cpp-httplib v0.18.3) — reuse, do not re-upload."
+  },
+  "default_src_subdir": ".src",
+  "packages": [
+    {
+      "name": "glog",
+      "git_url": "http://localhost:3000/ccl/glog.git",
+      "git_ref": "v0.6.0",
+      "build_system": "cmake",
+      "note": "Reused mogu pin (v0.6.0). Gitea already has this tag; not re-uploaded.",
+      "cmake_args": [
+        "-DWITH_GFLAGS=OFF",
+        "-DWITH_GTEST=OFF",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_TESTING=OFF"
+      ]
+    },
+    {
+      "name": "googletest",
+      "git_url": "http://localhost:3000/ccl/googletest.git",
+      "git_ref": "v1.14.0",
+      "build_system": "cmake",
+      "note": "Reused mogu pin (v1.14.0). Gitea already has this tag; not re-uploaded. gtest_force_shared_crt=ON for mgis MSVC /MD.",
+      "cmake_args": [
+        "-Dgtest_force_shared_crt=ON",
+        "-DBUILD_GMOCK=ON",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DINSTALL_GTEST=ON"
+      ]
+    },
+    {
+      "name": "benchmark",
+      "local_src": "googlebenchmark",
+      "git_url": "http://localhost:3000/ccl/googlebenchmark.git",
+      "git_ref": "cb7267c1dcf6ba9ea4318e2d05cd7252c75a483f",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import of vendored googlebenchmark (not mogu benchmark v1.8.3; that Gitea repo is empty).",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBENCHMARK_ENABLE_TESTING=OFF"
+      ]
+    },
+    {
+      "name": "cpp-httplib",
+      "git_url": "http://localhost:3000/ccl/cpp-httplib.git",
+      "git_ref": "v0.18.3",
+      "build_system": "cmake",
+      "note": "Reused mogu pin (v0.18.3). Gitea already has this tag; not re-uploaded.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON",
+        "-DCMAKE_DISABLE_FIND_PACKAGE_OpenSSL=ON"
+      ]
+    },
+    {
+      "name": "sqlite3",
+      "git_url": "http://localhost:3000/ccl/sqlite3.git",
+      "git_ref": "527d3eb0763df9d98289bba65160aaff2aef98f9",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF"
+      ]
+    },
+    {
+      "name": "geos",
+      "git_url": "http://localhost:3000/ccl/geos.git",
+      "git_ref": "4fc2ba184c9ba5e2b46a0291e97311f95b06c2da",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. LGPL — WKT display only.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DUSE_UNSTABLE_GEOS_CPP_API=1"
+      ]
+    },
+    {
+      "name": "PROJ",
+      "git_url": "http://localhost:3000/ccl/PROJ.git",
+      "git_ref": "1c7cf0dcb0eaa17f3bf0577b5c73ac146d93c773",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded.",
+      "install_requires": [
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DENABLE_TIFF=OFF",
+        "-DENABLE_CURL=OFF",
+        "-DBUILD_APPS=OFF",
+        "-DBUILD_PROJSYNC=OFF",
+        "-DEXE_SQLITE3=@PREFIX@/bin/sqlite3.exe",
+        "-DSQLITE3_INCLUDE_DIR=@PREFIX@/include",
+        "-DSQLITE3_LIBRARY=@PREFIX@/lib/sqlite3.lib"
+      ]
+    },
+    {
+      "name": "SQLiteCpp",
+      "git_url": "http://localhost:3000/ccl/SQLiteCpp.git",
+      "git_ref": "85a256f68331c0d36e90ea7c137b0c7f8f4c5d47",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded.",
+      "install_requires": [
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DSQLITECPP_INTERNAL_SQLITE=OFF",
+        "-DSQLITECPP_RUN_CPPLINT=OFF",
+        "-DSQLITE3_INCLUDE_DIR=@PREFIX@/include",
+        "-DSQLITE3_LIBRARY=@PREFIX@/lib/sqlite3.lib"
+      ]
+    },
+    {
+      "name": "libspatialindex",
+      "git_url": "http://localhost:3000/ccl/libspatialindex.git",
+      "git_ref": "a7004ccc23ab9b61c57f5e0d7a00681086aadf20",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Dead product link — keep for third_party_all.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON"
+      ]
+    },
+    {
+      "name": "gdal",
+      "git_url": "http://localhost:3000/ccl/gdal.git",
+      "git_ref": "8bc09143be713a89258aed6ecd6cd8e343544328",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Frozen display adapter.",
+      "install_requires": [
+        "PROJ"
+      ],
+      "cmake_prefix_paths": [
+        "PROJ"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DGDAL_BUILD_OPTIONAL_DRIVERS=OFF",
+        "-DOGR_BUILD_OPTIONAL_DRIVERS=OFF",
+        "-DGDAL_USE_INTERNAL_LIBS=ON",
+        "-DPROJ_INCLUDE_DIR=@PREFIX@/include",
+        "-DPROJ_LIBRARIES=@PREFIX@/lib"
+      ]
+    },
+    {
+      "name": "libspatialite",
+      "git_url": "http://localhost:3000/ccl/libspatialite.git",
+      "git_ref": "1c0e08e1a827a5a8a1c1aec388b5e22087909381",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Dead product link — keep for third_party_all.",
+      "install_requires": [
+        "geos",
+        "PROJ",
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "geos",
+        "PROJ",
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON"
+      ]
+    },
+    {
+      "name": "SpatiaLiteCpp",
+      "git_url": "http://localhost:3000/ccl/SpatiaLiteCpp.git",
+      "git_ref": "ec2b1d8348bbfb023f81f62304affa8106364dbd",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded.",
+      "install_requires": [
+        "libspatialite"
+      ],
+      "cmake_prefix_paths": [
+        "libspatialite"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-Dspatialite_dir_inc=@PREFIX@/include",
+        "-Dspatialite_dir_lib=@PREFIX@/lib"
+      ]
+    },
+    {
+      "name": "CxImage",
+      "git_url": "http://localhost:3000/ccl/CxImage.git",
+      "git_ref": "f36a4a5be1b06ac985270386a4804f9b30dd40fd",
+      "build_system": "cmake",
+      "install_skip": true,
+      "note": "Reused existing Gitea import; not re-uploaded. Compiled by //third_party/CxImage GN, not install.py."
+    },
+    {
+      "name": "wtl8.0",
+      "git_url": "http://localhost:3000/ccl/wtl8.0.git",
+      "git_ref": "8ab4baa835eb6510abc03a554eb5022935aac949",
+      "build_system": "cmake",
+      "install_skip": true,
+      "note": "Reused existing Gitea import; not re-uploaded. Header-only WTL; consumers include //third_party/wtl8.0/."
+    }
+  ]
+}

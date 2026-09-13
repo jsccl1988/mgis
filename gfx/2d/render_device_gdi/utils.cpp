@@ -24,7 +24,7 @@ void ClearRect(HDC dc_, int x, int y, int w, int h, COLORREF clr) {
   ::DeleteObject(hBrush);
 }
 
-void DrawRect(HDC dc_, RECT &rect, BOOL xor) {
+void DrawRect(HDC dc_, RECT &rect, BOOL is_xor) {
   ::MoveToEx(dc_, rect.left, rect.top, NULL);
   ::LineTo(dc_, rect.right, rect.top);
   ::LineTo(dc_, rect.right, rect.bottom);
@@ -32,14 +32,14 @@ void DrawRect(HDC dc_, RECT &rect, BOOL xor) {
   ::LineTo(dc_, rect.left, rect.top);
 }
 
-void DrawLine(HDC dc_, POINT *points, int size, BOOL xor) {
+void DrawLine(HDC dc_, POINT *points, int size, BOOL is_xor) {
   if (points == NULL) return;
 
   ::MoveToEx(dc_, points[0].x, points[0].y, NULL);
   ::PolylineTo(dc_, points, size);
 }
 
-void DrawCross(HDC dc_, long x, long y, long r, BOOL xor) {
+void DrawCross(HDC dc_, long x, long y, long r, BOOL is_xor) {
   ::MoveToEx(dc_, x - r, y, NULL);
   ::LineTo(dc_, x + r, y);
 

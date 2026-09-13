@@ -1,0 +1,27 @@
+---
+description: Keep repository root README.md in sync when changes affect documented surface area
+alwaysApply: true
+---
+
+# Root `README.md` maintenance
+
+The file **`README.md`** at the repository root is the first-stop overview: how to build, root GN groups, and module table.
+
+## When to update (same change set)
+
+If your edit **materially changes** something already summarized in `README.md`, or introduces a **new** top-level capability that readers would expect to see there, **update `README.md` in the same change**.
+
+Typical triggers:
+
+- **New or removed** major area under `base/`, `core/`, `content/`, `gui/`, or `gfx/` that belongs in the module table.
+- **Build / run workflow** changes (`build.bat`, `gn gen`, default `out/`, test/benchmark entrypoints).
+- **Renamed** paths, binaries, or scripts that the README still names explicitly.
+
+## When not to touch
+
+- **Narrow bugfixes** or internal refactors with **no** documented workflow or layout change.
+
+## How to update
+
+- Keep tone and structure; **minimal** edits that restore accuracy.
+- When you **meaningfully** edit `README.md`, refresh the **“最后更新”** line to the current date.

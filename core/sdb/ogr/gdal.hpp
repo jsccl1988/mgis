@@ -39,6 +39,10 @@ DEALINGS IN THE SOFTWARE.
 
 // Copyright (c) 2024 The MGIS Authors.
 // All rights reserved.
+//
+// FROZEN display adapter. Not the query SoT. Remote catalog/recordset lives
+// in //core/sdb_client (HTTP). Do not add a second GDAL link or use this as
+// a mapd/sdbd driver.
 
 #include <gdal_priv.h>
 #include <gdal_version.h>
@@ -144,6 +148,21 @@ struct Options {
 
   char** get() const noexcept { return const_cast<char**>(m_ptrs.get()); }
 };  // struct Options
+
+#if GDAL_VERSION_MAJOR >= 2
+inline gdal_dataset_type* CreateWritableDataset(gdal_driver_type& driver,
+                                                const std::string& name,
+                                                char** options) {
+  gdal_dataset_type* ds =
+      driver.Create(name.c_str(), 0, 0, 0, GDT_Unknown, options);
+  if (ds) {
+    return ds;
+  }
+  // Raster MEM / newer GDAL reject 0x0 Create; 1x1 Byte is the same
+  // fallback used by sdbd_ogr_mem.
+  return driver.Create(name.c_str(), 1, 1, 1, GDT_Byte, options);
+}
+#endif
 }  // namespace detail
 
 class SRS {
@@ -227,10 +246,9 @@ class Dataset {
         m_options(options),
         m_srs(srs),
 #if GDAL_VERSION_MAJOR >= 2
-        m_dataset(detail::Driver(driver_name)
-                      .get()
-                      .Create(dataset_name.c_str(), 0, 0, 0, GDT_Unknown,
-                              m_options.get())){
+        m_dataset(detail::CreateWritableDataset(detail::Driver(driver_name).get(),
+                                                dataset_name,
+                                                m_options.get())){
 #else
         m_dataset(
             detail::Driver(driver_name)

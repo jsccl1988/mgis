@@ -1,7 +1,14 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
 import("//testing/test.gni")
+
+group("gfx_3d_all") {
+  deps = [
+    ":renderer3d",
+    ":render_device_d3d",
+  ]
+}
 
 static_library("renderer3d") {
   defines = [
@@ -14,7 +21,6 @@ static_library("renderer3d") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
   ]
 
   libs = [
@@ -39,21 +45,12 @@ shared_library("render_device_d3d") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
-
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
-  libs = [
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
   deps = [
     "//base:base",
     ":renderer3d",
+    "//third_party:glog",
   ]
 }
 
@@ -68,7 +65,6 @@ test("renderer3d_test") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
   ]
 
   libs = [

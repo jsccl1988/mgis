@@ -1,0 +1,15 @@
+# Copyright (c) 2026 The MGIS Authors.
+# All rights reserved.
+#
+# sdbd client + protocol + in-process mock service.
+# Paths are relative to //core/BUILD.gn.
+
+sdbd_sources = [
+  "sdb/fake_http_transport.cpp",
+  "sdb/http_transport_win.cpp",
+  "sdb/sdbd_client.cpp",
+  "sdb/sdbd_json.cpp",
+  "sdb/sdbd_mock_service.cpp",
+  "sdb/sdbd_ogr_mem.cpp",
+  "sdb/sdbd_url.cpp",
+]

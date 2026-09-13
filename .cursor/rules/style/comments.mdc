@@ -1,0 +1,32 @@
+---
+description: Code-as-documentation — English comments; sparse comments; class intent; explain only complex logic
+alwaysApply: true
+---
+
+# Comments and class intent
+
+Prefer **self-explanatory names and structure** over narrating obvious code.
+
+## Language
+
+- Write **all new or changed comments** in **English**.
+- **Exceptions**: string literals, user-visible messages, protocol quotations, and identifiers required by an external API.
+
+## When to comment
+
+- **Do** comment non-obvious logic, invariants, algorithm/performance tradeoffs, and easy-to-misread edge cases.
+- **Don’t** restate what the code already says.
+- **Don’t** add verbose docblocks on every function unless the signature is insufficient.
+
+## Class and struct documentation
+
+- **Do** place a short block before each new or substantially edited `class` / `struct` stating **core purpose** in one or two sentences.
+
+```cpp
+// In-memory feature batch owned by the map window; not a GDAL dataset.
+class FeatureSet {
+  // ...
+};
+```
+
+Apply these norms **in new or touched** translation units.

@@ -1,6 +1,13 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 import("//testing/test.gni")
+
+group("gfx_2d_all") {
+  deps = [
+    ":renderer2d",
+    ":render_device_gdi",
+  ]
+}
 
 static_library("renderer2d") {
   defines = [
@@ -14,21 +21,12 @@ static_library("renderer2d") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
-
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
-  libs = [
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
-    "$root_out_dir/third_party/lib/gdal$suffix.lib",
   ]
 
   deps = [
     "//base:base",
+    "//third_party:glog",
+    "//third_party:gdal",
   ]
 }
 
@@ -48,23 +46,14 @@ shared_library("render_device_gdi") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
-
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
-  libs = [
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
-    "$root_out_dir/third_party/lib/gdal$suffix.lib",
   ]
 
   deps = [
     "//base:base",
     ":renderer2d",
     "//third_party/CxImage:CxImage",
+    "//third_party:glog",
+    "//third_party:gdal",
   ]
 }
 
@@ -79,17 +68,6 @@ test("renderer2d_test") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
-  ]
-
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
-  libs = [
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
-    "$root_out_dir/third_party/lib/gdal$suffix.lib",
   ]
 
   deps = [

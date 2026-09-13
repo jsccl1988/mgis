@@ -1,0 +1,25 @@
+---
+description: Mogu copyright header; add on edit if missing; year is current year when creating or touching files
+alwaysApply: true
+---
+
+# Copyright header
+
+## Year (always current)
+
+- Use the **current calendar year** in `Copyright (c) YYYY`.
+- **New files**: add the standard two-line notice with that year.
+- **Touched / edited files**: if the file already has the Mogu `Copyright (c) … The Mogu Authors.` line, **update `YYYY` to the current year** as part of the same change. Do not leave a past year after you modify the file.
+- **Touched files with no Mogu header**: if you edit a source file that does **not** yet include that notice, **add the full two-line header** (current year) in the same change. Place it at the very top; for scripts that start with a shebang (`#!`) or `@echo off`, put the header **immediately after** that line.
+- **Do not** copy a stale year from another file.
+
+## C/C++ (`//` comments)
+
+```cpp
+// Copyright (c) YYYY The Mogu Authors.
+// All rights reserved.
+```
+
+## Other languages
+
+Same two-line text using the language’s comment syntax (e.g. `#` for Python/shell, `REM` for `.bat`).

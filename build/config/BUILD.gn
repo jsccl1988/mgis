@@ -32,3 +32,24 @@ config("cc_std") {
     cflags_cc = [ "-std=$cc_std" ]
   }
 }
+
+# Named warnings config (mogu //build/config/compiler:warnings).
+# Not in default configs — flipping /W3 → /W4 would flood existing targets.
+# Opt in: configs += [ "//build/config:warnings" ]
+config("warnings") {
+  if (is_win) {
+    cflags = [
+      "/W4",
+      "/wd4100",
+      "/wd4201",
+      "/wd4505",
+      "/wd4996",
+    ]
+  } else {
+    cflags_cc = [
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+    ]
+  }
+}

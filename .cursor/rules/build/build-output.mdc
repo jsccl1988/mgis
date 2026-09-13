@@ -1,0 +1,24 @@
+---
+description: GN/Ninja build output must be out/ at repo root only
+alwaysApply: true
+---
+
+# Build output directory
+
+- **Only** use repository root **`out/`** as the GN/Ninja output directory (`out/build.ninja`, binaries under `out/`).
+- **Do not** use **`out/Default`** or any other subdirectory of `out/` as the gen root — not for docs, scripts, or examples.
+- Use **`gn gen out`** and **`ninja -C out <target>`**, or repo-root **`build.bat`** / **`build.bat te`**. Resolve built binaries under **`$REPO_ROOT/out/`** only.
+- **Third-party CMake install prefix** is **`out/third_party`** (GN `cmake_install_dir`). This is **not** mogu’s `third_party/.install`. Do not invent a second install root.
+
+```bat
+gn gen out --root=./ --args="is_debug=true is_build_third_party=false"
+ninja -C out all
+```
+
+```bat
+set EXE=%CD%\out\smartgis.exe
+if not exist "%EXE%" (
+  echo Build first: ninja -C out smartgis
+  exit /b 1
+)
+```

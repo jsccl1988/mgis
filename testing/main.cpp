@@ -8,8 +8,7 @@
 int main(int argc, char* argv[]) {
   base::Initialize(argc, argv);
   testing::InitGoogleTest(&argc, argv);
-  RUN_ALL_TESTS();
+  const int result = RUN_ALL_TESTS();
   base::Deinitialize();
-
-  return 0;
+  return result;
 }

@@ -1,6 +1,55 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 import("//testing/test.gni")
+import("sdb/sdbd.gni")
+
+group("core_all") {
+  deps = [
+    ":core",
+    ":demo_map_data",
+    "//core/sdbd_client",
+    "//core/mapd_client",
+  ]
+}
+
+# Default demo: world GeoJSON (point/line/polygon) plus Shanghai shapefile fallback.
+action("demo_map_data") {
+  script = "//core/copy_demo_data.py"
+  sources = [
+    "data/sh/POLYGON.dbf",
+    "data/sh/POLYGON.prj",
+    "data/sh/POLYGON.shp",
+    "data/sh/POLYGON.shx",
+    "data/world/countries.geojson",
+    "data/world/graticule.geojson",
+    "data/world/capitals.geojson",
+  ]
+  outputs = [
+    "$root_out_dir/data/sh/POLYGON.dbf",
+    "$root_out_dir/data/sh/POLYGON.prj",
+    "$root_out_dir/data/sh/POLYGON.shp",
+    "$root_out_dir/data/sh/POLYGON.shx",
+    "$root_out_dir/data/world/countries.geojson",
+    "$root_out_dir/data/world/graticule.geojson",
+    "$root_out_dir/data/world/capitals.geojson",
+  ]
+  args = [
+    rebase_path("data/sh/POLYGON.dbf", root_build_dir),
+    rebase_path("$root_out_dir/data/sh/POLYGON.dbf", root_build_dir),
+    rebase_path("data/sh/POLYGON.prj", root_build_dir),
+    rebase_path("$root_out_dir/data/sh/POLYGON.prj", root_build_dir),
+    rebase_path("data/sh/POLYGON.shp", root_build_dir),
+    rebase_path("$root_out_dir/data/sh/POLYGON.shp", root_build_dir),
+    rebase_path("data/sh/POLYGON.shx", root_build_dir),
+    rebase_path("$root_out_dir/data/sh/POLYGON.shx", root_build_dir),
+    rebase_path("data/world/countries.geojson", root_build_dir),
+    rebase_path("$root_out_dir/data/world/countries.geojson", root_build_dir),
+    rebase_path("data/world/graticule.geojson", root_build_dir),
+    rebase_path("$root_out_dir/data/world/graticule.geojson", root_build_dir),
+    rebase_path("data/world/capitals.geojson", root_build_dir),
+    rebase_path("$root_out_dir/data/world/capitals.geojson", root_build_dir),
+  ]
+}
 
 static_library("core") {
   defines = [
@@ -13,28 +62,28 @@ static_library("core") {
     "sdb/sdb.cpp",
   ]
 
+  # sdbd
+  sources += sdbd_sources
+
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
   ]
 
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
   libs = [
-    "$root_out_dir/third_party/lib/sqlite3.lib",
-    "$root_out_dir/third_party/lib/SQLiteCpp.lib",
-    "$root_out_dir/third_party/lib/geos.lib",
-    "$root_out_dir/third_party/lib/gdal$suffix.lib",
-    "$root_out_dir/third_party/lib/spatialindex-64.lib",
-    "$root_out_dir/third_party/lib/spatialite_i.lib",
-    "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
+    "winhttp.lib",
+  ]
+
+  public_deps = [
+    "//core/sdbd_client",
+    "//core/mapd_client",
   ]
 
   deps = [
     "//base:base",
+    "//third_party:sqlite3",
+    "//third_party:SQLiteCpp",
+    "//third_party:geos",
+    "//third_party:gdal",
   ]
 }
 
@@ -48,32 +97,24 @@ test("core_test") {
     "core_unittest.cpp",
     "geometry/geometry_unittest.cpp",
     "sdb/sdb_unittest.cpp",
+    "sdb/sdbd_unittest.cpp",
   ]
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
   ]
 
-  proj_suffix = ""
-  gdal_suffix = ""
-  if (is_debug) {
-    proj_suffix = "_d"
-    gdal_suffix = "d"
-  }
-
   libs = [
-    "$root_out_dir/third_party/lib/sqlite3.lib",
-    "$root_out_dir/third_party/lib/SQLiteCpp.lib",
-    "$root_out_dir/third_party/lib/geos.lib",
-    "$root_out_dir/third_party/lib/proj$proj_suffix.lib",
-    "$root_out_dir/third_party/lib/gdal$gdal_suffix.lib",
-    "$root_out_dir/third_party/lib/spatialindex-64.lib",
-    "$root_out_dir/third_party/lib/spatialite_i.lib",
-    "$root_out_dir/third_party/lib/SpatiaLiteCpp.lib",
+    "ws2_32.lib",
   ]
 
   deps = [
     ":core",
+    "//third_party:sqlite3",
+    "//third_party:SQLiteCpp",
+    "//third_party:geos",
+    "//third_party:PROJ",
+    "//third_party:gdal",
+    "//third_party:runtime_dlls_beside_exe",
   ]
 }

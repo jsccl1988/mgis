@@ -1,12 +1,18 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 import("//testing/test.gni")
+import("sdbd.gni")
+
+group("content_all") {
+  deps = [ ":content" ]
+}
 
 shared_library("content") {
   defines = [
     "NOMINMAX",
     "COMPONENT_BUILD",
     "CONTENT_IMPLEMENTATION",
+    "MGIS_LINK_SDBD",
   ]
 
   configs += [
@@ -30,44 +36,68 @@ shared_library("content") {
     "control/tool/select_tool.cpp",
     "control/tool/tool_factory.cpp",
     "export.cpp",
+    # // mapd
+    "mapd_link.cpp",
+    "mapd_session.cpp",
+    # // spatial_link
+    "spatial_link.cpp",
   ]
+
+  # sdbd
+  sources += sdbd_content_sources
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
     "//third_party/wtl8.0/",
   ]
 
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
   libs = [
     "atls.lib",
-    "$root_out_dir/third_party/lib/gdal$suffix.lib",
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
   deps = [
     "//base:base",
     "//core:core",
+    "//core:demo_map_data",
     "//gfx/2d:renderer2d",
     "//gfx/3d:renderer3d",
+    "//third_party:glog",
+    "//third_party:gdal",
+    # // mapd
+    "//core/mapd_client",
   ]
 }
 
+# E2E: out\content_test.exe --gtest_filter=E2E.*
+# GUI smoke (optional): python testing/e2e/smartgis_smoke.py
 test("content_test") {
   sources = [
     "content_unittest.cpp",
+    "e2e_unittest.cpp",
+    # // mapd
+    "mapd_link_unittest.cpp",
+    # // sdbd
+    "sdbd_link_unittest.cpp",
+    "//testing/sdbd/sdbd_http_mock.cpp",
   ]
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
+    "//third_party/cpp-httplib",
+  ]
+
+  libs += [
+    "ws2_32.lib",
   ]
 
   deps = [
     ":content",
+    # // mapd
+    "//core/mapd_client",
+    "//core/sdbd_client",
+    "//core:core",
+    "//third_party:gdal",
+    "//third_party:cpp-httplib",
+    "//third_party:runtime_dlls_beside_exe",
   ]
 }

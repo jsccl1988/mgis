@@ -1,6 +1,10 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 import("//testing/test.gni")
+
+group("base_all") {
+  deps = [ ":base" ]
+}
 
 shared_library("base") {
   defines = [
@@ -63,13 +67,7 @@ shared_library("base") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
   ]
-
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
 
   libs = [
     "wsock32.lib",
@@ -77,10 +75,11 @@ shared_library("base") {
     "ws2_32.lib",
     "Snmpapi.lib",
     "netapi32.lib",
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
-  deps = [
+  # logging.h includes glog/logging.h; consumers need the install include path.
+  public_deps = [
+    "//third_party:glog",
   ]
 }
 

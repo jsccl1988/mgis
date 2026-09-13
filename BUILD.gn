@@ -1,14 +1,16 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
 group("all") {
   deps = []
   if (!is_build_third_party) {
     deps += [
-      "//base:base",
-      "//gui:smartgis",
-      "//gfx/2d:render_device_gdi",
-      "//gfx/3d:render_device_d3d",
+      "//base:base_all",
+      "//core:core_all",
+      "//content:content_all",
+      "//gui:gui_all",
+      "//gfx/2d:gfx_2d_all",
+      "//gfx/3d:gfx_3d_all",
     ]
   }
 
@@ -17,4 +19,53 @@ group("all") {
       "//third_party:third_party_all",
     ]
   }
+}
+
+# Production code plus tests (mogu: //:all_with_tests)
+group("all_with_tests") {
+  testonly = true
+  deps = [
+    ":all",
+    ":test_all",
+  ]
+}
+
+# No benchmark targets yet; group exists so `b` / build.bat b stay valid.
+group("benchmark_all") {
+  testonly = true
+  deps = []
+}
+
+group("test_all") {
+  testonly = true
+  deps = [
+    "//base:base_test",
+    "//core:core_test",
+    "//core/sdbd_client:sdbd_client_test",
+    "//core/mapd_client:mapd_client_test",
+    "//content:content_test",
+    "//gfx/2d:renderer2d_test",
+    "//gfx/3d:renderer3d_test",
+    "//testing/sdbd:sdbd_mock",
+  ]
+}
+
+# Shorthand aliases (mogu: m / a / b / te)
+group("m") {
+  deps = [ ":all" ]
+}
+
+group("a") {
+  testonly = true
+  deps = [ ":all_with_tests" ]
+}
+
+group("b") {
+  testonly = true
+  deps = [ ":benchmark_all" ]
+}
+
+group("te") {
+  testonly = true
+  deps = [ ":test_all" ]
 }

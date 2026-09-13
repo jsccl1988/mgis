@@ -1,6 +1,10 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 import("//testing/test.gni")
+
+group("gui_all") {
+  deps = [ ":smartgis" ]
+}
 
 executable("smartgis") {
   defines = [
@@ -23,22 +27,16 @@ executable("smartgis") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/third_party/include",
     # "//third_party/wtl8.0/",
   ]
 
-  suffix = ""
-  if (is_debug) {
-    suffix = "d"
-  }
-
   libs += [
     "atls.lib",
-    "$root_out_dir/third_party/lib/glog$suffix.lib",
   ]
 
   deps = [
     "//base:base",
     "//content:content",
+    "//third_party:glog",
   ]
 }

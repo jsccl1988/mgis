@@ -161,7 +161,7 @@ void InputSurfaceTool::AppendRect(uint32_t mouse_status, Point point) {
         EndAppendSurface();
 
         if (ERR_NONE == render_device_->BeginRender(
-                            gfx2d::RenderDevice::RB_IMMEDIATELY, true, false))
+                            gfx2d::RenderDevice::RB_IMMEDIATELY, true, nullptr))
           render_device_->EndRender(gfx2d::RenderDevice::RB_IMMEDIATELY);
       }
       break;

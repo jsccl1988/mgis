@@ -19,7 +19,7 @@
 #include "gfx/3d/renderer/render_export.h"
 
 namespace gfx3d {
-enum RHI3D { RHI3D_D3D, RHI3D_GL };
+enum RHI3D { RHI3D_D3D, RHI3D_GL, RHI3D_FLYCUBE };
 struct RenderOptions {};
 }  // namespace gfx3d
 

@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# Deprecated for //third_party: mgis now follows mogu (manifest + tools/install.py
+# → third_party/.install). This script remains only for leftover cmake() templates
+# outside third_party.
 
 import os
 import sys
@@ -24,7 +27,7 @@ def cmake_build(
             'Debug' if is_debug else '',
             '' if static_link_crt else 'DLL',
         )
-        options += '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=%s ' % (
+        options += '-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_MSVC_RUNTIME_LIBRARY=%s ' % (
             crt_link_flags,)
     elif sys.platform == 'darwin':
         options += '-DCMAKE_OSX_ARCHITECTURES=%s ' % 'i386' if target_cpu == 'x86' else 'x86_64'
@@ -58,7 +61,10 @@ def cmake_build(
     for cmd in (config_cmd, build_cmd, install_cmd):
         print(cmd)
         sys.stdout.flush()
-        os.system(cmd)
+        ret = os.system(cmd)
+        if ret != 0:
+            print('ERROR: cmake command failed (%s): %s' % (ret, cmd))
+            sys.exit(1)
 
 
 def main():

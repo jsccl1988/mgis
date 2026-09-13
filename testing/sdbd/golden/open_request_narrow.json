@@ -1,0 +1,8 @@
+{
+  "layer": "t_rtree_demo",
+  "columns": ["id", "name", "geom"],
+  "bbox": { "min_x": 100, "min_y": 100, "max_x": 200, "max_y": 200 },
+  "predicate": "intersects",
+  "crs": "EPSG:4326",
+  "limit": 10000
+}

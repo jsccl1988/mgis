@@ -1,0 +1,34 @@
+# Copyright (c) 2026 The MGIS Authors.
+# All rights reserved.
+#
+# Thin mapd HTTP client, contract-compatible with sg::MapdClient.
+# Shares HttpTransport from //core/sdbd_client. 待 pin 替换.
+import("//testing/test.gni")
+
+config("mapd_client_public") {
+  include_dirs += [ "." ]
+}
+
+static_library("mapd_client") {
+  sources = [
+    "mapd_client.cc",
+    "query_request.cc",
+  ]
+
+  public_configs = [ ":mapd_client_public" ]
+
+  deps = [
+    "//core/sdbd_client",
+  ]
+}
+
+test("mapd_client_test") {
+  sources = [
+    "mapd_client_unittest.cpp",
+  ]
+
+  deps = [
+    ":mapd_client",
+    "//core/sdbd_client",
+  ]
+}

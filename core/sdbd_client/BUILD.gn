@@ -1,0 +1,47 @@
+# Copyright (c) 2026 The MGIS Authors.
+# All rights reserved.
+#
+# Thin sdbd HTTP client (04 §7 / link-spatial). Headers sit next to .cc
+# (no include/ tree). 待 pin 替换: do not treat these headers as a second contract.
+import("//testing/test.gni")
+
+config("sdbd_client_public") {
+  include_dirs += [ "." ]
+}
+
+static_library("sdbd_client") {
+  sources = [
+    "fake_http_transport.cc",
+    "feature_set.cc",
+    "http_transport_win.cc",
+    "json_lite.cc",
+    "sdbd_client.cc",
+    "sdbd_session.cc",
+  ]
+
+  public_configs = [ ":sdbd_client_public" ]
+
+  if (is_win) {
+    libs = [ "winhttp.lib" ]
+  }
+}
+
+# Alias so existing ninja sdb_client_test still resolves.
+group("sdb_client") {
+  public_deps = [ ":sdbd_client" ]
+}
+
+test("sdbd_client_test") {
+  sources = [
+    "sdbd_client_unittest.cpp",
+  ]
+
+  deps = [
+    ":sdbd_client",
+  ]
+}
+
+group("sdb_client_test") {
+  testonly = true
+  deps = [ ":sdbd_client_test" ]
+}

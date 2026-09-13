@@ -3,15 +3,120 @@
 
 #include "content/control/window/map_window.h"
 
+#include "base/logging.h"
 #include "base/path/base_paths.h"
 #include "base/util/string_util.h"
+#include "content/mapd_link.h"
+#include "content/sdbd_link.h"
+#include "content/spatial_link.h"
 #include "gfx/2d/renderer/style.h"
+
+#include <cstdio>
+#include <string>
+#include <vector>
 
 #define ToDPoint(point) gfx2d::DPoint(point.x, point.y)
 
 namespace content {
+namespace {
 static const UINT kRefreshTimer = 69;
 static const UINT kNotifyTimer = 70;
+
+const wchar_t* kWorldLayerFiles[] = {L"countries.geojson", L"graticule.geojson",
+                                     L"capitals.geojson"};
+const char* kWorldLayerNames[] = {"countries", "graticule", "capitals"};
+
+void LogBoundLayers(const char* where, const std::vector<OGRLayer*>& layers) {
+  LOG(INFO) << where << ": bind layers=" << layers.size();
+  std::string text =
+      std::string(where) + ": bind layers=" + std::to_string(layers.size()) +
+      "\n";
+  for (OGRLayer* layer : layers) {
+    if (!layer) {
+      continue;
+    }
+    const char* name = layer->GetName();
+    const char* geom = OGRGeometryTypeToName(layer->GetGeomType());
+    const GIntBig n = layer->GetFeatureCount();
+    LOG(INFO) << where << ": layer=" << (name ? name : "?")
+              << " geom=" << (geom ? geom : "?") << " features=" << n;
+    text += "layer=";
+    text += name ? name : "?";
+    text += " geom=";
+    text += geom ? geom : "?";
+    text += " features=";
+    text += std::to_string(static_cast<long long>(n));
+    text += "\n";
+  }
+  FILE* f = nullptr;
+  if (fopen_s(&f, "world_bind.log", "w") == 0 && f) {
+    fwrite(text.data(), 1, text.size(), f);
+    fclose(f);
+  }
+}
+
+bool OpenWorldDemo(const base::PathString& dir, GDALDataset** out) {
+  if (!out) {
+    return false;
+  }
+  GDALDriver* mem = GetGDALDriverManager()->GetDriverByName("Memory");
+  if (!mem) {
+    LOG(ERROR) << "InitMap: Memory driver missing";
+    return false;
+  }
+  GDALDataset* ds = mem->Create("world_demo", 0, 0, 0, GDT_Unknown, nullptr);
+  if (!ds) {
+    return false;
+  }
+  int copied = 0;
+  for (int i = 0; i < 3; ++i) {
+    const base::PathString path = dir + L"\\" + kWorldLayerFiles[i];
+    const std::string utf8 = base::UTF16ToUTF8(path);
+    GDALDataset* src = static_cast<GDALDataset*>(GDALOpenEx(
+        utf8.c_str(), GDAL_OF_VECTOR | GDAL_OF_READONLY, nullptr, nullptr,
+        nullptr));
+    if (!src) {
+      LOG(WARNING) << "InitMap: missing world layer " << utf8
+                   << " gdal=" << CPLGetLastErrorMsg();
+      continue;
+    }
+    OGRLayer* layer = src->GetLayer(0);
+    if (layer && ds->CopyLayer(layer, kWorldLayerNames[i])) {
+      ++copied;
+    }
+    GDALClose(src);
+  }
+  if (copied != 3) {
+    GDALClose(ds);
+    return false;
+  }
+  *out = ds;
+  return true;
+}
+
+bool OpenShanghaiFallback(const base::PathString& module_dir,
+                          GDALDataset** out) {
+  const base::PathString candidates[] = {
+      module_dir + L"\\data\\sh\\POLYGON.shp",
+      module_dir + L"\\..\\core\\data\\sh\\POLYGON.shp",
+  };
+  std::string file_path;
+  for (const auto& shp_path : candidates) {
+    file_path = base::UTF16ToUTF8(shp_path);
+    GDALDataset* ds = static_cast<GDALDataset*>(GDALOpenEx(
+        file_path.c_str(), GDAL_OF_VECTOR, nullptr, nullptr, nullptr));
+    if (ds) {
+      *out = ds;
+      LOG(INFO) << "InitMap: opened fallback " << file_path
+                << " layers=" << ds->GetLayerCount();
+      return true;
+    }
+  }
+  LOG(ERROR) << "InitMap: failed to open " << file_path
+             << " gdal=" << CPLGetLastErrorMsg();
+  return false;
+}
+}  // namespace
 
 LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
   CMessageLoop* loop = _Module.GetMessageLoop();
@@ -21,30 +126,30 @@ LRESULT MapWindow::OnCreate(LPCREATESTRUCT lpcs) {
   }
 
   if (!InitStyle()) {
-    return S_FALSE;
+    return -1;
   }
 
-  if (!InitMap()) {
-    return S_FALSE;
-  }
+  // Demo shapefile is optional. A missing/unreadable file must not skip
+  // renderer setup — OnPaint calls render_device_->Swap().
+  InitMap();
 
   if (!InitRenderer()) {
-    return S_FALSE;
+    return -1;
   }
 
   if (!InitTool()) {
-    return S_FALSE;
+    return -1;
   }
 
   if (!InitMenu()) {
-    return S_FALSE;
+    return -1;
   }
 
   if (!InitTimer()) {
-    return S_FALSE;
+    return -1;
   }
 
-  return S_OK;
+  return 0;
 }
 
 void MapWindow::OnDestroy() {
@@ -60,11 +165,22 @@ void MapWindow::OnDestroy() {
   ::DestroyMenu(m_hMainMenu);
   ::DestroyMenu(m_hContexMenu);
 
-  render_device_->Unbind();
-  renderer_->ReleaseDevice();
-  delete renderer_;
+  if (render_device_) {
+    render_device_->Unbind();
+    render_device_ = nullptr;
+  }
+  if (renderer_) {
+    renderer_->ReleaseDevice();
+    delete renderer_;
+    renderer_ = nullptr;
+  }
 
-  GDALClose(dataset_);
+  if (dataset_) {
+    if (content::SpatialLinkKind() != "sdbd") {
+      GDALClose(dataset_);
+    }
+    dataset_ = nullptr;
+  }
 }
 
 void MapWindow::OnTimer(UINT_PTR event) {
@@ -96,7 +212,8 @@ void MapWindow::OnTimer(UINT_PTR event) {
 
 void MapWindow::OnSize(UINT nType, CSize size) {
   auto& environment = content::Environment::GetInstance();
-  if (render_device_) {
+  if (render_device_ && nType != SIZE_MINIMIZED && size.cx > 0 &&
+      size.cy > 0) {
     auto system_options = environment.get()->GetSystemOptions();
     gfx2d::RenderOptions options;
     options.show_mbr = system_options.show_mbr;
@@ -123,7 +240,9 @@ void MapWindow::OnPaint(HDC /*hDC*/) {
     tool->AuxDraw();
   }
 
-  render_device_->Swap();
+  if (render_device_) {
+    render_device_->Swap();
+  }
 }
 
 BOOL MapWindow::OnEraseBkgnd(CDCHandle dc) { return TRUE; }
@@ -236,6 +355,15 @@ void MapWindow::OnCommand(UINT uNotifyCode, int nID, CWindow wndCtl) {
   content::MessageListener::Message message;
   message.id = nID;
   message.source_window = m_hWnd;
+
+  if (nID == MESSAGE_CMD_LINK_MAPD) {
+    OnLinkMapd();
+    return;
+  }
+  if (nID == MESSAGE_CMD_LINK_SDBD) {
+    OnLinkSdbd();
+    return;
+  }
 
   if (nID >= MESSAGE_CMD_BEGIN && nID <= MESSAGE_CMD_END) {
     auto& tool_manager = content::ToolManager::GetInstance();
@@ -432,34 +560,83 @@ bool MapWindow::InitStyle() {
   return true;
 }
 bool MapWindow::InitMap() {
-  auto& environment = content::Environment::GetInstance();
   CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");
   CPLSetConfigOption("SHAPE_ENCODING", "");
   GDALAllRegister();
 
-  base::PathString module_dir;
-  base::PathProvider(base::FILE_MODULE_DIR, &module_dir);
-  std::string file_path =
-      base::UTF16ToUTF8(module_dir) + "./data/sh/POLYGON.shp";
-
-  dataset_ = (GDALDataset*)GDALOpenEx(file_path.c_str(), GDAL_OF_VECTOR,
-                                      nullptr, nullptr, nullptr);
-  if (dataset_ == nullptr) {
-    return false;
+  std::string link_url;
+  if (content::SpatialLinkRequested(&link_url)) {
+    if (!content::TryOpenSpatialLink(link_url)) {
+      LOG(ERROR) << "InitMap: " << content::SpatialLinkKind()
+                 << " 未就绪 not_ready url=" << link_url
+                 << " err=" << content::SpatialLinkError();
+      return false;
+    }
+    dataset_ = content::TakeSpatialLinkDataset();
+    LOG(INFO) << "InitMap: spatial link kind=" << content::SpatialLinkKind()
+              << " url=" << link_url
+              << " layers=" << (dataset_ ? dataset_->GetLayerCount() : 0);
+    return true;
   }
 
-  return true;
+  base::PathString module_dir;
+  base::PathProvider(base::FILE_MODULE_DIR, &module_dir);
+  const base::PathString world_dirs[] = {
+      module_dir + L"\\data\\world",
+      module_dir + L"\\..\\core\\data\\world",
+  };
+  for (const auto& dir : world_dirs) {
+    if (OpenWorldDemo(dir, &dataset_)) {
+      LOG(INFO) << "InitMap: opened world demo "
+                << base::UTF16ToUTF8(dir)
+                << " layers=" << dataset_->GetLayerCount();
+      return true;
+    }
+  }
+
+  if (OpenShanghaiFallback(module_dir, &dataset_)) {
+    return true;
+  }
+  return false;
 }
 bool MapWindow::InitRenderer() {
   auto& environment = content::Environment::GetInstance();
   renderer_ = new gfx2d::Renderer(::GetModuleHandle(NULL));
-  if (ERR_NONE == renderer_->CreateDevice(L"render_device_gdi")) {
-    render_device_ = renderer_->GetDevice();
-    render_device_->Init(m_hWnd);
-    render_device_->SetMapMode(MM_TEXT);
+  if (ERR_NONE != renderer_->CreateDevice(L"render_device_gdi")) {
+    return false;
+  }
 
+  render_device_ = renderer_->GetDevice();
+  if (!render_device_) {
+    return false;
+  }
+
+  render_device_->Init(m_hWnd);
+  render_device_->SetMapMode(MM_TEXT);
+
+  std::vector<OGRLayer*> layers;
+  gfx2d::DRect drect;
+  drect.x = drect.y = 0;
+  drect.width = 1;
+  drect.height = 1;
+
+  RECT client{};
+  ::GetClientRect(m_hWnd, &client);
+  if (client.right > 0) {
+    drect.width = client.right;
+  }
+  if (client.bottom > 0) {
+    drect.height = client.bottom;
+  }
+
+  gfx2d::LRect lrect;
+  lrect.x = 0;
+  lrect.y = 0;
+  lrect.width = 1;
+  lrect.height = 1;
+
+  if (dataset_) {
     OGREnvelope envelop;
-    std::vector<OGRLayer*> layers;
     auto layer_count = dataset_->GetLayerCount();
     for (size_t i = 0; i < layer_count; i++) {
       auto* layer = dataset_->GetLayer(i);
@@ -469,24 +646,26 @@ bool MapWindow::InitRenderer() {
       envelop.Merge(layer_envelop);
     }
 
-    gfx2d::DRect drect;
-    drect.x = drect.y = 0;
-    drect.width = envelop.MaxX;
-    drect.height = envelop.MaxY;
-
-    gfx2d::LRect lrect;
-    lrect.x = envelop.MinX;
-    lrect.y = envelop.MinY;
-    lrect.width = envelop.MaxX - envelop.MinX;
-    lrect.height = envelop.MaxY - envelop.MinY;
-
-    render_device_->Bind(layers);
-    render_device_->Resize(drect);
-    render_device_->ZoomToRect(lrect);
-    return true;
+    if (envelop.MaxX > envelop.MinX && envelop.MaxY > envelop.MinY) {
+      lrect.x = envelop.MinX;
+      lrect.y = envelop.MinY;
+      lrect.width = envelop.MaxX - envelop.MinX;
+      lrect.height = envelop.MaxY - envelop.MinY;
+    }
   }
 
-  return false;
+  map_extent_ = lrect;
+  auto system_options = environment.get()->GetSystemOptions();
+  gfx2d::RenderOptions options;
+  options.show_mbr = system_options.show_mbr;
+  options.show_point = true;
+  options.point_radius = system_options.point_radius;
+  render_device_->SetRenderOptions(options);
+  LogBoundLayers("InitRenderer", layers);
+  render_device_->Bind(layers);
+  render_device_->Resize(drect);
+  render_device_->ZoomToRect(lrect);
+  return true;
 }
 bool MapWindow::InitTool() {
   auto& environment = content::Environment::GetInstance();
@@ -541,7 +720,98 @@ bool MapWindow::InitMenu() {
   content::AppendListenerMenu(m_hContexMenu, edit_tool_, content::FIG_2DVIEW,
                               true);
 
+  AppendMenu(m_hMainMenu, MF_STRING, MESSAGE_CMD_LINK_MAPD, TEXT("链接 mapd"));
+  AppendMenu(m_hMainMenu, MF_STRING, MESSAGE_CMD_LINK_SDBD, TEXT("链接 sdbd"));
+  AppendMenu(m_hContexMenu, MF_SEPARATOR, 0, nullptr);
+  AppendMenu(m_hContexMenu, MF_STRING, MESSAGE_CMD_LINK_MAPD, TEXT("链接 mapd"));
+  AppendMenu(m_hContexMenu, MF_STRING, MESSAGE_CMD_LINK_SDBD, TEXT("链接 sdbd"));
+
   return true;
+}
+
+void MapWindow::BindOpenedDataset() {
+  if (!render_device_) {
+    return;
+  }
+  render_device_->Unbind();
+
+  std::vector<OGRLayer*> layers;
+  gfx2d::LRect lrect;
+  lrect.x = 0;
+  lrect.y = 0;
+  lrect.width = 1;
+  lrect.height = 1;
+
+  if (dataset_) {
+    OGREnvelope envelop;
+    const int layer_count = dataset_->GetLayerCount();
+    for (int i = 0; i < layer_count; ++i) {
+      auto* layer = dataset_->GetLayer(i);
+      layers.push_back(layer);
+      OGREnvelope layer_envelop;
+      layer->GetExtent(&layer_envelop);
+      envelop.Merge(layer_envelop);
+    }
+    if (envelop.MaxX > envelop.MinX && envelop.MaxY > envelop.MinY) {
+      lrect.x = envelop.MinX;
+      lrect.y = envelop.MinY;
+      lrect.width = envelop.MaxX - envelop.MinX;
+      lrect.height = envelop.MaxY - envelop.MinY;
+    }
+  }
+
+  map_extent_ = lrect;
+  LogBoundLayers("BindOpenedDataset", layers);
+  render_device_->Bind(layers);
+  render_device_->ZoomToRect(lrect);
+  render_device_->Refresh(true);
+}
+
+void MapWindow::OnLinkMapd() {
+  const std::string url = content::DefaultMapdBaseUrl();
+  if (render_device_) {
+    render_device_->Unbind();
+  }
+  if (dataset_) {
+    if (content::SpatialLinkKind() != "sdbd") {
+      GDALClose(dataset_);
+    }
+    dataset_ = nullptr;
+  }
+  if (!content::TryOpenSpatialLink(url)) {
+    LOG(ERROR) << "链接 mapd: 未就绪 not_ready url=" << url
+               << " err=" << content::SpatialLinkError();
+    BindOpenedDataset();
+    return;
+  }
+  dataset_ = content::TakeSpatialLinkDataset();
+  LOG(INFO) << "链接 mapd: opened " << url
+            << " layers=" << content::SpatialLinkLayerCount();
+  BindOpenedDataset();
+}
+
+void MapWindow::OnLinkSdbd() {
+  const std::string url = content::DefaultSdbdBaseUrl();
+  if (render_device_) {
+    render_device_->Unbind();
+  }
+  if (dataset_) {
+    if (content::SpatialLinkKind() != "sdbd") {
+      GDALClose(dataset_);
+    }
+    dataset_ = nullptr;
+  }
+  if (!content::TryOpenSpatialLink(url)) {
+    LOG(ERROR) << "链接 sdbd: 未就绪 not_ready url=" << url
+               << " err=" << content::SpatialLinkError();
+    BindOpenedDataset();
+    return;
+  }
+  dataset_ = content::TakeSpatialLinkDataset();
+  LOG(INFO) << "链接 sdbd: opened " << url
+            << " kind=" << content::SpatialLinkKind()
+            << " layers=" << content::SpatialLinkLayerCount();
+  BindOpenedDataset();
 }
 
 bool MapWindow::InitTimer() {

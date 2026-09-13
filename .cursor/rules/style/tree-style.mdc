@@ -1,0 +1,20 @@
+---
+description: Per top-level tree, match sibling code style and patterns
+alwaysApply: true
+---
+
+# Code style consistency by directory tree
+
+The repository is organized by **top-level directories** (`base/`, `core/`, `content/`, `gui/`, `gfx/`, `testing/`, `build/`). **Within each tree**, keep style and patterns **uniform**.
+
+## Do
+
+- **Anchor on peers**: when adding or editing a file, read nearby code in the same subtree and **match** naming, include order, `BUILD.gn` patterns, and documentation density.
+- **Follow narrower rules first**: `.cursor/rules/` path rules beat this default.
+
+## Don’t
+
+- **Don’t** import idioms from a different top-level tree when the current tree already has an established pattern.
+- **Don’t** mix unrelated formatting or structural styles within the same subtree in a single change.
+
+Repo-wide requirements (copyright, build output, function `snake_case`) still apply everywhere.

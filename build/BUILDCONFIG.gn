@@ -47,6 +47,8 @@ is_posix = !is_win && !is_fuchsia
 declare_args() {
   # Debug build
   is_debug = false
+  # Reserved (mogu): faster debug info. Not wired on MSVC; default remains /Zi.
+  use_fast_debug = false
 
   is_prof = true
   is_asan = false
@@ -54,13 +56,17 @@ declare_args() {
   is_msan = false
   is_tsan = false
 
+  # Deprecated: no longer drives cmake() for //third_party.
+  # Install prefix is third_party/.install via `build.bat t`.
   is_build_third_party = false
 }
 
 declare_args() {
   if (is_win) {
     c_std = "c17"
-    cc_std = "c++17"
+    # Product floor is C++20 (MSVC /std:c++20). C++23 features are OK when
+    # this repo's VS 2022/2026 cl accepts them; do not use /std:c++latest.
+    cc_std = "c++20"
   } else {
     c_std = "c23"
     cc_std = "c++23"
@@ -155,6 +161,9 @@ if (is_win) {
 # help to build cmake/makefile projects
 import("//build/tools/cmake.gni")
 import("//build/tools/makefile.gni")
+
+# mogu-aligned third_party prefix (consumed by //third_party/gn)
+import("//third_party/gn/tp.gni")
 
 include_dirs = [
   "//",

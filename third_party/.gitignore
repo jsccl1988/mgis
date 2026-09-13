@@ -1,0 +1,10 @@
+/.src/
+/.build/
+/.install/
+/.install_prefix/
+/log
+.ide.*
+.vscode
+.vs
+*.pyc
+*.swp

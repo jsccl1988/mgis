@@ -1,0 +1,42 @@
+---
+description: Main-library C++ functions and member functions must use snake_case; rename call sites in-tree
+alwaysApply: true
+---
+
+# Function naming: `snake_case` (main library)
+
+Applies to **main-library** C++ under **`base/`**, **`core/`**, **`content/`**, **`gfx/`**, and **`gui/`** (`.h` / `.hh` / `.cc` / `.cpp`). Does **not** apply to `third_party/` or vendored trees.
+
+## Must be `snake_case`
+
+Free functions, member functions (including `static`), and named callables the project owns.
+
+```cpp
+// ❌ BAD
+void LoadConfig();
+int layerCount() const;
+
+// ✅ GOOD
+void load_config();
+int layer_count() const;
+```
+
+Boolean predicates prefer `is_` / `has_` / `can_` / `should_`.
+
+## Rename policy (when editing)
+
+If new or touched code in scope **encounters** a project-owned function named in `camelCase` or `PascalCase`:
+
+1. Rename it to **`snake_case`** in the declaration and definition.
+2. Update **all call sites inside the main library** in the **same change**.
+3. Do **not** leave a local-only rename unless an external ABI forces it.
+
+Do **not** drive-by rename unrelated symbols outside the edit’s blast radius.
+
+## Out of scope
+
+- **Types**: PascalCase (or match the file).
+- **Third-party / STL / Win32 / WTL** names you call or override.
+- Virtual overrides and COM/Win32 entry points whose name is fixed — keep the required name; prefer a thin `snake_case` helper when practical.
+- Macros and test macros (`TEST`, `TEST_F`, `BENCHMARK`).
+- Single-word STL-style members (`begin`, `end`, `size`, `empty`, `data`, `clear`).

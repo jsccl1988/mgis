@@ -1,0 +1,13 @@
+{
+  "layer": "t_rtree_demo",
+  "crs": "EPSG:4326",
+  "count": 1,
+  "offset": 0,
+  "features": [
+    {
+      "id": 2,
+      "geom_wkt": "POLYGON((100 100,200 100,200 200,100 200,100 100))",
+      "attrs": {"name": "hit"}
+    }
+  ]
+}

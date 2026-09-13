@@ -1,0 +1,8 @@
+# Copyright (c) 2026 The MGIS Authors.
+# All rights reserved.
+#
+# sdbd link entry. Paths are relative to //content/BUILD.gn.
+
+sdbd_content_sources = [
+  "sdbd_link.cpp",
+]

@@ -1,0 +1,27 @@
+# Copyright (c) 2026 The MGIS Authors.
+# All rights reserved.
+import("//testing/test.gni")
+
+# Tiny local sdbd HTTP mock (not a mogu sdbd product).
+#   out\sdbd_mock.exe [port]   default 8021
+executable("sdbd_mock") {
+  testonly = true
+  sources = [
+    "sdbd_http_mock.cpp",
+    "sdbd_mock_main.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "//third_party/cpp-httplib",
+  ]
+
+  libs += [ "ws2_32.lib" ]
+
+  deps = [
+    "//base:base",
+    "//core:core",
+    "//third_party:gdal",
+    "//third_party:cpp-httplib",
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "service": "mapd",
+  "crs": "EPSG:3857",
+  "data_version": "contract-2026-09-12.1",
+  "raster_max_z": 10,
+  "vector_min_z": 11,
+  "vector_max_z": 14,
+  "raster_format": "webp",
+  "vector_store": "pmtiles",
+  "layers": ["basemap"],
+  "query_layers": ["basemap"],
+  "path_q": {
+    "features": true,
+    "analysis": true,
+    "jobs": "stub",
+    "query_timeout_ms": 5000,
+    "query_default_limit": 100,
+    "query_hard_limit": 1000,
+    "query_pool_size": 4,
+    "postgis_configured": false,
+    "primary_store": "table"
+  },
+  "path_r": {
+    "raster": true,
+    "vector": true,
+    "terrain": false
+  },
+  "satellite": {
+    "enabled": false
+  }
+}

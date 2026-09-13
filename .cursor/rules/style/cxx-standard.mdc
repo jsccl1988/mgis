@@ -1,0 +1,44 @@
+---
+description: First-party C++20 on MSVC; traits + concepts over copy-pasted overloads
+alwaysApply: true
+---
+
+# Product C++: C++20 + traits
+
+Applies to first-party C++ under **`base/`**, **`core/`**, **`content/`**, **`gui/`**, **`gfx/`**, and **`testing/`** (`*.h` / `*.hpp` / `*.hh` / `*.cc` / `*.cpp`). **`third_party/`** is out of scope — do not force third-party CMake (GDAL, googletest, …) onto `cc_std`.
+
+## Language standard
+
+Floor is **C++20** (`cc_std = "c++20"` → MSVC `/std:c++20`). Do not pin product targets to `/std:c++17`. This repo’s `cl /help` (VS 18) lists `/std:c++14|c++17|c++20|c++latest` — **no** `/std:c++23`. **Do not** use `/std:c++latest` as the repo default (moving target).
+
+**C++23** features are allowed only when this repo’s **MSVC (VS 2022 / VS 2026)** compiles them under `/std:c++20` or a documented local fallback. Linux/mac may keep `-std=c++23`. Do not use GCC-only extensions (`__integer_pack`, …).
+
+If an advanced TMP feature fails on MSVC (pack indexing, `std::meta`, fold-in-`requires`, NTTP the toolset rejects), **keep a C++20 concepts/traits fallback that compiles**. Do not leave the tree red. Put a one-line comment on the fallback naming the MSVC error.
+
+## Do (collapse duplication)
+
+Prefer **traits + concepts** + `if constexpr` / `requires` over copied overloads, type switches, and macros. Target **shared infrastructure**, not one-off GIS product logic:
+
+| Area | Pattern |
+| --- | --- |
+| mapd / sdbd link | `spatial_link_traits<Service>` + `parse_spatial_link` (`core/sdbd_client/spatial_link.h`) |
+| WinHTTP / fake HTTP | `http_transport_like` + `winhttp_send<Traits>` (UA / timeouts in traits) |
+| OGR Memory / feature bind | `ogr_bind_traits` for field/geom type maps (rule-only until a second copy appears) |
+| Render bind | geometry-type traits instead of a pasted `wkb*` switch per device (rule-only) |
+
+```cpp
+template <SpatialService S>
+struct spatial_link_traits;  // alias_scheme, forbidden_port, forbidden_error
+
+template <spatial_link_like Traits>
+bool parse_spatial_link(const std::string& input, SpatialLink* out);
+```
+
+Keep two public namespace layers (`sg`, `core::sdb`, helpers in `…::detail`). New functions `snake_case`. Copyright header per `repo/copyright.mdc`.
+
+## Don’t
+
+- Don’t traits-abstract MapWindow / UI / one-off layer logic.
+- Don’t invent an in-tree Boost.Geometry or merge `core::sdb` vs `sg` into a new architecture.
+- Don’t rewrite clients to templates unless it deletes a real second copy.
+- Don’t vendor a second GDAL / GEOS stack.

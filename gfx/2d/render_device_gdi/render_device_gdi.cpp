@@ -1,4 +1,4 @@
-// Copyright (c) 2024 The mgis Authors.
+// Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
 #include "gfx/2d/render_device_gdi/render_device_gdi.h"
@@ -7,6 +7,7 @@
 
 #include "base/logging.h"
 #include "gfx/2d/render_device_gdi/utils.h"
+#include "gfx/2d/renderer/ogr_geom_dispatch.h"
 
 #pragma warning(disable : 4244)
 
@@ -24,7 +25,7 @@ RenderDeviceGDI::RenderDeviceGDI(HINSTANCE instance)
       use_current_style_(false),
       is_lock_style_(false),
       op_(R2_COPYPEN) {
-  rhi_api_ = RHI2D_GDI;
+  rhi_api_ = RHI2D_FLYCUBE;
   current_dop_.x = 0;
   current_dop_.y = 0;
 
@@ -386,6 +387,7 @@ int RenderDeviceGDI::BeginRender(eRenderBuffer render_buffer, bool clear,
     PrepareForDrawing(style, op);
   }
 
+  Begin(render_buffer);
   return ERR_NONE;
 }
 
@@ -411,11 +413,16 @@ int RenderDeviceGDI::EndRender(eRenderBuffer render_buffer) {
 
   current_dc_ = nullptr;
   is_lock_style_ = false;
+  End();
 
   return ERR_NONE;
 }
 
 int RenderDeviceGDI::PrepareForDrawing(const Style *style, int draw_mode) {
+  if (!style || !current_dc_) {
+    return ERR_INVALID_PARAM;
+  }
+
   ::SetROP2(current_dc_, draw_mode);
 
   use_current_style_ = (nullptr != style);
@@ -523,6 +530,8 @@ int RenderDeviceGDI::Swap(void) {
   composit_render_buffer_.Swap(current_dop_.x, current_dop_.y, viewport_.width,
                                viewport_.height, viewport_.x, viewport_.y);
 
+  Blit(RB_MAP, RB_DIRECT);
+  Submit();
   return ERR_NONE;
 }
 
@@ -533,10 +542,37 @@ int RenderDeviceGDI::Render() {
 
   BeginRender(RB_MAP);
 
+  // Stock GDI objects are white-on-white. Use the same colors InitStyle
+  // assigns to DefSurfaceStyle so polygons are visible without holding a
+  // Style* allocated in another DLL.
+  HPEN layer_pen = ::CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+  HBRUSH layer_brush = ::CreateSolidBrush(RGB(77, 255, 0));
+  HPEN old_layer_pen = nullptr;
+  HBRUSH old_layer_brush = nullptr;
+  if (current_dc_ && layer_pen && layer_brush) {
+    old_layer_pen = (HPEN)::SelectObject(current_dc_, layer_pen);
+    old_layer_brush = (HBRUSH)::SelectObject(current_dc_, layer_brush);
+  }
+
   for (auto *layer : layers_) {
     if (layer != nullptr) {
       RenderLayer(layer, op_);
     }
+  }
+
+  if (current_dc_) {
+    if (old_layer_pen) {
+      ::SelectObject(current_dc_, old_layer_pen);
+    }
+    if (old_layer_brush) {
+      ::SelectObject(current_dc_, old_layer_brush);
+    }
+  }
+  if (layer_pen) {
+    ::DeleteObject(layer_pen);
+  }
+  if (layer_brush) {
+    ::DeleteObject(layer_brush);
   }
 
   EndRender(RB_MAP);
@@ -567,6 +603,7 @@ int RenderDeviceGDI::RenderLayer(const OGRLayer *const_layer, int op) {
       auto *geometry = feature->GetGeomFieldRef(i);
       RenderGeometry(geometry, op);
     }
+    OGRFeature::DestroyFeature(feature);
   }
 
   return ERR_NONE;
@@ -608,41 +645,7 @@ int RenderDeviceGDI::RenderGeometry(const OGRGeometry *geometry, int op) {
     ::LineTo(current_dc_, X, Y);
   }
 
-  auto type = geometry->getGeometryType();
-  switch (type) {
-    case wkbPoint:
-      DrawPoint((OGRPoint *)geometry);
-      break;
-
-    case wkbLineString:
-      DrawLineString((OGRLineString *)geometry);
-      break;
-
-    case wkbPolygon:
-      DrawPolygon((OGRPolygon *)geometry);
-      break;
-
-    case wkbMultiPoint:
-      DrawMultiPoint((OGRMultiPoint *)geometry);
-      break;
-
-    case wkbMultiLineString:
-      DrawMultiLineString((OGRMultiLineString *)geometry);
-      break;
-
-    case wkbMultiPolygon:
-      DrawMultiPolygon((OGRMultiPolygon *)geometry);
-      break;
-
-    case wkbLinearRing:
-      DrawLinearRing((OGRLinearRing *)geometry);
-      break;
-
-    case wkbNone:
-    case wkbUnknown:
-    default:
-      break;
-  }
+  detail::dispatch_ogr_draw(*this, geometry);
 
   // if (!is_lock_style_) EndDrawing();
 
@@ -787,8 +790,7 @@ int RenderDeviceGDI::DrawLineString(const OGRLineString *line_string) {
     }
   }
 
-  MoveToEx(current_dc_, points[0].x, points[0].y, nullptr);
-  PolylineTo(current_dc_, points, point_size);
+  Draw(static_cast<unsigned>(point_size));
 
   SAFE_DELETE_A(points);
 
@@ -800,80 +802,24 @@ int RenderDeviceGDI::DrawLinearRing(const OGRLinearRing *linear_ring) {
 }
 
 int RenderDeviceGDI::DrawPolygon(const OGRPolygon *polygon) {
-  BOOL ret = FALSE;
-  int all_point_size = 0;
-
   const auto *exterior_ring = polygon->getExteriorRing();
   if (!exterior_ring) {
     return ERR_INVALID_PARAM;
   }
 
-  int exterior_point_size = exterior_ring->getNumPoints();
-  if (exterior_point_size < 2) {
+  int all_point_size = exterior_ring->getNumPoints();
+  if (all_point_size < 2) {
     return ERR_INVALID_PARAM;
   }
-  all_point_size += exterior_point_size;
-
-  int interior_ring_size = polygon->getNumInteriorRings();
-  int *ring_point_sizes = new int[interior_ring_size + 1];
-  ring_point_sizes[0] = exterior_point_size;
+  const int interior_ring_size = polygon->getNumInteriorRings();
   for (int i = 0; i < interior_ring_size; i++) {
     const auto *interior_ring = polygon->getInteriorRing(i);
-    ring_point_sizes[i + 1] = interior_ring->getNumPoints();
-    all_point_size += ring_point_sizes[i + 1];
+    all_point_size += interior_ring->getNumPoints();
   }
 
-  POINT *points = nullptr;
-  points = new POINT[all_point_size];
-
-  if (options_.show_point) {
-    int idx = 0;
-    OGRPoint point;
-    for (int i = 0; i < exterior_point_size; i++, idx++) {
-      exterior_ring->getPoint(i, &point);
-      LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
-      DrawCross(current_dc_, points[idx].x, points[idx].y,
-                options_.point_radius);
-    }
-
-    for (int i = 0; i < interior_ring_size; i++) {
-      const auto *interior_ring = polygon->getInteriorRing(i);
-      int nInteriorPts = interior_ring->getNumPoints();
-      for (int j = 0; j < nInteriorPts; ++j, idx++) {
-        interior_ring->getPoint(i, &point);
-        LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
-        DrawCross(current_dc_, points[idx].x, points[idx].y,
-                  options_.point_radius);
-      }
-    }
-
-    ret = ::PolyPolygon(current_dc_, points, ring_point_sizes,
-                        interior_ring_size + 1);
-  } else {
-    int idx = 0;
-    OGRPoint point;
-    for (int i = 0; i < exterior_point_size; i++, idx++) {
-      exterior_ring->getPoint(i, &point);
-      LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
-    }
-
-    for (int i = 0; i < interior_ring_size; i++) {
-      const auto *interior_ring = polygon->getInteriorRing(i);
-      int nInteriorPts = interior_ring->getNumPoints();
-      OGRPoint point;
-      for (int j = 0; j < nInteriorPts; ++j, idx++) {
-        interior_ring->getPoint(i, &point);
-        LPToDP(point.getX(), point.getY(), points[idx].x, points[idx].y);
-      }
-    }
-
-    ret = ::PolyPolygon(current_dc_, points, ring_point_sizes,
-                        interior_ring_size + 1);
-  }
-
-  SAFE_DELETE_A(points);
-  SAFE_DELETE_A(ring_point_sizes);
-
+  DrawIndexed(all_point_size > 2
+                  ? static_cast<unsigned>((all_point_size - 2) * 3)
+                  : 0u);
   return ERR_NONE;
 }
 

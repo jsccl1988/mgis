@@ -83,6 +83,9 @@ class MapWindow : public CWindowImpl<MapWindow>,
   bool InitTool();
   bool InitMenu();
   bool InitTimer();
+  void OnLinkMapd();
+  void OnLinkSdbd();
+  void BindOpenedDataset();
 
   HMENU m_hContexMenu{NULL};
   HMENU m_hMainMenu{NULL};
@@ -97,6 +100,7 @@ class MapWindow : public CWindowImpl<MapWindow>,
   H2DRENDERDEVICE render_device_{nullptr};
 
   GDALDataset* dataset_{nullptr};
+  gfx2d::LRect map_extent_{};
 };
 }  // namespace content
 

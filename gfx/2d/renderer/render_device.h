@@ -16,7 +16,7 @@ class RenderDevice {
  public:
   enum eRenderBuffer { RB_MAP, RB_IMMEDIATELY, RB_DYNAMIC, RB_DIRECT };
   RenderDevice(HINSTANCE instance)
-      : rhi_api_(RHI2D_GDI),
+      : rhi_api_(RHI2D_FLYCUBE),
         instance_handle_(instance),
         hwnd_(nullptr),
         map_mode_(MM_TEXT),
@@ -111,6 +111,50 @@ class RenderDevice {
                                bool backgroud_transparent = false) = 0;
   virtual int FreeImageBuffer(char *&image_buffer) = 0;
 
+  // Same shape as sg::rhi::CommandEncoder + Queue::Submit.
+  // Product implement is FlyCube (smartgis wrap). This object is the CI /
+  // heritage stand-in — GDI is frozen, not a Track A/B identity.
+  void Begin(eRenderBuffer /*color*/, float r = 0.f, float g = 0.f,
+             float b = 0.f, float a = 1.f) {
+    (void)r;
+    (void)g;
+    (void)b;
+    (void)a;
+    rhi_closed_ = false;
+  }
+  void SetPipeline(const char *name) { (void)name; }
+  void SetVertexBuffer(const void *buffer, unsigned long long offset) {
+    (void)buffer;
+    (void)offset;
+  }
+  void SetIndexBuffer(const void *buffer, unsigned long long offset,
+                      unsigned format = 1) {
+    (void)buffer;
+    (void)offset;
+    (void)format;
+  }
+  void Draw(unsigned vertex_count) {
+    (void)vertex_count;
+    ++rhi_draw_count_;
+  }
+  void DrawIndexed(unsigned index_count) {
+    (void)index_count;
+    ++rhi_draw_indexed_count_;
+  }
+  void Blit(eRenderBuffer /*src*/, eRenderBuffer /*dst*/) { ++rhi_blit_count_; }
+  void End() { rhi_closed_ = true; }
+  bool closed() const { return rhi_closed_; }
+  void Submit() {
+    if (rhi_closed_) {
+      ++rhi_submit_count_;
+    }
+  }
+  unsigned long long submit_count() const { return rhi_submit_count_; }
+  unsigned long long draw_count() const { return rhi_draw_count_; }
+  unsigned long long draw_indexed_count() const {
+    return rhi_draw_indexed_count_;
+  }
+
  protected:
   HINSTANCE instance_handle_;
   RHI2D rhi_api_;
@@ -124,6 +168,12 @@ class RenderDevice {
   RenderOptions options_;
 
   LPoint current_dop_;
+
+  bool rhi_closed_ = true;
+  unsigned long long rhi_submit_count_ = 0;
+  unsigned long long rhi_draw_count_ = 0;
+  unsigned long long rhi_draw_indexed_count_ = 0;
+  unsigned long long rhi_blit_count_ = 0;
 };
 }  // namespace gfx2d
 

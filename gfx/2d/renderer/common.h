@@ -20,7 +20,7 @@
 #include "ogrsf_frmts.h"
 
 namespace gfx2d {
-enum RHI2D { RHI2D_GDI, RHI2D_SKIA };
+enum RHI2D { RHI2D_GDI, RHI2D_SKIA, RHI2D_FLYCUBE };
 struct RenderOptions {
   bool show_mbr = true;
   bool show_point = true;

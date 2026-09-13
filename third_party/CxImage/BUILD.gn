@@ -1,4 +1,4 @@
-# Copyright (c) 2023 The Mogu Authors.
+# Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 import("//testing/test.gni")
 
@@ -28,7 +28,6 @@ static_library("zlib") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/zlib",
   ]
 
@@ -99,7 +98,6 @@ static_library("jasper") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/jasper/include",
   ]
 
@@ -121,7 +119,6 @@ static_library("jbig") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/jbig",
   ]
 
@@ -186,7 +183,6 @@ static_library("jpeg") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/jpeg",
   ]
 
@@ -255,7 +251,6 @@ static_library("libpsd") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/libpsd",
   ]
 
@@ -300,7 +295,6 @@ static_library("mng") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/mng",
   ]
 
@@ -334,7 +328,6 @@ static_library("png") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/png",
     "//third_party/CxImage/zlib",
   ]
@@ -356,7 +349,6 @@ static_library("raw") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/raw",
   ]
 
@@ -409,7 +401,6 @@ static_library("tiff") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/tiff",
     "//third_party/CxImage/zlib",
   ]
@@ -419,12 +410,32 @@ static_library("tiff") {
   ]
 }
 
+config("cximage_public") {
+  include_dirs += [
+    "//third_party/cximage_pub",
+    "//third_party/CxImage/CxImage",
+  ]
+}
+
+# CxImage 7.0.2 ships a pre-C++11 stdint.h on its include path.
+# Under C++23, MSVC <string_view> needs PTRDIFF_MAX, which that
+# header only defines when __STDC_LIMIT_MACROS is set. Isolate
+# this target only; do not roll the repo back to C++17.
+config("cximage_cc20") {
+  cflags_cc = [ "/std:c++20" ]
+}
+
 shared_library("CxImage") {
+  configs -= [ "//build/config:cc_std" ]
+  configs += [ ":cximage_cc20" ]
+  public_configs = [ ":cximage_public" ]
   defines = [
     "WIN32",
     "NOMINMAX",
     "JAS_WIN_MSVC_BUILD",
     "_USRDLL",
+    "__STDC_LIMIT_MACROS",
+    "__STDC_CONSTANT_MACROS",
   ]
 
   sources = [
@@ -464,7 +475,6 @@ shared_library("CxImage") {
 
   include_dirs += [
     "$root_gen_dir/",
-    "$root_out_dir/glog/include",
     "//third_party/CxImage/CxImage",
     "//third_party/CxImage/jpeg",
     "//third_party/CxImage/png",

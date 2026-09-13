@@ -18,7 +18,7 @@ class TestSDB : public ::testing::Test {
   void SetUp() override {}
   void TearDown() override {}
 
-  core::Dataset dataset_{"MEM", "ForTest"};
+  core::Dataset dataset_{"Memory", "ForTest"};
 };
 
 TEST_F(TestSDB, test_create_layer) {

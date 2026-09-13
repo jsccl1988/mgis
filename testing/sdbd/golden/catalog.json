@@ -1,0 +1,13 @@
+[
+  {
+    "name": "t_rtree_demo",
+    "crs": "EPSG:4326",
+    "geom_type": "polygon",
+    "geom_column": "geom",
+    "extent": { "min_x": 0, "min_y": 0, "max_x": 1000, "max_y": 1000 },
+    "fields": [
+      { "name": "id", "type": "uint64" },
+      { "name": "name", "type": "string" }
+    ]
+  }
+]

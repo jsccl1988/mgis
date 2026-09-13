@@ -12,7 +12,7 @@
 
 namespace gfx3d {
 RenderDeviceD3D::RenderDeviceD3D(HINSTANCE instance) : RenderDevice(instance) {
-  rhi_api_ = RHI3D_D3D;
+  rhi_api_ = RHI3D_FLYCUBE;
 }
 
 RenderDeviceD3D::~RenderDeviceD3D(void) { Release(); }

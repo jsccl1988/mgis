@@ -1,0 +1,28 @@
+---
+description: C++ namespaces — at most two public layers; deeper symbols live under detail
+alwaysApply: true
+---
+
+# C++ namespaces (two public layers + `detail`)
+
+Public C++ namespaces stop at **two** levels. Anything deeper uses **`detail`**.
+
+## Shape
+
+| Layer | Role | Examples |
+| --- | --- | --- |
+| 1–2 | **Public** API / module identity | `base`, `core`, `core::feature_set`, `content`, `gfx` |
+| 3 | **`detail` only** (internals) | `base::detail`, `core::detail`, `content::detail` |
+
+## Do
+
+- **Do** use at most **`area::module`** for symbols callers are meant to name.
+- **Do** put non-exported helpers in **`…::detail`** (or an anonymous namespace in a `.cpp`).
+- **Do** apply this to **new or touched** translation units.
+
+## Don’t
+
+- **Don’t** introduce a third semantic namespace for public types (`core::sdb::ogr` as a *new* public layer — keep wrappers thin or hoist).
+- **Don’t** nest further named layers under `detail`.
+
+This does not apply to protobuf `package`, Python modules, or Win32/WTL macros.
