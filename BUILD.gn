@@ -1,0 +1,71 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Root groups: all / default / m. Default builds //examples:examples
+# (base_widget, activex_widget, extra_views).
+
+group("all") {
+  deps = [ "//examples:examples" ]
+}
+
+group("default") {
+  deps = [ ":all" ]
+}
+
+group("m") {
+  deps = [ ":all" ]
+}
+
+# P0 tool dispatch. Not part of the product group, so default stays base_widget.
+group("tool_tests") {
+  testonly = true
+  deps = [ "//tool:tool_dispatch_test" ]
+}
+
+# GIS content library. Not part of //:default. ninja target: content.
+group("content_lib") {
+  deps = [ "//content:content" ]
+}
+
+# Product shell. Not part of //:default. ninja target: mview_shell.
+group("shell") {
+  deps = [ "//shell:mview_shell" ]
+}
+
+# P2/P4 pipe gate. Not part of //:default. ninja target: viewport_gate.
+group("viewport_gate_tests") {
+  testonly = true
+  deps = [ "//content:viewport_gate" ]
+}
+
+# P6 plugin and pick verifiers. Not part of //:default.
+group("plugin_tests") {
+  testonly = true
+  deps = [ "//plugin:plugin_sample_test" ]
+}
+
+# P7 install launcher. Not part of //:default.
+group("launcher") {
+  deps = [ "//launcher:mview_launcher" ]
+}
+
+# P6 and P7 verifiers together. Not part of //:default.
+group("p6_p7") {
+  testonly = true
+  deps = [
+    "//plugin:plugin_sample_test",
+    "//launcher:mview_launcher",
+  ]
+}
+
+# P5 volume and wind. Not part of the product group, so default stays base_widget.
+group("volume_tests") {
+  testonly = true
+  deps = [ "//native/mview_volume:volume_field_test" ]
+}
+
+# P3 map camera and navigation math. Not part of //:default.
+group("mview_map_tests") {
+  testonly = true
+  deps = [ "//native/mview_map:mview_map_test" ]
+}

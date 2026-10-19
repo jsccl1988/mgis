@@ -1,0 +1,30 @@
+---
+description: HARD RULE — agents edit on master only; no feature/cursor branches; parallel agents use non-overlapping paths
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Agent git workflow: work on `master` only
+
+**This rule is always on.** Treat it as non-negotiable unless the user’s current message explicitly asks for a new branch or worktree.
+
+User directive: 不要新开分支，就在 master 改；多 agent 并行时各自改不冲突的路径。
+
+## Do
+
+- Stay on **`master`** for routine edits and commits (when asked).
+- When multiple agents run, edit **non-overlapping paths**.
+
+## Don’t
+
+- Don’t create `feature/*`, `cursor/*`, or agent topic branches for routine work.
+- Don’t force-push `master`.
+- Don’t delete existing agent branches unless the user explicitly asks.
+
+## Exception
+
+Create or switch branches **only** when the user’s **current** message explicitly requests it.

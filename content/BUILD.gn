@@ -1,0 +1,68 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Desktop GIS embedder surface. Headers are included as
+# "content/public/....h" from the repo root. Language mode is the tree
+# cc_std (c++14). This library does not depend on views, UE, or MapLibre.
+# Not part of //:default.
+
+config("content_includes") {
+  include_dirs += [ "//" ]
+}
+
+static_library("content") {
+  include_dirs += [ "//" ]
+  public_configs = [ ":content_includes" ]
+  sources = [
+    "public/types.h",
+    "public/event_bus.h",
+    "public/gis_document.h",
+    "public/gis_contents.h",
+    "public/gis_contents_client.h",
+    "public/plugin_host.h",
+    "public/tool_session.h",
+    "public/script_runtime.h",
+    "browser/types.cc",
+    "browser/event_bus.cc",
+    "browser/gis_document.cc",
+    "browser/gis_contents.cc",
+    "browser/gis_contents_client.cc",
+    "browser/plugin_host.cc",
+    "browser/tool_session.cc",
+    "browser/script_runtime.cc",
+    "browser/glang.runtime/language/suite_loader.h",
+    "browser/glang.runtime/language/suite_loader.cc",
+    "browser/glang.runtime/exec/suite_runner.h",
+    "browser/glang.runtime/exec/suite_runner.cc",
+    "browser/glang.runtime/host/capability_host.h",
+    "browser/glang.runtime/host/capability_host.cc",
+    "browser/pipe/json_mini.h",
+    "browser/pipe/json_mini.cc",
+    "browser/pipe/pipe_message.h",
+    "browser/pipe/pipe_message.cc",
+    "browser/pipe/pipe_client.h",
+    "browser/pipe/pipe_client.cc",
+  ]
+}
+
+# P2 viewport pipe and P4 origin/tileset protocol. Not part of //:default.
+executable("viewport_gate") {
+  testonly = true
+  sources = [
+    "browser/pipe/ue_peer.h",
+    "browser/pipe/ue_peer.cc",
+    "browser/pipe/viewport_gate_test.cc",
+  ]
+  deps = [
+    ":content",
+    "//testing:gtest",
+    "//testing:gtest_main",
+  ]
+  include_dirs += [
+    "//",
+    "//testing/gtest/include",
+  ]
+  if (is_win) {
+    configs += [ "//build/config/win:console_subsystem" ]
+  }
+}

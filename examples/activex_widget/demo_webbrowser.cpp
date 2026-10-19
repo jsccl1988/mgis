@@ -44,7 +44,7 @@ void DemoWebBrowser::InitView(views::View* container)
     web_address_ = new views::Textfield();
     web_address_->SetText(L"http://www.baidu.com/");
     layout->AddView(web_address_);
-    button_ = new views::TextButton(this, L"µ¼º½");
+    button_ = new views::TextButton(this, L"å¯¼èˆª");
     layout->AddView(button_);
 
 }

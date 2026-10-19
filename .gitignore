@@ -1,6 +1,26 @@
 /out_*
 /out
 /build/Debug
+/third_party/.build/
+/third_party/.install/
+/third_party/.src/_cache/
+# On-demand pins (junction or fetch). Not a second Chromium snapshot.
+/third_party/.src/maplibre-native/
+/third_party/.src/vtk/
+/third_party/.src/cesium-native/
+/third_party/.src/cesium-unreal/
+# Junctions onto third_party/.src. Git must not record a second copy.
+/third_party/skia/
+/third_party/zlib/
+/third_party/libpng/
+/third_party/libjpeg_turbo/
+/third_party/modp_b64/
+/third_party/wtl/
+/third_party/yasm/
+/third_party/jstemplate/
+/third_party/iaccessible2/
+/testing/gtest/
+/testing/gmock/
 *.sln
 *.ncb
 *.vcxproj

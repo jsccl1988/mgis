@@ -1,0 +1,33 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# In-process plugin catalog.
+
+config("plugin_includes") {
+  include_dirs += [ "//" ]
+}
+
+static_library("plugin") {
+  sources = [
+    "contribute.cc",
+    "contribute.h",
+    "registry.cc",
+    "registry.h",
+  ]
+  include_dirs += [ "//" ]
+  public_configs = [ ":plugin_includes" ]
+}
+
+executable("plugin_sample_test") {
+  testonly = true
+  sources = [ "../testing/plugin/p6_harness_test.cc" ]
+  deps = [
+    ":plugin",
+    "//testing:gtest",
+    "//testing:gtest_main",
+  ]
+  include_dirs += [ "//testing/gtest/include" ]
+  if (is_win) {
+    configs += [ "//build/config/win:console_subsystem" ]
+  }
+}

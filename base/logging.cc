@@ -864,6 +864,6 @@ std::wstring GetLogFileFullPath() {
 
 }  // namespace logging
 
-std::ostream& operator<<(std::ostream& out, const wchar_t* wstr) {
-  return out << WideToUTF8(std::wstring(wstr));
-}
+// operator<<(ostream, const wchar_t*) is defined in build/cxx23_compat.h,
+// which is force-included before any log-stream template is parsed. A
+// definition here is invisible to those templates and collides with it.

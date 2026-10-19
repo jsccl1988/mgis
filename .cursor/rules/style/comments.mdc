@@ -1,0 +1,27 @@
+---
+description: Code-as-documentation — English comments; sparse comments; class intent; explain only complex logic
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Comments and class intent
+
+Prefer **self-explanatory names and structure** over narrating obvious code.
+
+## Language
+
+- Write **all new or changed comments** in **English**.
+- **Do not** use other natural languages in comments you add or edit, even if nearby legacy comments differ.
+- **Exceptions**: string literals, user-visible messages, protocol quotations, and identifiers required by an external API.
+
+## When to comment
+
+- **Do** comment non-obvious logic, subtle invariants, algorithm choices, and easy-to-misread edge cases.
+- **Don’t** restate what the code already says.
+- **Do** place a short block immediately before a **new or substantially edited** `class` / `struct` stating purpose in one or two sentences.
+
+Apply these norms in **new or touched** translation units. Do not drive-by rewrite Chromium comments elsewhere.

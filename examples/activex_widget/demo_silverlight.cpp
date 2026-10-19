@@ -40,7 +40,7 @@ void DemoSilverlight::InitView(views::View* container)
     layout->AddView(silverlight_view2_);
 
     layout->StartRow(0.0f, 1);
-    button_ = new views::NativeTextButton(this, L"¼ÓÔØSilverlightÎÄ¼þ");
+    button_ = new views::NativeTextButton(this, L"åŠ è½½Silverlightæ–‡ä»¶");
     layout->AddView(button_);
 }
 

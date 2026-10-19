@@ -1,0 +1,24 @@
+---
+description: GN/Ninja build output uses out/Debug and out/Release gen roots
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Build output directory
+
+- GN/Ninja gen roots are **`out/Debug`** (`is_debug=true`) and **`out/Release`** (`is_debug=false`).
+- Do not use bare **`out/`** or **`out/Default`** as a gen root.
+- Default `build.bat` builds **both** configs. Prefer `build.bat debug` when iterating.
+- Shared under `out/` (not gen roots): `out/environment.x64.x64` (copied into each config for `ninja -t msvc`), `out/crash/` for cdb dumps.
+- Logs: `out/Debug/build.log`, `out/Release/build.log`.
+- Product binary for the sample is under `out/Debug/` or `out/Release/` (`base_widget.exe` once that target links).
+
+```bat
+build.bat
+build.bat debug
+build.bat debug base_widget
+```

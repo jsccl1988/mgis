@@ -1,0 +1,29 @@
+---
+description: Product diagnostics go through base/logging.h, not ad-hoc prints or smartgis LOGGING
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Logging (`base/logging.h`)
+
+Product C++ under **`ui/`**, **`base/`**, and **`examples/`** uses Chromium logging.
+
+```cpp
+#include "base/logging.h"
+
+LOG(INFO) << "attached hwnd";
+LOG(ERROR) << "host failed: " << message;
+DLOG(WARNING) << "debug-only note";
+```
+
+## Don’t
+
+- Don’t add `fprintf` / `printf` / `std::cerr` / `OutputDebugString` for new diagnostics in touched product TUs.
+- Don’t introduce smartgis `LOGGING(...)` or `base/core/log.h`. That header is not in this repo.
+- Don’t log secrets or full document payloads.
+
+`third_party/` and `skia/` keep their own logs.

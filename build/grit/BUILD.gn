@@ -1,0 +1,60 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+_grds = [
+  "//ui/resources/ui_resources.grd",
+  "//ui/resources/ui_unscaled_resources.grd",
+  "//ui/keyboard/keyboard_resources.grd",
+  "//ui/base/strings/ui_strings.grd",
+  "//ui/base/strings/app_locale_settings.grd",
+]
+
+_headers = [
+  "$root_gen_dir/grit/ui_resources.h",
+  "$root_gen_dir/grit/ui_unscaled_resources.h",
+  "$root_gen_dir/grit/keyboard_resources.h",
+  "$root_gen_dir/grit/ui_strings.h",
+  "$root_gen_dir/grit/app_locale_settings.h",
+  "$root_gen_dir/ui/ui_resources/grit/ui_resources.h",
+]
+
+config("grit_include") {
+  include_dirs += [ "$root_gen_dir" ]
+}
+
+action("emit") {
+  script = "//build/tools/emit_grit_header.py"
+  inputs = [ script ] + _grds
+  outputs = _headers
+  args = [ rebase_path("$root_gen_dir/grit", root_build_dir) ]
+  foreach(grd, _grds) {
+    args += [ rebase_path(grd, root_build_dir) ]
+  }
+}
+
+group("headers") {
+  public_configs = [ ":grit_include" ]
+  public_deps = [ ":emit" ]
+}
+
+# 100% UI images. Ids match :emit. Copied beside the exe because
+# ResourceBundle loads ui_resources_100_percent.pak from DIR_MODULE.
+action("ui_resources_pak") {
+  script = "//build/tools/emit_resource_pak.py"
+  inputs = [
+    script,
+    "//ui/resources/ui_resources.grd",
+  ]
+  outputs = [ "$root_gen_dir/ui_resources_100_percent.pak" ]
+  args = [
+    rebase_path("//ui/resources/ui_resources.grd", root_build_dir),
+    rebase_path("$root_gen_dir/ui_resources_100_percent.pak", root_build_dir),
+    "default_100_percent",
+  ]
+}
+
+copy("ui_resources_pak_bundle") {
+  sources = [ "$root_gen_dir/ui_resources_100_percent.pak" ]
+  outputs = [ "$root_out_dir/{{source_file_part}}" ]
+  deps = [ ":ui_resources_pak" ]
+}

@@ -1,0 +1,31 @@
+---
+description: 代理可以自行编译；入口是 build.bat（gn + ninja）
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# 代理可以自行编译
+
+Agent **可以**在本仓库根目录编译、链接，以及为验证而运行测试二进制。
+
+入口是根目录 **`build.bat`**。它写 `out\environment.x64.x64`，再对 **`out/Debug`** 与 **`out/Release`** 做 `gn gen` + `ninja`。不要改回 `gen.bat` / MSBuild。不要建 `out/.build.lock.on`，也不要设 `SMARTGIS_BUILD_LOCK`。
+
+## 允许
+
+```bat
+build.bat
+build.bat debug
+build.bat debug base_widget
+```
+
+修编译时优先 `build.bat debug <单个目标>`。
+
+## Skill
+
+`auto-build-fix` / `auto-bug-fix` / `auto-idle-pipeline` 要求跑构建或测试时，按 skill **代跑**并迭代到绿。
+
+细则见 **`.cursor/rules/build/agent-may-build.mdc`**、**`.cursor/rules/build/build-output.mdc`**。

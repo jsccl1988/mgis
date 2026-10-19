@@ -1,0 +1,25 @@
+---
+description: HARD RULE — this repo is the Chromium Views + Skia toolkit; do not add a second shell
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Desktop UI: this tree is Views + Skia
+
+**This rule is always on.** `ui/views` is the widget toolkit. `ui/aura` is the window/host layer. `skia` paints. Do not vendor a second widget kit beside them.
+
+## Do
+
+- New chrome goes in `ui/views` (`views`) and hosts windows through `ui/aura`.
+- Keep Skia as the **canvas / render backend**, not a second widget kit.
+- Map or native child HWNDs, when a spec asks for them, attach through the existing native-view host. Do not composite that child as an `ui::Layer`.
+
+## Don’t
+
+- Don’t introduce Qt (see `no-qt.mdc`), WinUI 3, WinAppSDK, WebView2, or CEF.
+- Don’t add a parallel `src/chrome` or `src/ui` product tree. Product UI lives in `ui/`.
+- Don’t pull a second copy of Chromium or Skia in a drive-by edit.

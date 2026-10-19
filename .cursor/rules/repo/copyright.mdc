@@ -1,0 +1,32 @@
+---
+description: Keep Chromium BSD headers on existing files; Mogu header only on new agent-authored docs and rules
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Copyright header
+
+## Existing Chromium / Skia / third-party files
+
+Files that already say **The Chromium Authors**, **The Android Open Source Project**, or another upstream notice **keep that notice**. Do not rewrite them to The Mogu Authors. Do not bump their year as a drive-by.
+
+## New files this repo authors
+
+For **new** engineering files that are not upstream snapshots (docs under `docs/`, `.cursor/rules` `.mdc`, `.cursor/skills`, new scripts you add):
+
+```text
+Copyright (c) YYYY The Mogu Authors.
+All rights reserved.
+```
+
+- `YYYY` is the **current calendar year**.
+- C/C++: `//` comments. Python/shell: `#`. Markdown / `.mdc`: HTML comment **after** YAML frontmatter. Shebang scripts: header immediately after `#!`.
+
+## Don’t
+
+- Don’t stamp Mogu copyright onto `ui/`, `base/`, `skia/`, or `third_party/` files that already have an upstream header.
+- Don’t copy a stale year from another file.

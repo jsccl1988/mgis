@@ -1,0 +1,25 @@
+---
+description: Never add Cursor Co-authored-by trailers to git commits
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# No Cursor Co-authored-by in commits
+
+## Do
+
+- Commit messages: subject + optional body only.
+- Strip any `Co-authored-by:` trailer that names Cursor / Cursor Agent or uses `cursoragent@cursor.com` before finishing a commit (and before push).
+- After commit, verify with `git log -1 --format=%B`. If a Cursor trailer remains, rewrite the message (amend only when amend rules allow).
+
+## Don’t
+
+- Don’t add `Co-authored-by: Cursor <cursoragent@cursor.com>`.
+- Don’t add `Co-authored-by: Cursor Agent <cursoragent@cursor.com>`.
+- Don’t leave historical Cursor co-author trailers on `master` / `origin/master`.
+
+Other human `Co-authored-by:` lines may remain.

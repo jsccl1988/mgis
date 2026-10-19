@@ -108,3 +108,4 @@
 #include <vector>
 
 #include "intsafe_workaround.h"
+#include "build/cxx23_compat.h"

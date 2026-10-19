@@ -1,0 +1,28 @@
+---
+description: 终止进程时使用系统级（非沙箱）终端能力；优先温和结束；不要猜 PID
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# 终止进程：使用系统级终端能力
+
+在 Cursor Agent 中，`kill` / `pkill` / `taskkill` 等向已有进程发信号的操作，在沙箱内常会失败。需要改用**全权限 / 非沙箱**的 Shell，而不是在受限沙箱里反复重试。
+
+本仓库以 **Windows** 为主（`build.bat` / `out/Debug`）。
+
+## Do
+
+- **需要杀进程时**：通过系统级终端执行 `Stop-Process` / `taskkill`。
+- **顺序（Windows）**：先温和结束（`Stop-Process` 默认 / `taskkill` 不带 `/F`），等待退出；仍存活再强制。避免一上来就 `/F`。
+- **顺序（POSIX）**：先 `kill -TERM`，仍存活再 `kill -KILL`。
+- **PID 来源**：本会话终端元数据、构建日志里写明的 PID、或用户给出的 PID。不要猜测。
+- 若必须杀非本会话进程，简短说明目标（端口占用、残留编译器或测试进程）。
+
+## Don’t
+
+- **不要**在沙箱内对失败的 `taskkill` 做无意义重试。
+- **不要**套用 smartgis 的 `out/.build.lock` 或产品 exe 名。本仓库没有那套编译锁。

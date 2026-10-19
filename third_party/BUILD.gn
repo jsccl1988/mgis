@@ -1,0 +1,17 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+#
+# Facade labels. Vendored packages are compiled from third_party/.src via the
+# junctions (//third_party/<name>). `build.bat t` only checks the manifest;
+# these trees are not CMake-installed.
+
+import("//third_party/gn/tp.gni")
+
+group("third_party_all") {
+  public_deps = [
+    "//third_party/.src/libjpeg_turbo:libjpeg",
+    "//third_party/.src/libpng:libpng",
+    "//third_party/.src/modp_b64:modp_b64",
+    "//third_party/.src/zlib:zlib",
+  ]
+}

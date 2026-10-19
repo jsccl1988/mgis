@@ -1,0 +1,33 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+config("ia2_include") {
+  include_dirs += [ "$root_gen_dir" ]
+}
+
+action("midl") {
+  script = "//build/tools/run_midl.py"
+  inputs = [ "ia2_api_all.idl" ]
+  outputs = [
+    "$root_gen_dir/third_party/iaccessible2/ia2_api_all.h",
+    "$root_gen_dir/third_party/iaccessible2/ia2_api_all_i.c",
+  ]
+  args = [
+    rebase_path("ia2_api_all.idl", root_build_dir),
+    rebase_path("$root_gen_dir/third_party/iaccessible2", root_build_dir),
+  ]
+}
+
+static_library("iaccessible2") {
+  sources = [
+    "$root_gen_dir/third_party/iaccessible2/ia2_api_all_i.c",
+  ]
+  deps = [ ":midl" ]
+  public_configs = [ ":ia2_include" ]
+}
+
+group("IAccessible2Proxy") {
+  public_deps = [
+    "//third_party/.src/iaccessible2:iaccessible2",
+  ]
+}

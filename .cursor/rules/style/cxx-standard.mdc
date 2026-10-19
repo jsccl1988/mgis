@@ -1,0 +1,27 @@
+---
+description: Product C++ follows build/BUILDCONFIG.gn cc_std (C++23 on Windows)
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Language standard
+
+Windows product C++ uses **`cc_std`** in **`build/BUILDCONFIG.gn`** (currently **`c++23`**). On MSVC 14.50/14.51 that is **`/std:c++23preview`** via `//build/config:cc_std`. The views snapshot still uses `throw()`, `std::auto_ptr`, and unqualified dependent-base members. Those stay compiling through `_HAS_AUTO_PTR_ETC` and `/permissive` next to `/std:c++23preview`, not by dropping the standard.
+
+The compiler flag that ninja uses is the GN config in `build/BUILDCONFIG.gn` and `build/config/BUILD.gn`.
+
+## Do
+
+- Write new code that compiles as the current `cc_std` on MSVC.
+- Match Chromium views idioms already in `ui/` and `base/` (`override`, `DISALLOW_COPY_AND_ASSIGN` or `= delete` where siblings already do, `scoped_ptr` / `std::unique_ptr` as the surrounding file does).
+
+## Don’t
+
+- Don’t drop `cc_std` back to `c++14` / `c++17` to silence a snapshot error.
+- Don’t add `/std:c++latest` unless `cc_std` itself moves.
+- Don’t import smartgis C++23 traits or a parallel geometry type tree.
+- Don’t retarget `third_party/` or `skia/` language flags.

@@ -1,0 +1,11 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+group("examples") {
+  public_deps = [
+    "//build/grit:headers",
+    "//examples/activex_widget:activex_widget",
+    "//examples/base_widget:base_widget",
+    "//examples/extra_views:extra_views",
+  ]
+}

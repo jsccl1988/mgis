@@ -1,0 +1,24 @@
+---
+description: Match Chromium Google style — PascalCase methods, snake_case files; do not snake_case the views tree
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Naming
+
+This tree follows **Chromium Google C++ style**, same as `ui/views` and `ui/aura`.
+
+## Do
+
+- Files: `snake_case.h` / `snake_case.cc`.
+- Types: `PascalCase`. Methods: `PascalCase`. Locals and data members: `snake_case_` (trailing underscore on members) when that is what the file already does.
+- Boolean predicates: `Is` / `Has` / `Can` prefixes, matching nearby code.
+
+## Don’t
+
+- Don’t rename `GetWidget` / `SetBounds` to `get_widget` / `set_bounds`. smartgis `snake_case` functions do **not** apply here.
+- Don’t drive-by rename Chromium symbols you are not already changing.

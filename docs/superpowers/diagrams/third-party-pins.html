@@ -1,0 +1,65 @@
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>mview 第三方 pin</title>
+<style>
+  body { margin: 0; background: #f4f6f8; color: #1a2330; font: 15px/1.5 "Segoe UI", sans-serif; }
+  main { max-width: 980px; margin: 28px auto; padding: 0 16px 40px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
+  p.lead { color: #5a6a7e; margin: 0 0 20px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: #fff; border: 1px solid #d8dee6; border-radius: 8px; padding: 14px 16px; }
+  .card h2 { margin: 0 0 6px; font-size: 16px; color: #2563a8; }
+  .card p { margin: 0; color: #5a6a7e; }
+  .flow { margin-top: 16px; background: #fff; border: 1px solid #d8dee6; border-radius: 8px; padding: 16px; }
+  .lane { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .box { border: 1px solid #d8dee6; background: #fafbfc; border-radius: 6px; padding: 6px 10px; }
+  .accent { border-color: #2563a8; color: #2563a8; }
+</style>
+</head>
+<body>
+<main>
+  <h1>第三方依赖落点</h1>
+  <p class="lead">清单在 third_party/manifest.json。引擎与插件不进 aura/views 的 GN 图。</p>
+  <div class="grid">
+    <section class="card">
+      <h2>已有快照</h2>
+      <p>skia、zlib、libpng 等仍是 vendored，由 build.bat 的 GN 编译。</p>
+    </section>
+    <section class="card">
+      <h2>MapLibre Native</h2>
+      <p>pin 与 smartgis 相同：ios-v6.30.0。可联接已有 .src。示例只跑 mbgl-render。</p>
+    </section>
+    <section class="card">
+      <h2>Unreal 5.6 + Cesium for Unreal 2.30</h2>
+      <p>引擎在 UE_5_6_ROOT。插件源码包按需下载。产品只用插件内的 cesium-native。</p>
+    </section>
+    <section class="card">
+      <h2>VTK 9.5.2</h2>
+      <p>关闭 Qt、Rendering、Views。示例写出规则网格，不建渲染窗口。</p>
+    </section>
+  </div>
+  <section class="flow">
+    <div class="lane">
+      <span class="box accent">manifest.json</span>
+      <span>→</span>
+      <span class="box">fetch.py --package</span>
+      <span>→</span>
+      <span class="box">.src / 机外引擎</span>
+      <span>→</span>
+      <span class="box">third_party/&lt;name&gt;/example</span>
+    </div>
+    <div class="lane">
+      <span class="box">壳 GN</span>
+      <span>不链接</span>
+      <span class="box">VTK · MapLibre · cesium-native 示例树 · UE</span>
+    </div>
+  </section>
+</main>
+</body>
+</html>

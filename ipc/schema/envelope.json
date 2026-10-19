@@ -1,0 +1,558 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Pipe frame is a little-endian uint32 byte length plus UTF-8 JSON, and the whole frame must not exceed 65536 bytes.",
+  "title": "mview named-pipe envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "id", "op", "body"],
+  "properties": {
+    "v": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "op": {
+      "type": "string",
+      "enum": [
+        "session.hello",
+        "session.welcome",
+        "viewport.attach",
+        "viewport.resize",
+        "viewport.close",
+        "catalog.register",
+        "catalog.list",
+        "layer.set",
+        "entity.upsert",
+        "entity.remove",
+        "entity.list",
+        "entity.select",
+        "camera.set",
+        "camera.mode",
+        "time.set",
+        "volume.load",
+        "volume.tf",
+        "wind.load",
+        "wind.params",
+        "pick.result",
+        "health.ping",
+        "draft.set"
+      ]
+    },
+    "body": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "op": { "const": "session.hello" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/session.hello" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "session.welcome" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/session.welcome" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "viewport.attach" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/viewport.attach" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "viewport.resize" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/viewport.resize" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "viewport.close" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/viewport.close" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "catalog.register" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/catalog.register" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "catalog.list" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/catalog.list" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "layer.set" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/layer.set" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "entity.upsert" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/entity.upsert" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "entity.remove" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/entity.remove" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "entity.list" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/entity.list" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "entity.select" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/entity.select" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "camera.set" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/camera.set" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "camera.mode" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/camera.mode" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "time.set" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/time.set" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "volume.load" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/volume.load" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "volume.tf" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/volume.tf" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "wind.load" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/wind.load" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "wind.params" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/wind.params" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "pick.result" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/pick.result" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "health.ping" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/health.ping" } } }
+    },
+    {
+      "if": { "properties": { "op": { "const": "draft.set" } }, "required": ["op"] },
+      "then": { "properties": { "body": { "$ref": "#/$defs/draft.set" } } }
+    }
+  ],
+  "$defs": {
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "error"],
+      "properties": {
+        "ok": { "const": false },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message"],
+          "properties": {
+            "code": {
+              "enum": ["schema", "not_found", "busy", "too_large", "io"]
+            },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+    "view3d": { "enum": ["view0", "view1"] },
+    "llh": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["longitude", "latitude", "height"],
+      "properties": {
+        "longitude": { "type": "number" },
+        "latitude": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "bbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["west", "south", "east", "north"],
+      "properties": {
+        "west": { "type": "number" },
+        "south": { "type": "number" },
+        "east": { "type": "number" },
+        "north": { "type": "number" }
+      }
+    },
+    "timeRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string" },
+        "end": { "type": "string" }
+      }
+    },
+    "catalogItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "bbox", "timeRange", "crs"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string" },
+        "bbox": { "$ref": "#/$defs/bbox" },
+        "timeRange": { "$ref": "#/$defs/timeRange" },
+        "crs": { "type": "string" }
+      }
+    },
+    "session.hello": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["protocol", "build"],
+          "properties": {
+            "protocol": { "const": 1 },
+            "build": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "session.welcome": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["snapshot", "layers", "entities"],
+          "properties": {
+            "snapshot": { "type": "object" },
+            "layers": { "type": "array", "items": { "type": "object" } },
+            "entities": { "type": "array", "items": { "type": "object" } }
+          }
+        }
+      ]
+    },
+    "viewport.attach": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["view", "parentHwnd", "width", "height", "dpi"],
+          "properties": {
+            "view": { "$ref": "#/$defs/view3d" },
+            "parentHwnd": { "type": "integer" },
+            "width": { "type": "integer", "minimum": 0 },
+            "height": { "type": "integer", "minimum": 0 },
+            "dpi": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "viewport.resize": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["view", "width", "height"],
+          "properties": {
+            "view": { "$ref": "#/$defs/view3d" },
+            "width": { "type": "integer", "minimum": 0 },
+            "height": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "viewport.close": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["view"],
+          "properties": {
+            "view": { "$ref": "#/$defs/view3d" }
+          }
+        }
+      ]
+    },
+    "catalog.register": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        { "$ref": "#/$defs/catalogItem" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "catalog.list": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "filter": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["items"],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/catalogItem" }
+            }
+          }
+        }
+      ]
+    },
+    "layer.set": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["layerId", "viewport", "visible", "opacity"],
+          "properties": {
+            "layerId": { "type": "string", "minLength": 1 },
+            "viewport": { "enum": ["view0", "view1", "both"] },
+            "visible": { "type": "boolean" },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      ]
+    },
+    "entity.upsert": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entityId"],
+          "properties": {
+            "entityId": { "type": "string", "minLength": 1 },
+            "name": { "type": "string" },
+            "parentId": { "type": "string" },
+            "feature": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "entity.remove": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entityId"],
+          "properties": {
+            "entityId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "entity.list": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cursor": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entities"],
+          "properties": {
+            "entities": { "type": "array", "items": { "type": "object" } },
+            "cursor": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "entity.select": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entityId"],
+          "properties": {
+            "entityId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "camera.set": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "origin",
+            "seq",
+            "longitude",
+            "latitude",
+            "height",
+            "heading",
+            "pitch"
+          ],
+          "properties": {
+            "origin": { "enum": ["ui", "view0", "view1"] },
+            "seq": { "type": "integer", "minimum": 0 },
+            "longitude": { "type": "number" },
+            "latitude": { "type": "number" },
+            "height": { "type": "number" },
+            "heading": { "type": "number" },
+            "pitch": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "camera.mode": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": {
+              "enum": ["free", "follow-2d", "follow-3d", "lock-center"]
+            }
+          }
+        }
+      ]
+    },
+    "time.set": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["t", "playing", "speed"],
+          "properties": {
+            "t": { "type": "number" },
+            "playing": { "type": "boolean" },
+            "speed": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "volume.load": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["datasetId", "variable", "timeIndex"],
+          "properties": {
+            "datasetId": { "type": "string", "minLength": 1 },
+            "variable": { "type": "string" },
+            "timeIndex": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "volume.tf": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stops"],
+          "properties": {
+            "stops": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["offset", "color"],
+                "properties": {
+                  "offset": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "color": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "wind.load": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["datasetId", "timeIndex"],
+          "properties": {
+            "datasetId": { "type": "string", "minLength": 1 },
+            "timeIndex": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "wind.params": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "speed", "trail"],
+          "properties": {
+            "count": { "type": "integer", "minimum": 0 },
+            "speed": { "type": "number" },
+            "trail": { "type": "number", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "pick.result": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["longitude", "latitude", "height", "featureId"],
+          "properties": {
+            "longitude": { "type": "number" },
+            "latitude": { "type": "number" },
+            "height": { "type": "number" },
+            "featureId": { "type": "string" },
+            "attributes": {
+              "type": "object",
+              "description": "Property subset. The serialized attributes stay within 8192 bytes."
+            }
+          }
+        }
+      ]
+    },
+    "health.ping": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {}
+        }
+      ]
+    },
+    "draft.set": {
+      "oneOf": [
+        { "$ref": "#/$defs/error" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["view", "kind", "points"],
+          "properties": {
+            "view": { "enum": ["map", "view0", "view1"] },
+            "kind": { "enum": ["polyline", "rect"] },
+            "points": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/llh" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

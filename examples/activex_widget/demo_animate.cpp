@@ -256,7 +256,7 @@ void DemoAnimate::InitView(views::View* container)
     container->SetLayoutManager(layout);
 
     apps_container_ = new AppContainer();
-    button_animate_ = new views::NativeTextButton(this, L"ÑÝÊ¾¶¯»­");
+    button_animate_ = new views::NativeTextButton(this, L"æ¼”ç¤ºåŠ¨ç”»");
 
     views::ColumnSet* column_set = layout->AddColumnSet(0);
     column_set->AddColumn(views::GridLayout::FILL, views::GridLayout::FILL,

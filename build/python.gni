@@ -1,0 +1,47 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+#
+# CPython 3.12 embed. Default prefix is
+# %LOCALAPPDATA%/Programs/Python/Python312 (same as build.bat).
+# Override with python_root. Force the skip stub with has_python=false.
+# Optional check: python build/find_python.py
+
+declare_args() {
+  # Compile in-process CPython bindings when a 3.12 prefix is set.
+  # Set false to force the skip stub even if Python is installed.
+  has_python = true
+
+  # Empty = %LOCALAPPDATA%/Programs/Python/Python312.
+  # Prefix must contain include/Python.h, libs/python312.lib, python312.dll.
+  python_root = ""
+}
+
+_auto_python = ""
+_localappdata = getenv("LOCALAPPDATA")
+if (_localappdata != "") {
+  _auto_python = _localappdata + "/Programs/Python/Python312"
+}
+
+if (python_root != "") {
+  python_prefix = python_root
+} else {
+  python_prefix = _auto_python
+}
+python_prefix = string_replace(python_prefix, "\\", "/")
+
+python_include = ""
+python_libdir = ""
+python_dll = ""
+if (python_prefix != "") {
+  python_include = python_prefix + "/include"
+  python_libdir = python_prefix + "/libs"
+  python_dll = python_prefix + "/python312.dll"
+}
+
+# Official Windows CPython ships /MD only (no python312_d). Linking
+# python312.dll into a /MDd SmartGIS process mixes MSVCP140 with
+# MSVCP140D and trips STATUS_HEAP_CORRUPTION (0xC0000374) on ordinary
+# interactive launch. Keep Python for Release; Debug uses the stub until a
+# matching debug CPython is available.
+python_enabled =
+    has_python && python_prefix != "" && !is_debug

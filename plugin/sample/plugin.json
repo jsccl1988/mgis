@@ -1,0 +1,5 @@
+{
+  "id": "plugin.sample",
+  "name": "Sample",
+  "commands": ["plugin.sample.run"]
+}

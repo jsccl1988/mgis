@@ -1,0 +1,15 @@
+{
+  "version": 8,
+  "name": "mview-maplibre-background",
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#d6e2ee",
+        "background-opacity": 1
+      }
+    }
+  ]
+}

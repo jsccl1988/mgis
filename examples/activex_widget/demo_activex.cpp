@@ -41,8 +41,8 @@ void DemoActiveX::InitView(views::View* container)
 	layout->AddView(flash_view_);
 
 
-    play_flash_ = new views::NativeTextButton(this, L"播放Flash"); 
-    create_flash_popup_ = new views::NativeTextButton(this, L"创建透明Flash窗口");
+    play_flash_ = new views::NativeTextButton(this, L"鎾斁Flash"); 
+    create_flash_popup_ = new views::NativeTextButton(this, L"鍒涘缓閫忔槑Flash绐楀彛");
     layout->StartRow(0.0f, 1);
     layout->AddView(play_flash_); 
     layout->AddView(create_flash_popup_);

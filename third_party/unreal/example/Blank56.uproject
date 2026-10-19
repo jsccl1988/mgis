@@ -1,0 +1,9 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.6",
+	"Category": "",
+	"Description": "Blank Unreal Engine 5.6 project. The engine is not stored in this repo.",
+	"TargetPlatforms": [
+		"Windows"
+	]
+}

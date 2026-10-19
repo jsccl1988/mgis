@@ -1,0 +1,23 @@
+---
+description: Keep Chromium namespaces (views, aura, gfx, base); do not flatten them
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Namespaces
+
+Public namespaces in this repo are the Chromium ones already in the tree: `views`, `aura`, `ui`, `gfx`, `base`, and their existing nested names (`views::internal` where siblings use it).
+
+## Do
+
+- Put new widgets next to peers in the same namespace as the directory (`views` under `ui/views`).
+- Put file-local helpers in an anonymous namespace in the `.cc`.
+
+## Don’t
+
+- Don’t collapse `views` into a two-level `ui::views::detail` scheme from smartgis.
+- Don’t invent a third product namespace (`mview::shell::…`) for code that belongs in `views` or `aura`.

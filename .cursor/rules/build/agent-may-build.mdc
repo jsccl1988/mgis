@@ -1,0 +1,34 @@
+---
+description: Agents may run build.bat / gn / ninja to compile and verify. Not MSBuild, not gen.bat.
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Agents may build
+
+From the **mview** repo root:
+
+```bat
+.\build.bat
+.\build.bat debug
+.\build.bat debug base_widget
+.\build.bat <single_target>
+```
+
+`build.bat` runs `gn gen` into **`out/Debug`** and **`out/Release`**, then `ninja`. Alias `m` is the product group (`default` / `base_widget`). `sln` is rejected.
+
+## Do
+
+- Prefer `build.bat debug <target>` when iterating.
+- Partition parallel agents by **non-overlapping paths**. There is **no** compile lock.
+
+## Don’t
+
+- Don’t run `gen.bat`, `gen-dll.bat`, or MSBuild as the fix loop.
+- Don’t create `out/.build.lock.on` or set `SMARTGIS_BUILD_LOCK`.
+- Don’t use bare `out/` or `out/Default` as a gen root.
+- Don’t retarget the tree to smartgis `//src` targets (`te`, `harness`, `SmartGIS.exe`). Those are not in this repo.

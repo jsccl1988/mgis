@@ -1,0 +1,37 @@
+---
+description: Superpowers specs/plans lifecycle — one living GIS spec; revise in place
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Superpowers docs lifecycle
+
+**This rule is always on.** It overrides Superpowers defaults that open a new dated file every time.
+
+## Default: revise in place
+
+1. Read `docs/superpowers/README.md` before any design write.
+2. The living spec is **`docs/superpowers/specs/2026-10-19-ue-mview-maplibre-design.md`** (UE dual viewport + mview shell + MapLibre + named pipe). New requirements on that product are a new `§` on that file.
+3. Put **`Status:`** on the first metadata line when you edit it. Refresh the date when merging.
+4. Open plans under `docs/superpowers/plans/`. Diagrams under `docs/superpowers/diagrams/`.
+5. Keep `docs/superpowers/README.md` as a **short table**. Do not rebuild a full inventory in `docs/README.md`.
+
+## When a new dated spec is allowed
+
+Only if it is a **new top-level subsystem** with no row that can own it, and the new file says which living file was considered and why a `§` merge is impossible.
+
+Do **not** open smartgis umbrellas (map2d frame, scene3d, plugin host, GDAL, legacy MFC). Those trees are not in this repo.
+
+## Don’t
+
+- Don’t add a dated twin that only restates the living GIS spec.
+- Don’t archive the living spec while the topic is still open.
+- Don’t ask the user to pick an umbrella when this file already owns desktop GIS.
+
+## Diagrams
+
+When a `§` or plan **locks architecture**, ship HTML under `docs/superpowers/diagrams/` in the same change. See `design-html-diagrams.mdc`.

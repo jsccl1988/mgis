@@ -50,7 +50,7 @@ void DemoLabel::InitView(views::View* container)
     label_multi_line_ = new views::Label(L"I'm a Label! \nTihs's the second line.");
     label_multi_line_->SetMultiLine(true);
     label_multi_line_->SizeToFit(label_multi_line_->width());
-    label_multi_line_->SetTooltipText(L"¶àÐÐ±êÇ©");
+    label_multi_line_->SetTooltipText(L"å¤šè¡Œæ ‡ç­¾");
 
     container->SetLayoutManager(new views::BoxLayout(
         views::BoxLayout::kVertical, 5, 5, 5));

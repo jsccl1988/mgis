@@ -1,0 +1,41 @@
+---
+description: Technical design docs must ship core layering + principle diagrams (HTML, light style, optional animation)
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Design docs: HTML layering + principle diagrams
+
+Applies when the agent writes or substantially revises a technical design (`docs/superpowers/specs/` `§`, or a plan that locks architecture).
+
+## Must deliver (same change)
+
+1. **Core layering** — which process / library owns which lane.
+2. **Principle diagram** — data and control flow (stages, thread ownership).
+3. **HTML artifact** — self-contained `.html` (inline CSS; optional animation). Prefer Chinese UI labels; keep API names in English.
+
+Markdown may keep a short ASCII sketch. The HTML is the visual. Link it from the spec (`Diagram:` line).
+
+## Placement
+
+`docs/superpowers/diagrams/<topic>.html` — one topic, one file, revise in place.
+
+## Visual style: light technical
+
+| Token | Guidance |
+| --- | --- |
+| Page bg | `#f4f6f8`–`#fafbfc` |
+| Panels | White cards, 1px `#d8dee6` |
+| Text | `#1a2330`; muted `#5a6a7e` |
+| Accent | `#2563a8` |
+
+No dark-mode default, no CDN, no Mermaid-only substitute.
+
+## Don’t
+
+- Don’t ship an architecture lock with no linked HTML diagram.
+- Don’t put diagrams under `ui/` or a second dated design file.

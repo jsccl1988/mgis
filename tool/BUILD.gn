@@ -1,0 +1,28 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+static_library("tool") {
+  sources = [
+    "command.cc",
+    "command.h",
+    "input_event.h",
+    "interaction.cc",
+    "interaction.h",
+    "workspace.cc",
+    "workspace.h",
+  ]
+}
+
+executable("tool_dispatch_test") {
+  testonly = true
+  sources = [ "../testing/tool/tool_dispatch_test.cc" ]
+  deps = [
+    ":tool",
+    "//testing:gtest",
+    "//testing:gtest_main",
+  ]
+  include_dirs += [ "//testing/gtest/include" ]
+  if (is_win) {
+    configs += [ "//build/config/win:console_subsystem" ]
+  }
+}

@@ -1,0 +1,26 @@
+---
+description: Colocate each C++ header with its .cc in the same directory
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Colocated headers and sources
+
+A directory is one unit: the header and its implementation live **side by side**. Applies to new files and moves under `ui/`, `base/`, `examples/`, and `testing/`.
+
+## Do
+
+- Put `foo.h` next to `foo.cc` in the **same directory**.
+- When splitting a module, **move the header with its translation unit**.
+- In the same change, update the owning **`BUILD.gn`** and every `#include`.
+
+## Don’t
+
+- Don’t leave public headers at the parent and move only `.cc` into a child.
+- Don’t add an `include/` + `src/` split for product code.
+- Don’t leave a forwarding header at the old path after a move.
+- Don’t restyle `third_party/` or `skia/` layout.

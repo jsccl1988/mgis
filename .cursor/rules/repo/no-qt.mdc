@@ -1,0 +1,19 @@
+---
+description: HARD RULE — no Qt (Widgets, Quick/QML, Network, Qt5/Qt6) anywhere in this repo
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# No Qt in this repository
+
+**This rule is always on.** Desktop chrome is this tree’s **Chromium views + Skia** (`ui/views`, `ui/aura`, `skia`). Qt is not an alternative. The desktop GIS spec also rejects Qt, CEF, WebView2, and HTML as the shell.
+
+## Don’t
+
+- Don’t use Qt Widgets, Qt Quick / QML, Qt Network, or any other Qt module.
+- Don’t add a Qt SDK, `Qt5` / `Qt6` packages, `find_package(Qt…)`, or gyp/CMake deps on Qt.
+- Don’t rewrite the shell in Qt, WinUI 3, WebView2, or CEF.

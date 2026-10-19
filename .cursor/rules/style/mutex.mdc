@@ -1,0 +1,26 @@
+---
+description: Use the lock type already in the subtree; base::Lock in ui/base
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Mutex
+
+In **new or touched** product C++ under `ui/` and `base/`, use the lock the siblings use:
+
+```cpp
+#include "base/synchronization/lock.h"
+
+base::Lock lock_;
+base::AutoLock guard(lock_);
+```
+
+## Don’t
+
+- Don’t import a mogu `base/synchronization/mutex.h` wrapper that is not this tree’s `Lock`.
+- Don’t replace existing `base::Lock` with `std::mutex` in a drive-by.
+- Don’t spread Win32 `CRITICAL_SECTION` into new views code when `base::Lock` is the local pattern.

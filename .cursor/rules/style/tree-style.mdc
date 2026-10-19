@@ -1,0 +1,23 @@
+---
+description: Per top-level tree, match sibling code style and patterns
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Code style consistency by directory tree
+
+Top-level trees: **`ui/`**, **`base/`**, **`skia/`**, **`examples/`**, **`testing/`**, **`build/`**, **`third_party/`**. Within each tree, match siblings.
+
+## Do
+
+- When editing a file, read nearby code and match naming, include order, abstraction, and `BUILD.gn` patterns.
+- Follow narrower rules first (`cxx-standard.mdc`, `naming.mdc`, `ui-views-skia.mdc`).
+
+## Don’t
+
+- Don’t import smartgis `core/` / C++23 idioms into `ui/views`.
+- Don’t restyle `skia/` or `third_party/` to match a product edit.

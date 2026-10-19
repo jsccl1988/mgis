@@ -10594,7 +10594,7 @@ IWMPLibraryTreeCtrl : IDispatch
 // Function implementation mapping
 //
 
-#pragma start_map_region("controls/activex/wmp.tli")
+#pragma start_map_region("../../ui/views/controls/activex/wmp.tli")
 __declspec(implementation_key(1)) _bstr_t IWMPSyncDevice::GetfriendlyName ( );
 __declspec(implementation_key(2)) void IWMPSyncDevice::PutfriendlyName ( _bstr_t pbstrName );
 __declspec(implementation_key(3)) _bstr_t IWMPSyncDevice::GetdeviceName ( );

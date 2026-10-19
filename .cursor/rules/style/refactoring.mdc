@@ -1,0 +1,25 @@
+---
+description: Refactoring — compose smaller units; update gyp and includes with moves
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Refactoring
+
+Use this when replacing a tangled implementation or moving code between directories.
+
+## Do
+
+- Split along responsibilities (I/O, policy, state, UI). Prefer composition over a new god-object.
+- After moves, code should still look like siblings (`tree-style.mdc`). Headers stay next to `.cc` (`colocated-sources.mdc`).
+- Update **`BUILD.gn` sources**, includes, and any path-scoped rules in the **same change**.
+
+## Don’t
+
+- Don’t chunk a file only by line count.
+- Don’t introduce Qt, WinUI, WebView2, or CEF while reshaping (`no-qt.mdc`).
+- Don’t rewrite `skia/` or `third_party/` as part of a product refactor.

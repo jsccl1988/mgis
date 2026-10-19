@@ -116,6 +116,11 @@ using BASE_HASH_NAMESPACE::unordered_map;
 using BASE_HASH_NAMESPACE::unordered_multimap;
 using BASE_HASH_NAMESPACE::unordered_multiset;
 using BASE_HASH_NAMESPACE::unordered_set;
+// Older call sites still say hash_map / hash_set. MSVC no longer ships those.
+template <class... Args>
+using hash_map = BASE_HASH_NAMESPACE::unordered_map<Args...>;
+template <class... Args>
+using hash_set = BASE_HASH_NAMESPACE::unordered_set<Args...>;
 }
 
 #endif  // BASE_HASH_TABLES_H_

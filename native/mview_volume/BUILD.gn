@@ -1,0 +1,21 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Synthetic volume and wind grid. VTK is not linked.
+# Not part of //:default.
+
+static_library("mview_volume") {
+  sources = [
+    "mview_volume.cc",
+    "mview_volume.h",
+  ]
+}
+
+executable("volume_field_test") {
+  testonly = true
+  sources = [ "volume_field_test.cc" ]
+  deps = [ ":mview_volume" ]
+  if (is_win) {
+    configs += [ "//build/config/win:console_subsystem" ]
+  }
+}

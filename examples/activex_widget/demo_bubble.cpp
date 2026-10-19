@@ -72,11 +72,11 @@ void DemoBubble::InitView(views::View* container)
     views::GridLayout* layout = new views::GridLayout(container);
     container->SetLayoutManager(layout);
 
-    button1_ = new views::TextButton(this, L"ÏÔÊ¾Bubble");
-    button2_ = new views::TextButton(this, L"ÏÔÊ¾Bubble");
-    button3_ = new views::TextButton(this, L"ÏÔÊ¾Bubble");
-    button4_ = new views::TextButton(this, L"ÏÔÊ¾Bubble");
-    button5_ = new views::TextButton(this, L"ÏÔÊ¾Bubble");
+    button1_ = new views::TextButton(this, L"æ˜¾ç¤ºBubble");
+    button2_ = new views::TextButton(this, L"æ˜¾ç¤ºBubble");
+    button3_ = new views::TextButton(this, L"æ˜¾ç¤ºBubble");
+    button4_ = new views::TextButton(this, L"æ˜¾ç¤ºBubble");
+    button5_ = new views::TextButton(this, L"æ˜¾ç¤ºBubble");
 
     views::ColumnSet* column_set = layout->AddColumnSet(0);
     column_set->AddColumn(views::GridLayout::FILL, views::GridLayout::FILL,
@@ -107,7 +107,7 @@ void DemoBubble::ButtonPressed(views::Button* sender,
 	views::BubbleConfig config;
 	config = views::kRoundConfig;
 	config.anchor_view = sender;
-	config.label = L"ÕâÊÇÒ»¸öÑ¤ÀöµÄµ¯³öÊ½ÆøÅİ´°¿Ú";
+	config.label = L"è¿™æ˜¯ä¸€ä¸ªç»šä¸½çš„å¼¹å‡ºå¼æ°”æ³¡çª—å£";
 	config.arrow = views::BubbleBorder::FLOAT;
 
 	views::ExampleBubbleDelegateView* bubble_delegate =

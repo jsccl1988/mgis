@@ -1,0 +1,25 @@
+---
+description: Unit tests use gtest targets in testing/BUILD.gn
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Tests
+
+Unit tests use **gtest** targets in **`testing/BUILD.gn`**.
+
+## Do
+
+- One behavior per `TEST` / `TEST_F`. Assertions are `EXPECT_*` / `ASSERT_*`.
+- Register new test sources on the existing GN target that owns that subtree, matching sibling tests.
+- Build and run them with `build.bat debug <target>`.
+
+## Don’t
+
+- Don’t add a handwritten `main` that walks cases.
+- Don’t invent a smartgis `SmartGIS.exe --harness` gate. This repo does not have that runner.
+- Don’t put product tests inside `third_party/`.

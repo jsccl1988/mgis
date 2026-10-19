@@ -1,0 +1,26 @@
+---
+description: Keep repository root README.md in sync when build or top-level layout changes
+alwaysApply: true
+---
+
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+
+# Root `README.md` maintenance
+
+Root **`README.md`** is the first-stop overview. Today it is a one-line stub. Expand it only when the change is something a new reader must see.
+
+## When to update (same change)
+
+- Build entry changes (`build.bat`, `gn` args, where `out/Debug` lands).
+- A new top-level tree or user-facing binary is added or removed.
+- A path or script the README already names is renamed.
+
+## When not to touch
+
+- Narrow bugfixes inside `ui/` / `base/` with no workflow change.
+- Drive-by rewrites of the stub into a smartgis-style GN module table.
+
+Keep edits minimal. Do not invent a “最后更新” line unless the README already has one.

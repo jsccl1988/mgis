@@ -1,0 +1,15 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+group("ui_strings") {
+  public_deps = [
+    "//build/grit:headers",
+  ]
+}
+
+group("ui_locales_strings") {
+  public_deps = [
+    "//build/grit:headers",
+    "//ui/base/strings:ui_strings",
+  ]
+}
