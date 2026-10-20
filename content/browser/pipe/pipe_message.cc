@@ -11,37 +11,41 @@ void SetCode(std::string* error_code, const char* code) {
     *error_code = code;
 }
 
-bool AsString(const PipeJson* value, std::string* out) {
-  if (!value || value->type() != PipeJson::kString)
-    return false;
-  *out = value->string_value();
-  return true;
-}
-
-bool ExactRoot(const PipeJson& root) {
+bool ExactRoot(const rapidjson::Value& root) {
   static const char* kKeys[] = {"v", "id", "op", "body"};
-  if (root.type() != PipeJson::kObject || root.object_size() != 4)
-    return false;
-  for (size_t i = 0; i < 4; ++i) {
-    if (!root.find(kKeys[i]))
-      return false;
-  }
-  return true;
+  return pipe_json_exact_keys(root, kKeys, 4);
 }
 
 }  // namespace
 
-const wchar_t* pipe_name_wide() { return L"\\\\.\\pipe\\mview"; }
+const wchar_t* pipe_name_wide() {
+  return L"\\\\.\\pipe\\mview";
+}
 
-PipeMessage::PipeMessage() : v(1), body(PipeJson::Object()) {}
+PipeMessage::PipeMessage() : v(1) {
+  body.SetObject();
+}
 
-PipeJson pipe_error_body(const std::string& code, const std::string& message) {
-  PipeJson error = PipeJson::Object();
-  error.set("code", PipeJson::String(code));
-  error.set("message", PipeJson::String(message));
-  PipeJson body = PipeJson::Object();
-  body.set("ok", PipeJson::Bool(false));
-  body.set("error", error);
+rapidjson::Document pipe_error_body(const std::string& code,
+                                    const std::string& message) {
+  rapidjson::Document body;
+  body.SetObject();
+  rapidjson::Document::AllocatorType& alloc = body.GetAllocator();
+
+  rapidjson::Value error(rapidjson::kObjectType);
+  error.AddMember("code",
+                  rapidjson::Value(code.c_str(),
+                                   static_cast<rapidjson::SizeType>(code.size()),
+                                   alloc),
+                  alloc);
+  error.AddMember(
+      "message",
+      rapidjson::Value(message.c_str(),
+                       static_cast<rapidjson::SizeType>(message.size()), alloc),
+      alloc);
+
+  body.AddMember("ok", false, alloc);
+  body.AddMember("error", error, alloc);
   return body;
 }
 
@@ -108,46 +112,57 @@ bool parse_pipe_message(const std::string& json,
     SetCode(error_code, "io");
     return false;
   }
-  PipeJson root;
+
+  rapidjson::Document root;
   if (!parse_pipe_json(json, &root) || !ExactRoot(root)) {
     SetCode(error_code, "schema");
     return false;
   }
-  const PipeJson* version = root.find("v");
-  const PipeJson* id = root.find("id");
-  const PipeJson* op = root.find("op");
-  const PipeJson* body = root.find("body");
-  if (!version || version->type() != PipeJson::kNumber || !version->is_int() ||
-      !body || body->type() != PipeJson::kObject) {
-    SetCode(error_code, "schema");
-    return false;
-  }
+
+  long long version_i = 0;
   std::string id_text;
   std::string op_text;
-  if (!AsString(id, &id_text) || id_text.empty() || !AsString(op, &op_text) ||
-      op_text.empty()) {
+  const rapidjson::Value* body = pipe_json_member(root, "body");
+  if (!pipe_json_int64(root, "v", &version_i) ||
+      !pipe_json_string(root, "id", &id_text) || id_text.empty() ||
+      !pipe_json_string(root, "op", &op_text) || op_text.empty() || !body ||
+      !body->IsObject()) {
     SetCode(error_code, "schema");
     return false;
   }
-  message->v = static_cast<int>(version->int_value());
+
+  message->v = static_cast<int>(version_i);
   message->id = id_text;
   message->op = op_text;
-  message->body = *body;
+  pipe_json_copy(&message->body, *body);
   SetCode(error_code, "");
   return true;
 }
 
 std::string serialize_pipe_message(const PipeMessage& message) {
-  std::string json = "{\"v\":";
-  json += std::to_string(message.v);
-  json += ",\"id\":";
-  json += PipeJson::String(message.id).stringify();
-  json += ",\"op\":";
-  json += PipeJson::String(message.op).stringify();
-  json += ",\"body\":";
-  json += message.body.stringify();
-  json.push_back('}');
-  return json;
+  rapidjson::Document root;
+  root.SetObject();
+  rapidjson::Document::AllocatorType& alloc = root.GetAllocator();
+
+  root.AddMember("v", message.v, alloc);
+  root.AddMember(
+      "id",
+      rapidjson::Value(message.id.c_str(),
+                       static_cast<rapidjson::SizeType>(message.id.size()),
+                       alloc),
+      alloc);
+  root.AddMember(
+      "op",
+      rapidjson::Value(message.op.c_str(),
+                       static_cast<rapidjson::SizeType>(message.op.size()),
+                       alloc),
+      alloc);
+
+  rapidjson::Value body(rapidjson::kObjectType);
+  body.CopyFrom(message.body, alloc);
+  root.AddMember("body", body, alloc);
+
+  return pipe_json_stringify(root);
 }
 
 }  // namespace content

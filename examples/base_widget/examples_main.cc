@@ -15,6 +15,7 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/resource/resource_bundle_win.h"
 #include "base/native_library.h"
+#include "ui/base/win/dpi.h"
 #include "ui/base/win/scoped_ole_initializer.h"
 
 #include "examples_window.h"
@@ -30,6 +31,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+
+    // Before any HWND / GetDeviceCaps: opt out of OS bitmap scaling.
+    ui::EnableHighDPISupport();
 
 	ui::ScopedOleInitializer OleIniter;
     CommandLine::Init(0, NULL);

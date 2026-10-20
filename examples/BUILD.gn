@@ -7,5 +7,6 @@ group("examples") {
     "//examples/activex_widget:activex_widget",
     "//examples/base_widget:base_widget",
     "//examples/extra_views:extra_views",
+    "//examples/ui_designer:ui_designer",
   ]
 }

@@ -11,6 +11,8 @@
 
 #include <windows.h>
 
+#include "content/browser/pipe/pipe_json.h"
+
 namespace {
 
 class PipePeerFixture : public ::testing::Test {
@@ -31,55 +33,71 @@ class WorldGate : public PipePeerFixture {};
 
 content::PipeMessage MakeMessage(const std::string& id,
                                  const std::string& op,
-                                 const content::PipeJson& body) {
+                                 rapidjson::Document body) {
   content::PipeMessage message;
   message.v = 1;
   message.id = id;
   message.op = op;
-  message.body = body;
+  message.body.Swap(body);
   return message;
 }
 
-content::PipeJson HelloBody() {
-  content::PipeJson body = content::PipeJson::Object();
-  body.set("protocol", content::PipeJson::Integer(1));
-  body.set("build", content::PipeJson::String("viewport-gate"));
+rapidjson::Document EmptyObject() {
+  rapidjson::Document body;
+  body.SetObject();
   return body;
 }
 
-content::PipeJson AttachBody(const char* view,
-                             long long parent,
-                             long long width,
-                             long long height) {
-  content::PipeJson body = content::PipeJson::Object();
-  body.set("view", content::PipeJson::String(view));
-  body.set("parentHwnd", content::PipeJson::Integer(parent));
-  body.set("width", content::PipeJson::Integer(width));
-  body.set("height", content::PipeJson::Integer(height));
-  body.set("dpi", content::PipeJson::Integer(96));
+rapidjson::Document HelloBody() {
+  rapidjson::Document body;
+  body.SetObject();
+  rapidjson::Document::AllocatorType& alloc = body.GetAllocator();
+  body.AddMember("protocol", 1, alloc);
+  body.AddMember("build", "viewport-gate", alloc);
   return body;
 }
 
-content::PipeJson CameraBody(const char* origin,
-                             long long seq,
-                             double longitude,
-                             double latitude) {
-  content::PipeJson body = content::PipeJson::Object();
-  body.set("origin", content::PipeJson::String(origin));
-  body.set("seq", content::PipeJson::Integer(seq));
-  body.set("longitude", content::PipeJson::Number(longitude));
-  body.set("latitude", content::PipeJson::Number(latitude));
-  body.set("height", content::PipeJson::Number(50));
-  body.set("heading", content::PipeJson::Number(0));
-  body.set("pitch", content::PipeJson::Number(0));
+rapidjson::Document AttachBody(const char* view,
+                               long long parent,
+                               long long width,
+                               long long height) {
+  rapidjson::Document body;
+  body.SetObject();
+  rapidjson::Document::AllocatorType& alloc = body.GetAllocator();
+  body.AddMember("view", rapidjson::Value(view, alloc), alloc);
+  body.AddMember("parentHwnd", rapidjson::Value().SetInt64(parent), alloc);
+  body.AddMember("width", rapidjson::Value().SetInt64(width), alloc);
+  body.AddMember("height", rapidjson::Value().SetInt64(height), alloc);
+  body.AddMember("dpi", rapidjson::Value().SetInt64(96), alloc);
   return body;
 }
 
-const content::PipeJson* ErrorCode(const content::PipeMessage& message) {
-  const content::PipeJson* error = message.body.find("error");
-  if (!error)
+rapidjson::Document CameraBody(const char* origin,
+                               long long seq,
+                               double longitude,
+                               double latitude) {
+  rapidjson::Document body;
+  body.SetObject();
+  rapidjson::Document::AllocatorType& alloc = body.GetAllocator();
+  body.AddMember("origin", rapidjson::Value(origin, alloc), alloc);
+  body.AddMember("seq", rapidjson::Value().SetInt64(seq), alloc);
+  body.AddMember("longitude", longitude, alloc);
+  body.AddMember("latitude", latitude, alloc);
+  body.AddMember("height", 50.0, alloc);
+  body.AddMember("heading", 0.0, alloc);
+  body.AddMember("pitch", 0.0, alloc);
+  return body;
+}
+
+const rapidjson::Value* ErrorCode(const content::PipeMessage& message) {
+  rapidjson::Value::ConstMemberIterator error =
+      message.body.FindMember("error");
+  if (error == message.body.MemberEnd() || !error->value.IsObject())
     return NULL;
-  return error->find("code");
+  rapidjson::Value::ConstMemberIterator code = error->value.FindMember("code");
+  if (code == error->value.MemberEnd())
+    return NULL;
+  return &code->value;
 }
 
 bool Transact(content::PipeClient* client,
@@ -166,12 +184,13 @@ TEST_F(ViewportGate, AttachCloseAndReattach) {
   bad_version.v = 2;
   bad_version.id = "bad-v";
   bad_version.op = "health.ping";
-  bad_version.body = content::PipeJson::Object();
+  bad_version.body.SetObject();
   content::PipeMessage response;
   ASSERT_TRUE(Transact(&client, bad_version, &response));
-  const content::PipeJson* bad_code = ErrorCode(response);
+  const rapidjson::Value* bad_code = ErrorCode(response);
   ASSERT_TRUE(bad_code);
-  EXPECT_EQ(std::string("schema"), bad_code->string_value());
+  ASSERT_TRUE(bad_code->IsString());
+  EXPECT_EQ(std::string("schema"), bad_code->GetString());
 
   std::string oversized(8, '\0');
   oversized[0] = static_cast<char>(0x70);
@@ -183,16 +202,17 @@ TEST_F(ViewportGate, AttachCloseAndReattach) {
   content::PipeMessage oversized_reply;
   ASSERT_TRUE(content::parse_pipe_message(reply_json, &oversized_reply, &error))
       << error;
-  const content::PipeJson* large_code = ErrorCode(oversized_reply);
+  const rapidjson::Value* large_code = ErrorCode(oversized_reply);
   ASSERT_TRUE(large_code);
-  EXPECT_EQ(std::string("too_large"), large_code->string_value());
+  ASSERT_TRUE(large_code->IsString());
+  EXPECT_EQ(std::string("too_large"), large_code->GetString());
 
   ASSERT_TRUE(Transact(&client, MakeMessage("hello-1", "session.hello", HelloBody()),
                        &response));
   EXPECT_EQ(std::string("session.welcome"), response.op);
-  ASSERT_TRUE(response.body.find("snapshot"));
-  ASSERT_TRUE(response.body.find("layers"));
-  ASSERT_TRUE(response.body.find("entities"));
+  ASSERT_TRUE(response.body.HasMember("snapshot"));
+  ASSERT_TRUE(response.body.HasMember("layers"));
+  ASSERT_TRUE(response.body.HasMember("entities"));
 
   ASSERT_TRUE(Transact(
       &client, MakeMessage("att-0", "viewport.attach", AttachBody("view0", 4096, 640, 480)),
@@ -209,11 +229,16 @@ TEST_F(ViewportGate, AttachCloseAndReattach) {
   EXPECT_NE(0ull, child1);
   EXPECT_NE(child0, child1);
 
-  content::PipeJson resize = content::PipeJson::Object();
-  resize.set("view", content::PipeJson::String("view0"));
-  resize.set("width", content::PipeJson::Integer(800));
-  resize.set("height", content::PipeJson::Integer(600));
-  ASSERT_TRUE(Transact(&client, MakeMessage("rsz-0", "viewport.resize", resize),
+  rapidjson::Document resize;
+  resize.SetObject();
+  {
+    rapidjson::Document::AllocatorType& alloc = resize.GetAllocator();
+    resize.AddMember("view", "view0", alloc);
+    resize.AddMember("width", rapidjson::Value().SetInt64(800), alloc);
+    resize.AddMember("height", rapidjson::Value().SetInt64(600), alloc);
+  }
+  ASSERT_TRUE(Transact(&client, MakeMessage("rsz-0", "viewport.resize",
+                                            std::move(resize)),
                        &response));
   EXPECT_TRUE(ErrorCode(response) == NULL);
   int width = 0;
@@ -223,15 +248,17 @@ TEST_F(ViewportGate, AttachCloseAndReattach) {
   EXPECT_EQ(600, height);
 
   ASSERT_TRUE(Transact(&client,
-                       MakeMessage("ping-1", "health.ping", content::PipeJson::Object()),
+                       MakeMessage("ping-1", "health.ping", EmptyObject()),
                        &response));
   EXPECT_EQ(std::string("health.ping"), response.op);
   EXPECT_EQ(std::string("ping-1"), response.id);
   EXPECT_TRUE(ErrorCode(response) == NULL);
 
-  content::PipeJson close_body = content::PipeJson::Object();
-  close_body.set("view", content::PipeJson::String("view1"));
-  ASSERT_TRUE(Transact(&client, MakeMessage("cls-1", "viewport.close", close_body),
+  rapidjson::Document close_body;
+  close_body.SetObject();
+  close_body.AddMember("view", "view1", close_body.GetAllocator());
+  ASSERT_TRUE(Transact(&client, MakeMessage("cls-1", "viewport.close",
+                                            std::move(close_body)),
                        &response));
   EXPECT_TRUE(ErrorCode(response) == NULL);
   EXPECT_FALSE(peer_.view_attached("view1"));
@@ -239,12 +266,15 @@ TEST_F(ViewportGate, AttachCloseAndReattach) {
 
   ASSERT_TRUE(Transact(&client, MakeMessage("hello-2", "session.hello", HelloBody()),
                        &response));
-  const content::PipeJson* snapshot = response.body.find("snapshot");
-  ASSERT_TRUE(snapshot);
-  const content::PipeJson* cameras = snapshot->find("cameras");
-  ASSERT_TRUE(cameras);
-  ASSERT_TRUE(cameras->is_int());
-  EXPECT_EQ(1, static_cast<int>(cameras->int_value()));
+  rapidjson::Value::ConstMemberIterator snapshot =
+      response.body.FindMember("snapshot");
+  ASSERT_TRUE(snapshot != response.body.MemberEnd());
+  ASSERT_TRUE(snapshot->value.IsObject());
+  rapidjson::Value::ConstMemberIterator cameras =
+      snapshot->value.FindMember("cameras");
+  ASSERT_TRUE(cameras != snapshot->value.MemberEnd());
+  ASSERT_TRUE(cameras->value.IsInt() || cameras->value.IsInt64());
+  EXPECT_EQ(1, cameras->value.GetInt());
 
   unsigned long long frames_before = peer_.frame_count();
   client.close();
@@ -319,12 +349,14 @@ TEST_F(WorldGate, OriginConflictAndTilesetHidden) {
                        MakeMessage("cam-far", "camera.set",
                                    CameraBody("view1", 2, 121.4737, 31.2304)),
                        &response));
-  const content::PipeJson* code = ErrorCode(response);
+  const rapidjson::Value* code = ErrorCode(response);
   ASSERT_TRUE(code);
-  EXPECT_EQ(std::string("origin_conflict"), code->string_value());
-  const content::PipeJson* ok = response.body.find("ok");
-  ASSERT_TRUE(ok);
-  EXPECT_FALSE(ok->bool_value());
+  ASSERT_TRUE(code->IsString());
+  EXPECT_EQ(std::string("origin_conflict"), code->GetString());
+  rapidjson::Value::ConstMemberIterator ok = response.body.FindMember("ok");
+  ASSERT_TRUE(ok != response.body.MemberEnd());
+  ASSERT_TRUE(ok->value.IsBool());
+  EXPECT_FALSE(ok->value.GetBool());
 
   double after_lon = 0;
   double after_lat = 0;
@@ -334,12 +366,19 @@ TEST_F(WorldGate, OriginConflictAndTilesetHidden) {
   EXPECT_DOUBLE_EQ(origin_lon, after_lon);
   EXPECT_DOUBLE_EQ(origin_lat, after_lat);
 
-  content::PipeJson layer = content::PipeJson::Object();
-  layer.set("layerId", content::PipeJson::String(content::kStandInTilesetLayerId));
-  layer.set("viewport", content::PipeJson::String("both"));
-  layer.set("visible", content::PipeJson::Bool(false));
-  layer.set("opacity", content::PipeJson::Number(1));
-  ASSERT_TRUE(Transact(&client, MakeMessage("layer-hide", "layer.set", layer),
+  rapidjson::Document layer;
+  layer.SetObject();
+  {
+    rapidjson::Document::AllocatorType& alloc = layer.GetAllocator();
+    layer.AddMember("layerId",
+                    rapidjson::Value(content::kStandInTilesetLayerId, alloc),
+                    alloc);
+    layer.AddMember("viewport", "both", alloc);
+    layer.AddMember("visible", false, alloc);
+    layer.AddMember("opacity", 1.0, alloc);
+  }
+  ASSERT_TRUE(Transact(&client, MakeMessage("layer-hide", "layer.set",
+                                            std::move(layer)),
                        &response));
   EXPECT_TRUE(ErrorCode(response) == NULL);
   EXPECT_TRUE(peer_.tileset_hidden());

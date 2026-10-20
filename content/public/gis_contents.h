@@ -7,6 +7,7 @@
 #include <string>
 
 #include "content/public/event_bus.h"
+#include "content/public/trace_log.h"
 
 namespace content {
 
@@ -26,6 +27,7 @@ class GisContents {
 
   // Owned by this contents. Never NULL. Lifetime matches the contents.
   EventBus* event_bus();
+  TraceLog* trace_log();
 
   // True for the three product view ids (map, view0, view1).
   bool has_view(const std::string& view_id) const;
@@ -36,6 +38,7 @@ class GisContents {
 
   GisDocument* document_;
   EventBus event_bus_;
+  TraceLog trace_log_;
 };
 
 }  // namespace content

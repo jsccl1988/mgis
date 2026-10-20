@@ -1,13 +1,189 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 #
-# Facade labels. Vendored packages are compiled from third_party/.src via the
-# junctions (//third_party/<name>). `build.bat t` only checks the manifest;
-# these trees are not CMake-installed.
+# Thin forwarder: public labels //third_party:<name> resolve to facade groups
+# under //third_party/gn. Third-party install is tools/batch.py �?.install
+# (`build.bat t`), not cmake() from this file.
 
 import("//third_party/gn/tp.gni")
 
+group("glog") {
+  public_deps = [ "//third_party/gn:glog" ]
+}
+
+group("gtest") {
+  public_deps = [ "//third_party/gn:gtest" ]
+}
+
+group("googletest") {
+  public_deps = [ "//third_party/gn:googletest" ]
+}
+
+group("gbenchmark") {
+  public_deps = [ "//third_party/gn:gbenchmark" ]
+}
+
+group("gbenchmark_main") {
+  public_deps = [ "//third_party/gn:gbenchmark_main" ]
+}
+
+group("benchmark") {
+  public_deps = [ "//third_party/gn:benchmark" ]
+}
+
+group("sqlite3") {
+  public_deps = [ "//third_party/gn:sqlite3" ]
+}
+
+group("SQLiteCpp") {
+  public_deps = [ "//third_party/gn:SQLiteCpp" ]
+}
+
+group("geos") {
+  public_deps = [ "//third_party/gn:geos" ]
+}
+
+group("PROJ") {
+  public_deps = [ "//third_party/gn:PROJ" ]
+}
+
+group("gdal") {
+  public_deps = [ "//third_party/gn:gdal" ]
+}
+
+group("pdal") {
+  public_deps = [ "//third_party/gn:pdal" ]
+}
+
+group("gdal_runtime_dlls") {
+  public_deps = [ "//third_party/gn:gdal_runtime_dlls" ]
+}
+
+group("libspatialindex") {
+  public_deps = [ "//third_party/gn:libspatialindex" ]
+}
+
+group("libspatialite") {
+  public_deps = [ "//third_party/gn:libspatialite" ]
+}
+
+group("SpatiaLiteCpp") {
+  public_deps = [ "//third_party/gn:SpatiaLiteCpp" ]
+}
+
+group("asio") {
+  public_deps = [ "//third_party/gn:asio" ]
+}
+
+group("cpp-httplib") {
+  public_deps = [ "//third_party/gn:cpp-httplib" ]
+}
+
+group("cpp_httplib") {
+  public_deps = [ "//third_party/gn:cpp_httplib" ]
+}
+
+group("httplib") {
+  public_deps = [ "//third_party/gn:httplib" ]
+}
+
+group("openssl") {
+  public_deps = [ "//third_party/gn:openssl" ]
+}
+
+group("eigen") {
+  public_deps = [ "//third_party/gn:eigen" ]
+}
+
+if (is_win) {
+  config("cximage_delayload") {
+    libs = [ "delayimp.lib" ]
+    ldflags = [ "/DELAYLOAD:CxImage.dll" ]
+  }
+}
+
+group("CxImage") {
+  public_deps = [ "//third_party/gn:CxImage" ]
+  if (is_win) {
+    # gis_d.dll imports CxImage.dll. Delay-load so the preload hook can
+    # SetDllDirectory(<exe>/../third_party/bin) before the loader resolves it.
+    public_deps += [ "//third_party/gn:dll_search" ]
+    public_configs = [ ":cximage_delayload" ]
+  }
+}
+
+group("wtl8.0") {
+  public_deps = [ "//third_party/gn:wtl8.0" ]
+}
+
+group("antlr4") {
+  public_deps = [ "//third_party/gn:antlr4" ]
+}
+
+group("khronos_gl") {
+  public_deps = [ "//third_party/gn:khronos_gl" ]
+}
+
+# MapLibre Native examples stay under third_party/maplibre/example (CMake/scripts).
+# No //third_party/maplibre:maplibre GN target in this tree yet.
+group("maplibre") {
+}
+
+group("ed25519") {
+  public_deps = [ "//third_party/gn:ed25519" ]
+}
+
+group("flycube") {
+  public_deps = [ "//third_party/gn:flycube" ]
+}
+
+group("assimp") {
+  public_deps = [ "//third_party/gn:assimp" ]
+}
+
+group("tinygltf") {
+  public_deps = [ "//third_party/gn:tinygltf" ]
+}
+
+group("octree") {
+  public_deps = [ "//third_party/gn:octree" ]
+}
+
+group("laszip") {
+  public_deps = [ "//third_party/laszip:laszip" ]
+}
+
+group("CLI11") {
+  public_deps = [ "//third_party/gn:CLI11" ]
+}
+
+group("rapidjson") {
+  public_deps = [ "//third_party/rapidjson:rapidjson" ]
+}
+
+group("concurrentqueue") {
+  public_deps = [ "//third_party/gn:concurrentqueue" ]
+}
+
+group("vir_simd") {
+  public_deps = [ "//third_party/gn:vir_simd" ]
+}
+
+group("pugixml") {
+  public_deps = [ "//third_party/gn:pugixml" ]
+}
+
+group("yoga") {
+  public_deps = [ "//third_party/gn:yoga" ]
+}
+
+group("protobuf") {
+  public_deps = [ "//third_party/gn:protobuf" ]
+}
+
 group("third_party_all") {
+  # Chromium snapshots always available. GIS/utility packages are opt-in
+  # via //third_party:<name> after fetch/install or local junctions.
   public_deps = [
     "//third_party/.src/libjpeg_turbo:libjpeg",
     "//third_party/.src/libpng:libpng",

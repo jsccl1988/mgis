@@ -939,7 +939,10 @@ BASE_EXPORT std::wstring GetLogFileFullPath();
 // which is normally ASCII. It is relatively slow, so try not to use it for
 // common cases. Non-ASCII characters will be converted to UTF-8 by these
 // operators.
-BASE_EXPORT std::ostream& operator<<(std::ostream& out, const wchar_t* wstr);
+//
+// operator<<(ostream, const wchar_t*) lives in build/cxx23_compat.h (PCH). Do
+// not redeclare it with BASE_EXPORT under COMPONENT_BUILD — that conflicts
+// with the inline definition (C2375 different linkage).
 inline std::ostream& operator<<(std::ostream& out, const std::wstring& wstr) {
   return out << wstr.c_str();
 }

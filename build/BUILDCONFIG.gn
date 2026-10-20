@@ -53,6 +53,10 @@ declare_args() {
   # Reserved (mogu): faster debug info. Not wired on MSVC; default remains /Zi.
   use_fast_debug = false
 
+  # Component build: product libraries (+ skia) become DLLs. build.bat debug
+  # sets this true; Release stays false (static).
+  is_component_build = false
+
   is_prof = true
   is_asan = false
   is_lsan = false
@@ -154,6 +158,11 @@ set_defaults("shared_library") {
 set_defaults("source_set") {
   configs = _compile_defaults
 }
+# component() invoker scope needs the same defaults so `configs +=` / `defines +=`
+# in BUILD.gn files keep working when retargeted from static_library.
+set_defaults("component") {
+  configs = _compile_defaults
+}
 
 # =============================================================================
 # IMPORTS
@@ -167,6 +176,13 @@ if (is_mac) {
 # help to specify subsystem explicitly to build win32 application or console application
 if (is_win) {
   import("//build/config/win/application.gni")
+}
+
+# component() — shared_library when is_component_build, else static_library.
+import("//build/config/component.gni")
+# Defaults must be set after the template exists so `configs +=` in callers works.
+set_defaults("component") {
+  configs = _compile_defaults
 }
 
 # help to build cmake/makefile projects

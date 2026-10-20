@@ -1,6 +1,6 @@
 {
   "schema": "incubator_third_party_manifest_v1",
-  "description": "mview third_party pins. Vendored Chromium snapshots live in third_party/.src/<name>. MapLibre reuses the smartgis pin. UE 5.6, Cesium for Unreal 2.30, cesium-native 0.64.0, and VTK 9.5.2 (no Qt) are opt-in pins. Legacy include paths are junctions and are not a second copy.",
+  "description": "mview third_party pins. Chromium snapshots are source_policy:vendored. GIS/utility packages synced from smartgis (CEF/WebView2/WinAppSDK/BCG excluded). Opt-in fetch via build.bat t / tools/fetch.py; local junctions to smartgis .src allowed.",
   "default_src_subdir": ".src",
   "packages": [
     {
@@ -154,6 +154,500 @@
       "engine_tag": "5.6",
       "engine_root_env": "UE_5_6_ROOT",
       "note": "Unreal Engine 5.6 stays in the Epic install (or a licensed source tree) pointed at by UE_5_6_ROOT. Not cloned into third_party/.src. Example: third_party/unreal/example."
+    },
+    {
+      "name": "glog",
+      "git_url": "http://localhost:3000/ccl/glog.git",
+      "git_ref": "v0.6.0",
+      "build_system": "cmake",
+      "note": "Reused mogu pin (v0.6.0). Gitea already has this tag; not re-uploaded. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "cmake_args": [
+        "-DWITH_GFLAGS=OFF",
+        "-DWITH_GTEST=OFF",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_TESTING=OFF"
+      ]
+    },
+    {
+      "name": "googletest",
+      "git_url": "http://localhost:3000/ccl/googletest.git",
+      "git_ref": "v1.14.0",
+      "build_system": "cmake",
+      "note": "Reused mogu pin (v1.14.0). Gitea already has this tag; not re-uploaded. gtest_force_shared_crt=ON for mgis MSVC /MD. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "cmake_args": [
+        "-Dgtest_force_shared_crt=ON",
+        "-DBUILD_GMOCK=ON",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DINSTALL_GTEST=ON",
+        "-DCMAKE_DEBUG_POSTFIX=d"
+      ]
+    },
+    {
+      "name": "benchmark",
+      "local_src": "googlebenchmark",
+      "git_url": "http://localhost:3000/ccl/googlebenchmark.git",
+      "git_ref": "cb7267c1dcf6ba9ea4318e2d05cd7252c75a483f",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import of vendored googlebenchmark (not mogu benchmark v1.8.3; that Gitea repo is empty). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBENCHMARK_ENABLE_TESTING=OFF"
+      ]
+    },
+    {
+      "name": "asio",
+      "git_url": "http://localhost:3000/ccl/asio.git",
+      "git_url_fallbacks": [
+        "https://github.com/chriskohlhoff/asio.git"
+      ],
+      "git_ref": "asio-1-30-2",
+      "install_skip": true,
+      "note": "Standalone header-only ASIO (ASIO_STANDALONE). Gitea ccl/asio exists; GitHub fallback if the tag is missing. Do not add Boost.Asio. Used by src/net. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "cpp-httplib",
+      "git_url": "http://localhost:3000/ccl/cpp-httplib.git",
+      "git_url_fallbacks": [
+        "https://github.com/yhirose/cpp-httplib.git"
+      ],
+      "git_ref": "v0.18.3",
+      "install_skip": true,
+      "note": "Header-only HTTP(S) client/server. HTTPS needs CPPHTTPLIB_OPENSSL_SUPPORT + //third_party:openssl (sync_openssl_win.ps1). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "openssl",
+      "install_skip": true,
+      "note": "Not fetched from git. Windows: winget install ShiningLight.OpenSSL.Dev then powershell -File third_party/tools/sync_openssl_win.ps1 → third_party/.install (and out/third_party junction). GN label //third_party:openssl. OpenSSL 3+ required by cpp-httplib. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "sqlite3",
+      "git_url": "http://localhost:3000/ccl/sqlite3.git",
+      "git_ref": "527d3eb0763df9d98289bba65160aaff2aef98f9",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF"
+      ]
+    },
+    {
+      "name": "geos",
+      "git_url": "http://localhost:3000/ccl/geos.git",
+      "git_ref": "4fc2ba184c9ba5e2b46a0291e97311f95b06c2da",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. LGPL — WKT display only. CMAKE_DEBUG_POSTFIX=d so Debug geosd.dll/geos_cd.dll can sit next to Release geos.dll/geos_c.dll in the same .install prefix (same coexistence as gdald.dll). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DUSE_UNSTABLE_GEOS_CPP_API=1",
+        "-DCMAKE_DEBUG_POSTFIX=d"
+      ]
+    },
+    {
+      "name": "PROJ",
+      "git_url": "http://localhost:3000/ccl/PROJ.git",
+      "git_ref": "1c7cf0dcb0eaa17f3bf0577b5c73ac146d93c773",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "install_requires": [
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DENABLE_TIFF=OFF",
+        "-DENABLE_CURL=OFF",
+        "-DBUILD_APPS=OFF",
+        "-DBUILD_PROJSYNC=OFF",
+        "-DEXE_SQLITE3=@PREFIX@/bin/sqlite3.exe",
+        "-DSQLITE3_INCLUDE_DIR=@PREFIX@/include",
+        "-DSQLITE3_LIBRARY=@PREFIX@/lib/sqlite3.lib"
+      ]
+    },
+    {
+      "name": "SQLiteCpp",
+      "git_url": "http://localhost:3000/ccl/SQLiteCpp.git",
+      "git_ref": "85a256f68331c0d36e90ea7c137b0c7f8f4c5d47",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "install_requires": [
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DSQLITECPP_INTERNAL_SQLITE=OFF",
+        "-DSQLITECPP_RUN_CPPLINT=OFF",
+        "-DSQLITE3_INCLUDE_DIR=@PREFIX@/include",
+        "-DSQLITE3_LIBRARY=@PREFIX@/lib/sqlite3.lib"
+      ]
+    },
+    {
+      "name": "libspatialindex",
+      "git_url": "http://localhost:3000/ccl/libspatialindex.git",
+      "git_ref": "a7004ccc23ab9b61c57f5e0d7a00681086aadf20",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Dead product link — keep for third_party_all. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON"
+      ]
+    },
+    {
+      "name": "gdal",
+      "git_url": "http://localhost:3000/ccl/gdal.git",
+      "git_ref": "8bc09143be713a89258aed6ecd6cd8e343544328",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Frozen display adapter. GPKG needs SQLite3 (explicitly enabled below). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "install_requires": [
+        "PROJ",
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "PROJ",
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_TESTING=OFF",
+        "-DGDAL_BUILD_OPTIONAL_DRIVERS=OFF",
+        "-DOGR_BUILD_OPTIONAL_DRIVERS=OFF",
+        "-DGDAL_USE_INTERNAL_LIBS=ON",
+        "-DGDAL_USE_SQLITE3=ON",
+        "-DGDAL_USE_SPATIALITE=OFF",
+        "-DGDAL_USE_OPENSSL=OFF",
+        "-DOGR_ENABLE_DRIVER_SQLITE=ON",
+        "-DOGR_ENABLE_DRIVER_GPKG=ON",
+        "-DSQLite3_INCLUDE_DIR=@PREFIX@/include",
+        "-DSQLite3_LIBRARY=@PREFIX@/lib/sqlite3.lib",
+        "-DPROJ_INCLUDE_DIR=@PREFIX@/include",
+        "-DPROJ_LIBRARIES=@PREFIX@/lib"
+      ]
+    },
+    {
+      "name": "libspatialite",
+      "git_url": "http://localhost:3000/ccl/libspatialite.git",
+      "git_ref": "1c0e08e1a827a5a8a1c1aec388b5e22087909381",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Dead product link — keep for third_party_all. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "install_requires": [
+        "geos",
+        "PROJ",
+        "sqlite3"
+      ],
+      "cmake_prefix_paths": [
+        "geos",
+        "PROJ",
+        "sqlite3"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON"
+      ]
+    },
+    {
+      "name": "SpatiaLiteCpp",
+      "git_url": "http://localhost:3000/ccl/SpatiaLiteCpp.git",
+      "git_ref": "ec2b1d8348bbfb023f81f62304affa8106364dbd",
+      "build_system": "cmake",
+      "note": "Reused existing Gitea import; not re-uploaded. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this.",
+      "install_requires": [
+        "libspatialite"
+      ],
+      "cmake_prefix_paths": [
+        "libspatialite"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-Dspatialite_dir_inc=@PREFIX@/include",
+        "-Dspatialite_dir_lib=@PREFIX@/lib"
+      ]
+    },
+    {
+      "name": "CxImage",
+      "git_url": "http://localhost:3000/ccl/CxImage.git",
+      "git_ref": "f36a4a5be1b06ac985270386a4804f9b30dd40fd",
+      "build_system": "cmake",
+      "install_skip": true,
+      "note": "Reused existing Gitea import; not re-uploaded. Compiled by thin //third_party/CxImage GN from .src/CxImage, not install.py. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "wtl8.0",
+      "git_url": "http://localhost:3000/ccl/wtl8.0.git",
+      "git_ref": "8ab4baa835eb6510abc03a554eb5022935aac949",
+      "build_system": "cmake",
+      "install_skip": true,
+      "note": "Reused existing Gitea import; not re-uploaded. Header-only WTL in .src/wtl8.0. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "flycube",
+      "git_url": "http://localhost:3000/ccl/flycube.git",
+      "git_url_fallbacks": [
+        "https://github.com/andrejnau/FlyCube.git"
+      ],
+      "git_ref": "1b03312157e97286e5737c24695a5e5313138c52",
+      "build_system": "cmake",
+      "install_skip": true,
+      "note": "Mirrored to Gitea from local FlyCube checkout (was shallow; unshallowed then pushed). Low-level DX12/Vulkan/Metal API behind render::rhi. Sources in .src/flycube; Release /MD libs merge into third_party/.install/lib (no flycube_prebuilt root). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "assimp",
+      "git_url": "http://localhost:3000/ccl/assimp.git",
+      "git_url_fallbacks": [
+        "https://github.com/assimp/assimp.git"
+      ],
+      "git_ref": "v5.4.3",
+      "build_system": "cmake",
+      "install_skip": true,
+      "note": "Gitea 404 as of 2026-09-13. Pin v5.4.3. Junction a local tree to .src/assimp (Importer.hpp). Do not GitHub-fetch from product TUs; Assimp stays off until that include exists. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "tinygltf",
+      "git_url": "http://localhost:3000/ccl/tinygltf.git",
+      "git_url_fallbacks": [
+        "https://github.com/syoyo/tinygltf.git"
+      ],
+      "git_ref": "v2.9.3",
+      "install_skip": true,
+      "note": "Gitea 404 as of 2026-09-13. Pin v2.9.3. GitHub tag archive extracted to .src/tinygltf (tiny_gltf.h). Used only for 3D Tiles content, never as a tileset. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "khronos_gl",
+      "git_url": "http://localhost:3000/ccl/khronos_gl.git",
+      "git_ref": "e40d74db4e03df9ee05667f787c51e68c0c2e0c6",
+      "install_skip": true,
+      "note": "Khronos OpenGL extension headers (MIT). Sources in .src/khronos_gl; thin GN at third_party/khronos_gl. Uploaded to Gitea (SHA e40d74db…). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "ed25519",
+      "git_url": "http://localhost:3000/ccl/ed25519.git",
+      "git_ref": "51854966deb651a149b6cd3d95cf7d9bd33acdf9",
+      "install_skip": true,
+      "note": "tweetnacl/ed25519 used by src/base. Sources in .src/ed25519; thin GN at third_party/ed25519. Uploaded to Gitea. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "antlr4",
+      "http_url": "https://www.antlr.org/download/antlr4-cpp-runtime-4.13.2-source.zip",
+      "src_dir_name": "antlr4",
+      "sha256": "0ed13668906e86dbc0dcddf30fdee68c10203dea4e83852b4edb810821bee3c4",
+      "install_skip": true,
+      "note": "Runtime-only ANTLR 4.13.2 C++ (BSD-3). Gitea ccl/antlr4 exists but is empty; official source zip. Do not vendor the Java tool jar in the product DLL. GN //third_party/antlr4:antlr4_runtime. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "eigen",
+      "git_url": "http://localhost:3000/ccl/eigen.git",
+      "git_ref": "3.4.0",
+      "install_skip": true,
+      "git_sparse_paths": [
+        "Eigen"
+      ],
+      "note": "Header-only Eigen 3.4.0 (MPL2). SparseLU backend for orthogrid Laplace / elliptic grid generation only — not geo Vector types. Reused existing Gitea mirror; not re-uploaded. No cmake install. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "octree",
+      "git_url": "http://localhost:3000/ccl/octree.git",
+      "git_url_fallbacks": [
+        "https://github.com/jbehley/octree.git"
+      ],
+      "git_ref": "8e3927d48d5ce61f94aab6090d77b4434f87dc89",
+      "install_skip": true,
+      "note": "jbehley/octree unibn Octree.hpp MIT header-only. Sources in .src/octree; thin GN at third_party/octree. Used by legacy/render/scene3d/index adapter only. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "CLI11",
+      "git_url": "http://localhost:3000/ccl/CLI11.git",
+      "git_url_fallbacks": [
+        "https://github.com/CLIUtils/CLI11.git"
+      ],
+      "git_ref": "v2.4.2",
+      "install_skip": true,
+      "note": "CLIUtils/CLI11 header-only command-line parser (BSD-3). Sources in .src/CLI11; thin GN at third_party/CLI11. Used by SmartGisViews process entry. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "rapidjson",
+      "git_url": "http://localhost:3000/ccl/rapidjson.git",
+      "git_url_fallbacks": [
+        "https://github.com/Tencent/rapidjson.git"
+      ],
+      "git_ref": "v1.1.0",
+      "install_skip": true,
+      "note": "Tencent/rapidjson header-only (MIT). Product JSON parse/write only — no homemade json_mini. Sources in .src/rapidjson; thin GN //third_party/rapidjson. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "concurrentqueue",
+      "git_url": "http://localhost:3000/ccl/concurrentqueue.git",
+      "git_url_fallbacks": [
+        "https://github.com/cameron314/concurrentqueue.git"
+      ],
+      "git_ref": "v1.0.4",
+      "install_skip": true,
+      "note": "moodycamel concurrentqueue header-only (BSD). Sources in .src/concurrentqueue; include layout third_party/concurrentqueue/include/concurrentqueue/moodycamel/. Thin GN //third_party:concurrentqueue. Used by base/concurrency/queue.h PushOnlyQueue. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "vir-simd",
+      "git_url": "http://localhost:3000/ccl/vir-simd.git",
+      "git_url_fallbacks": [
+        "https://github.com/mattkretz/vir-simd.git"
+      ],
+      "git_ref": "v0.4.4",
+      "install_skip": true,
+      "note": "mattkretz/vir-simd header-only (LGPL-3.0-or-later). Portable Parallelism TS / C++26 std::simd (P1928) polyfill as vir::stdx::simd until MSVC ships <simd>. Sources in .src/vir-simd; thin GN //third_party:vir_simd. Product include via base/simd/stdx.h. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "pugixml",
+      "git_url": "http://localhost:3000/ccl/pugixml.git",
+      "git_url_fallbacks": [
+        "https://github.com/zeux/pugixml.git"
+      ],
+      "git_ref": "v1.14",
+      "install_skip": true,
+      "note": "zeux/pugixml (MIT). Replaces vendored TinyXML under src/legacy/xml. Sources in .src/pugixml; thin GN //third_party/pugixml compiles src/pugixml.cpp. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "yoga",
+      "git_url": "http://localhost:3000/ccl/yoga.git",
+      "git_url_fallbacks": [
+        "https://github.com/facebook/yoga.git"
+      ],
+      "git_ref": "v3.2.1",
+      "install_skip": true,
+      "note": "facebook/yoga W3C Flexbox (MIT). Sources in .src/yoga; thin GN //third_party/yoga compiles yoga/*.cpp for Views MarkupLayout. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "protobuf",
+      "git_url": "http://localhost:3000/ccl/protobuf.git",
+      "git_url_fallbacks": [
+        "https://github.com/protocolbuffers/protobuf.git"
+      ],
+      "git_ref": "v25.3",
+      "build_system": "cmake",
+      "install_skip": true,
+      "skip_fetch_all": true,
+      "note": "Official protobuf C++ (BSD-3). Policy allows product + future IPC; this pin is opt-in (skip_fetch_all). Enable fetch + cmake install when MVT or a proto consumer lands. Thin GN //third_party/protobuf when .install headers exist. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "curl",
+      "git_url": "https://github.com/curl/curl.git",
+      "git_ref": "curl-8_10_1",
+      "build_system": "cmake",
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DBUILD_CURL_EXE=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DCURL_USE_SCHANNEL=ON",
+        "-DCURL_USE_LIBPSL=OFF",
+        "-DCURL_DISABLE_LDAP=ON",
+        "-DCURL_DISABLE_MQTT=ON",
+        "-DHTTP_ONLY=OFF"
+      ],
+      "note": "libcurl 8.10.1 (curl license). Required by PDAL arbiter (cmake/curl.cmake is unconditional). Windows uses Schannel — no OpenSSL dep. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "libtiff",
+      "http_url": "https://gitlab.com/libtiff/libtiff/-/archive/v4.6.0/libtiff-v4.6.0.tar.gz",
+      "src_dir_name": "libtiff",
+      "build_system": "cmake",
+      "install_requires": [
+        "zlib"
+      ],
+      "cmake_prefix_paths": [
+        "zlib"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-Dtiff-tools=OFF",
+        "-Dtiff-tests=OFF",
+        "-Dtiff-contrib=OFF",
+        "-Dtiff-docs=OFF",
+        "-Djpeg=OFF",
+        "-Dold-jpeg=OFF",
+        "-Djbig=OFF",
+        "-Dlerc=OFF",
+        "-Dlibdeflate=OFF",
+        "-Dlzma=OFF",
+        "-Dzstd=OFF",
+        "-Dwebp=OFF"
+      ],
+      "note": "libtiff 4.6.0 (BSD-like). Required by libgeotiff / PDAL GeoTIFF. GitLab archive (GitHub tag tarballs 404). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "libgeotiff",
+      "git_url": "https://github.com/OSGeo/libgeotiff.git",
+      "git_ref": "1.7.3",
+      "build_system": "cmake",
+      "cmake_source_subdir": "libgeotiff",
+      "install_requires": [
+        "libtiff",
+        "PROJ",
+        "zlib"
+      ],
+      "cmake_prefix_paths": [
+        "libtiff",
+        "PROJ",
+        "zlib"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DWITH_UTILITIES=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DCMAKE_DEBUG_POSTFIX=d",
+        "-DTIFF_INCLUDE_DIR=@PREFIX@/include",
+        "-DTIFF_LIBRARY=@PREFIX@/lib/tiff@D@.lib"
+      ],
+      "note": "OSGeo libgeotiff 1.7.3 (X/MIT). PDAL requires standalone GeoTIFF. FindTIFF CONFIG yields TIFF::tiff whose VS include can resolve to lib/cmake/tiff/include (install.py junctions that to prefix/include after libtiff). TIFF_LIBRARY uses @D@ (tiffd.lib Debug / tiff.lib Release). Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
+    },
+    {
+      "name": "pdal",
+      "git_url": "http://localhost:3000/ccl/PDAL.git",
+      "git_url_fallbacks": [
+        "https://github.com/PDAL/PDAL.git"
+      ],
+      "git_ref": "2.8.3",
+      "build_system": "cmake",
+      "install_requires": [
+        "gdal",
+        "geos",
+        "PROJ",
+        "zlib",
+        "libtiff",
+        "libgeotiff",
+        "curl"
+      ],
+      "cmake_prefix_paths": [
+        "gdal",
+        "geos",
+        "PROJ",
+        "sqlite3",
+        "zlib",
+        "libtiff",
+        "libgeotiff",
+        "curl"
+      ],
+      "cmake_args": [
+        "-DBUILD_SHARED_LIBS=ON",
+        "-DWITH_TESTS=OFF",
+        "-DBUILD_TOOLS=OFF",
+        "-DWITH_COMPLETION=OFF",
+        "-DWITH_BACKTRACE=OFF",
+        "-DWITH_GDAL=ON",
+        "-DWITH_GEOS=ON",
+        "-DWITH_ZLIB=ON",
+        "-DWITH_LZMA=OFF",
+        "-DWITH_LIBXML2=OFF",
+        "-DWITH_OPENSSL=OFF",
+        "-DCMAKE_DEBUG_POSTFIX=d",
+        "-DGEOTIFF_INCLUDE_DIR=@PREFIX@/include",
+        "-DGEOTIFF_LIBRARY=@PREFIX@/lib/geotiff@D@_i.lib",
+        "-DCURL_INCLUDE_DIR=@PREFIX@/include",
+        "-DCURL_LIBRARY=@PREFIX@/lib/libcurl@DASH_D@_imp.lib"
+      ],
+      "note": "PDAL 2.8.3 (BSD). Point-cloud processing only (world3d.pdal_*). Default load_point_cloud stays LASzip. Needs zlib+libtiff+libgeotiff+curl (arbiter always links CURL). GEOTIFF/CURL libs use @D@ / @DASH_D@ (Debug: geotiff_d_i.lib + libcurl-d_imp.lib; Release: geotiff_i.lib + libcurl_imp.lib). CMAKE_DEBUG_POSTFIX=d so pdalcppd.dll can sit next to Release pdalcpp.dll. Install: build.bat release t pdal → .install; GN smt_has_pdal when include/pdal/PipelineManager.hpp exists. Gitea ccl/PDAL is 404 — GitHub fallback. Synced from smartgis for on-demand use in mview. Default product GN graph does not link this."
     }
-  ]
+  ],
+  "gitea_mirror": {
+    "base_url": "http://localhost:3000/ccl",
+    "repo_prefix": "",
+    "note": "Same org Gitea as mogu/mgis. Existing mirrors are reused; do not re-upload. Override with GITEA_MIRROR_BASE / GITEA_TOKEN if wiring authenticated create/push."
+  }
 }

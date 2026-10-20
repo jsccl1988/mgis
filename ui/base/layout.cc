@@ -120,12 +120,13 @@ std::vector<ScaleFactor>& GetSupportedScaleFactorsInternal() {
     if (base::mac::IsOSLionOrLater())
       supported_scale_factors->push_back(SCALE_FACTOR_200P);
 #elif defined(OS_WIN)
-    // Have high-DPI resources for 140% and 180% scaling on Windows based on
-    // default scaling for Metro mode.  Round to nearest supported scale in
-    // all cases.
+    // High-DPI resource packs for Metro-era 140%/180%, plus 200% for modern
+    // common desktop scales. Layout uses the continuous device_scale_factor;
+    // these enums only select which .pak to load (with 100P fallback).
     if (ui::IsInHighDPIMode()) {
       supported_scale_factors->push_back(SCALE_FACTOR_140P);
       supported_scale_factors->push_back(SCALE_FACTOR_180P);
+      supported_scale_factors->push_back(SCALE_FACTOR_200P);
     }
 #elif defined(OS_CHROMEOS)
     // TODO(oshima): Include 200P only if the device support 200P

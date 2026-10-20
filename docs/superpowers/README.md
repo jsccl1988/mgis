@@ -9,5 +9,13 @@ All rights reserved.
 
 | 文档 | 内容 |
 | --- | --- |
-| [`specs/2026-10-19-ue-mview-maplibre-design.md`](specs/2026-10-19-ue-mview-maplibre-design.md) | aura/views 界面；content / glang / 插件；UE 与 MapLibre 共用 tool::Workspace；P0–P7 门控；第三方 pin |
+| [`specs/2026-10-19-ue-mview-maplibre-design.md`](specs/2026-10-19-ue-mview-maplibre-design.md) | aura/views 界面；content / glang / 插件；UE 与 MapLibre 共用 tool::Workspace；P0–P7 门控；第三方 pin；§ Mgis 工作台壳 |
+| [`specs/2026-10-21-debug-component-build-design.md`](specs/2026-10-21-debug-component-build-design.md) | Debug `is_component_build`：产品库 + Skia DLL；Release 静态 |
+| [`diagrams/debug-component-build.html`](diagrams/debug-component-build.html) | component DLL 分层示意 |
+| [`specs/2026-10-20-views-declarative-markup-design.md`](specs/2026-10-20-views-declarative-markup-design.md) | views markup（mview 方言）+ Yoga + ControlFactory；独立 UiDesigner |
+| [`plans/2026-10-20-mgis-workbench-chrome.md`](plans/2026-10-20-mgis-workbench-chrome.md) | `app/mgis` 四区壳第一刀（面板已自 `ui/gis` 并入） |
+| [`plans/2026-10-20-views-declarative-markup.md`](plans/2026-10-20-views-declarative-markup.md) | markup 运行时 + UiDesigner 落地任务 |
 | [`diagrams/third-party-pins.html`](diagrams/third-party-pins.html) | UE 5.6、Cesium、VTK、MapLibre 的清单落点 |
+| [`diagrams/mgis-workbench-chrome.html`](diagrams/mgis-workbench-chrome.html) | 工作台分层与 Tab 联动 |
+| [`diagrams/content-wiring.html`](diagrams/content-wiring.html) | Content 接线：手势事实、FlyCube 子窗口、底栏 trace、glang |
+| [`diagrams/views-declarative-markup.html`](diagrams/views-declarative-markup.html) | markup 资源 → 管线 → UiDesigner / 产品宿主 |

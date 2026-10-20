@@ -1,6 +1,11 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
+# Consumers of //skia:skia need SKIA_DLL so SK_API is dllimport.
+config("skia_dll") {
+  defines = [ "SKIA_DLL" ]
+}
+
 static_library("skia_opts_ssse3") {
   sources = [
     "../third_party/skia/src/opts/SkBitmapProcState_opts_SSSE3.cpp",
@@ -145,7 +150,7 @@ static_library("skia_opts") {
   configs += [ "//build/config:precompile" ]
 }
 
-static_library("skia") {
+component("skia") {
   sources = [
     "../third_party/skia/src/core/Sk64.cpp",
     "../third_party/skia/src/core/SkAAClip.cpp",
@@ -499,7 +504,12 @@ static_library("skia") {
     "ext/vector_platform_device_skia.cc",
   ]
   deps = [
+    "//base/third_party/dynamic_annotations:dynamic_annotations",
+    "//base:base",
     "//build/grit:headers",
+    "//skia:skia_opts",
+    "//skia:skia_opts_ssse3",
+    "//third_party/.src/zlib:zlib",
   ]
   defines += [
     "_WIN32_WINNT=0x0602",
@@ -561,6 +571,13 @@ static_library("skia") {
     "_CRT_NONSTDC_NO_WARNINGS",
     "_CRT_NONSTDC_NO_DEPRECATE",
   ]
+  if (is_component_build) {
+    defines += [
+      "SKIA_DLL",
+      "SKIA_IMPLEMENTATION=1",
+    ]
+    public_configs = [ ":skia_dll" ]
+  }
   include_dirs += [
     "//third_party/wtl/include",
     "//.",

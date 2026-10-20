@@ -23,6 +23,10 @@ EventBus* GisContents::event_bus() {
   return &event_bus_;
 }
 
+TraceLog* GisContents::trace_log() {
+  return &trace_log_;
+}
+
 bool GisContents::has_view(const std::string& view_id) const {
   return is_known_view_id(view_id);
 }

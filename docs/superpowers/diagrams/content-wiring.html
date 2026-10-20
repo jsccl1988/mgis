@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Content 接线</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  body { margin:0; font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:980px; margin:32px auto; padding:0 20px 48px; }
+  h1 { font-size:22px; margin:0 0 8px; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  p { color:var(--muted); line-height:1.55; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin:16px 0; }
+  .lanes { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .lane { border:1px solid var(--line); border-radius:6px; padding:12px; background:#fafbfc; }
+  .lane h3 { margin:0 0 8px; font-size:14px; color:var(--accent); }
+  .lane ul { margin:0; padding-left:18px; font-size:13px; line-height:1.6; }
+  .flow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px; }
+  .chip { background:#eef4fb; border:1px solid #c5d4e8; border-radius:4px; padding:6px 10px; }
+  .arrow { color:var(--accent); font-weight:700; }
+  code { font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Content 接线</h1>
+  <p>产品窗在 <code>app/mgis</code>。<code>app/shell</code> 只是孵化器，可以打开工作台，mgis 不包含它。手势先经过 <code>tool::Workspace</code>，总线只公布已经发生的 <code>GestureApplied</code>。三维子窗口这一刀是 FlyCube 地球，不是 MapLibre，也不是 UE。</p>
+
+  <div class="card">
+    <h2>分层</h2>
+    <div class="lanes">
+      <div class="lane">
+        <h3>app/mgis</h3>
+        <ul>
+          <li>aura 窗口与底栏</li>
+          <li>自己登记 FlyCube 钩子（GlobeView）</li>
+          <li>NativeViewHost 托住子 HWND</li>
+          <li>不包含 app/shell</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>content</h3>
+        <ul>
+          <li>ToolSession → 三个 Workspace</li>
+          <li>EventBus 事实</li>
+          <li>TraceLog + DebugAgent</li>
+          <li>ViewHost 父子 HWND</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>这一刀不做</h3>
+        <ul>
+          <li>MapLibre / UE 子窗口</li>
+          <li>回环套接字与 Python 工人</li>
+          <li>expect_* / capture 真值</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>指针与事实</h2>
+    <div class="flow">
+      <span class="chip">子 HWND</span><span class="arrow">→</span>
+      <span class="chip">InputEvent</span><span class="arrow">→</span>
+      <span class="chip">Workspace.dispatch</span><span class="arrow">→</span>
+      <span class="chip">GestureApplied</span><span class="arrow">→</span>
+      <span class="chip">底栏 console / trace</span>
+    </div>
+    <p>滚轮被 <code>wheel.zoom</code> 截断。移动先经过 <code>hover.cursor</code>（不截断），再进入当前工具。<code>view3d.trackball</code> 只在 view0 / view1 上激活。</p>
+  </div>
+
+  <div class="card">
+    <h2>glang 与 agent</h2>
+    <div class="flow">
+      <span class="chip">底栏 agent / ExecLine</span><span class="arrow">→</span>
+      <span class="chip">help · trace · suite · attach</span><span class="arrow">→</span>
+      <span class="chip">mark · command · activate_tool · pointer</span><span class="arrow">→</span>
+      <span class="chip">同一个 ToolSession</span>
+    </div>
+  </div>
+</main>
+</body>
+</html>

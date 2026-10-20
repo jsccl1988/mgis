@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "content/browser/pipe/pipe_json.h"
 #include "content/browser/pipe/pipe_message.h"
 
 namespace content {
@@ -134,46 +135,6 @@ bool BuildUserSecurity(SecurityBundle* bundle, std::string* error) {
   return true;
 }
 
-bool AsString(const PipeJson* value, std::string* out) {
-  if (!value || value->type() != PipeJson::kString)
-    return false;
-  *out = value->string_value();
-  return true;
-}
-
-bool AsInt(const PipeJson* value, long long* out) {
-  if (!value || value->type() != PipeJson::kNumber || !value->is_int())
-    return false;
-  *out = value->int_value();
-  return true;
-}
-
-bool AsNumber(const PipeJson* value, double* out) {
-  if (!value || value->type() != PipeJson::kNumber)
-    return false;
-  if (value->is_int())
-    *out = static_cast<double>(value->int_value());
-  else
-    *out = value->number_value();
-  return true;
-}
-
-bool AsBool(const PipeJson* value, bool* out) {
-  if (!value || value->type() != PipeJson::kBool)
-    return false;
-  *out = value->bool_value();
-  return true;
-}
-
-bool ExactKeys(const PipeJson& body, const char* const* keys, size_t count) {
-  if (body.type() != PipeJson::kObject || body.object_size() != count)
-    return false;
-  for (size_t i = 0; i < count; ++i) {
-    if (!body.find(keys[i]))
-      return false;
-  }
-  return true;
-}
 
 double SeparationMeters(double lon1, double lat1, double lon2, double lat2) {
   const double kPi = 3.14159265358979323846;
@@ -209,7 +170,7 @@ PipeMessage Echo(const PipeMessage& request) {
   reply.v = 1;
   reply.id = request.id;
   reply.op = request.op;
-  reply.body = request.body;
+  pipe_json_copy(&reply.body, request.body);
   return reply;
 }
 
@@ -320,33 +281,39 @@ PipeMessage MakeWelcome(UePeerState* state, const PipeMessage& request) {
   reply.v = 1;
   reply.id = request.id;
   reply.op = "session.welcome";
-  PipeJson snapshot = PipeJson::Object();
-  snapshot.set("cameras",
-               PipeJson::Integer(CountCameras(state->view0, state->view1)));
-  snapshot.set("frames", PipeJson::Integer(static_cast<long long>(
-                             state->frames.load())));
-  PipeJson origin = PipeJson::Object();
-  origin.set("longitude", PipeJson::Number(state->origin_lon));
-  origin.set("latitude", PipeJson::Number(state->origin_lat));
-  snapshot.set("origin", origin);
+  rapidjson::Document::AllocatorType& alloc = reply.body.GetAllocator();
 
-  PipeJson layer = PipeJson::Object();
-  layer.set("id", PipeJson::String(kStandInTilesetLayerId));
-  layer.set("kind", PipeJson::String("tileset"));
-  layer.set("visible", PipeJson::Bool(state->tileset_visible));
-  PipeJson layers = PipeJson::Array();
-  layers.push(layer);
+  rapidjson::Value origin(rapidjson::kObjectType);
+  origin.AddMember("longitude", state->origin_lon, alloc);
+  origin.AddMember("latitude", state->origin_lat, alloc);
 
-  PipeJson body = PipeJson::Object();
-  body.set("snapshot", snapshot);
-  body.set("layers", layers);
-  body.set("entities", PipeJson::Array());
-  reply.body = body;
+  rapidjson::Value snapshot(rapidjson::kObjectType);
+  snapshot.AddMember("cameras", CountCameras(state->view0, state->view1),
+                     alloc);
+  snapshot.AddMember(
+      "frames",
+      rapidjson::Value().SetInt64(
+          static_cast<int64_t>(state->frames.load())),
+      alloc);
+  snapshot.AddMember("origin", origin, alloc);
+
+  rapidjson::Value layer(rapidjson::kObjectType);
+  layer.AddMember("id", rapidjson::Value(kStandInTilesetLayerId, alloc), alloc);
+  layer.AddMember("kind", rapidjson::Value("tileset", alloc), alloc);
+  layer.AddMember("visible", state->tileset_visible, alloc);
+
+  rapidjson::Value layers(rapidjson::kArrayType);
+  layers.PushBack(layer, alloc);
+
+  reply.body.AddMember("snapshot", snapshot, alloc);
+  reply.body.AddMember("layers", layers, alloc);
+  reply.body.AddMember("entities", rapidjson::Value(rapidjson::kArrayType),
+                       alloc);
   return reply;
 }
 
-bool ReadViewName(const PipeJson& body, std::string* view) {
-  return AsString(body.find("view"), view) &&
+bool ReadViewName(const rapidjson::Value& body, std::string* view) {
+  return pipe_json_string(body, "view", view) &&
          (*view == "view0" || *view == "view1");
 }
 
@@ -354,9 +321,9 @@ PipeMessage HandleHello(UePeerState* state, const PipeMessage& request) {
   static const char* kKeys[] = {"protocol", "build"};
   long long protocol = 0;
   std::string build;
-  if (!ExactKeys(request.body, kKeys, 2) ||
-      !AsInt(request.body.find("protocol"), &protocol) || protocol != 1 ||
-      !AsString(request.body.find("build"), &build) || build.empty()) {
+  if (!pipe_json_exact_keys(request.body, kKeys, 2) ||
+      !pipe_json_int64(request.body, "protocol", &protocol) || protocol != 1 ||
+      !pipe_json_string(request.body, "build", &build) || build.empty()) {
     return ErrorReply(request, "schema", "session.hello body");
   }
   return MakeWelcome(state, request);
@@ -369,13 +336,15 @@ PipeMessage HandleAttach(UePeerState* state, const PipeMessage& request) {
   long long width = 0;
   long long height = 0;
   long long dpi = 0;
-  if (!ExactKeys(request.body, kKeys, 5) || !ReadViewName(request.body, &view_name) ||
-      !AsInt(request.body.find("parentHwnd"), &parent) || parent < 0 ||
-      !AsInt(request.body.find("width"), &width) || width < 0 ||
+  if (!pipe_json_exact_keys(request.body, kKeys, 5) ||
+      !ReadViewName(request.body, &view_name) ||
+      !pipe_json_int64(request.body, "parentHwnd", &parent) || parent < 0 ||
+      !pipe_json_int64(request.body, "width", &width) || width < 0 ||
       width > 2147483647LL ||
-      !AsInt(request.body.find("height"), &height) || height < 0 ||
-      height > 2147483647LL || !AsInt(request.body.find("dpi"), &dpi) ||
-      dpi < 1 || dpi > 2147483647LL) {
+      !pipe_json_int64(request.body, "height", &height) || height < 0 ||
+      height > 2147483647LL ||
+      !pipe_json_int64(request.body, "dpi", &dpi) || dpi < 1 ||
+      dpi > 2147483647LL) {
     return ErrorReply(request, "schema", "viewport.attach body");
   }
   View* view = FindView(&state->view0, &state->view1, view_name);
@@ -394,10 +363,12 @@ PipeMessage HandleResize(UePeerState* state, const PipeMessage& request) {
   std::string view_name;
   long long width = 0;
   long long height = 0;
-  if (!ExactKeys(request.body, kKeys, 3) || !ReadViewName(request.body, &view_name) ||
-      !AsInt(request.body.find("width"), &width) || width < 0 ||
-      width > 2147483647LL || !AsInt(request.body.find("height"), &height) ||
-      height < 0 || height > 2147483647LL) {
+  if (!pipe_json_exact_keys(request.body, kKeys, 3) ||
+      !ReadViewName(request.body, &view_name) ||
+      !pipe_json_int64(request.body, "width", &width) || width < 0 ||
+      width > 2147483647LL ||
+      !pipe_json_int64(request.body, "height", &height) || height < 0 ||
+      height > 2147483647LL) {
     return ErrorReply(request, "schema", "viewport.resize body");
   }
   View* view = FindView(&state->view0, &state->view1, view_name);
@@ -411,7 +382,8 @@ PipeMessage HandleResize(UePeerState* state, const PipeMessage& request) {
 PipeMessage HandleClose(UePeerState* state, const PipeMessage& request) {
   static const char* kKeys[] = {"view"};
   std::string view_name;
-  if (!ExactKeys(request.body, kKeys, 1) || !ReadViewName(request.body, &view_name))
+  if (!pipe_json_exact_keys(request.body, kKeys, 1) ||
+      !ReadViewName(request.body, &view_name))
     return ErrorReply(request, "schema", "viewport.close body");
   View* view = FindView(&state->view0, &state->view1, view_name);
   if (!view->attached)
@@ -424,7 +396,7 @@ PipeMessage HandleClose(UePeerState* state, const PipeMessage& request) {
 }
 
 PipeMessage HandlePing(const PipeMessage& request) {
-  if (request.body.type() != PipeJson::kObject || request.body.object_size() != 0)
+  if (!request.body.IsObject() || request.body.MemberCount() != 0)
     return ErrorReply(request, "schema", "health.ping body");
   return Echo(request);
 }
@@ -441,15 +413,15 @@ PipeMessage HandleCamera(UePeerState* state, const PipeMessage& request) {
   double height = 0;
   double heading = 0;
   double pitch = 0;
-  if (!ExactKeys(request.body, kKeys, 7) ||
-      !AsString(request.body.find("origin"), &origin) ||
+  if (!pipe_json_exact_keys(request.body, kKeys, 7) ||
+      !pipe_json_string(request.body, "origin", &origin) ||
       (origin != "ui" && origin != "view0" && origin != "view1") ||
-      !AsInt(request.body.find("seq"), &seq) || seq < 0 ||
-      !AsNumber(request.body.find("longitude"), &longitude) ||
-      !AsNumber(request.body.find("latitude"), &latitude) ||
-      !AsNumber(request.body.find("height"), &height) ||
-      !AsNumber(request.body.find("heading"), &heading) ||
-      !AsNumber(request.body.find("pitch"), &pitch)) {
+      !pipe_json_int64(request.body, "seq", &seq) || seq < 0 ||
+      !pipe_json_double(request.body, "longitude", &longitude) ||
+      !pipe_json_double(request.body, "latitude", &latitude) ||
+      !pipe_json_double(request.body, "height", &height) ||
+      !pipe_json_double(request.body, "heading", &heading) ||
+      !pipe_json_double(request.body, "pitch", &pitch)) {
     return ErrorReply(request, "schema", "camera.set body");
   }
   View* target = origin == "view1" ? &state->view1 : &state->view0;
@@ -493,12 +465,13 @@ PipeMessage HandleLayer(UePeerState* state, const PipeMessage& request) {
   std::string viewport;
   bool visible = false;
   double opacity = 0;
-  if (!ExactKeys(request.body, kKeys, 4) ||
-      !AsString(request.body.find("layerId"), &layer_id) || layer_id.empty() ||
-      !AsString(request.body.find("viewport"), &viewport) ||
+  if (!pipe_json_exact_keys(request.body, kKeys, 4) ||
+      !pipe_json_string(request.body, "layerId", &layer_id) ||
+      layer_id.empty() ||
+      !pipe_json_string(request.body, "viewport", &viewport) ||
       (viewport != "view0" && viewport != "view1" && viewport != "both") ||
-      !AsBool(request.body.find("visible"), &visible) ||
-      !AsNumber(request.body.find("opacity"), &opacity) || opacity < 0 ||
+      !pipe_json_bool(request.body, "visible", &visible) ||
+      !pipe_json_double(request.body, "opacity", &opacity) || opacity < 0 ||
       opacity > 1) {
     return ErrorReply(request, "schema", "layer.set body");
   }

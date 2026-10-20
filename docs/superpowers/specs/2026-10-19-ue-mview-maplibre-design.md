@@ -7,8 +7,8 @@ All rights reserved.
 
 **Status:** draft
 **Date:** 2026-10-19
-**Updated:** 2026-10-19 — 第三方 pin 写入 `third_party/manifest.json`：MapLibre 沿用 smartgis 的 `ios-v6.30.0`；UE 5.6 留在机外；Cesium for Unreal 2.30 与 cesium-native v0.64.0、VTK 9.5.2（无 Qt）按需拉取。各包示例在 `third_party/<name>/example`。
-**Diagram:** [`../diagrams/third-party-pins.html`](../diagrams/third-party-pins.html)
+**Updated:** 2026-10-21 — Content 接线：手势事实走 `EventBus`，三维子 HWND 先接 FlyCube 地球，trace 进底栏，glang 与 DebugAgent 共用套件动词。另增 `third_party/cesium-flycube`（对照 Cesium for Unreal，不进壳 GN）。
+**Diagram:** [`../diagrams/third-party-pins.html`](../diagrams/third-party-pins.html) · [`../diagrams/mgis-workbench-chrome.html`](../diagrams/mgis-workbench-chrome.html) · [`../diagrams/content-wiring.html`](../diagrams/content-wiring.html)
 **Scope:** 独立桌面 GIS 的进程、窗口、地理底座、体渲染与界面边界。本文是方案，不包含实现。
 
 ## Goal
@@ -36,7 +36,7 @@ All rights reserved.
 - 第一版不把 MapLibre 再拆成第三个进程。
 - 第一版不使用 UE 的 Slate 窗口、UMG 或编辑器面板作为产品界面。
 - 不把 smartgis 的 vista / scenic / gpu 呈现栈搬进本仓库。三维呈现仍是 UE 进程。
-- 不让 `shell/` 或 `plugin/` 包含管道帧、UE 头文件或 MapLibre 头文件。
+- 不让 `app/shell/` 或 `plugin/` 包含管道帧、UE 头文件或 MapLibre 头文件。
 - 不为套件再做一套 opcode 中间语言。glang 只有一个进程内 CPython，套件执行 `main()`。
 - 不把代理的迭代写成壳里的私有测试钩子。缺能力时只增加一个具名 `eval_*`。
 - 不把 MapLibre 的手势回调或 UE 的 Enhanced Input / Pawn 操控当成产品工具。它们只提供命中和相机执行。
@@ -308,15 +308,15 @@ ion token 和带密钥的服务地址放在用户目录配置中，不进前端�
 
 | 层 | 留下什么 |
 | --- | --- |
-| `shell/` | aura Widget、`NativeViewHost`、菜单、图层树、实体树、时间轴。实现 `GisContentsClient`。把指针译成 `InputEvent`。 |
+| `app/shell/` | 薄入口（`mview_shell.exe`）。产品 chrome 在 `app/mgis`；实现 `GisContentsClient`、把指针译成 `InputEvent`。 |
 | `content/public` | 嵌入合同。见下表。 |
 | `content/browser` | 目录会话、管道客户端、glang、`ToolSession` 的组装。不进 public。 |
 | `tool/` | 命令、交互、`Workspace`。没有 HWND、没有 UE 类型、没有 MapLibre 类型。 |
 | `plugin/` | `plugin.json` 与产品包。只经 `PluginHost`。 |
 | `ue/` | 地形、瓦片、体、风、射线命中、相机执行。 |
-| `native/mview_map` | 二维绘制与 `queryRenderedFeatures`。 |
+| `third_party/maplibre/mview_map` | 二维绘制与 `queryRenderedFeatures`。 |
 
-公开头只有这些：`gis_contents.h`、`gis_document.h`、`plugin_host.h`、`tool_session.h`、`event_bus.h`、`types.h`、`gis_contents_client.h`、`script_runtime.h`。
+公开头：`gis_contents.h`、`gis_document.h`、`plugin_host.h`、`tool_session.h`、`event_bus.h`、`types.h`、`gis_contents_client.h`、`script_runtime.h`，以及接线用的 `trace_log.h`、`view_host.h`、`debug_agent.h`。
 
 两条轴不合并：
 
@@ -333,6 +333,28 @@ mview_shell.exe
 壳在 `browser_main` 里创建窗口。`viewport.attach` 由 `content/browser` 发送。壳通过 `ShellBridge` 提供父 HWND 和「把 `AuxOverlay` 画到某个视图」。content 不认识 `TreeView` 或 `Widget`。
 
 图层树和实体树显示 content 给出的字符串快照。勾选和选中调用 public 方法，不自己组装管道帧。
+
+## Content 接线
+
+对照 smartgis：`content/public` 是唯一嵌入面；`EventBus` 只公布已经发生的事，主线程、非 RPC、无进程单例；指针不在总线上路由。本树路由仍是 `tool::Workspace`（`wheel.zoom` 截断滚轮，`hover.cursor` 不截断移动）。`content::ToolSession` 按 `view_id` 持有 `map` / `view0` / `view1` 三个 `Workspace`，把 `content::InputEvent` 译成 `tool::InputEvent` 再 `dispatch`。路由返回之后才 `publish(GestureApplied)`，带 `consumed`。订阅者不能把总线当成 `InputRouter`。
+
+```
+子 HWND 指针 / 滚轮
+  → content::InputEvent
+  → tool::Workspace::dispatch
+  → GestureApplied + TraceLog
+  → 底栏 console / trace
+```
+
+视口合同是 `content::ViewHost`：父 HWND 进，子 HWND 出。后端三种：`flycube`、`maplibre`、`ue`。MapLibre 与 UE 这一刀明确返回失败并写 trace `backend.unavailable`，不创建子窗口。`flycube` 是 Cesium / UE 到位之前的三维子窗口，由 `app/mgis` 在 `StartSession` 里用 `SetBackendHooks` 装上自己的 OpenGL 地球（`GlobeView`）。`app/shell` 只是孵化器，可以调用 `mgis::ShowWorkbench`，mgis 不包含 shell，也不等 shell 先登记钩子。未装钩子时 content 自己建一个标注为 Cesium / FlyCube 的子 HWND，测试不链 GL。地球的拖动和滚轮由 mgis 的桥执行相机，content 只记录手势事实。`view3d.trackball` 在 `view0` 上激活后，鼠标才被路由消费。
+
+`GisContents` 拥有本会话的 `TraceLog`（环形，最多 256 行）。通道 `console`、`perf`、`agent`。关键路径用 `TraceScope` 记耗时（attach、按下、滚轮、`ExecLine`），移动只进 console。`app/mgis` 订阅后刷新底栏三个 Tab。content 不包含 `ui/views`。
+
+`DebugAgent::ExecLine` 是进程内核心，不做 smartgis 那套回环套接字、Python 工人或界面点击。内置行：`help`、`trace`、`suite <path>`、`attach <view_id> <flycube|maplibre|ue>`。其余一行交给 glang 替身。替身动词：`mark`、`command`、`activate_tool`、`pointer`。`expect_camera`、`expect_layer`、`expect_entity`、`capture` 这一刀返回明确错误，不假装通过。`command` / `activate_tool` / `pointer` 的槽由 agent 接到同一个 `ToolSession`。未知动词失败时，该文件的 mark 一个都不写。
+
+产品窗由 `mgis::ShowWorkbench` → `StartSession` 自己登记 FlyCube 钩子，再把 `view0` 子 HWND 交给 `NativeViewHost`。二维页保持占位。`app/shell` 的卫星视口仍可直接使用 `GlobeView` 做渲染检查，那条路径不负责产品接线。
+
+验收：`build.bat debug session_wire`。
 
 ## glang
 
@@ -435,36 +457,119 @@ glang 的 `activate_tool`、`pointer`、`command` 往指定 `view_id` 注入同�
 
 ## 第三方 pin
 
-`third_party/manifest.json` 仍是唯一 pin。Chromium 快照保持 `source_policy: vendored`。下面这些不进 `ui/` 的 GN 图，`build.bat t` 默认也不下载它们。
+`third_party/manifest.json` 仍是唯一 pin。Chromium 快照保持 `source_policy: vendored`。
+
+### smartgis 工具 / GIS 库（按需）
+
+- 清单已并入 smartgis 允许的包（gdal、geos、PROJ、pdal、rapidjson、asio、CLI11 等）。
+- **排除：** `cef`、`webview2`、`windows_app_sdk`、`bcg`（及同类壳 UI）。
+- **zlib：** 保留 Chromium vendored `.src/zlib`；不覆盖。
+- **gtest：** 产品测试继续用 `//testing:gtest`（Chromium 快照）；清单里的 `googletest` 仅供按需 CMake 安装。
+- 本机：`py -3 third_party/tools/sync_from_smartgis.py` 建 `.src/<pkg>` junction；`.install` 不整树替换。
+- 默认产品 GN **不**链 GIS 大库；需要时 `//third_party:<name>` + `build.bat t <pkg>`。
+- `content/browser/pipe` 直接用 RapidJSON（`Document` / `Value`），助手 API 对齐 smartgis `sdbd_json` / `args_json`（`pipe_json_*`），无自制值模型。
+
+### 引擎类 pin（不进 `ui/` 默认图）
 
 | 清单名 | 钉扎 | 落点 | 示例 |
 | --- | --- | --- | --- |
 | `maplibre-native` | `ios-v6.30.0`（与 smartgis 相同） | `.src/maplibre-native`，可联接已有检出 | `third_party/maplibre/example` |
 | `unreal` | UE 5.6，`UE_5_6_ROOT` | 不进仓库 | `third_party/unreal/example` |
 | `cesium-unreal` | Cesium for Unreal 2.30，`CesiumForUnreal-56` 源码包 | `.src/cesium-unreal` | `third_party/cesium-unreal/example` |
+| `cesium-flycube` | 本仓库编写，不进清单 fetch | `third_party/cesium-flycube` | `example/dual_view`、`example/ellipsoid_city` |
 | `cesium-native` | `v0.64.0` | `.src/cesium-native`，仅示例 | `third_party/cesium-native/example` |
 | `vtk` | `v9.5.2`，Qt / Rendering / Views 关闭 | `.src/vtk` | `third_party/vtk/example` |
 
 产品进程里的 cesium-native 只来自 Cesium for Unreal 插件。清单里的 `cesium-native` 不链进壳，也不链进 UE 模块。VTK 示例只写规则网格，不创建 OpenGL 窗口。MapLibre 示例跑上游 `mbgl-render`，像素不进 `ui::Layer`。
 
+### Cesium for FlyCube
+
+`third_party/cesium-flycube` 是对照 Cesium for Unreal 运行时写的 FlyCube 绑定，不进 `manifest.json`，也不进壳的 GN 图。
+
+它保留 Unreal 插件里产品实际用到的几件事：一个 WGS84 地理参考、`AdditionalCameras`（不调用已废弃的 `AddCamera`）、椭球 / URL / ion 三种瓦片源，以及 `IPrepareRendererResources`。FlyCube 没有 Actor，相机参数直接写在 `Camera` 上。世界坐标是右手系、米、X 东 / Y 北 / Z 上。两台相机 ECEF 相距超过 100 km 时返回 `origin_conflict`，原点不动。
+
+网格先落在 CPU，再上传到 FlyCube DX12 的 vertex / index upload buffer。不做光栅化窗口。`dual_view` 只验证锚点和双相机；`ellipsoid_city` 跑椭球瓦片并上传。壳上现有的三维子窗口仍是 `GlobeView` 钩子；本库不替换那条路径，也不替代 UE 进程里的 Cesium for Unreal。
+
+## Mgis 工作台壳（`app/mgis`）
+
+**Status:** draft · **Updated:** 2026-10-21  
+**Diagram:** [`../diagrams/mgis-workbench-chrome.html`](../diagrams/mgis-workbench-chrome.html)
+
+对照 smartgis（`src/ui/gis` + `src/app/views`）。本仓产品 chrome 全部在 `app/mgis`（`mgis` 命名空间），不再单独保留 `ui/gis`。产品主路径是**单主窗 IDE 布局**，不再以多个独立顶层视口 Widget 作为日常 UI。
+
+### 布局
+
+| 区 | 内容 |
+| --- | --- |
+| 顶 | 菜单占位 + 时间轴 `Slider` |
+| 左 | `TabbedPane`：**图层** \| **实体**（各一棵 `TreeView`） |
+| 中 | `TabbedPane`：**2D** \| **3D**；页内 `ViewportPlaceholder`（第一刀无真 HWND） |
+| 右 | 工具 / 插件空壳 |
+| 底 | **console** \| **trace** \| **agent** 空 Tab |
+
+### 语义与联动
+
+- **图层** = 2D 地图侧 catalog（Workspace `map`）。
+- **实体** = 3D GIS 侧 catalog（Workspace `view0`）。
+- 第一刀中心仅两页：`2D` / `3D`（`view1` 后置）。
+- **双向联动**：切中心 2D|3D ⇔ 切左栏 图层|实体；同一 `SelectViewTab`，防重入。
+- 右栏、底栏全局，不随视口 Tab 换内容。
+- 各 catalog 的 model / 选中 / 展开按视口保留。
+
+### 目录
+
+| 路径 | 职责 |
+| --- | --- |
+| `app/mgis/` | 工作台壳：`WorkbenchContents`、四区面板、`SelectViewTab`（无管道、无 MapLibre/UE） |
+| `app/shell/` | 薄入口；`ShowMainWindow` → `mgis::ShowWorkbench`；harness 仍可创建卫星 ViewportWindow 写 mark |
+
+当前文件仍**扁平**在 `app/mgis/`（`workbench` + 四面板 + `view_id`）。下一刀按职责拆子目录（仍单一 GN 目标 `//app/mgis:mgis`，命名空间 `mgis`）：
+
+```
+app/mgis/
+  BUILD.gn
+  view_id.h
+  workbench/                 # 主窗组合与联动
+    workbench.h
+    workbench.cc
+  chrome/                    # 四区壳面板（无管道 / 无 MapLibre / 无 UE）
+    catalog_tabs.{h,cc}
+    viewport_placeholder.{h,cc}
+    tool_plugin_panel.{h,cc}
+    bottom_panel.{h,cc}
+  viewport/                  # 预留：NativeViewHost 真 HWND（map / view0）
+  session/                   # 预留：文档 / EventBus / 工具会话接线
+```
+
+原则：`chrome/` 只放 View 壳；`workbench/` 只做布局与 `SelectViewTab`；视口挂载与会话进 `viewport/`、`session/`，不回流 `ui/`。
+
+### 第一刀非目标
+
+不挂 MapLibre/UE 子 HWND；不接文档/`EventBus`；右栏不扫插件；底栏无 IO。下一刀再把占位换成 `NativeViewHost`。
+
+### 与多 Widget 表述的关系
+
+上文「二维 Widget / view0 / view1 独立 Widget」仍描述 **P2 挂接与崩溃域** 的 HWND 父级策略；**产品可见 chrome** 以本节单主窗为准。P1 mark 名可暂时仍由 harness 侧卫星窗满足，直至套件改写。
+
 ## 目录与安装布局
 
 ```
 launcher/
-shell/                         aura 壳，只包含 content/public
+app/shell/                     薄入口（原顶层 shell/），组合 content/public + app/mgis
+app/mgis/                      产品工作台（四区壳 + chrome 面板）
 content/public/
 content/browser/glang.runtime/ language、exec、host
 content/browser/               会话、目录、管道、ToolSession 组装
 tool/                          Workspace、命令、交互
 plugin/                        注册表与产品包
-native/mview_volume/
-native/mview_map/
+third_party/vtk/mview_volume/
+third_party/maplibre/mview_map/
 ue/
 ipc/schema/
 testing/tools/harness/         阶段套件
 ```
 
-`shell/` 的 GN 依赖与根组里的 examples 同类，并只依赖 `content/public`。不修改 `ui/aura` 合成器。`tool/` 不依赖 `ui/views`。
+`app/shell/` 的 GN 目标为 `//app/shell:mview_shell`，依赖与根组里的 examples 同类，并只依赖 `content/public`（及 `app/mgis`）。不修改 `ui/aura` 合成器。`tool/` 不依赖 `ui/views`。
 
 安装布局不变：`MView.exe`、`Engine/`、`UI/mview_shell.exe`、`UI/mview_map.dll`、`Bin/mview_volume.dll`。插件放在 `UI/plugins/<id>/`。日志在 `%LOCALAPPDATA%\MView\logs\`。
 
@@ -472,7 +577,7 @@ testing/tools/harness/         阶段套件
 
 campaign 顺序就是阶段顺序。进入下一阶段之前，前面每个套件的 `required_marks` 必须在同一次 campaign 里全部落地。某一套件失败时，不写它后面的 mark，也不启动下一套件。
 
-每一阶段另外有一条永久门禁：`shell/` 与 `plugin/` 的包含检查失败则该阶段失败。`shell` 不得包含 `content/browser`、`tool/` 的内部头、UE 头、MapLibre 头。`content` 不得包含 `ui/views` 或 UE 头。`tool/` 不得包含 HWND、UE、MapLibre。
+每一阶段另外有一条永久门禁：`app/shell/` 与 `plugin/` 的包含检查失败则该阶段失败。`app/shell` 不得包含 `content/browser`、`tool/` 的内部头、UE 头、MapLibre 头。`content` 不得包含 `ui/views` 或 UE 头。`tool/` 不得包含 HWND、UE、MapLibre。
 
 | 阶段 | 套件 | 通过条件 |
 | --- | --- | --- |

@@ -7,19 +7,27 @@
 #include "CesiumCamera.h"
 #include "CesiumCameraManager.h"
 #include "CesiumGlobeAnchorComponent.h"
+#include "Components/SceneComponent.h"
 
 AMViewCameraPawn::AMViewCameraPawn()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	GlobeAnchor = CreateDefaultSubobject<UCesiumGlobeAnchorComponent>(TEXT("GlobeAnchor"));
+
+	// GlobeAnchor is a UActorComponent (not a scene component); root is a plain scene node.
+	USceneComponent* SceneRoot =
+		CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+	RootComponent = SceneRoot;
+
+	GlobeAnchor =
+		CreateDefaultSubobject<UCesiumGlobeAnchorComponent>(TEXT("GlobeAnchor"));
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
-	RootComponent = GlobeAnchor;
-	ViewCamera->SetupAttachment(GlobeAnchor);
+	ViewCamera->SetupAttachment(SceneRoot);
 }
 
 void AMViewCameraPawn::RegisterView(const FVector2D& ViewportSize)
 {
-	ACesiumCameraManager* Manager = ACesiumCameraManager::GetDefaultCameraManager(this);
+	ACesiumCameraManager* Manager =
+		ACesiumCameraManager::GetDefaultCameraManager(this);
 	if (!Manager)
 	{
 		return;
@@ -29,7 +37,7 @@ void AMViewCameraPawn::RegisterView(const FVector2D& ViewportSize)
 
 	FCesiumCamera Camera;
 	Camera.ViewportSize = ViewportSize;
-	Camera.CameraParameterSource = ECameraParameterSource::CameraComponent;
+	Camera.ParameterSource = ECameraParameterSource::CameraComponent;
 	Camera.CameraComponent = ViewCamera;
 	Manager->AdditionalCameras = {Camera};
 }

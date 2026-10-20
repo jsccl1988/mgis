@@ -19,6 +19,20 @@ struct SelectionChanged {
   std::vector<FeatureId> feature_ids;
 };
 
+// Published after ToolSession has already handed a sample to the router.
+// Subscribers observe the fact. They do not replace InputRouter.
+struct GestureApplied {
+  GestureApplied();
+
+  std::string view_id;
+  InputEventKind kind;
+  MouseAction mouse_action;
+  int x;
+  int y;
+  int wheel_delta;
+  bool consumed;
+};
+
 // Published after an extent commit has already landed.
 // west/south/east/north are WGS84 degrees (EPSG:4979 horizontal).
 struct ExtentChanged {
@@ -33,7 +47,7 @@ struct ExtentChanged {
 
 // Session-scoped fan-out for facts that already happened.
 // Construct one bus per session. This type has no process-wide instance.
-// Pointer input does not travel on this bus.
+// GestureApplied is published after the router returns. The bus is not the router.
 class EventBus {
  public:
   // Observer pointers are not owned. Unregister before the observer dies.
@@ -42,6 +56,7 @@ class EventBus {
     virtual ~Observer();
     virtual void on_selection_changed(const SelectionChanged& event);
     virtual void on_extent_changed(const ExtentChanged& event);
+    virtual void on_gesture_applied(const GestureApplied& event);
 
    protected:
     Observer();
@@ -59,6 +74,7 @@ class EventBus {
 
   void publish(const SelectionChanged& event);
   void publish(const ExtentChanged& event);
+  void publish(const GestureApplied& event);
 
  private:
   EventBus(const EventBus&) = delete;

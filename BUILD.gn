@@ -29,7 +29,7 @@ group("content_lib") {
 
 # Product shell. Not part of //:default. ninja target: mview_shell.
 group("shell") {
-  deps = [ "//shell:mview_shell" ]
+  deps = [ "//app/shell:mview_shell" ]
 }
 
 # P2/P4 pipe gate. Not part of //:default. ninja target: viewport_gate.
@@ -61,11 +61,11 @@ group("p6_p7") {
 # P5 volume and wind. Not part of the product group, so default stays base_widget.
 group("volume_tests") {
   testonly = true
-  deps = [ "//native/mview_volume:volume_field_test" ]
+  deps = [ "//third_party/vtk/mview_volume:volume_field_test" ]
 }
 
 # P3 map camera and navigation math. Not part of //:default.
 group("mview_map_tests") {
   testonly = true
-  deps = [ "//native/mview_map:mview_map_test" ]
+  deps = [ "//third_party/maplibre/mview_map:mview_map_test" ]
 }

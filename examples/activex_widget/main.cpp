@@ -10,15 +10,17 @@
 #include "ui/views/widget/widget.h"
 #include "ui/base/resource/resource_bundle_win.h"
 #include "base/native_library.h"
+#include "ui/base/win/dpi.h"
 #include "ui/base/win/scoped_ole_initializer.h"
 
 #include "demo_main.h"
- 
+
 
 
 
 #if defined(OS_WIN)
 int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE, wchar_t*, int) {
+	ui::EnableHighDPISupport();
 	ui::ScopedOleInitializer ole_initializer_;
 #else
 int main(int argc, const char** argv) {

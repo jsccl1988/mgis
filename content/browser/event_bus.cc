@@ -12,6 +12,14 @@ SelectionChanged::SelectionChanged() {}
 ExtentChanged::ExtentChanged()
     : west(0.0), south(0.0), east(0.0), north(0.0) {}
 
+GestureApplied::GestureApplied()
+    : kind(kInputEventMouse),
+      mouse_action(kMouseMove),
+      x(0),
+      y(0),
+      wheel_delta(0),
+      consumed(false) {}
+
 EventBus::Observer::Observer() {}
 
 EventBus::Observer::~Observer() {}
@@ -21,6 +29,10 @@ void EventBus::Observer::on_selection_changed(const SelectionChanged& event) {
 }
 
 void EventBus::Observer::on_extent_changed(const ExtentChanged& event) {
+  (void)event;
+}
+
+void EventBus::Observer::on_gesture_applied(const GestureApplied& event) {
   (void)event;
 }
 
@@ -60,6 +72,14 @@ void EventBus::publish(const ExtentChanged& event) {
   for (size_t i = 0; i < observers.size(); ++i) {
     if (observers[i])
       observers[i]->on_extent_changed(event);
+  }
+}
+
+void EventBus::publish(const GestureApplied& event) {
+  const std::vector<Observer*> observers = observers_;
+  for (size_t i = 0; i < observers.size(); ++i) {
+    if (observers[i])
+      observers[i]->on_gesture_applied(event);
   }
 }
 

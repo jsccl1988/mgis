@@ -19,3 +19,5 @@ third_party\.build\vtk-example\Release\vtk_image_grid.exe third_party\.build\vtk
 ```
 
 示例只分配 `vtkImageData` 并写出 `.vti`，不创建渲染窗口。
+
+产品体网格 ABI 在 `third_party/vtk/mview_volume/`（GN：`//third_party/vtk/mview_volume`）。当前不链接 VTK，网格为合成数据。

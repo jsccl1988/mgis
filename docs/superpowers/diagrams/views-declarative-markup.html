@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>Views declarative markup</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --border:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui,sans-serif; background:var(--bg); color:var(--text); padding:28px; }
+  h1 { font-size:20px; margin:0 0 8px; }
+  p.lead { color:var(--muted); margin:0 0 24px; max-width:52rem; }
+  .row { display:flex; flex-wrap:wrap; gap:16px; align-items:stretch; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 16px; min-width:200px; flex:1; }
+  .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
+  .lane { border-left:3px solid var(--accent); padding-left:10px; margin:8px 0; }
+  .lane strong { display:block; }
+  .arrow { align-self:center; color:var(--accent); font-weight:700; font-size:22px; }
+  code { font:12px/1.3 ui-monospace,Consolas,monospace; background:#eef2f6; padding:1px 5px; border-radius:3px; }
+  ul { margin:6px 0 0; padding-left:18px; color:var(--text); }
+  .foot { margin-top:20px; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+  <h1>Views 声明式 Markup 分层</h1>
+  <p class="lead">mview 方言：XML 结构 + Flex CSS 子集 → Yoga 布局 → Chromium <code>views</code> 控件。独立 <code>UiDesigner.exe</code> 共用同一加载管线。</p>
+  <div class="row">
+    <div class="card">
+      <h2>资源</h2>
+      <div class="lane"><strong>.ui.xml</strong> View / FlexRow / Label…</div>
+      <div class="lane"><strong>.ui.css</strong> tag / #id / .class</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="card">
+      <h2>ui/views/markup</h2>
+      <div class="lane"><strong>MarkupDocument</strong> pugixml + CssParser</div>
+      <div class="lane"><strong>ControlFactory</strong> tag → Chromium View</div>
+      <div class="lane"><strong>YogaLayoutManager</strong> SetBoundsRect</div>
+      <div class="lane"><strong>LoadMarkup</strong> MarkupRoot + NamedViewMap</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="card">
+      <h2>宿主</h2>
+      <div class="lane"><strong>产品 Dialog</strong> 可选依赖 markup</div>
+      <div class="lane"><strong>UiDesigner.exe</strong> 画布 / 树 / 属性 / 热重载</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>原则</h2>
+    <ul>
+      <li>不引入 Qt / WebView2 / CEF；画布仍是 Views + Skia。</li>
+      <li>不搬 smartgis <code>primitives/</code>；tag 绑 <code>ui/views/controls</code>。</li>
+      <li>方言故意不兼容 smartgis；API 用 Chromium <code>PascalCase</code>。</li>
+      <li><code>pugixml</code> / <code>yoga</code> 已 pin；默认 shell 不强制链接。</li>
+    </ul>
+  </div>
+  <p class="foot">docs/superpowers/diagrams/views-declarative-markup.html · 对应 specs/2026-10-20-views-declarative-markup-design.md</p>
+</body>
+</html>

@@ -25,39 +25,56 @@ All rights reserved.
 <body>
 <main>
   <h1>第三方依赖落点</h1>
-  <p class="lead">清单在 third_party/manifest.json。引擎与插件不进 aura/views 的 GN 图。</p>
+  <p class="lead">清单在 third_party/manifest.json。GIS/工具库可按需引入；引擎与插件不进 aura/views 默认图。</p>
   <div class="grid">
     <section class="card">
       <h2>已有快照</h2>
-      <p>skia、zlib、libpng 等仍是 vendored，由 build.bat 的 GN 编译。</p>
+      <p>skia、zlib、libpng 等仍是 vendored，由 build.bat 的 GN 编译。zlib 不被 smartgis cmake 版覆盖。</p>
     </section>
     <section class="card">
-      <h2>MapLibre Native</h2>
-      <p>pin 与 smartgis 相同：ios-v6.30.0。可联接已有 .src。示例只跑 mbgl-render。</p>
+      <h2>smartgis 同步</h2>
+      <p>sync_from_smartgis.py：清单 + 薄 GN + .src junction。排除 CEF / WebView2 / WinAppSDK / BCG。</p>
     </section>
     <section class="card">
-      <h2>Unreal 5.6 + Cesium for Unreal 2.30</h2>
-      <p>引擎在 UE_5_6_ROOT。插件源码包按需下载。产品只用插件内的 cesium-native。</p>
+      <h2>按需工具库</h2>
+      <p>rapidjson（pipe）、asio、gdal、PROJ、pdal 等：//third_party:&lt;name&gt;，默认不进产品图。</p>
     </section>
     <section class="card">
-      <h2>VTK 9.5.2</h2>
-      <p>关闭 Qt、Rendering、Views。示例写出规则网格，不建渲染窗口。</p>
+      <h2>MapLibre / UE / Cesium / VTK</h2>
+      <p>MapLibre ios-v6.30.0；UE 5.6 机外；Cesium 2.30；VTK 9.5.2 无 Qt。示例旁路壳。</p>
+    </section>
+    <section class="card">
+      <h2>Cesium for FlyCube</h2>
+      <p>对照 Cesium for Unreal 的地理参考、AdditionalCameras、3D Tiles。网格上传到 FlyCube DX12。不进壳。</p>
     </section>
   </div>
   <section class="flow">
     <div class="lane">
       <span class="box accent">manifest.json</span>
       <span>→</span>
-      <span class="box">fetch.py --package</span>
+      <span class="box">sync / fetch / junction</span>
       <span>→</span>
-      <span class="box">.src / 机外引擎</span>
+      <span class="box">.src · .install</span>
       <span>→</span>
-      <span class="box">third_party/&lt;name&gt;/example</span>
+      <span class="box">//third_party:&lt;name&gt;</span>
     </div>
     <div class="lane">
-      <span class="box">壳 GN</span>
+      <span class="box">content/browser/pipe</span>
+      <span>→</span>
+      <span class="box accent">rapidjson</span>
+      <span>（PipeJson 值模型）</span>
+    </div>
+    <div class="lane">
+      <span class="box">壳默认 GN</span>
       <span>不链接</span>
-      <span class="box">VTK · MapLibre · cesium-native 示例树 · UE</span>
+      <span class="box">GIS 大库 · VTK · MapLibre · UE · Cesium for FlyCube</span>
+    </div>
+    <div class="lane">
+      <span class="box">cesium-native</span>
+      <span>→</span>
+      <span class="box accent">Georeference / AdditionalCameras / Tileset</span>
+      <span>→</span>
+      <span class="box">FlyCube upload buffer</span>
     </div>
   </section>
 </main>

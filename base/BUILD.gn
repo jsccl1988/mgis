@@ -128,7 +128,7 @@ static_library("base_static") {
   configs += [ "//build/config:precompile" ]
 }
 
-static_library("base") {
+component("base") {
   sources = [
     "../build/precompile.cc",
     "at_exit.cc",
@@ -303,9 +303,12 @@ static_library("base") {
     "win/wrapped_window_proc.cc",
   ]
   deps = [
+    "//base:base_static",
     "//build/grit:headers",
     "//testing:gtest_prod",
+    "//third_party/.src/modp_b64:modp_b64",
   ]
+  libs = [ "version.lib" ]
   defines += [
     "_WIN32_WINNT=0x0602",
     "WINVER=0x0602",
@@ -497,7 +500,7 @@ executable("check_example") {
   configs += [ "//build/config/win:console_subsystem" ]
 }
 
-static_library("base_prefs") {
+component("base_prefs") {
   sources = [
     "../build/precompile.cc",
     "prefs/default_pref_store.cc",
@@ -516,6 +519,7 @@ static_library("base_prefs") {
     "prefs/value_map_pref_store.cc",
   ]
   deps = [
+    "//base:base",
     "//build/grit:headers",
   ]
   defines += [
@@ -643,7 +647,7 @@ static_library("base_prefs_test_support") {
   configs += [ "//build/config:precompile" ]
 }
 
-static_library("base_i18n") {
+component("base_i18n") {
   sources = [
     "../build/precompile.cc",
     "i18n/case_conversion.cc",
@@ -652,6 +656,7 @@ static_library("base_i18n") {
     "i18n/rtl.cc",
   ]
   deps = [
+    "//base:base",
     "//build/grit:headers",
   ]
   defines += [

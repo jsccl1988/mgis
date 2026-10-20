@@ -1,0 +1,54 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Product workbench: Mgis main window and chrome panels.
+
+static_library("mgis") {
+  sources = [
+    "bottom_panel.cc",
+    "bottom_panel.h",
+    "flycube_bridge.cc",
+    "flycube_bridge.h",
+    "globe_view.cc",
+    "globe_view.h",
+    "catalog_tabs.cc",
+    "catalog_tabs.h",
+    "tool_plugin_panel.cc",
+    "tool_plugin_panel.h",
+    "view_id.h",
+    "viewport_placeholder.cc",
+    "viewport_placeholder.h",
+    "viewport_surface.cc",
+    "viewport_surface.h",
+    "workbench.cc",
+    "workbench.h",
+  ]
+  deps = [
+    "//base:base",
+    "//base:base_i18n",
+    "//content:content",
+    "//build/grit:headers",
+    "//skia:skia",
+    "//ui/views:views",
+    "//ui:ui",
+    "//ui:ui_resources",
+  ]
+  defines += [
+    "_WIN32_WINNT=0x0602",
+    "WINVER=0x0602",
+    "WIN32",
+    "_WINDOWS",
+    "NOMINMAX",
+    "TOOLKIT_VIEWS=1",
+    "CHROMIUM_BUILD",
+    "_HAS_EXCEPTIONS=0",
+  ]
+  include_dirs += [
+    "//.",
+    "//skia/config",
+    "//third_party/skia/include/core",
+    "//third_party/skia/include/config",
+  ]
+  libs = [ "opengl32.lib" ]
+  configs += [ "//build/config:precompile" ]
+}

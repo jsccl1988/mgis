@@ -8,21 +8,33 @@
 
 #include "content/public/types.h"
 
+namespace tool {
+class Workspace;
+}
+
 namespace content {
 
-// Per-view command and input session. P0 stores the last call so the shell
-// can link against a real object. When tool::Workspace exists, these methods
-// forward there. This header does not include tool/ private headers.
+class EventBus;
+class TraceLog;
+
+// Per-view command and input session. Each known view id has its own
+// tool::Workspace. This header does not include tool/ private headers.
+// dispatch_input translates to tool::InputEvent, then publishes GestureApplied.
 class ToolSession {
  public:
   ToolSession();
   ~ToolSession();
 
+  // Unowned. NULL skips that side effect.
+  void set_event_bus(EventBus* event_bus);
+  void set_trace_log(TraceLog* trace_log);
+
   // Records |command_id| for |view_id|. Returns false, and leaves the last
   // command unchanged, when either string is empty or |view_id| is unknown.
   bool execute(const std::string& command_id, const std::string& view_id);
 
-  // Records |event| and returns true. Input is not published on EventBus.
+  // Routes |event| and publishes GestureApplied when |view_id| is known.
+  // Returns whether the router consumed the sample.
   bool dispatch_input(const InputEvent& event);
 
   // Records |interaction_id| for |view_id|. Returns false, and leaves the last
@@ -44,6 +56,13 @@ class ToolSession {
   std::string last_command_view_id_;
   bool has_last_input_;
   InputEvent last_input_;
+  struct Routers;
+  Routers* routers_;
+  EventBus* event_bus_;
+  TraceLog* trace_log_;
+
+  tool::Workspace* WorkspaceFor(const std::string& view_id);
+
   std::string last_interaction_id_;
   std::string last_interaction_view_id_;
 };

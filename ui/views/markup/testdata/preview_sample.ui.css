@@ -1,0 +1,66 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  width: 360px;
+  height: 520px;
+  background-color: #f7f8fa;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  height: 32px;
+}
+
+#title {
+  height: 24px;
+  font-size: 16px;
+  color: #1a2330;
+}
+
+#ok,
+#cancel {
+  width: 80px;
+  height: 28px;
+}
+
+#note {
+  height: 28px;
+}
+
+#agree,
+#a,
+#b {
+  height: 22px;
+}
+
+#choice {
+  height: 28px;
+  width: 160px;
+}
+
+#level {
+  height: 28px;
+  width: 200px;
+}
+
+#rule {
+  height: 8px;
+}
+
+#icon {
+  width: 48px;
+  height: 48px;
+  background-color: #d8dee6;
+}
+
+#scroller {
+  height: 64px;
+}
+
+#slot {
+  height: 48px;
+}

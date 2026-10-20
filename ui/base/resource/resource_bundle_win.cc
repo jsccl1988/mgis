@@ -38,39 +38,38 @@ base::FilePath GetResourcesPakFilePath(const std::string& pak_name) {
 void ResourceBundle::LoadCommonResources() {
   // As a convenience, add the current resource module as a data packs.
   data_packs_.push_back(new ResourceDataDLL(GetCurrentResourceDLL()));
-  // Have high-DPI resources for 140% and 180% scaling on Windows based on
-  // default scaling for Metro mode. If high-DPI mode is enabled, load resource
-  // pak closest to the desired scale factor.  The high-DPI resources are
-  // scaled up from 100% touch.
-
-
+  // Optional high-DPI packs when present. Never require touch_* packs: this
+  // tree ships ui_resources_100_percent.pak only, and forcing touch_100 after
+  // a missing 140/180 pack left the process without a baseline image pack.
 
   float scale = ui::win::GetDeviceScaleFactor();
-  bool force_touch_resources = false;
-  switch(ui::GetScaleFactorFromScale(scale)) {
+  switch (ui::GetScaleFactorFromScale(scale)) {
+    case ui::SCALE_FACTOR_200P:
+      AddOptionalDataPackFromPath(
+          GetResourcesPakFilePath("ui_resources_200_percent.pak"),
+          SCALE_FACTOR_200P);
+      break;
     case ui::SCALE_FACTOR_180P:
-      AddDataPackFromPath(GetResourcesPakFilePath(
-          "ui_resources__touch_180_percent.pak"),
+      AddOptionalDataPackFromPath(
+          GetResourcesPakFilePath("ui_resources__touch_180_percent.pak"),
           SCALE_FACTOR_180P);
-      force_touch_resources = true;
       break;
     case ui::SCALE_FACTOR_140P:
-      AddDataPackFromPath(GetResourcesPakFilePath(
-          "ui_resources__touch_140_percent.pak"),
+      AddOptionalDataPackFromPath(
+          GetResourcesPakFilePath("ui_resources__touch_140_percent.pak"),
           SCALE_FACTOR_140P);
-      force_touch_resources = true;
+      break;
+    default:
+      break;
   }
-  // TODO(kevers|girard): Remove loading of 1x resources when in high-DPI
-  // mode once all resources are available at 140% and 180%.
-  if (ui::GetDisplayLayout() == ui::LAYOUT_TOUCH || force_touch_resources) {
-    AddDataPackFromPath(
+  if (ui::GetDisplayLayout() == ui::LAYOUT_TOUCH) {
+    AddOptionalDataPackFromPath(
         GetResourcesPakFilePath("ui_resources__touch_100_percent.pak"),
         SCALE_FACTOR_100P);
-  } else {
-    AddDataPackFromPath(
-        GetResourcesPakFilePath("ui_resources_100_percent.pak"),
-        SCALE_FACTOR_100P);
   }
+  AddDataPackFromPath(
+      GetResourcesPakFilePath("ui_resources_100_percent.pak"),
+      SCALE_FACTOR_100P);
 }
 
 gfx::Image& ResourceBundle::GetNativeImageNamed(int resource_id, ImageRTL rtl) {

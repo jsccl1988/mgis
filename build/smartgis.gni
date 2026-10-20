@@ -1,0 +1,8 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+#
+# Compatibility shim for smartgis-origin third_party overlays.
+# Presence flags live in //third_party/gn/presence.gni. Product MFC
+# templates from smartgis are intentionally not provided here.
+
+import("//third_party/gn/presence.gni")

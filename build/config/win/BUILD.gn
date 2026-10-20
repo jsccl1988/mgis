@@ -7,6 +7,9 @@ config("default") {
   defines = [
     "UNICODE",
     "_UNICODE",
+    # Draw in physical pixels with a real device_scale_factor. Without this,
+    # Windows bitmap-scales non-aware windows on high-DPI displays (blurry UI).
+    "ENABLE_HIDPI",
   ]
 
   cflags = [

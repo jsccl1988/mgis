@@ -1,0 +1,30 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Product graph only. Skip build output and vendored source mirrors.
+/out/
+/out_*/
+/third_party/.src/
+/third_party/.install/
+/third_party/.build/
+# Junctions into third_party/.src (ignore .src alone still walks these paths).
+/third_party/iaccessible2/
+/third_party/jstemplate/
+/third_party/libjpeg_turbo/
+/third_party/libpng/
+/third_party/modp_b64/
+/third_party/skia/
+/third_party/wtl/
+/third_party/yasm/
+/third_party/zlib/
+# Build debris and oversized vendor trees that dominate full reindex.
+/third_party/cesium-flycube/build/
+/third_party/cesium-unreal/example/Binaries/
+/third_party/cesium-unreal/example/Intermediate/
+/third_party/cesium-unreal/example/Saved/
+/third_party/cesium-native/
+/third_party/unreal/
+/third_party/vtk/
+/third_party/assimp/
+/third_party/antlr4/
+/third_party/protobuf/

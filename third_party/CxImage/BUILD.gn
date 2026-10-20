@@ -1,0 +1,521 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Sources live in third_party/.src/CxImage (fetch / Gitea / local junction).
+_cx_src = "//third_party/.src/CxImage"
+
+# Bundled zlib for CxImage only. Distinct output_name avoids colliding with
+# //third_party/.src/zlib:zlib → zlib.lib.
+static_library("zlib") {
+  output_name = "cximage_zlib"
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+  ]
+
+  configs += [
+    "//build/config/win:no_cr_code",
+  ]
+
+  sources = [
+    "$_cx_src/zlib/adler32.c",
+    "$_cx_src/zlib/compress.c",
+    "$_cx_src/zlib/crc32.c",
+    "$_cx_src/zlib/deflate.c",
+    "$_cx_src/zlib/infback.c",
+    "$_cx_src/zlib/inffast.c",
+    "$_cx_src/zlib/inflate.c",
+    "$_cx_src/zlib/inftrees.c",
+    "$_cx_src/zlib/trees.c",
+    "$_cx_src/zlib/uncompr.c",
+    "$_cx_src/zlib/zutil.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/zlib",
+  ]
+
+  deps = [
+  ]
+}
+
+static_library("jasper") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+    "JAS_WIN_MSVC_BUILD",
+    "EXCLUDE_JPG_SUPPORT",
+  ]
+
+  sources = [
+    "$_cx_src/jasper/base/jas_cm.c",
+    "$_cx_src/jasper/base/jas_debug.c",
+    "$_cx_src/jasper/base/jas_getopt.c",
+    "$_cx_src/jasper/base/jas_icc.c",
+    "$_cx_src/jasper/base/jas_iccdata.c",
+    "$_cx_src/jasper/base/jas_image.c",
+    "$_cx_src/jasper/base/jas_init.c",
+    "$_cx_src/jasper/base/jas_malloc.c",
+    "$_cx_src/jasper/base/jas_seq.c",
+    "$_cx_src/jasper/base/jas_stream.c",
+    "$_cx_src/jasper/base/jas_string.c",
+    "$_cx_src/jasper/base/jas_tvp.c",
+    "$_cx_src/jasper/base/jas_version.c",
+    "$_cx_src/jasper/bmp/bmp_cod.c",
+    "$_cx_src/jasper/bmp/bmp_dec.c",
+    "$_cx_src/jasper/bmp/bmp_enc.c",
+    "$_cx_src/jasper/jp2/jp2_cod.c",
+    "$_cx_src/jasper/jp2/jp2_dec.c",
+    "$_cx_src/jasper/jp2/jp2_enc.c",
+    "$_cx_src/jasper/jpc/jpc_bs.c",
+    "$_cx_src/jasper/jpc/jpc_cs.c",
+    "$_cx_src/jasper/jpc/jpc_dec.c",
+    "$_cx_src/jasper/jpc/jpc_enc.c",
+    "$_cx_src/jasper/jpc/jpc_math.c",
+    "$_cx_src/jasper/jpc/jpc_mct.c",
+    "$_cx_src/jasper/jpc/jpc_mqcod.c",
+    "$_cx_src/jasper/jpc/jpc_mqdec.c",
+    "$_cx_src/jasper/jpc/jpc_mqenc.c",
+    "$_cx_src/jasper/jpc/jpc_qmfb.c",
+    "$_cx_src/jasper/jpc/jpc_t1cod.c",
+    "$_cx_src/jasper/jpc/jpc_t1dec.c",
+    "$_cx_src/jasper/jpc/jpc_t1enc.c",
+    "$_cx_src/jasper/jpc/jpc_t2cod.c",
+    "$_cx_src/jasper/jpc/jpc_t2dec.c",
+    "$_cx_src/jasper/jpc/jpc_t2enc.c",
+    "$_cx_src/jasper/jpc/jpc_tagtree.c",
+    "$_cx_src/jasper/jpc/jpc_tsfb.c",
+    "$_cx_src/jasper/jpc/jpc_util.c",
+    "$_cx_src/jasper/jpg/jpg_dummy.c",
+    "$_cx_src/jasper/jpg/jpg_val.c",
+    "$_cx_src/jasper/mif/mif_cod.c",
+    "$_cx_src/jasper/pgx/pgx_cod.c",
+    "$_cx_src/jasper/pgx/pgx_dec.c",
+    "$_cx_src/jasper/pgx/pgx_enc.c",
+    "$_cx_src/jasper/pnm/pnm_cod.c",
+    "$_cx_src/jasper/pnm/pnm_dec.c",
+    "$_cx_src/jasper/pnm/pnm_enc.c",
+    "$_cx_src/jasper/ras/ras_cod.c",
+    "$_cx_src/jasper/ras/ras_dec.c",
+    "$_cx_src/jasper/ras/ras_enc.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/jasper/include",
+  ]
+
+  deps = [
+  ]
+}
+
+static_library("jbig") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+    "",
+  ]
+
+  sources = [
+    "$_cx_src/jbig/jbig.c",
+    "$_cx_src/jbig/jbig_tab.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/jbig",
+  ]
+
+  deps = [
+  ]
+}
+
+static_library("jpeg") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "$_cx_src/jpeg/jaricom.c",
+    "$_cx_src/jpeg/jcapimin.c",
+    "$_cx_src/jpeg/jcapistd.c",
+    "$_cx_src/jpeg/jcarith.c",
+    "$_cx_src/jpeg/jccoefct.c",
+    "$_cx_src/jpeg/jccolor.c",
+    "$_cx_src/jpeg/jcdctmgr.c",
+    "$_cx_src/jpeg/jchuff.c",
+    "$_cx_src/jpeg/jcinit.c",
+    "$_cx_src/jpeg/jcmainct.c",
+    "$_cx_src/jpeg/jcmarker.c",
+    "$_cx_src/jpeg/jcmaster.c",
+    "$_cx_src/jpeg/jcomapi.c",
+    "$_cx_src/jpeg/jcparam.c",
+    "$_cx_src/jpeg/jcprepct.c",
+    "$_cx_src/jpeg/jcsample.c",
+    "$_cx_src/jpeg/jctrans.c",
+    "$_cx_src/jpeg/jdapimin.c",
+    "$_cx_src/jpeg/jdapistd.c",
+    "$_cx_src/jpeg/jdarith.c",
+    "$_cx_src/jpeg/jdatadst.c",
+    "$_cx_src/jpeg/jdatasrc.c",
+    "$_cx_src/jpeg/jdcoefct.c",
+    "$_cx_src/jpeg/jdcolor.c",
+    "$_cx_src/jpeg/jddctmgr.c",
+    "$_cx_src/jpeg/jdhuff.c",
+    "$_cx_src/jpeg/jdinput.c",
+    "$_cx_src/jpeg/jdmainct.c",
+    "$_cx_src/jpeg/jdmarker.c",
+    "$_cx_src/jpeg/jdmaster.c",
+    "$_cx_src/jpeg/jdmerge.c",
+    "$_cx_src/jpeg/jdpostct.c",
+    "$_cx_src/jpeg/jdsample.c",
+    "$_cx_src/jpeg/jdtrans.c",
+    "$_cx_src/jpeg/jerror.c",
+    "$_cx_src/jpeg/jfdctflt.c",
+    "$_cx_src/jpeg/jfdctfst.c",
+    "$_cx_src/jpeg/jfdctint.c",
+    "$_cx_src/jpeg/jidctflt.c",
+    "$_cx_src/jpeg/jidctfst.c",
+    "$_cx_src/jpeg/jidctint.c",
+    "$_cx_src/jpeg/jmemmgr.c",
+    "$_cx_src/jpeg/jmemnobs.c",
+    "$_cx_src/jpeg/jquant1.c",
+    "$_cx_src/jpeg/jquant2.c",
+    "$_cx_src/jpeg/jutils.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/jpeg",
+  ]
+
+  deps = [
+  ]
+}
+
+static_library("libpsd") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "$_cx_src/libpsd/adjustment.c",
+    "$_cx_src/libpsd/bevel_emboss.c",
+    "$_cx_src/libpsd/bitmap.c",
+    "$_cx_src/libpsd/blend.c",
+    "$_cx_src/libpsd/boundary.c",
+    "$_cx_src/libpsd/brightness_contrast.c",
+    "$_cx_src/libpsd/channel_image.c",
+    "$_cx_src/libpsd/channel_mixer.c",
+    "$_cx_src/libpsd/color.c",
+    "$_cx_src/libpsd/color_balance.c",
+    "$_cx_src/libpsd/color_mode.c",
+    "$_cx_src/libpsd/color_overlay.c",
+    "$_cx_src/libpsd/curves.c",
+    "$_cx_src/libpsd/descriptor.c",
+    "$_cx_src/libpsd/drop_shadow.c",
+    "$_cx_src/libpsd/effects.c",
+    "$_cx_src/libpsd/file_header.c",
+    "$_cx_src/libpsd/fixed.c",
+    "$_cx_src/libpsd/gaussian_blur.c",
+    "$_cx_src/libpsd/gradient_blend.c",
+    "$_cx_src/libpsd/gradient_fill.c",
+    "$_cx_src/libpsd/gradient_map.c",
+    "$_cx_src/libpsd/gradient_overlay.c",
+    "$_cx_src/libpsd/hue_saturation.c",
+    "$_cx_src/libpsd/image_data.c",
+    "$_cx_src/libpsd/image_resource.c",
+    "$_cx_src/libpsd/inner_glow.c",
+    "$_cx_src/libpsd/inner_shadow.c",
+    "$_cx_src/libpsd/invert.c",
+    "$_cx_src/libpsd/layer_mask.c",
+    "$_cx_src/libpsd/levels.c",
+    "$_cx_src/libpsd/outer_glow.c",
+    "$_cx_src/libpsd/path.c",
+    "$_cx_src/libpsd/pattern.c",
+    "$_cx_src/libpsd/pattern_fill.c",
+    "$_cx_src/libpsd/pattern_overlay.c",
+    "$_cx_src/libpsd/photo_filter.c",
+    "$_cx_src/libpsd/posterize.c",
+    "$_cx_src/libpsd/psd.c",
+    "$_cx_src/libpsd/psd_system.c",
+    "$_cx_src/libpsd/psd_zip.c",
+    "$_cx_src/libpsd/rect.c",
+    "$_cx_src/libpsd/satin.c",
+    "$_cx_src/libpsd/selective_color.c",
+    "$_cx_src/libpsd/solid_color.c",
+    "$_cx_src/libpsd/stream.c",
+    "$_cx_src/libpsd/stroke.c",
+    "$_cx_src/libpsd/threshold.c",
+    "$_cx_src/libpsd/thumbnail.c",
+    "$_cx_src/libpsd/type_tool.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/libpsd",
+  ]
+
+  deps = [
+  ]
+}
+
+
+static_library("mng") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+    "MNG_SUPPORT_DISPLAY",
+    "MNG_SUPPORT_READ",
+    "MNG_SUPPORT_WRITE",
+    "MNG_ACCESS_CHUNKS",
+    "MNG_STORE_CHUNKS",
+    "MNG_ERROR_TELLTALE",
+  ]
+
+  sources = [
+    "$_cx_src/mng/libmng_callback_xs.c",
+    "$_cx_src/mng/libmng_chunk_descr.c",
+    "$_cx_src/mng/libmng_chunk_io.c",
+    "$_cx_src/mng/libmng_chunk_prc.c",
+    "$_cx_src/mng/libmng_chunk_xs.c",
+    "$_cx_src/mng/libmng_cms.c",
+    "$_cx_src/mng/libmng_display.c",
+    "$_cx_src/mng/libmng_dither.c",
+    "$_cx_src/mng/libmng_error.c",
+    "$_cx_src/mng/libmng_filter.c",
+    "$_cx_src/mng/libmng_hlapi.c",
+    "$_cx_src/mng/libmng_jpeg.c",
+    "$_cx_src/mng/libmng_object_prc.c",
+    "$_cx_src/mng/libmng_pixels.c",
+    "$_cx_src/mng/libmng_prop_xs.c",
+    "$_cx_src/mng/libmng_read.c",
+    "$_cx_src/mng/libmng_trace.c",
+    "$_cx_src/mng/libmng_write.c",
+    "$_cx_src/mng/libmng_zlib.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/mng",
+  ]
+
+  deps = [
+  ]
+}
+
+static_library("png") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "$_cx_src/png/png.c",
+    "$_cx_src/png/pngerror.c",
+    "$_cx_src/png/pngget.c",
+    "$_cx_src/png/pngmem.c",
+    "$_cx_src/png/pngpread.c",
+    "$_cx_src/png/pngread.c",
+    "$_cx_src/png/pngrio.c",
+    "$_cx_src/png/pngrtran.c",
+    "$_cx_src/png/pngrutil.c",
+    "$_cx_src/png/pngset.c",
+    "$_cx_src/png/pngtrans.c",
+    "$_cx_src/png/pngwio.c",
+    "$_cx_src/png/pngwrite.c",
+    "$_cx_src/png/pngwtran.c",
+    "$_cx_src/png/pngwutil.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/png",
+    "$_cx_src/zlib",
+  ]
+
+  deps = [
+    "//third_party/CxImage:zlib",
+  ]
+}
+
+static_library("raw") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "$_cx_src/raw/libdcr.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/raw",
+  ]
+
+  deps = [
+  ]
+}
+
+static_library("tiff") {
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+  ]
+
+  sources = [
+    "$_cx_src/tiff/tif_aux.c",
+    "$_cx_src/tiff/tif_close.c",
+    "$_cx_src/tiff/tif_codec.c",
+    "$_cx_src/tiff/tif_color.c",
+    "$_cx_src/tiff/tif_compress.c",
+    "$_cx_src/tiff/tif_dir.c",
+    "$_cx_src/tiff/tif_dirinfo.c",
+    "$_cx_src/tiff/tif_dirread.c",
+    "$_cx_src/tiff/tif_dirwrite.c",
+    "$_cx_src/tiff/tif_dumpmode.c",
+    "$_cx_src/tiff/tif_error.c",
+    "$_cx_src/tiff/tif_fax3.c",
+    "$_cx_src/tiff/tif_fax3sm.c",
+    "$_cx_src/tiff/tif_flush.c",
+    "$_cx_src/tiff/tif_getimage.c",
+    "$_cx_src/tiff/tif_jpeg.c",
+    "$_cx_src/tiff/tif_luv.c",
+    "$_cx_src/tiff/tif_lzw.c",
+    "$_cx_src/tiff/tif_next.c",
+    "$_cx_src/tiff/tif_ojpeg.c",
+    "$_cx_src/tiff/tif_open.c",
+    "$_cx_src/tiff/tif_packbits.c",
+    "$_cx_src/tiff/tif_pixarlog.c",
+    "$_cx_src/tiff/tif_predict.c",
+    "$_cx_src/tiff/tif_print.c",
+    "$_cx_src/tiff/tif_read.c",
+    "$_cx_src/tiff/tif_strip.c",
+    "$_cx_src/tiff/tif_swab.c",
+    "$_cx_src/tiff/tif_thunder.c",
+    "$_cx_src/tiff/tif_tile.c",
+    "$_cx_src/tiff/tif_version.c",
+    "$_cx_src/tiff/tif_warning.c",
+    "$_cx_src/tiff/tif_write.c",
+    "$_cx_src/tiff/tif_zip.c",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/tiff",
+    "$_cx_src/zlib",
+  ]
+
+  deps = [
+    "//third_party/CxImage:zlib",
+  ]
+}
+
+config("cximage_public") {
+  include_dirs += [
+    "//third_party/cximage_pub",
+    "$_cx_src/CxImage",
+  ]
+}
+
+# CxImage 7.0.2 ships a pre-C++11 stdint.h on its include path.
+# Under C++23, MSVC <string_view> needs PTRDIFF_MAX, which that
+# header only defines when __STDC_LIMIT_MACROS is set. Isolate
+# this target only; do not roll the repo back to C++17.
+config("cximage_cc20") {
+  cflags_cc = [ "/std:c++20" ]
+}
+
+# Legacy GDI callers use CxImage::Save(const char*, ...). Global win
+# UNICODE would compile only the wchar_t overload and break the link.
+config("cximage_mbcs") {
+  cflags = [
+    "/UUNICODE",
+    "/U_UNICODE",
+  ]
+}
+
+shared_library("CxImage") {
+  configs -= [ "//build/config:cc_std" ]
+  configs += [
+    ":cximage_cc20",
+    ":cximage_mbcs",
+  ]
+  public_configs = [ ":cximage_public" ]
+  defines = [
+    "WIN32",
+    "NOMINMAX",
+    "JAS_WIN_MSVC_BUILD",
+    "_USRDLL",
+    "__STDC_LIMIT_MACROS",
+    "__STDC_CONSTANT_MACROS",
+  ]
+
+  sources = [
+    "$_cx_src/CxImage/tif_xfile.cpp",
+    "$_cx_src/CxImage/ximabmp.cpp",
+    "$_cx_src/CxImage/ximadsp.cpp",
+    "$_cx_src/CxImage/ximaenc.cpp",
+    "$_cx_src/CxImage/ximaexif.cpp",
+    "$_cx_src/CxImage/ximage.cpp",
+    "$_cx_src/CxImage/ximagif.cpp",
+    "$_cx_src/CxImage/ximahist.cpp",
+    "$_cx_src/CxImage/ximaico.cpp",
+    "$_cx_src/CxImage/ximainfo.cpp",
+    "$_cx_src/CxImage/ximaint.cpp",
+    "$_cx_src/CxImage/ximajas.cpp",
+    "$_cx_src/CxImage/ximajbg.cpp",
+    "$_cx_src/CxImage/ximajpg.cpp",
+    "$_cx_src/CxImage/ximalpha.cpp",
+    "$_cx_src/CxImage/ximalyr.cpp",
+    "$_cx_src/CxImage/ximamng.cpp",
+    "$_cx_src/CxImage/ximapal.cpp",
+    "$_cx_src/CxImage/ximapcx.cpp",
+    "$_cx_src/CxImage/ximapng.cpp",
+    "$_cx_src/CxImage/ximapsd.cpp",
+    "$_cx_src/CxImage/ximaraw.cpp",
+    "$_cx_src/CxImage/ximasel.cpp",
+    "$_cx_src/CxImage/ximaska.cpp",
+    "$_cx_src/CxImage/ximatga.cpp",
+    "$_cx_src/CxImage/ximath.cpp",
+    "$_cx_src/CxImage/ximatif.cpp",
+    "$_cx_src/CxImage/ximatran.cpp",
+    "$_cx_src/CxImage/ximawbmp.cpp",
+    "$_cx_src/CxImage/ximawmf.cpp",
+    "$_cx_src/CxImage/ximawnd.cpp",
+    "$_cx_src/CxImage/xmemfile.cpp",
+  ]
+
+  include_dirs += [
+    "$root_gen_dir/",
+    "$_cx_src/CxImage",
+    "$_cx_src/jpeg",
+    "$_cx_src/png",
+    "$_cx_src/zlib",
+    "$_cx_src/mng",
+    "$_cx_src/tiff",
+    "$_cx_src/j2k",
+    "$_cx_src/jasper/include",
+  ]
+
+  libs += [
+    "ws2_32.lib",
+  ]
+
+  deps = [
+    "//third_party/CxImage:jasper",
+    "//third_party/CxImage:jbig",
+    "//third_party/CxImage:jpeg",
+    "//third_party/CxImage:libpsd",
+    "//third_party/CxImage:mng",
+    "//third_party/CxImage:png",
+    "//third_party/CxImage:raw",
+    "//third_party/CxImage:tiff",
+    "//third_party/CxImage:zlib",
+  ]
+}
+

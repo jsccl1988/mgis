@@ -1,0 +1,60 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+#
+# Opt-in third_party presence flags for //third_party/gn.
+
+_flycube_cmake = exec_script("//build/file_exists.py",
+                             [ "third_party/.src/flycube/CMakeLists.txt" ],
+                             "trim string")
+_flycube_release_lib = exec_script(
+    "//build/file_exists.py",
+    [ "third_party/.install/lib/FlyCube.lib" ],
+    "trim string")
+has_flycube_src = _flycube_cmake == "1"
+has_flycube =
+    has_flycube_src && (is_debug || _flycube_release_lib == "1")
+
+_has_assimp_h = exec_script("//build/file_exists.py",
+                            [
+                              "third_party/.src/assimp/include/assimp/Importer.hpp",
+                            ],
+                            "trim string")
+_has_tinygltf_h = exec_script("//build/file_exists.py",
+                              [ "third_party/.src/tinygltf/tiny_gltf.h" ],
+                              "trim string")
+_has_rapidjson_h = exec_script("//build/file_exists.py",
+                               [
+                                 "third_party/.src/rapidjson/include/rapidjson/document.h",
+                               ],
+                               "trim string")
+_has_pugixml_h = exec_script("//build/file_exists.py",
+                             [ "third_party/.src/pugixml/src/pugixml.hpp" ],
+                             "trim string")
+_has_protobuf_h = exec_script("//build/file_exists.py",
+                              [
+                                "third_party/.install/include/google/protobuf/message.h",
+                              ],
+                              "trim string")
+_has_pdal_h = exec_script("//build/file_exists.py",
+                          [
+                            "third_party/.install/include/pdal/PipelineManager.hpp",
+                          ],
+                          "trim string")
+_pdal_dbg_lib = exec_script("//build/file_exists.py",
+                            [ "third_party/.install/lib/pdalcppd.lib" ],
+                            "trim string")
+_pdal_rel_lib = exec_script("//build/file_exists.py",
+                            [ "third_party/.install/lib/pdalcpp.lib" ],
+                            "trim string")
+has_assimp = _has_assimp_h == "1"
+has_tinygltf = _has_tinygltf_h == "1"
+has_rapidjson = _has_rapidjson_h == "1"
+has_pugixml = _has_pugixml_h == "1"
+has_protobuf = _has_protobuf_h == "1"
+has_pdal = _has_pdal_h == "1" &&
+               ((is_debug && _pdal_dbg_lib == "1") ||
+                (!is_debug && _pdal_rel_lib == "1"))
+
+declare_args() {
+  enable_maplibre_example = false
+}

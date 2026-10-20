@@ -7,7 +7,6 @@
 #include <windows.h>
 
 #include "base/win/scoped_hdc.h"
-#include "ui/base/layout.h"
 #include "base/win/registry.h"
 #include "ui/gfx/display.h"
 #include "ui/gfx/point_conversions.h"
@@ -19,13 +18,24 @@ namespace {
 int kDefaultDPIX = 96;
 int kDefaultDPIY = 96;
 
+int g_dpi_x = 0;
+int g_dpi_y = 0;
+bool g_dpi_initialized = false;
+
+void ClearCachedDPI() {
+  g_dpi_initialized = false;
+  g_dpi_x = 0;
+  g_dpi_y = 0;
+}
+
 float GetDeviceScaleFactorImpl() {
 #if defined(ENABLE_HIDPI)
-  float scale = gfx::Display::HasForceDeviceScaleFactor() ?
-      gfx::Display::GetForcedDeviceScaleFactor() : ui::GetDPIScale();
-  // Quantize to nearest supported scale factor.
-  scale = ui::GetScaleFactorScale(ui::GetScaleFactorFromScale(scale));
-  return scale;
+  // Use the continuous DPI scale for layout/compositing. Resource packs still
+  // pick the nearest ScaleFactor via GetScaleFactorFromScale(); quantizing here
+  // (e.g. 2.5 -> 1.8) left UI undersized on common 150%/250% displays.
+  if (gfx::Display::HasForceDeviceScaleFactor())
+    return gfx::Display::GetForcedDeviceScaleFactor();
+  return ui::GetDPIScale();
 #else
   return 1.0f;
 #endif
@@ -46,20 +56,16 @@ BOOL IsProcessDPIAwareWrapper() {
 namespace ui {
 
 gfx::Size GetDPI() {
-  static int dpi_x = 0;
-  static int dpi_y = 0;
-  static bool should_initialize = true;
-
-  if (should_initialize) {
-    should_initialize = false;
+  if (!g_dpi_initialized) {
+    g_dpi_initialized = true;
     base::win::ScopedGetDC screen_dc(NULL);
-    // This value is safe to cache for the life time of the app since the
-    // user must logout to change the DPI setting. This value also applies
-    // to all screens.
-    dpi_x = GetDeviceCaps(screen_dc, LOGPIXELSX);
-    dpi_y = GetDeviceCaps(screen_dc, LOGPIXELSY);
+    // Safe to cache for the process lifetime after DPI awareness is set; the
+    // user must log out to change the system DPI. Call ClearCachedDPI via
+    // EnableHighDPISupport() if metrics were read under DPI virtualization.
+    g_dpi_x = GetDeviceCaps(screen_dc, LOGPIXELSX);
+    g_dpi_y = GetDeviceCaps(screen_dc, LOGPIXELSY);
   }
-  return gfx::Size(dpi_x, dpi_y);
+  return gfx::Size(g_dpi_x, g_dpi_y);
 }
 
 float GetDPIScale() {
@@ -79,13 +85,19 @@ void EnableHighDPISupport() {
           GetProcAddress(GetModuleHandleA("user32.dll"), "SetProcessDPIAware"));
   if (set_process_dpi_aware_func)
     set_process_dpi_aware_func();
+  // Drop any LOGPIXELS* captured while Windows was virtualizing this process
+  // to 96 DPI.
+  ClearCachedDPI();
 }
 
 namespace win {
 
 float GetDeviceScaleFactor() {
-  static const float device_scale_factor = GetDeviceScaleFactorImpl();
-  return device_scale_factor;
+  if (gfx::Display::HasForceDeviceScaleFactor())
+    return gfx::Display::GetForcedDeviceScaleFactor();
+  // Do not permanently cache across EnableHighDPISupport(); GetDPIScale()
+  // already caches LOGPIXELS after awareness is enabled.
+  return GetDeviceScaleFactorImpl();
 }
 
 gfx::Point ScreenToDIPPoint(const gfx::Point& pixel_point) {

@@ -6,7 +6,7 @@
 
 #include <string>
 
-#include "content/browser/pipe/json_mini.h"
+#include "content/browser/pipe/pipe_json.h"
 
 namespace content {
 
@@ -17,18 +17,20 @@ static const size_t kMaxPipeFrameBytes = 65536;
 // UE is the single server. The browser connects to this name.
 const wchar_t* pipe_name_wide();
 
-// One envelope: { "v", "id", "op", "body" }.
+// One envelope: { "v", "id", "op", "body" }. |body| is a RapidJSON object
+// (same Document usage as smartgis sdbd_json / args_json).
 struct PipeMessage {
   PipeMessage();
 
   int v;
   std::string id;
   std::string op;
-  PipeJson body;
+  rapidjson::Document body;
 };
 
-// Failure body shared by every op: { "ok": false, "error": { "code", "message" } }.
-PipeJson pipe_error_body(const std::string& code, const std::string& message);
+// Failure body: { "ok": false, "error": { "code", "message" } }.
+rapidjson::Document pipe_error_body(const std::string& code,
+                                    const std::string& message);
 
 bool encode_pipe_frame(const std::string& json,
                        std::string* frame,

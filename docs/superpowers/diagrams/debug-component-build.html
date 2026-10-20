@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Debug component build</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  body { margin:0; font:14px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:920px; margin:32px auto; padding:0 20px; }
+  h1 { font-size:22px; font-weight:650; margin:0 0 8px; }
+  p { color:var(--muted); margin:0 0 20px; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; flex:1; min-width:240px; }
+  .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 10px; }
+  .dll { display:inline-block; margin:4px 6px 4px 0; padding:6px 10px; border-radius:4px; background:#e8f0f8; color:var(--accent); font-weight:600; font-size:13px; }
+  .stat { display:inline-block; margin:4px 6px 4px 0; padding:6px 10px; border-radius:4px; background:#f0f2f5; color:var(--muted); font-size:13px; }
+  .flow { margin-top:20px; border:1px solid var(--line); background:var(--card); border-radius:8px; padding:18px; }
+  .arrow { color:var(--accent); font-weight:700; margin:0 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Debug component build 分层</h1>
+  <p>Debug：产品库与 Skia 为 DLL；Release 与其余 third_party 保持静态。</p>
+  <div class="row">
+    <div class="card">
+      <h2>Process / exe</h2>
+      <span class="dll">base_widget.exe</span>
+      <span class="dll">activex_widget.exe</span>
+      <span class="stat">mgis / content（静态）</span>
+    </div>
+    <div class="card">
+      <h2>Component DLLs</h2>
+      <span class="dll">base.dll</span>
+      <span class="dll">ui.dll</span>
+      <span class="dll">views.dll</span>
+      <span class="dll">skia.dll</span>
+      <span class="dll">native_theme.dll</span>
+      <span class="dll">extra_views.dll</span>
+    </div>
+    <div class="card">
+      <h2>仍静态</h2>
+      <span class="stat">third_party/*</span>
+      <span class="stat">gtest / gmock</span>
+      <span class="stat">skia_opts*</span>
+      <span class="stat">base_static</span>
+    </div>
+  </div>
+  <div class="flow">
+    <strong>控制流</strong>
+    <div style="margin-top:10px">
+      <code>build.bat debug</code>
+      <span class="arrow">→</span>
+      <code>is_component_build=true</code>
+      <span class="arrow">→</span>
+      <code>component()</code>
+      <span class="arrow">→</span>
+      solink DLL + 增量链 exe
+    </div>
+  </div>
+</main>
+</body>
+</html>

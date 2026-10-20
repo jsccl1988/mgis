@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Mgis 工作台壳分层</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  body { margin:0; font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:960px; margin:32px auto; padding:0 20px 48px; }
+  h1 { font-size:22px; margin:0 0 8px; }
+  p { color:var(--muted); line-height:1.55; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin:16px 0; }
+  .lanes { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .lane { border:1px solid var(--line); border-radius:6px; padding:12px; background:#fafbfc; }
+  .lane h3 { margin:0 0 8px; font-size:14px; color:var(--accent); }
+  .lane ul { margin:0; padding-left:18px; font-size:13px; line-height:1.6; }
+  .wire { display:grid; grid-template-rows:28px 1fr 72px; height:280px; border:1px solid var(--line); border-radius:6px; overflow:hidden; background:#fff; font-size:11px; }
+  .top { background:#e8eef4; display:flex; align-items:center; padding:0 10px; color:var(--muted); }
+  .mid { display:grid; grid-template-columns:22% 1fr 18%; min-height:0; }
+  .mid > div { border-right:1px solid var(--line); padding:6px; }
+  .mid > div:last-child { border-right:0; }
+  .tabs span { display:inline-block; padding:4px 8px; margin-right:4px; }
+  .tabs .on { border-bottom:2px solid var(--accent); color:var(--accent); font-weight:600; }
+  .bot { border-top:1px solid var(--line); padding:6px 8px; color:var(--muted); }
+  .flow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px; }
+  .chip { background:#eef4fb; border:1px solid #c5d4e8; border-radius:4px; padding:4px 10px; }
+  .arrow { color:var(--accent); font-weight:700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mgis 工作台壳 · 分层与联动</h1>
+  <p>产品进程内：<code>shell</code> 薄入口 → <code>app/mgis</code>（工作台组合 + chrome 面板）。第一刀无 MapLibre/UE 挂载。</p>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 12px">核心分层</h2>
+    <div class="lanes">
+      <div class="lane">
+        <h3>app/shell/</h3>
+        <ul>
+          <li>MessageLoop / WinMain</li>
+          <li>ShowMainWindow → mgis</li>
+          <li>harness 卫星 Viewport（mark）</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>app/mgis/（组合）</h3>
+        <ul>
+          <li>WorkbenchContents</li>
+          <li>SelectViewTab 双向联动</li>
+          <li>map / view0 状态</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>app/mgis/（面板）</h3>
+        <ul>
+          <li>CatalogTabs（图层|实体）</li>
+          <li>ViewportPlaceholder</li>
+          <li>ToolPluginPanel / BottomPanel</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 12px">主窗线框</h2>
+    <div class="wire">
+      <div class="top">菜单 · 时间轴</div>
+      <div class="mid">
+        <div>
+          <div class="tabs"><span class="on">图层</span><span>实体</span></div>
+          TreeView · map
+        </div>
+        <div>
+          <div class="tabs"><span class="on">2D</span><span>3D</span></div>
+          ViewportPlaceholder
+        </div>
+        <div>工具 / 插件</div>
+      </div>
+      <div class="bot"><span class="on">console</span> · trace · agent</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 12px">控制流</h2>
+    <div class="flow">
+      <span class="chip">中心 Tab 2D|3D</span>
+      <span class="arrow">↔</span>
+      <span class="chip">SelectViewTab</span>
+      <span class="arrow">↔</span>
+      <span class="chip">左栏 图层|实体</span>
+    </div>
+    <p style="margin:12px 0 0">图层 ↔ map（2D）；实体 ↔ view0（3D）。右栏与底栏全局，不随 Tab 换内容。</p>
+  </div>
+</main>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
-static_library("views") {
+component("views") {
   sources = [
     "accessibility/native_view_accessibility.cc",
     "accessibility/native_view_accessibility_win.cc",
@@ -112,6 +112,18 @@ static_library("views") {
     "layout/fill_layout.cc",
     "layout/grid_layout.cc",
     "layout/layout_manager.cc",
+    "markup/document/markup_document.cc",
+    "markup/document/named_view_map.cc",
+    "markup/factory/control_factory.cc",
+    "markup/factory/control_factory_default.cc",
+    "markup/factory/markup_combobox.cc",
+    "markup/factory/placeholder_view.cc",
+    "markup/factory/register_controls.cc",
+    "markup/factory/register_markup_tags.cc",
+    "markup/layout/yoga_layout_manager.cc",
+    "markup/loader/markup_loader.cc",
+    "markup/style/css_parser.cc",
+    "markup/style/flex_style.cc",
     "metrics.cc",
     "metrics_win.cc",
     "mouse_watcher.cc",
@@ -156,12 +168,28 @@ static_library("views") {
     "window/non_client_view.cc",
     "window/window_shape.cc",
   ]
+  public_deps = [
+    "//third_party:pugixml",
+    "//third_party:yoga",
+  ]
   deps = [
+    "//base/third_party/dynamic_annotations:dynamic_annotations",
+    "//base:base",
+    "//base:base_i18n",
     "//build/grit:headers",
+    "//skia:skia",
     "//third_party/.src/iaccessible2:iaccessible2",
     "//ui/base/strings:ui_locales_strings",
     "//ui/base/strings:ui_strings",
+    "//ui/native_theme:native_theme",
+    "//ui:ui",
     "//ui:ui_resources",
+  ]
+  # Win32 / COM helpers required when views is a DLL (were satisfied at exe link).
+  libs += [
+    "comsuppw.lib",
+    "dwmapi.lib",
+    "oleacc.lib",
   ]
   defines += [
     "_WIN32_WINNT=0x0602",
@@ -327,7 +355,7 @@ static_library("views_test_support") {
   configs += [ "//build/config:precompile" ]
 }
 
-static_library("views_examples_lib") {
+component("views_examples_lib") {
   sources = [
     "examples/bubble_example.cc",
     "examples/button_example.cc",
@@ -356,7 +384,12 @@ static_library("views_examples_lib") {
     "examples/widget_example.cc",
   ]
   deps = [
+    "//base:base",
+    "//base:base_i18n",
     "//build/grit:headers",
+    "//skia:skia",
+    "//ui/views:views",
+    "//ui:ui",
     "//ui:ui_resources",
   ]
   defines += [

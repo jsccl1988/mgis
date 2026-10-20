@@ -93,7 +93,7 @@ static_library("ui_test_support") {
   configs += [ "//build/config:precompile" ]
 }
 
-static_library("ui") {
+component("ui") {
   sources = [
     "base/accelerators/accelerator.cc",
     "base/accelerators/accelerator_manager.cc",
@@ -250,10 +250,20 @@ static_library("ui") {
     "gfx/vector3d_f.cc",
   ]
   deps = [
+    "//base/third_party/dynamic_annotations:dynamic_annotations",
+    "//base:base",
+    "//base:base_i18n",
     "//build/grit:headers",
+    "//skia:skia",
+    "//third_party/.src/libjpeg_turbo:libjpeg",
+    "//third_party/.src/libpng:libpng",
+    "//third_party/.src/modp_b64:modp_b64",
+    "//third_party/.src/zlib:zlib",
     "//ui/base/strings:ui_strings",
     "//ui:ui_resources",
   ]
+  # DwmIsCompositionEnabled (Aero) — required when ui is a DLL.
+  libs += [ "dwmapi.lib" ]
   defines += [
     "_WIN32_WINNT=0x0602",
     "WINVER=0x0602",
@@ -365,6 +375,7 @@ executable("ui_unittests") {
     "base/text/bytes_formatting_unittest.cc",
     "base/text/text_elider_unittest.cc",
     "base/text/utf16_indexing_unittest.cc",
+    "base/win/dpi_unittest.cc",
     "base/win/hwnd_subclass_unittest.cc",
     "gfx/blit_unittest.cc",
     "gfx/break_list_unittest.cc",

@@ -1,0 +1,22 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Chromium-style component(): shared_library when is_component_build, else
+# static_library. Import from BUILDCONFIG so every BUILD.gn can call it.
+
+template("component") {
+  if (is_component_build) {
+    shared_library(target_name) {
+      # `libs` is not always copied by forward_variables_from("*") into a
+      # shared_library, which drops dwmapi.lib and similar from the DLL link.
+      forward_variables_from(invoker, "*", [ "libs" ])
+      if (defined(invoker.libs)) {
+        libs = invoker.libs
+      }
+    }
+  } else {
+    static_library(target_name) {
+      forward_variables_from(invoker, "*")
+    }
+  }
+}

@@ -4,6 +4,8 @@
 
 #include "base/debug/debug_on_start_win.h"
 
+#if !defined(COMPONENT_BUILD)
+
 #include <windows.h>
 
 #include "base/base_switches.h"
@@ -72,3 +74,5 @@ int __cdecl DebugOnStart::Init() {
 
 }  // namespace debug
 }  // namespace base
+
+#endif  // !defined(COMPONENT_BUILD)

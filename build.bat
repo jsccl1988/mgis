@@ -120,7 +120,13 @@ REM ---------------------------------------------------------------------------
 set "OUT_NAME=%~1"
 set "IS_DEBUG=%~2"
 set "OUT_DIR=out\%OUT_NAME%"
-set "GN_ARGS=is_debug=%IS_DEBUG% is_build_third_party=false run_vs_env_script=false vs_version=180 msvc_installed=true"
+REM Debug defaults to component build (DLLs) for faster incremental link.
+REM Release stays static (is_component_build omitted → false).
+if /I "%IS_DEBUG%"=="true" (
+  set "GN_ARGS=is_debug=%IS_DEBUG% is_component_build=true is_build_third_party=false run_vs_env_script=false vs_version=180 msvc_installed=true"
+) else (
+  set "GN_ARGS=is_debug=%IS_DEBUG% is_component_build=false is_build_third_party=false run_vs_env_script=false vs_version=180 msvc_installed=true"
+)
 
 echo === gn gen %OUT_DIR% ^(is_debug=%IS_DEBUG%^) ===
 "%GN%" gen "%OUT_DIR%" --root=./ --ide=vs2019 --args="!GN_ARGS!"

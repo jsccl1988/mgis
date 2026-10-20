@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<View name="preview_sample">
+  <Style src="preview_sample.ui.css"/>
+  <FlexColumn id="root" class="form">
+    <Label id="title" text="UiDesigner sample"/>
+    <FlexRow id="row" class="row">
+      <LabelButton id="ok" text="OK"/>
+      <LabelButton id="cancel" text="Cancel"/>
+    </FlexRow>
+    <Textfield id="note" text="edit me"/>
+    <Checkbox id="agree" text="Agree"/>
+    <RadioButton id="a" text="A" group="1"/>
+    <RadioButton id="b" text="B" group="1"/>
+    <Combobox id="choice">
+      <item text="One"/>
+      <item text="Two"/>
+    </Combobox>
+    <Slider id="level" value="0.4"/>
+    <Separator id="rule"/>
+    <ImageView id="icon"/>
+    <ScrollView id="scroller">
+      <Placeholder id="scroll_body" text="scroll body"/>
+    </ScrollView>
+    <Placeholder id="slot" text="slot"/>
+  </FlexColumn>
+</View>

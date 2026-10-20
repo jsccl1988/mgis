@@ -1,7 +1,7 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
-static_library("native_theme") {
+component("native_theme") {
   sources = [
     "common_theme.cc",
     "native_theme.cc",
@@ -9,7 +9,10 @@ static_library("native_theme") {
     "native_theme_win.cc",
   ]
   deps = [
+    "//base:base",
     "//build/grit:headers",
+    "//skia:skia",
+    "//ui:ui",
     "//ui:ui_resources",
   ]
   defines += [
