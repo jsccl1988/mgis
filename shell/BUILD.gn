@@ -5,13 +5,17 @@
 # Depends on //plugin:plugin and //ui/views:views. Not part of //:default.
 executable("mview_shell") {
   sources = [
+    "globe_view.cc",
+    "globe_view.h",
     "main_window.cc",
     "main_window.h",
     "shell_main.cc",
   ]
   deps = [
     "//content:content",
+    "//native/mview_map:mview_map",
     "//plugin:plugin",
+    "//tool:tool",
     "//base/third_party/dynamic_annotations:dynamic_annotations",
     "//base:base",
     "//base:base_i18n",
@@ -110,6 +114,7 @@ executable("mview_shell") {
     "dwmapi.lib",
     "imm32.lib",
     "oleacc.lib",
+    "opengl32.lib",
   ]
   configs += [ "//build/config:precompile" ]
   configs += [ "//build/config/win:windows_subsystem" ]

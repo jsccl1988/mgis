@@ -12,9 +12,10 @@ py -3 third_party\tools\fetch.py --package vtk
 cmake -S third_party\.src\vtk -B third_party\.build\vtk -DVTK_GROUP_ENABLE_Qt=NO -DVTK_GROUP_ENABLE_Rendering=NO -DVTK_GROUP_ENABLE_Views=NO -DVTK_BUILD_TESTING=OFF
 cmake --build third_party\.build\vtk --config Release
 cmake --install third_party\.build\vtk --prefix third_party\.install
-cmake -S third_party\vtk\example -B third_party\.build\vtk-example -DVTK_DIR=third_party\.install\lib\cmake\vtk-9.5
+cmake -S third_party\vtk\example -B third_party\.build\vtk-example -G "Visual Studio 18 2026" -A x64 -DVTK_DIR=third_party\.install\lib\cmake\vtk-9.5
 cmake --build third_party\.build\vtk-example --config Release
-third_party\.build\vtk-example\Release\vtk_image_grid.exe grid.vti
+set PATH=%CD%\third_party\.install\bin;%PATH%
+third_party\.build\vtk-example\Release\vtk_image_grid.exe third_party\.build\vtk-example\grid.vti
 ```
 
 示例只分配 `vtkImageData` 并写出 `.vti`，不创建渲染窗口。

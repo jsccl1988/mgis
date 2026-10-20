@@ -4,8 +4,10 @@
 #ifndef NATIVE_MVIEW_MAP_MVIEW_MAP_H_
 #define NATIVE_MVIEW_MAP_MVIEW_MAP_H_
 
-// C ABI for the 2D map. This build does not link MapLibre Native, so the
-// session stores a camera and a style layer list and does not draw tiles.
+// C ABI for the 2D map. Camera and style layers stay in memory so headless
+// tests can run without a GL surface. mvm_present draws into a child HWND
+// when parent is non-NULL: MapLibre Native when mview_maplibre.dll is loaded,
+// otherwise an OpenGL mercator frame.
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -29,9 +31,26 @@ extern "C" {
 
 typedef struct MvmMap MvmMap;
 
-// parent may be NULL. No child GL window is created.
+// parent may be NULL. A child window is created on the first successful
+// mvm_present, not during create, so headless tests stay off the GL path.
 MVM_API MvmMap* mvm_create(HWND parent, int width, int height,
                            double pixel_ratio);
+
+// kind 0 = mouse, 1 = wheel. action 1 = move, 2 = press, 3 = release.
+typedef void (*MvmPointerFn)(void* user,
+                             int kind,
+                             int action,
+                             double x,
+                             double y,
+                             double wheel_dx,
+                             double wheel_dy);
+MVM_API void mvm_set_pointer_callback(MvmMap* map, MvmPointerFn fn, void* user);
+
+// 2 = MapLibre frame blitted, 1 = OpenGL mercator, 0 = no draw.
+// Non-zero means pixels were presented and are not a single flat color.
+MVM_API int mvm_present(MvmMap* map);
+MVM_API unsigned int mvm_frame_token(MvmMap* map);
+MVM_API int mvm_last_draw_calls(MvmMap* map);
 MVM_API void mvm_resize(MvmMap* map, int width, int height, double pixel_ratio);
 MVM_API void mvm_destroy(MvmMap* map);
 MVM_API void mvm_set_notify(MvmMap* map, HWND target, UINT message);

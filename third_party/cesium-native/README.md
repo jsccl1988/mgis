@@ -11,7 +11,11 @@ All rights reserved.
 
 ```bat
 py -3 third_party\tools\fetch.py --package cesium-native
+set EZVCPKG_BASEDIR=C:\cn-vcpkg
 py -3 third_party\tools\install.py --manifest third_party\manifest.json --package cesium-native --src-root third_party\.src --build-root third_party\.build\cesium-native --install-prefix third_party\.install --stamp third_party\.build\cesium-native\.gn_publish_stamp --unified-prefix --build-type Release --no-deps --no-cmake-calibrate
-cmake -S third_party\cesium-native\example -B third_party\.build\cesium-native-example -DCMAKE_PREFIX_PATH=third_party\.install
+cmake -S third_party\cesium-native\example -B third_party\.build\cesium-native-example -G "Visual Studio 18 2026" -A x64
 cmake --build third_party\.build\cesium-native-example --config Release
+third_party\.build\cesium-native-example\Release\cesium_ellipsoid.exe
 ```
+
+示例 CMake 会把 `third_party/.install` 和 `EZVCPKG_BASEDIR`（默认 `C:\cn-vcpkg`）下的 `x64-windows-static-md` 工具链拼进查找路径；不链进产品进程。

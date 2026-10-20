@@ -41,6 +41,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
   int exit_code = 0;
   if (CommandLine::ForCurrentProcess()->HasSwitch("harness-chrome")) {
     exit_code = shell::RunChromeHarness();
+  } else if (CommandLine::ForCurrentProcess()->HasSwitch("render-check")) {
+    exit_code = shell::RunRenderCheck();
   } else {
     shell::ShowMainWindow();
     MessageLoopForUI::current()->Run();

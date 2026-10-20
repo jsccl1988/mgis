@@ -16,6 +16,11 @@ void ShowMainWindow();
 // Does not start UE. The caller must already have a MessageLoopForUI.
 int RunChromeHarness();
 
+// Creates the map and view0 child HWNDs, presents one browsed frame each,
+// writes out/harness/render-check/mark.json, and returns 0 only when both
+// frames were actually drawn.
+int RunRenderCheck();
+
 }  // namespace shell
 
 #endif  // SHELL_MAIN_WINDOW_H_

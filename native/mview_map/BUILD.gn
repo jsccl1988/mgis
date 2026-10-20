@@ -18,11 +18,18 @@ static_library("mview_map_math") {
 shared_library("mview_map") {
   output_name = "mview_map"
   sources = [
+    "map_surface.cc",
+    "map_surface.h",
     "mview_map.cc",
     "mview_map.h",
   ]
   deps = [ ":mview_map_math" ]
   configs += [ ":export_defines" ]
+  libs = [
+    "gdi32.lib",
+    "opengl32.lib",
+    "user32.lib",
+  ]
 }
 
 executable("mview_map_test") {

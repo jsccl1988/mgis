@@ -4,6 +4,7 @@
 #include "native/mview_map/mview_map.h"
 
 #include "native/mview_map/camera_follow.h"
+#include "native/mview_map/map_surface.h"
 
 #include <cmath>
 #include <cstdio>
@@ -223,6 +224,9 @@ struct MvmMap {
   std::string last_query_json;
   std::vector<Layer> layers;
   std::vector<GeoSource> sources;
+  MapSurface* surface;
+  MvmPointerFn pointer_fn;
+  void* pointer_user;
 
   MvmMap()
       : parent(NULL),
@@ -236,7 +240,10 @@ struct MvmMap {
         zoom(0.0),
         bearing(0.0),
         pitch(0.0),
-        height_m(0.0) {}
+        height_m(0.0),
+        surface(NULL),
+        pointer_fn(NULL),
+        pointer_user(NULL) {}
 };
 
 namespace {
@@ -279,10 +286,47 @@ void mvm_resize(MvmMap* map, int width, int height, double pixel_ratio) {
   map->height = height;
   if (Finite(pixel_ratio) && pixel_ratio > 0.0)
     map->pixel_ratio = pixel_ratio;
+  if (map->surface)
+    map->surface->Resize(width, height);
 }
 
 void mvm_destroy(MvmMap* map) {
+  if (!map)
+    return;
+  delete map->surface;
+  map->surface = NULL;
   delete map;
+}
+
+void mvm_set_pointer_callback(MvmMap* map, MvmPointerFn fn, void* user) {
+  if (!map)
+    return;
+  map->pointer_fn = fn;
+  map->pointer_user = user;
+}
+
+int mvm_present(MvmMap* map) {
+  if (!map || !map->parent)
+    return 0;
+  if (!map->surface)
+    map->surface = new (std::nothrow) MapSurface();
+  if (!map->surface)
+    return 0;
+  return map->surface->Present(map->parent, map->width, map->height, map->lon,
+                               map->lat, map->zoom, map->bearing, map->pitch,
+                               map->pointer_fn, map->pointer_user);
+}
+
+unsigned int mvm_frame_token(MvmMap* map) {
+  if (!map || !map->surface)
+    return 0;
+  return map->surface->token();
+}
+
+int mvm_last_draw_calls(MvmMap* map) {
+  if (!map || !map->surface)
+    return 0;
+  return map->surface->draw_calls();
 }
 
 void mvm_set_notify(MvmMap* map, HWND target, UINT message) {

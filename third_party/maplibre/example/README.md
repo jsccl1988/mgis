@@ -10,6 +10,8 @@ All rights reserved.
 源码 pin 与 smartgis 相同（`ios-v6.30.0`）。已有检出时先做联接，见 `third_party/README.md`。
 
 ```bat
-py -3 third_party\maplibre\build_native.py third_party\.src\maplibre-native third_party\.build\maplibre-example Release
+py -3 third_party\maplibre\build_native.py third_party\.src\maplibre-native third_party\.build\maplibre-example Release --no-glfw
 third_party\.build\maplibre-example\bin\maplibre_headless_example.exe -s third_party\maplibre\example\style_background.json -o third_party\.build\maplibre-example\still.png -w 256 -h 256
 ```
+
+源码若是联到 smartgis 同一份 `ios-v6.30.0` 检出，且那边已编过 `mbgl-render.exe`，可直接复制为 `maplibre_headless_example.exe` 再跑上面的渲染命令，不必重复全量编译。

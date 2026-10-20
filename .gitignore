@@ -4,11 +4,17 @@
 /third_party/.build/
 /third_party/.install/
 /third_party/.src/_cache/
+/third_party/.src/*.zip
+/third_party/.src/*.tar.gz
 # On-demand pins (junction or fetch). Not a second Chromium snapshot.
 /third_party/.src/maplibre-native/
 /third_party/.src/vtk/
 /third_party/.src/cesium-native/
 /third_party/.src/cesium-unreal/
+# Unreal plugin tree is fetched on demand; do not vendor binaries.
+/third_party/cesium-unreal/example/Plugins/
+/cache.sqlite
+*.sqlite
 # Junctions onto third_party/.src. Git must not record a second copy.
 /third_party/skia/
 /third_party/zlib/
