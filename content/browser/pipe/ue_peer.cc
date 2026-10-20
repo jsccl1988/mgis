@@ -193,8 +193,14 @@ WaitKind WaitIo(HANDLE stop_event, HANDLE pipe, OVERLAPPED* overlapped, DWORD* b
   waits[0] = stop_event;
   waits[1] = overlapped->hEvent;
   DWORD result = WaitForMultipleObjects(2, waits, FALSE, INFINITE);
-  if (result == WAIT_OBJECT_0)
+  if (result == WAIT_OBJECT_0) {
+    // Stop won the race. Cancel and drain before the stack OVERLAPPED is
+    // destroyed; otherwise a late completion corrupts the stack.
+    CancelIoEx(pipe, overlapped);
+    DWORD ignored = 0;
+    GetOverlappedResult(pipe, overlapped, &ignored, TRUE);
     return kWaitStop;
+  }
   if (result != WAIT_OBJECT_0 + 1)
     return kWaitFail;
   if (!GetOverlappedResult(pipe, overlapped, bytes, FALSE))
