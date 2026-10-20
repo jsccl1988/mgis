@@ -13,6 +13,7 @@
 /third_party/unreal/example/Binaries/
 /third_party/unreal/example/Intermediate/
 /third_party/unreal/example/Saved/
+/third_party/cesium-flycube/build/
 /cache.sqlite
 *.sqlite
 # Junctions onto third_party/.src. Git must not record a second copy.
