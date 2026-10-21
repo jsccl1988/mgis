@@ -88,17 +88,27 @@ int main() {
               "origin_conflict must not move the georeference") &&
        ok;
 
+  cesium_flycube::PresentMesh ground;
+  const float ground_color[4] = {0.16f, 0.22f, 0.20f, 1.0f};
+  ground.mesh.xyz = {-7000.0f, -7000.0f, 0.0f, 7000.0f, -7000.0f, 0.0f,
+                     7000.0f, 7000.0f, 0.0f, -7000.0f, 7000.0f, 0.0f};
+  ground.mesh.indices = {0, 1, 2, 0, 2, 3};
+  ground.color[0] = ground_color[0];
+  ground.color[1] = ground_color[1];
+  ground.color[2] = ground_color[2];
+  ground.color[3] = ground_color[3];
+
   cesium_flycube::PresentMesh origin;
   cesium_flycube::PresentMesh bund_mark;
   cesium_flycube::PresentMesh east_mark;
+  // Horizontal diamond (two triangles). A single triangle reads as a missing vertex.
   const auto add_diamond = [](cesium_flycube::PresentMesh* mesh, double x, double y, float half,
                              const float color[4]) {
-    const std::uint32_t base = static_cast<std::uint32_t>(mesh->mesh.xyz.size() / 3);
     const float fx = static_cast<float>(x);
     const float fy = static_cast<float>(y);
-    mesh->mesh.xyz.insert(mesh->mesh.xyz.end(),
-                          {fx, fy + half, 30.0f, fx - half, fy - half, 30.0f, fx + half, fy - half, 30.0f});
-    mesh->mesh.indices.insert(mesh->mesh.indices.end(), {base, base + 1, base + 2});
+    const float z = 40.0f;
+    mesh->mesh.xyz = {fx, fy + half, z, fx + half, fy, z, fx, fy - half, z, fx - half, fy, z};
+    mesh->mesh.indices = {0, 1, 2, 0, 2, 3};
     mesh->color[0] = color[0];
     mesh->color[1] = color[1];
     mesh->color[2] = color[2];
@@ -111,19 +121,28 @@ int main() {
   add_diamond(&bund_mark, bund_local.x, bund_local.y, 280.0f, green);
   add_diamond(&east_mark, east_local.x, east_local.y, 280.0f, blue);
 
-  cesium_flycube::PresentCamera picture;
-  picture.eye[0] = 1200.0f;
-  picture.eye[1] = 400.0f;
-  picture.eye[2] = 9000.0f;
-  picture.target[0] = 1200.0f;
-  picture.target[1] = 400.0f;
-  picture.target[2] = 0.0f;
-  picture.up[0] = 0.0f;
-  picture.up[1] = 1.0f;
-  picture.up[2] = 0.0f;
-  picture.fov_y_radians = 0.9f;
-  const cesium_flycube::PresentResult shown = cesium_flycube::PresentScene(
-      "dual_view", picture, {origin, bund_mark, east_mark},
+  const auto look_down = [](cesium_flycube::PresentCamera* camera, double x, double y, double z,
+                            float fov_y) {
+    camera->eye[0] = static_cast<float>(x);
+    camera->eye[1] = static_cast<float>(y);
+    camera->eye[2] = static_cast<float>(z);
+    camera->target[0] = static_cast<float>(x);
+    camera->target[1] = static_cast<float>(y);
+    camera->target[2] = 0.0f;
+    camera->up[0] = 0.0f;
+    camera->up[1] = 1.0f;
+    camera->up[2] = 0.0f;
+    camera->fov_y_radians = fov_y;
+    camera->draw_edges = false;
+  };
+  // Vertical FOV matches ViewStateBuilder for the 16:9 viewports above.
+  cesium_flycube::PresentCamera overview_picture;
+  cesium_flycube::PresentCamera detail_picture;
+  look_down(&overview_picture, 0.0, 0.0, 8000.0, 0.627f);
+  look_down(&detail_picture, east_local.x, east_local.y, 600.0, 0.457f);
+  const cesium_flycube::PresentResult shown = cesium_flycube::PresentSplitScene(
+      "dual_view", overview_picture, detail_picture,
+      {ground, origin, bund_mark, east_mark},
       std::string(CESIUM_FLYCUBE_CAPTURE_DIR) + "/dual_view.png");
   std::cout << "png " << shown.png_path << " pixels " << shown.drawn_pixels
             << " " << shown.message << "\n";
