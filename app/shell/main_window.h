@@ -10,15 +10,17 @@ namespace shell {
 // MessageLoopForUI and must run it.
 void ShowMainWindow();
 
-// Creates the same four widgets, writes out/harness/browser.chrome/mark.json
-// after they exist, then closes them and runs the current message loop until
-// quit. Returns 0 when all six browser.chrome marks were recorded.
-// Does not start UE. The caller must already have a MessageLoopForUI.
+// Creates the same four widgets, then closes them and runs the current
+// message loop until quit. Does not write browser.chrome/mark.json: the
+// suite runner is not on content/public/browser. Returns 0 when the four
+// widgets and both trees exist. Does not start UE. The caller must already
+// have a MessageLoopForUI.
 int RunChromeHarness();
 
-// Creates the map and view0 child HWNDs, presents one browsed frame each,
-// writes out/harness/render-check/mark.json, and returns 0 only when both
-// frames were actually drawn.
+// Creates the map widget and the view0/view1 GlobeView satellites. Presents
+// a browsed frame on view0. The map widget is not a MapLibre surface.
+// Writes out/harness/render-check/mark.json and returns 0 only when the
+// view0 frame was actually drawn.
 int RunRenderCheck();
 
 }  // namespace shell

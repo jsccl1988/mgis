@@ -13,7 +13,6 @@ executable("mview_shell") {
   deps = [
     "//app/mgis:mgis",
     "//content:content",
-    "//third_party/maplibre/mview_map:mview_map",
     "//plugin:plugin",
     "//tool:tool",
     "//base/third_party/dynamic_annotations:dynamic_annotations",
