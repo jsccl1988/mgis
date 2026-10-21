@@ -11,7 +11,6 @@
 #include "base/utf_string_conversions.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "app/mgis/bottom_panel.h"
-#include "app/mgis/flycube_bridge.h"
 #include "app/mgis/tool_plugin_panel.h"
 #include "app/mgis/viewport_placeholder.h"
 #include "app/mgis/viewport_surface.h"
@@ -19,11 +18,10 @@
 #include "content/public/gis_contents.h"
 #include "content/public/tool_session.h"
 #include "content/public/trace_log.h"
-#include "content/public/view_host.h"
+#include "content/public/types.h"
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gfx/rect.h"
 #include "ui/views/controls/menu/menu.h"
-#include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/win/hwnd_util.h"
@@ -88,9 +86,6 @@ WorkbenchContents::WorkbenchContents()
 WorkbenchContents::~WorkbenchContents() {
   if (contents_.get())
     contents_->trace_log()->RemoveObserver(this);
-  if (view0_page_ && view0_page_->native_host())
-    view0_page_->native_host()->Detach();
-  view0_host_.reset();
 }
 
 void WorkbenchContents::SelectViewTab(ViewId id) {
@@ -115,6 +110,16 @@ void WorkbenchContents::ApplyViewTab(ViewId id) {
   if (view_tabs_)
     view_tabs_->SelectTabAt(index);
   syncing_ = false;
+  ApplySceneMode();
+}
+
+void WorkbenchContents::ApplySceneMode() {
+  if (!contents_.get())
+    return;
+  const content::SceneMode mode = active_ == kView0
+                                      ? content::SceneMode::kScene3D
+                                      : content::SceneMode::kScene2D;
+  contents_->SetSceneMode(mode);
 }
 
 bool WorkbenchContents::HasLayerTree() const {
@@ -191,8 +196,6 @@ void WorkbenchContents::Layout() {
     tools_panel_->SetBounds(left_w + center_w, slider_h, right_w, mid_h);
   if (bottom_)
     bottom_->SetBounds(0, slider_h + mid_h, width(), bottom_h);
-  if (view0_host_.get() && view0_page_)
-    view0_host_->Resize(view0_page_->width(), view0_page_->height());
 }
 
 void WorkbenchContents::WindowClosing() {
@@ -237,47 +240,31 @@ void WorkbenchContents::OnTrace(const content::TraceLine& line) {
   bottom_->ShowChannel(channel, lines);
 }
 
-bool WorkbenchContents::OnChildGesture(const content::InputEvent& event) {
-  if (!session_.get())
-    return false;
-  return session_->dispatch_input(event);
-}
-
 void WorkbenchContents::StartSession() {
   contents_.reset(new content::GisContents());
   session_.reset(new content::ToolSession());
   session_->set_event_bus(contents_->event_bus());
   session_->set_trace_log(contents_->trace_log());
   contents_->trace_log()->AddObserver(this);
-  session_->activate(std::string("view3d.trackball"),
-                     std::string(content::kViewIdView0));
-
-  view0_host_.reset(new content::ViewHost());
-  view0_host_->set_delegate(this);
-  view0_host_->set_trace(contents_->trace_log());
-  InstallFlyCubeBackend();
 
   views::Widget* widget = GetWidget();
   HWND parent = widget ? views::HWNDForWidget(widget) : NULL;
-  int width = view0_page_ ? view0_page_->width() : 640;
-  int height = view0_page_ ? view0_page_->height() : 480;
+  int width = view_tabs_ ? view_tabs_->width() : 0;
+  int height = view_tabs_ ? view_tabs_->height() : 0;
   if (width < 2)
     width = 640;
   if (height < 2)
     height = 480;
-  if (parent &&
-      view0_host_->Attach(parent, content::kViewIdView0,
-                          content::kViewBackendFlyCube, width, height) &&
-      view0_page_ && view0_page_->native_host()) {
-    view0_page_->native_host()->Attach(
-        reinterpret_cast<gfx::NativeView>(view0_host_->child_hwnd()));
+  if (parent) {
+    contents_->AttachView(parent, std::string(content::kViewIdScene), width,
+                          height);
   }
+  ApplySceneMode();
 
   contents_->trace_log()->Append(content::kTraceConsole,
                                 "backend.unavailable maplibre");
   agent_.reset(new content::DebugAgent());
-  agent_->Bind(session_.get(), contents_->trace_log(), view0_host_.get(),
-               parent);
+  agent_->Bind(session_.get(), contents_->trace_log(), NULL, parent);
   agent_->ExecLine("help");
   contents_->trace_log()->Append(content::kTraceConsole, "session.ready");
   LOG(INFO) << "mgis content session started";

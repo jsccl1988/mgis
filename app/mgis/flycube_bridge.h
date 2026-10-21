@@ -6,8 +6,7 @@
 
 namespace mgis {
 
-// Registers the in-process globe as the FlyCube view backend.
-// Owned by the workbench. The shell incubator does not call this.
+// Retained with the globe sources. Does not register a view backend.
 void InstallFlyCubeBackend();
 
 }  // namespace mgis

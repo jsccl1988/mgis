@@ -16,7 +16,6 @@
 #include "content/public/gis_contents.h"
 #include "content/public/tool_session.h"
 #include "content/public/trace_log.h"
-#include "content/public/view_host.h"
 #include "ui/views/widget/widget_delegate.h"
 
 namespace views {
@@ -29,7 +28,6 @@ namespace content {
 class DebugAgent;
 class GisContents;
 class ToolSession;
-class ViewHost;
 }
 
 namespace mgis {
@@ -45,8 +43,7 @@ class WorkbenchContents : public views::WidgetDelegateView,
                           public views::SliderListener,
                           public views::TabbedPaneListener,
                           public CatalogTabs::Observer,
-                          public content::TraceLog::Observer,
-                          public content::ViewHost::Delegate {
+                          public content::TraceLog::Observer {
  public:
   WorkbenchContents();
   virtual ~WorkbenchContents();
@@ -88,13 +85,12 @@ class WorkbenchContents : public views::WidgetDelegateView,
   // TraceLog::Observer:
   virtual void OnTrace(const content::TraceLine& line) OVERRIDE;
 
-  // ViewHost::Delegate:
-  virtual bool OnChildGesture(const content::InputEvent& event) OVERRIDE;
-
  private:
   class WindowMenuDelegate;
 
   void ApplyViewTab(ViewId id);
+  // 2D tab stores kScene2D. 3D tab stores kScene3D. The child HWND stays one.
+  void ApplySceneMode();
 
   ViewId active_;
   bool syncing_;
@@ -109,7 +105,6 @@ class WorkbenchContents : public views::WidgetDelegateView,
   scoped_ptr<views::Menu> menu_;
   scoped_ptr<content::GisContents> contents_;
   scoped_ptr<content::ToolSession> session_;
-  scoped_ptr<content::ViewHost> view0_host_;
   scoped_ptr<content::DebugAgent> agent_;
   views::Widget* map_;
   views::Widget* view0_;
