@@ -68,7 +68,7 @@ class InteractionRegistry {
 
 // Exclusive-tool stack for one view. activate replaces the current tool.
 // push keeps the previous tool. An empty stack means no exclusive tool.
-// view3d.trackball and view3d.fps activate only on view0 and view1.
+// view3d.trackball and view3d.fps activate on view0, view1, and scene.
 class InteractionStack {
  public:
   InteractionStack(InteractionRegistry* registry, const std::string& view_id);

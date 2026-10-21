@@ -8,7 +8,7 @@
 
 #include "gtest/gtest.h"
 
-#include "content/browser/glang.runtime/exec/suite_runner.h"
+#include "content/browser/glang/exec/suite_runner.h"
 #include "content/public/debug_agent.h"
 #include "content/public/gis_contents.h"
 #include "content/public/tool_session.h"
@@ -162,7 +162,8 @@ TEST(SessionWire, AgentCommandAndClosedVerb) {
   EXPECT_EQ(content::kViewIdMap, tools.last_command_view_id());
 
   const std::string closed = agent.ExecLine("expect_camera view0");
-  EXPECT_NE(std::string::npos, closed.find("not available"));
+  EXPECT_EQ(std::string::npos, closed.find("not available"));
+  EXPECT_NE(std::string::npos, closed.find("scene"));
 
   std::vector<std::string> agent_lines;
   contents.trace_log()->Snapshot(content::kTraceAgent, &agent_lines);
@@ -183,4 +184,84 @@ TEST(SessionWire, OnlySceneViewAttaches) {
   contents.trace_log()->Snapshot(content::kTraceConsole, &lines);
   EXPECT_NE(std::string::npos, lines[0].find("backend.unavailable map"));
   DestroyWindow(parent);
+}
+
+TEST(SessionWire, SuiteSceneModeAndUnknownVerb) {
+  content::GisContents contents;
+  HWND parent = MakeParent();
+  ASSERT_TRUE(contents.AttachView(parent, "scene", 64, 64));
+  std::string error;
+  EXPECT_TRUE(content::run_suite_text(
+      contents.capability_host(),
+      "scene_mode scene3d\nmark mode.ready\n", &error));
+  EXPECT_EQ(content::SceneMode::kScene3D, contents.scene_mode());
+  EXPECT_TRUE(contents.capability_host().has_mark("mode.ready"));
+
+  EXPECT_FALSE(content::run_suite_text(
+      contents.capability_host(), "mark gone\nnope\n", &error));
+  EXPECT_FALSE(contents.capability_host().has_mark("gone"));
+  EXPECT_TRUE(contents.capability_host().has_mark("mode.ready"));
+  DestroyWindow(parent);
+}
+
+TEST(SessionWire, ExpectCameraSceneTolerances) {
+  HWND parent = MakeParent();
+  ASSERT_TRUE(parent != NULL);
+  content::GisContents contents;
+  ASSERT_TRUE(contents.AttachView(parent, "scene", 64, 64));
+  std::string error;
+  EXPECT_TRUE(content::run_suite_text(
+      contents.capability_host(),
+      "expect_camera scene 0 0 0\n"
+      "expect_camera scene 0.000001 0 1\n",
+      &error))
+      << error;
+  EXPECT_FALSE(content::run_suite_text(
+      contents.capability_host(),
+      "expect_camera scene 0.000002 0 0\n", &error));
+  EXPECT_NE(std::string::npos, error.find("expect_camera"));
+  EXPECT_FALSE(content::run_suite_text(
+      contents.capability_host(), "expect_camera scene 0 0 1.1\n", &error));
+  EXPECT_NE(std::string::npos, error.find("expect_camera"));
+
+  EXPECT_FALSE(content::run_suite_text(
+      contents.capability_host(),
+      "scene_mode scene3d\nexpect_camera scene\n", &error));
+  EXPECT_TRUE(content::run_suite_text(
+      contents.capability_host(),
+      "scene_mode scene3d\n"
+      "activate_tool view3d.trackball scene\n"
+      "pointer scene move 3 4\n"
+      "expect_camera scene\n",
+      &error))
+      << error;
+  DestroyWindow(parent);
+}
+
+TEST(SessionWire, AttachAcceptsOnlyScene) {
+  HWND parent = MakeParent();
+  ASSERT_TRUE(parent != NULL);
+  content::GisContents contents;
+  content::ToolSession tools;
+  content::DebugAgent agent;
+  agent.Bind(&tools, contents.trace_log(), NULL, parent);
+  agent.set_contents(&contents);
+  const std::string backends = agent.ExecLine("attach view0 flycube");
+  EXPECT_NE(std::string::npos, backends.find("only scene"));
+  EXPECT_NE(std::string::npos, agent.ExecLine("attach map").find("only scene"));
+  EXPECT_EQ("attached", agent.ExecLine("attach scene"));
+  EXPECT_EQ(content::SceneMode::kScene2D, contents.scene_mode());
+  DestroyWindow(parent);
+}
+
+TEST(SessionWire, ExpectLayerAndEntityStayExplicit) {
+  content::DebugAgent agent;
+  const std::string layer = agent.ExecLine("expect_layer basemap");
+  const std::string entity = agent.ExecLine("expect_entity g0");
+  EXPECT_FALSE(layer.empty());
+  EXPECT_FALSE(entity.empty());
+  EXPECT_NE(std::string::npos, layer.find("expect_layer"));
+  EXPECT_NE(std::string::npos, entity.find("expect_entity"));
+  EXPECT_EQ(std::string::npos, layer.find("ok"));
+  EXPECT_EQ(std::string::npos, entity.find("ok"));
 }

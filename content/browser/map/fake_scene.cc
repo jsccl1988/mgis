@@ -3,6 +3,8 @@
 
 #include "content/browser/map/fake_scene.h"
 
+#include <cmath>
+
 #include <windows.h>
 
 #include "content/public/trace_log.h"
@@ -22,7 +24,14 @@ const char* SceneModeLabel(SceneMode mode) {
 
 }  // namespace
 
-FakeScene::FakeScene() : child_(NULL), mode_(SceneMode::kScene2D) {}
+FakeScene::FakeScene()
+    : child_(NULL),
+      mode_(SceneMode::kScene2D),
+      lon_(0),
+      lat_(0),
+      height_(0),
+      orbit_delta_(0),
+      trackball_armed_(false) {}
 
 FakeScene::~FakeScene() {
   if (child_)
@@ -54,6 +63,11 @@ bool FakeScene::Attach(void* parent_hwnd,
     DestroyWindow(reinterpret_cast<HWND>(child_));
   child_ = child;
   mode_ = SceneMode::kScene2D;
+  lon_ = 0;
+  lat_ = 0;
+  height_ = 0;
+  orbit_delta_ = 0;
+  trackball_armed_ = false;
   return true;
 }
 
@@ -67,6 +81,51 @@ void FakeScene::SetSceneMode(SceneMode mode, TraceLog* trace) {
 
 SceneMode FakeScene::scene_mode() const {
   return mode_;
+}
+
+void FakeScene::ArmTrackball() {
+  trackball_armed_ = true;
+}
+
+void FakeScene::NotePointer(const InputEvent& event) {
+  if (!trackball_armed_ || event.view_id != kViewIdScene)
+    return;
+  if (event.kind == kInputEventMouse && event.mouse_action == kMouseMove)
+    orbit_delta_ = 1;
+}
+
+bool FakeScene::ExpectCamera(bool has_target,
+                             double lon,
+                             double lat,
+                             double height,
+                             std::string* error) const {
+  if (!child_) {
+    if (error)
+      *error = "expect_camera: scene is not attached";
+    return false;
+  }
+  if (mode_ == SceneMode::kScene3D) {
+    if (orbit_delta_ <= 0) {
+      if (error)
+        *error = "expect_camera: orbit delta is not positive";
+      return false;
+    }
+    return true;
+  }
+  if (!has_target) {
+    if (error)
+      *error = "expect_camera: needs lon lat height";
+    return false;
+  }
+  const double kDegrees = 1e-6;
+  const double kHeightMeters = 1;
+  if (std::fabs(lon_ - lon) > kDegrees || std::fabs(lat_ - lat) > kDegrees ||
+      std::fabs(height_ - height) > kHeightMeters) {
+    if (error)
+      *error = "expect_camera: scene camera mismatch";
+    return false;
+  }
+  return true;
 }
 
 }  // namespace content

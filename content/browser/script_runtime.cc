@@ -3,8 +3,8 @@
 
 #include "content/public/script_runtime.h"
 
-#include "content/browser/glang.runtime/exec/suite_runner.h"
-#include "content/browser/glang.runtime/language/suite_loader.h"
+#include "content/browser/glang/exec/suite_runner.h"
+#include "content/browser/glang/language/suite_loader.h"
 
 namespace content {
 

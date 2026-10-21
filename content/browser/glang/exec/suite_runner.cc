@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/browser/glang.runtime/exec/suite_runner.h"
+#include "content/browser/glang/exec/suite_runner.h"
 
 #include <stdlib.h>
 
@@ -89,6 +89,9 @@ enum OpKind {
   kOpCommand,
   kOpActivate,
   kOpPointer,
+  kOpSceneMode,
+  kOpExpectCamera,
+  kOpAttach,
 };
 
 struct Op {
@@ -96,7 +99,33 @@ struct Op {
   std::string a;
   std::string b;
   InputEvent event;
+  bool has_camera_target;
+  double lon;
+  double lat;
+  double height;
 };
+
+bool IsSuiteView(const std::string& view_id) {
+  return view_id == kViewIdScene || is_known_view_id(view_id);
+}
+
+bool ParseDouble(const std::string& text, double* out) {
+  if (text.empty() || !out)
+    return false;
+  char* end = NULL;
+  const double value = strtod(text.c_str(), &end);
+  if (!end || end == text.c_str() || *end != '\0')
+    return false;
+  *out = value;
+  return true;
+}
+
+void ResetOp(Op* op) {
+  op->has_camera_target = false;
+  op->lon = 0;
+  op->lat = 0;
+  op->height = 0;
+}
 
 bool ParsePointer(const std::string& rest, InputEvent* event, std::string* error,
                   int line_no) {
@@ -106,7 +135,7 @@ bool ParsePointer(const std::string& rest, InputEvent* event, std::string* error
     SetError(error, LineError("pointer needs view phase x y", line_no));
     return false;
   }
-  if (!is_known_view_id(tokens[0])) {
+  if (!IsSuiteView(tokens[0])) {
     SetError(error, LineError("pointer view id", line_no));
     return false;
   }
@@ -152,12 +181,52 @@ bool ParseCommand(const std::string& rest,
                   const char* verb) {
   std::vector<std::string> tokens;
   SplitTokens(rest, &tokens);
-  if (tokens.size() != 2 || tokens[0].empty() || !is_known_view_id(tokens[1])) {
+  if (tokens.size() != 2 || tokens[0].empty() || !IsSuiteView(tokens[1])) {
     SetError(error, LineError(std::string(verb) + " needs id and view", line_no));
     return false;
   }
   *id = tokens[0];
   *view_id = tokens[1];
+  return true;
+}
+
+bool ParseExpectCamera(const std::string& rest,
+                       Op* op,
+                       std::string* error,
+                       int line_no) {
+  std::vector<std::string> tokens;
+  SplitTokens(rest, &tokens);
+  if (tokens.empty() || tokens[0] != kViewIdScene) {
+    SetError(error, LineError("expect_camera accepts only scene", line_no));
+    return false;
+  }
+  op->a = tokens[0];
+  if (tokens.size() == 1) {
+    op->has_camera_target = false;
+    return true;
+  }
+  if (tokens.size() != 4) {
+    SetError(error, LineError("expect_camera scene needs lon lat height", line_no));
+    return false;
+  }
+  if (!ParseDouble(tokens[1], &op->lon) || !ParseDouble(tokens[2], &op->lat) ||
+      !ParseDouble(tokens[3], &op->height)) {
+    SetError(error, LineError("expect_camera coordinates", line_no));
+    return false;
+  }
+  op->has_camera_target = true;
+  return true;
+}
+
+bool ParseAttach(const std::string& rest, std::string* view_id, std::string* error,
+                 int line_no) {
+  std::vector<std::string> tokens;
+  SplitTokens(rest, &tokens);
+  if (tokens.size() != 1 || tokens[0] != kViewIdScene) {
+    SetError(error, LineError("attach accepts only scene", line_no));
+    return false;
+  }
+  *view_id = tokens[0];
   return true;
 }
 
@@ -179,6 +248,7 @@ bool run_suite_text(CapabilityHost& host,
     std::string rest;
     if (SplitVerb(raw, &verb, &rest)) {
       Op op;
+      ResetOp(&op);
       if (verb == "mark") {
         if (rest.empty()) {
           SetError(error, LineError("mark requires a name", line_no));
@@ -206,8 +276,28 @@ bool run_suite_text(CapabilityHost& host,
         if (!ParsePointer(rest, &op.event, error, line_no))
           return false;
         op.kind = kOpPointer;
-      } else if (verb == "expect_camera" || verb == "expect_layer" ||
-                 verb == "expect_entity" || verb == "capture") {
+      } else if (verb == "scene_mode") {
+        if (rest != "scene2d" && rest != "scene3d" && rest != "columbus") {
+          SetError(error, LineError(
+              "scene_mode accepts scene2d|scene3d|columbus", line_no));
+          return false;
+        }
+        if (!host.has_scene_mode_slot()) {
+          SetError(error, LineError("scene_mode slot not installed", line_no));
+          return false;
+        }
+        op.kind = kOpSceneMode;
+        op.a = rest;
+      } else if (verb == "expect_camera") {
+        if (!ParseExpectCamera(rest, &op, error, line_no))
+          return false;
+        op.kind = kOpExpectCamera;
+      } else if (verb == "attach") {
+        if (!ParseAttach(rest, &op.a, error, line_no))
+          return false;
+        op.kind = kOpAttach;
+      } else if (verb == "expect_layer" || verb == "expect_entity" ||
+                 verb == "capture") {
         SetError(error, LineError(verb + " is not available in this slice", line_no));
         return false;
       } else {
@@ -237,9 +327,39 @@ bool run_suite_text(CapabilityHost& host,
         SetError(error, "activate_tool failed: " + op.a);
         return false;
       }
-    } else if (!host.RunPointer(op.event)) {
-      SetError(error, "pointer failed");
-      return false;
+    } else if (op.kind == kOpPointer) {
+      if (!host.RunPointer(op.event)) {
+        SetError(error, "pointer failed");
+        return false;
+      }
+    } else if (op.kind == kOpSceneMode) {
+      if (!host.RunSceneMode(op.a)) {
+        SetError(error, "scene_mode failed: " + op.a);
+        return false;
+      }
+    } else if (op.kind == kOpExpectCamera) {
+      if (!host.has_camera_slot()) {
+        SetError(error, "expect_camera: scene is not attached");
+        return false;
+      }
+      std::string camera_error;
+      if (!host.RunExpectCamera(op.a, op.has_camera_target, op.lon, op.lat,
+                               op.height, &camera_error)) {
+        SetError(error, camera_error.empty()
+                            ? "expect_camera: scene is not attached"
+                            : camera_error);
+        return false;
+      }
+    } else if (op.kind == kOpAttach) {
+      if (!host.has_attach_slot()) {
+        SetError(error, "parent hwnd missing");
+        return false;
+      }
+      std::string attach_error;
+      if (!host.RunAttach(op.a, &attach_error)) {
+        SetError(error, attach_error.empty() ? "attach failed" : attach_error);
+        return false;
+      }
     }
   }
   ClearError(error);

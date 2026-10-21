@@ -12,11 +12,16 @@
 namespace content {
 
 struct ToolSession::Routers {
-  Routers() : map(kViewIdMap), view0(kViewIdView0), view1(kViewIdView1) {}
+  Routers()
+      : map(kViewIdMap),
+        view0(kViewIdView0),
+        view1(kViewIdView1),
+        scene(kViewIdScene) {}
 
   tool::Workspace map;
   tool::Workspace view0;
   tool::Workspace view1;
+  tool::Workspace scene;
 };
 
 namespace {
@@ -65,6 +70,8 @@ tool::Workspace* ToolSession::WorkspaceFor(const std::string& view_id) {
     return &routers_->view0;
   if (view_id == kViewIdView1)
     return &routers_->view1;
+  if (view_id == kViewIdScene)
+    return &routers_->scene;
   return NULL;
 }
 
