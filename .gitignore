@@ -11,6 +11,9 @@
 /third_party/cesium-unreal/example/Intermediate/
 /third_party/cesium-unreal/example/Saved/
 /third_party/cesium-unreal/example/DerivedDataCache/
+# Local editor rewrites; sample keeps only DefaultEngine.ini in git.
+/third_party/cesium-unreal/example/Config/DefaultInput.ini
+/third_party/cesium-unreal/example/Content/
 /third_party/unreal/example/Binaries/
 /third_party/unreal/example/Intermediate/
 /third_party/unreal/example/Saved/
