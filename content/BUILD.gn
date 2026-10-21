@@ -37,6 +37,7 @@ static_library("content") {
     "browser/event_bus.cc",
     "browser/gis_document.cc",
     "browser/gis_contents.cc",
+    "browser/map/scene.h",
     "browser/map/fake_scene.h",
     "browser/map/fake_scene.cc",
     "browser/gis_contents_client.cc",

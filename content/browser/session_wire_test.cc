@@ -184,3 +184,38 @@ TEST(SessionWire, OnlySceneViewAttaches) {
   EXPECT_NE(std::string::npos, lines[0].find("backend.unavailable map"));
   DestroyWindow(parent);
 }
+
+TEST(SessionWire, ModeSelectsControllerAndPrimitive) {
+  HWND parent = MakeParent();
+  ASSERT_TRUE(parent != NULL);
+  content::GisContents contents;
+  ASSERT_TRUE(contents.AttachView(parent, "scene", 80, 60));
+  content::ToolSession* tools = contents.tool_session();
+  ASSERT_TRUE(tools != NULL);
+  EXPECT_FALSE(content::is_known_view_id("scene"));
+  EXPECT_FALSE(content::is_known_view_id(content::kViewIdScene));
+
+  EXPECT_TRUE(tools->activate("view.pan", "scene"));
+  EXPECT_TRUE(tools->activate("view.zoom_in", "scene"));
+  EXPECT_TRUE(tools->activate("view.zoom_out", "scene"));
+  EXPECT_FALSE(tools->activate("view3d.trackball", "scene"));
+  EXPECT_EQ("primitive:basemap:m0", contents.Pick(1, 1));
+
+  contents.SetSceneMode(content::SceneMode::kScene3D);
+  EXPECT_FALSE(tools->activate("view.pan", "scene"));
+  EXPECT_FALSE(tools->activate("view.zoom_in", "scene"));
+  EXPECT_FALSE(tools->activate("view.zoom_out", "scene"));
+  EXPECT_TRUE(tools->activate("view3d.trackball", "scene"));
+  EXPECT_EQ("primitive:groundwater:g0", contents.Pick(1, 1));
+
+  contents.SetSceneMode(content::SceneMode::kColumbusView);
+  EXPECT_TRUE(tools->activate("view.pan", "scene"));
+  EXPECT_TRUE(tools->activate("view.zoom_in", "scene"));
+  EXPECT_TRUE(tools->activate("view.zoom_out", "scene"));
+  EXPECT_FALSE(tools->activate("view3d.trackball", "scene"));
+  EXPECT_EQ("", contents.Pick(1, 1));
+
+  contents.SetSceneMode(content::SceneMode::kScene2D);
+  EXPECT_EQ("primitive:basemap:m0", contents.Pick(9, 9));
+  DestroyWindow(parent);
+}

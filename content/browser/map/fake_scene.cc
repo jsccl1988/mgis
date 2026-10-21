@@ -12,6 +12,9 @@ namespace content {
 
 namespace {
 
+const char kBasemapId[] = "basemap";
+const char kGroundwaterId[] = "groundwater";
+
 const char* SceneModeLabel(SceneMode mode) {
   if (mode == SceneMode::kScene3D)
     return "scene3d";
@@ -22,7 +25,10 @@ const char* SceneModeLabel(SceneMode mode) {
 
 }  // namespace
 
-FakeScene::FakeScene() : child_(NULL), mode_(SceneMode::kScene2D) {}
+FakeScene::FakeScene() : child_(NULL), mode_(SceneMode::kScene2D) {
+  primitive_ids_.push_back(kBasemapId);
+  primitive_ids_.push_back(kGroundwaterId);
+}
 
 FakeScene::~FakeScene() {
   if (child_)
@@ -67,6 +73,31 @@ void FakeScene::SetSceneMode(SceneMode mode, TraceLog* trace) {
 
 SceneMode FakeScene::scene_mode() const {
   return mode_;
+}
+
+bool FakeScene::HasPrimitive(const std::string& id) const {
+  for (size_t i = 0; i < primitive_ids_.size(); ++i) {
+    if (primitive_ids_[i] == id)
+      return true;
+  }
+  return false;
+}
+
+std::string FakeScene::Pick(int /*x*/, int /*y*/) const {
+  const char* id = NULL;
+  const char* feature = NULL;
+  if (mode_ == SceneMode::kScene2D) {
+    id = kBasemapId;
+    feature = "m0";
+  } else if (mode_ == SceneMode::kScene3D) {
+    id = kGroundwaterId;
+    feature = "g0";
+  } else {
+    return std::string();
+  }
+  if (!HasPrimitive(id))
+    return std::string();
+  return std::string("primitive:") + id + ":" + feature;
 }
 
 }  // namespace content

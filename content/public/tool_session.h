@@ -15,6 +15,7 @@ class Workspace;
 namespace content {
 
 class EventBus;
+class Scene;
 class TraceLog;
 
 // Per-view command and input session. Each known view id has its own
@@ -28,6 +29,9 @@ class ToolSession {
   // Unowned. NULL skips that side effect.
   void set_event_bus(EventBus* event_bus);
   void set_trace_log(TraceLog* trace_log);
+  // Unowned. activate() on kViewIdScene follows this scene's mode.
+  // NULL rejects that view. "scene" stays outside is_known_view_id.
+  void set_scene(Scene* scene);
 
   // Records |command_id| for |view_id|. Returns false, and leaves the last
   // command unchanged, when either string is empty or |view_id| is unknown.
@@ -39,6 +43,9 @@ class ToolSession {
 
   // Records |interaction_id| for |view_id|. Returns false, and leaves the last
   // activation unchanged, when either string is empty or |view_id| is unknown.
+  // kViewIdScene is not a known view id. It succeeds only when set_scene() is
+  // set and SceneMode allows the tool: pan and zoom in SCENE2D or
+  // COLUMBUS_VIEW, view3d.trackball only in SCENE3D.
   bool activate(const std::string& interaction_id, const std::string& view_id);
 
   const std::string& last_command_id() const;
@@ -60,6 +67,7 @@ class ToolSession {
   Routers* routers_;
   EventBus* event_bus_;
   TraceLog* trace_log_;
+  Scene* scene_;
 
   tool::Workspace* WorkspaceFor(const std::string& view_id);
 
