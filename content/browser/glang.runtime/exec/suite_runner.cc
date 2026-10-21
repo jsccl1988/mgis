@@ -89,6 +89,9 @@ enum OpKind {
   kOpCommand,
   kOpActivate,
   kOpPointer,
+  kOpAttach,
+  kOpSceneMode,
+  kOpExpectCamera,
 };
 
 struct Op {
@@ -98,6 +101,25 @@ struct Op {
   InputEvent event;
 };
 
+bool SuiteNamesView(const std::string& view_id) {
+  return is_known_view_id(view_id) || view_id == kViewIdScene;
+}
+
+bool ParseOneToken(const std::string& rest,
+                   std::string* token,
+                   std::string* error,
+                   int line_no,
+                   const char* message) {
+  std::vector<std::string> tokens;
+  SplitTokens(rest, &tokens);
+  if (tokens.size() != 1 || tokens[0].empty()) {
+    SetError(error, LineError(message, line_no));
+    return false;
+  }
+  *token = tokens[0];
+  return true;
+}
+
 bool ParsePointer(const std::string& rest, InputEvent* event, std::string* error,
                   int line_no) {
   std::vector<std::string> tokens;
@@ -106,7 +128,7 @@ bool ParsePointer(const std::string& rest, InputEvent* event, std::string* error
     SetError(error, LineError("pointer needs view phase x y", line_no));
     return false;
   }
-  if (!is_known_view_id(tokens[0])) {
+  if (!SuiteNamesView(tokens[0])) {
     SetError(error, LineError("pointer view id", line_no));
     return false;
   }
@@ -152,7 +174,7 @@ bool ParseCommand(const std::string& rest,
                   const char* verb) {
   std::vector<std::string> tokens;
   SplitTokens(rest, &tokens);
-  if (tokens.size() != 2 || tokens[0].empty() || !is_known_view_id(tokens[1])) {
+  if (tokens.size() != 2 || tokens[0].empty() || !SuiteNamesView(tokens[1])) {
     SetError(error, LineError(std::string(verb) + " needs id and view", line_no));
     return false;
   }
@@ -206,8 +228,33 @@ bool run_suite_text(CapabilityHost& host,
         if (!ParsePointer(rest, &op.event, error, line_no))
           return false;
         op.kind = kOpPointer;
-      } else if (verb == "expect_camera" || verb == "expect_layer" ||
-                 verb == "expect_entity" || verb == "capture") {
+      } else if (verb == "attach") {
+        if (!host.has_attach_slot()) {
+          SetError(error, LineError("attach slot not installed", line_no));
+          return false;
+        }
+        if (!ParseOneToken(rest, &op.a, error, line_no, "attach needs a view"))
+          return false;
+        op.kind = kOpAttach;
+      } else if (verb == "scene_mode") {
+        if (!host.has_scene_mode_slot()) {
+          SetError(error, LineError("scene_mode slot not installed", line_no));
+          return false;
+        }
+        if (!ParseOneToken(rest, &op.a, error, line_no,
+                           "scene_mode needs a mode"))
+          return false;
+        op.kind = kOpSceneMode;
+      } else if (verb == "expect_camera") {
+        if (!host.has_expect_camera_slot()) {
+          SetError(error,
+                   LineError(verb + " is not available in this slice", line_no));
+          return false;
+        }
+        op.kind = kOpExpectCamera;
+        op.a = rest;
+      } else if (verb == "expect_layer" || verb == "expect_entity" ||
+                 verb == "capture") {
         SetError(error, LineError(verb + " is not available in this slice", line_no));
         return false;
       } else {
@@ -235,6 +282,21 @@ bool run_suite_text(CapabilityHost& host,
     } else if (op.kind == kOpActivate) {
       if (!host.RunActivate(op.a, op.b)) {
         SetError(error, "activate_tool failed: " + op.a);
+        return false;
+      }
+    } else if (op.kind == kOpAttach) {
+      if (!host.RunAttach(op.a)) {
+        SetError(error, "attach failed");
+        return false;
+      }
+    } else if (op.kind == kOpSceneMode) {
+      if (!host.RunSceneMode(op.a)) {
+        SetError(error, "scene_mode failed");
+        return false;
+      }
+    } else if (op.kind == kOpExpectCamera) {
+      if (!host.RunExpectCamera(op.a)) {
+        SetError(error, "expect_camera failed");
         return false;
       }
     } else if (!host.RunPointer(op.event)) {

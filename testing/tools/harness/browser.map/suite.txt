@@ -1,0 +1,6 @@
+attach scene
+scene_mode scene2d
+activate_tool view.pan scene
+pointer scene move 1 1
+expect_camera scene 0 0 0
+mark pixel_ratio

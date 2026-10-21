@@ -23,6 +23,9 @@ class CapabilityHost {
                               const std::string& command_id,
                               const std::string& view_id);
   typedef bool (*PointerSlot)(void* context, const InputEvent& event);
+  typedef bool (*AttachSlot)(void* context, const std::string& view_id);
+  typedef bool (*SceneModeSlot)(void* context, const std::string& mode);
+  typedef bool (*ExpectCameraSlot)(void* context, const std::string& spec);
 
   CapabilityHost();
   ~CapabilityHost();
@@ -32,14 +35,23 @@ class CapabilityHost {
   void set_command_slot(CommandSlot slot, void* context);
   void set_activate_slot(CommandSlot slot, void* context);
   void set_pointer_slot(PointerSlot slot, void* context);
+  void set_attach_slot(AttachSlot slot, void* context);
+  void set_scene_mode_slot(SceneModeSlot slot, void* context);
+  void set_expect_camera_slot(ExpectCameraSlot slot, void* context);
 
   bool has_command_slot() const;
   bool has_activate_slot() const;
   bool has_pointer_slot() const;
+  bool has_attach_slot() const;
+  bool has_scene_mode_slot() const;
+  bool has_expect_camera_slot() const;
 
   bool RunCommand(const std::string& command_id, const std::string& view_id);
   bool RunActivate(const std::string& command_id, const std::string& view_id);
   bool RunPointer(const InputEvent& event);
+  bool RunAttach(const std::string& view_id);
+  bool RunSceneMode(const std::string& mode);
+  bool RunExpectCamera(const std::string& spec);
 
   // Appends |name| and, when a slot is set, invokes it. Empty names are
   // ignored so a bad caller cannot plant a blank mark.
@@ -60,14 +72,22 @@ class CapabilityHost {
   void* activate_context_;
   PointerSlot pointer_slot_;
   void* pointer_context_;
+  AttachSlot attach_slot_;
+  void* attach_context_;
+  SceneModeSlot scene_mode_slot_;
+  void* scene_mode_context_;
+  ExpectCameraSlot expect_camera_slot_;
+  void* expect_camera_context_;
   std::vector<std::string> marks_;
 };
 
 // Loads the UTF-8 suite at |path_utf8| and applies it to |host|.
 // The locked design runs one in-process CPython main(). The stand-in runner
-// honors mark, command, activate_tool, and pointer. expect_* and capture fail
-// closed. |error| may be NULL. On a parse failure no mark from this file is
-// written. A slot that returns false does not roll back earlier marks.
+// honors mark, command, activate_tool, pointer, attach, and scene_mode.
+// expect_camera runs only when a slot is installed. expect_layer, expect_entity,
+// and capture fail closed. |error| may be NULL. On a parse failure no mark
+// from this file is written. A slot that returns false does not roll back
+// earlier marks.
 bool run_suite_script(CapabilityHost& host,
                       const std::string& path_utf8,
                       std::string* error);

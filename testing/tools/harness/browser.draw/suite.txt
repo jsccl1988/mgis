@@ -1,0 +1,9 @@
+attach scene
+scene_mode scene2d
+activate_tool edit.append.point scene
+pointer scene down 1 1
+command commit scene
+scene_mode scene3d
+activate_tool edit.append.point scene
+pointer scene down 1 1
+command commit scene
