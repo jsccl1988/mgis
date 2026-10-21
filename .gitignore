@@ -10,6 +10,7 @@
 /third_party/cesium-unreal/example/Binaries/
 /third_party/cesium-unreal/example/Intermediate/
 /third_party/cesium-unreal/example/Saved/
+/third_party/cesium-unreal/example/DerivedDataCache/
 /third_party/unreal/example/Binaries/
 /third_party/unreal/example/Intermediate/
 /third_party/unreal/example/Saved/
