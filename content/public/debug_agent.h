@@ -5,17 +5,24 @@
 #define CONTENT_PUBLIC_DEBUG_AGENT_H_
 
 #include <string>
+#include <vector>
 
 #include "content/public/script_runtime.h"
 
+namespace base {
+class MessageLoop;
+}
+
 namespace content {
 
+class McpServer;
 class ToolSession;
 class TraceLog;
 class ViewHost;
 
-// In-process glang console. One session, main thread, no socket and no
-// Python worker. ExecLine either runs a builtin or one suite line.
+// In-process glang console. ExecLine runs a builtin or one suite line.
+// Start serves that console as MCP on 127.0.0.1 and writes the real port
+// into the local discovery file.
 class DebugAgent {
  public:
   DebugAgent();
@@ -31,6 +38,14 @@ class DebugAgent {
   // when a trace log is bound.
   std::string ExecLine(const std::string& line);
 
+  // Binds 127.0.0.1:0. On failure ExecLine still works.
+  bool Start();
+  void Stop();
+  int port() const;
+
+  bool has_mark(const std::string& name) const;
+  const std::vector<std::string>& marks() const;
+
  private:
   DebugAgent(const DebugAgent&) = delete;
   DebugAgent& operator=(const DebugAgent&) = delete;
@@ -42,12 +57,17 @@ class DebugAgent {
                          const std::string& command_id,
                          const std::string& view_id);
   static bool OnPointer(void* context, const InputEvent& event);
+  static std::string OnMcpLine(void* context, const std::string& line);
+
+  std::string RunLineOnUi(const std::string& line);
 
   ToolSession* tools_;
   TraceLog* trace_;
   ViewHost* view0_;
   void* parent_hwnd_;
   CapabilityHost host_;
+  McpServer* mcp_;
+  base::MessageLoop* ui_loop_;
 };
 
 }  // namespace content

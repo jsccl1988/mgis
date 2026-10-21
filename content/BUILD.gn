@@ -20,6 +20,9 @@ static_library("content") {
     "//base:base",
     "//tool:tool",
   ]
+  if (is_win) {
+    libs = [ "ws2_32.lib" ]
+  }
   sources = [
     "public/browser/scene_mode.h",
     "public/types.h",
@@ -46,6 +49,8 @@ static_library("content") {
     "browser/trace_log.cc",
     "browser/view_host.cc",
     "browser/debug/debug_agent.cc",
+    "browser/devtools/mcp_server.h",
+    "browser/devtools/mcp_server.cc",
     "browser/glang.runtime/language/suite_loader.h",
     "browser/glang.runtime/language/suite_loader.cc",
     "browser/glang.runtime/exec/suite_runner.h",
@@ -97,5 +102,6 @@ executable("session_wire") {
   ]
   if (is_win) {
     configs += [ "//build/config/win:console_subsystem" ]
+    libs = [ "ws2_32.lib" ]
   }
 }
