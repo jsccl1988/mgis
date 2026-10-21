@@ -252,7 +252,11 @@ extern "C" __declspec(dllexport) int mln_session_render(void* raw,
                  result.image.size.height,
                  static_cast<int>(result.image.stride()),
                  static_cast<int>(result.image.channels), &varies);
-    if (!varies)
+    const uint8_t* sample = result.image.data.get();
+    const bool empty = sample == nullptr ||
+                       (sample[0] | sample[1] | sample[2]) == 0;
+    // A background-only style is one color and still a real frame.
+    if (!varies && empty)
       return 0;
     if (!Blit(hwnd, result.image.data.get(), result.image.size.width,
               result.image.size.height))

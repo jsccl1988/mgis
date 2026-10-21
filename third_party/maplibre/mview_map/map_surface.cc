@@ -406,12 +406,21 @@ int MapSurface::PresentMercator(int width,
   glEnd();
 
   std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 3);
+  // Default pack alignment is 4. A width whose RGB row is not a multiple of 4
+  // makes glReadPixels fail, and the frame is then treated as blank.
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
   bool varies = false;
   const unsigned hash =
       HashGrid(pixels.data(), width, height, width * 3, 3, &varies);
   const GLenum error = glGetError();
-  if (!varies || error != GL_NO_ERROR) {
+  const uint8_t* sample = pixels.data();
+  const bool clear_only = std::abs(static_cast<int>(sample[0]) - 125) <= 3 &&
+                          std::abs(static_cast<int>(sample[1]) - 181) <= 3 &&
+                          std::abs(static_cast<int>(sample[2]) - 214) <= 3;
+  const bool empty = (sample[0] | sample[1] | sample[2]) == 0;
+  // Zoomed onto one land quad is a solid color, not a missed draw.
+  if (error != GL_NO_ERROR || (!varies && (clear_only || empty))) {
     wglMakeCurrent(NULL, NULL);
     return 0;
   }

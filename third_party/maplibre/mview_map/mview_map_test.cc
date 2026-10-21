@@ -321,6 +321,11 @@ TEST(MviewMap, Follow2dAndToolPath) {
   EXPECT_NE(log.find("wheel.zoom mvm_set_camera"), std::string::npos);
   EXPECT_EQ(3, set_calls);
 
+  SetWindowPos(hwnd, NULL, 0, 0, 801, 520, SWP_NOZORDER | SWP_NOACTIVATE);
+  ShowWindow(hwnd, SW_SHOWNA);
+  mvm_resize(map, 801, 500, pixel_ratio);
+  EXPECT_GT(mvm_present(map), 0) << "2D frame was blank";
+
   const std::wstring harness = root + L"\\out\\harness\\browser.map";
   EnsureDir(harness);
   ASSERT_TRUE(WriteText(harness + L"\\map.log", log));

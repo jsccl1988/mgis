@@ -120,10 +120,8 @@ void FillTriangle(std::vector<std::uint8_t>* image,
   if (std::fabs(area) < 1.0f) {
     return;
   }
-  if (std::fabs(a.x) > 3.0f || std::fabs(a.y) > 3.0f || std::fabs(b.x) > 3.0f ||
-      std::fabs(b.y) > 3.0f || std::fabs(c.x) > 3.0f || std::fabs(c.y) > 3.0f) {
-    return;
-  }
+  // A tile that crosses the frustum still covers the viewport. Dropping the
+  // whole triangle because one vertex is outside NDC leaves the PNG empty.
   const int min_x = std::max(0, static_cast<int>(std::floor(std::min({ax, bx, cx}))));
   const int max_x = std::min(kWidth - 1, static_cast<int>(std::ceil(std::max({ax, bx, cx}))));
   const int min_y = std::max(0, static_cast<int>(std::floor(std::min({ay, by, cy}))));

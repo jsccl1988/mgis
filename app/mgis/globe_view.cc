@@ -406,11 +406,20 @@ bool GlobeView::Present() {
     glDisableClientState(GL_VERTEX_ARRAY);
 
     std::vector<uint8_t> pixels(static_cast<size_t>(width_) * height_ * 3);
+    // Default pack alignment is 4. Odd viewport widths then fail the readback
+    // and the globe frame is rejected as flat.
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
     bool varies = false;
     const unsigned hash = HashGrid(pixels.data(), width_, height_, &varies);
     const GLenum error = glGetError();
-    if (varies && error == GL_NO_ERROR && SwapBuffers(dc_)) {
+    const uint8_t* sample = pixels.data();
+    const bool clear_only = std::abs(static_cast<int>(sample[0]) - 13) <= 3 &&
+                            std::abs(static_cast<int>(sample[1]) - 15) <= 3 &&
+                            std::abs(static_cast<int>(sample[2]) - 23) <= 3;
+    const bool empty = (sample[0] | sample[1] | sample[2]) == 0;
+    if (error == GL_NO_ERROR && (varies || (!clear_only && !empty)) &&
+        SwapBuffers(dc_)) {
       token_ = hash;
       ok = true;
     }
