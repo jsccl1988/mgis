@@ -168,3 +168,19 @@ TEST(SessionWire, AgentCommandAndClosedVerb) {
   contents.trace_log()->Snapshot(content::kTraceAgent, &agent_lines);
   EXPECT_GE(agent_lines.size(), 3u);
 }
+
+TEST(SessionWire, OnlySceneViewAttaches) {
+  HWND parent = MakeParent();
+  ASSERT_TRUE(parent != NULL);
+  content::GisContents contents;
+  EXPECT_FALSE(contents.AttachView(parent, content::kViewIdMap, 80, 60));
+  EXPECT_FALSE(contents.AttachView(parent, content::kViewIdView0, 80, 60));
+  EXPECT_TRUE(contents.AttachView(parent, content::kViewIdScene, 80, 60));
+  EXPECT_EQ(content::SceneMode::kScene2D, contents.scene_mode());
+  contents.SetSceneMode(content::SceneMode::kScene3D);
+  EXPECT_EQ(content::SceneMode::kScene3D, contents.scene_mode());
+  std::vector<std::string> lines;
+  contents.trace_log()->Snapshot(content::kTraceConsole, &lines);
+  EXPECT_NE(std::string::npos, lines[0].find("backend.unavailable map"));
+  DestroyWindow(parent);
+}

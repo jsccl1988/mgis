@@ -8,6 +8,7 @@ namespace content {
 const char kViewIdMap[] = "map";
 const char kViewIdView0[] = "view0";
 const char kViewIdView1[] = "view1";
+const char kViewIdScene[] = "scene";
 
 bool is_known_view_id(const std::string& view_id) {
   return view_id == kViewIdMap || view_id == kViewIdView0 ||

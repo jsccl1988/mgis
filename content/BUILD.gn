@@ -21,6 +21,7 @@ static_library("content") {
     "//tool:tool",
   ]
   sources = [
+    "public/browser/scene_mode.h",
     "public/types.h",
     "public/event_bus.h",
     "public/gis_document.h",
@@ -36,6 +37,8 @@ static_library("content") {
     "browser/event_bus.cc",
     "browser/gis_document.cc",
     "browser/gis_contents.cc",
+    "browser/map/fake_scene.h",
+    "browser/map/fake_scene.cc",
     "browser/gis_contents_client.cc",
     "browser/plugin_host.cc",
     "browser/tool_session.cc",

@@ -14,6 +14,9 @@ extern const char kViewIdMap[];
 extern const char kViewIdView0[];
 extern const char kViewIdView1[];
 
+// Single scene child. Attach-only; not a tool-router view id.
+extern const char kViewIdScene[];
+
 // True when |view_id| is map, view0, or view1.
 bool is_known_view_id(const std::string& view_id);
 
