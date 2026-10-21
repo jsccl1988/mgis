@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/view_host.h"
+#include "content/browser/view_host.h"
 
 #include <windows.h>
 

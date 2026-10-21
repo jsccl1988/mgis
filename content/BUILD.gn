@@ -2,7 +2,7 @@
 # All rights reserved.
 
 # Desktop GIS embedder surface. Headers are included as
-# "content/public/....h" from the repo root. Language mode is the tree
+# "content/public/browser/....h" from the repo root. Language mode is the tree
 # cc_std (c++14). This library does not depend on views, UE, or MapLibre.
 # Not part of //:default.
 
@@ -22,17 +22,17 @@ static_library("content") {
   ]
   sources = [
     "public/browser/scene_mode.h",
-    "public/types.h",
-    "public/event_bus.h",
-    "public/gis_document.h",
-    "public/gis_contents.h",
-    "public/gis_contents_client.h",
-    "public/plugin_host.h",
-    "public/tool_session.h",
-    "public/script_runtime.h",
-    "public/trace_log.h",
-    "public/view_host.h",
-    "public/debug_agent.h",
+    "public/browser/types.h",
+    "public/browser/event_bus.h",
+    "public/browser/gis_document.h",
+    "public/browser/gis_contents.h",
+    "public/browser/gis_contents_client.h",
+    "public/browser/plugin_host.h",
+    "public/browser/trace_log.h",
+    "browser/view_host.h",
+    "browser/tool_session.h",
+    "browser/script_runtime.h",
+    "browser/debug/debug_agent.h",
     "browser/types.cc",
     "browser/event_bus.cc",
     "browser/gis_document.cc",

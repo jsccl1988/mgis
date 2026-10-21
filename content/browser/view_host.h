@@ -1,13 +1,13 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_VIEW_HOST_H_
-#define CONTENT_PUBLIC_VIEW_HOST_H_
+#ifndef CONTENT_BROWSER_VIEW_HOST_H_
+#define CONTENT_BROWSER_VIEW_HOST_H_
 
 #include <string>
 
-#include "content/public/trace_log.h"
-#include "content/public/types.h"
+#include "content/public/browser/trace_log.h"
+#include "content/public/browser/types.h"
 
 namespace content {
 
@@ -102,4 +102,4 @@ class ViewHost {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_VIEW_HOST_H_
+#endif  // CONTENT_BROWSER_VIEW_HOST_H_

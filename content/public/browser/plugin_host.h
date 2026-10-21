@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_PLUGIN_HOST_H_
-#define CONTENT_PUBLIC_PLUGIN_HOST_H_
+#ifndef CONTENT_PUBLIC_BROWSER_PLUGIN_HOST_H_
+#define CONTENT_PUBLIC_BROWSER_PLUGIN_HOST_H_
 
 #include <string>
 #include <vector>
@@ -43,4 +43,4 @@ class PluginHost {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_PLUGIN_HOST_H_
+#endif  // CONTENT_PUBLIC_BROWSER_PLUGIN_HOST_H_

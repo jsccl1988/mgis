@@ -1,13 +1,13 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_EVENT_BUS_H_
-#define CONTENT_PUBLIC_EVENT_BUS_H_
+#ifndef CONTENT_PUBLIC_BROWSER_EVENT_BUS_H_
+#define CONTENT_PUBLIC_BROWSER_EVENT_BUS_H_
 
 #include <string>
 #include <vector>
 
-#include "content/public/types.h"
+#include "content/public/browser/types.h"
 
 namespace content {
 
@@ -85,4 +85,4 @@ class EventBus {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_EVENT_BUS_H_
+#endif  // CONTENT_PUBLIC_BROWSER_EVENT_BUS_H_

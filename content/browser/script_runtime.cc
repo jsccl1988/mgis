@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/script_runtime.h"
+#include "content/browser/script_runtime.h"
 
 #include "content/browser/glang.runtime/exec/suite_runner.h"
 #include "content/browser/glang.runtime/language/suite_loader.h"

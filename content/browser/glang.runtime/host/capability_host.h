@@ -5,9 +5,8 @@
 #define CONTENT_BROWSER_GLANG_RUNTIME_HOST_CAPABILITY_HOST_H_
 
 // Internal include for the glang host lane. CapabilityHost is declared in
-// content/public/script_runtime.h so the shell can construct it without
-// including content/browser. The mark slot is implemented in this directory.
+// content/browser/script_runtime.h. The mark slot is implemented here.
 
-#include "content/public/script_runtime.h"
+#include "content/browser/script_runtime.h"
 
 #endif  // CONTENT_BROWSER_GLANG_RUNTIME_HOST_CAPABILITY_HOST_H_

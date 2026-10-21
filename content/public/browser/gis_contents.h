@@ -1,14 +1,14 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_GIS_CONTENTS_H_
-#define CONTENT_PUBLIC_GIS_CONTENTS_H_
+#ifndef CONTENT_PUBLIC_BROWSER_GIS_CONTENTS_H_
+#define CONTENT_PUBLIC_BROWSER_GIS_CONTENTS_H_
 
 #include <string>
 
 #include "content/public/browser/scene_mode.h"
-#include "content/public/event_bus.h"
-#include "content/public/trace_log.h"
+#include "content/public/browser/event_bus.h"
+#include "content/public/browser/trace_log.h"
 
 namespace content {
 
@@ -56,4 +56,4 @@ class GisContents {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_GIS_CONTENTS_H_
+#endif  // CONTENT_PUBLIC_BROWSER_GIS_CONTENTS_H_

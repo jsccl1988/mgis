@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/plugin_host.h"
+#include "content/public/browser/plugin_host.h"
 
 namespace content {
 namespace {

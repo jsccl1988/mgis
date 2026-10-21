@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_GIS_CONTENTS_CLIENT_H_
-#define CONTENT_PUBLIC_GIS_CONTENTS_CLIENT_H_
+#ifndef CONTENT_PUBLIC_BROWSER_GIS_CONTENTS_CLIENT_H_
+#define CONTENT_PUBLIC_BROWSER_GIS_CONTENTS_CLIENT_H_
 
 namespace content {
 
@@ -29,4 +29,4 @@ class GisContentsClient {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_GIS_CONTENTS_CLIENT_H_
+#endif  // CONTENT_PUBLIC_BROWSER_GIS_CONTENTS_CLIENT_H_

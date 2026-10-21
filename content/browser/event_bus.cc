@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/event_bus.h"
+#include "content/public/browser/event_bus.h"
 
 #include <cstddef>
 

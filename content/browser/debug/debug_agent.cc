@@ -1,14 +1,14 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/debug_agent.h"
+#include "content/browser/debug/debug_agent.h"
 
 #include <vector>
 
 #include "content/browser/glang.runtime/exec/suite_runner.h"
-#include "content/public/tool_session.h"
-#include "content/public/trace_log.h"
-#include "content/public/view_host.h"
+#include "content/browser/tool_session.h"
+#include "content/public/browser/trace_log.h"
+#include "content/browser/view_host.h"
 
 namespace content {
 namespace {

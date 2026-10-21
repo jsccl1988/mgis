@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/trace_log.h"
+#include "content/public/browser/trace_log.h"
 
 #include <windows.h>
 

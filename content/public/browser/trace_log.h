@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_TRACE_LOG_H_
-#define CONTENT_PUBLIC_TRACE_LOG_H_
+#ifndef CONTENT_PUBLIC_BROWSER_TRACE_LOG_H_
+#define CONTENT_PUBLIC_BROWSER_TRACE_LOG_H_
 
 #include <string>
 #include <vector>
@@ -77,4 +77,4 @@ class TraceScope {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_TRACE_LOG_H_
+#endif  // CONTENT_PUBLIC_BROWSER_TRACE_LOG_H_

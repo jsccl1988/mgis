@@ -6,8 +6,8 @@
 
 namespace mgis {
 
-// Registers the in-process globe as the FlyCube view backend.
-// Owned by the workbench. The shell incubator does not call this.
+// No longer registers a view0 backend. Scene children attach through
+// GisContents::AttachView. GlobeView itself stays available for render checks.
 void InstallFlyCubeBackend();
 
 }  // namespace mgis

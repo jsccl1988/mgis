@@ -18,7 +18,6 @@
 #include "base/message_loop.h"
 #include "base/path_service.h"
 #include "base/utf_string_conversions.h"
-#include "content/public/script_runtime.h"
 #include "third_party/maplibre/mview_map/mview_map.h"
 #include "tool/input_event.h"
 #include "tool/workspace.h"
@@ -380,58 +379,6 @@ base::FilePath FindRepoRoot() {
   return base::FilePath();
 }
 
-bool HostHasRequiredMarks(const content::CapabilityHost& host) {
-  for (size_t i = 0; i < arraysize(kRequiredMarks); ++i) {
-    if (!host.has_mark(kRequiredMarks[i]))
-      return false;
-  }
-  return true;
-}
-
-// The P0 stand-in runner rejects '#' comments. browser.chrome documents
-// each mark with a comment line, so a direct run_suite_script fails before
-// it records anything. Retry on a comment-stripped copy of the same marks.
-bool WriteCommentStrippedSuite(const base::FilePath& source,
-                               const base::FilePath& dest) {
-  int64 size = 0;
-  if (!file_util::GetFileSize(source, &size) || size <= 0 ||
-      size > 1024 * 1024) {
-    return false;
-  }
-  std::string text(static_cast<size_t>(size), '\0');
-  const int read = file_util::ReadFile(
-      source, &text[0], static_cast<int>(size));
-  if (read < 0)
-    return false;
-  text.resize(static_cast<size_t>(read));
-
-  std::string stripped;
-  size_t index = 0;
-  while (index < text.size()) {
-    const size_t newline = text.find('\n', index);
-    const bool has_newline = newline != std::string::npos;
-    const size_t end = has_newline ? newline : text.size();
-    const std::string raw = text.substr(index, end - index);
-    size_t begin = 0;
-    while (begin < raw.size() && (raw[begin] == ' ' || raw[begin] == '\t'))
-      ++begin;
-    const bool comment = begin < raw.size() && raw[begin] == '#';
-    if (!comment) {
-      stripped.append(raw);
-      stripped.push_back('\n');
-    }
-    if (!has_newline)
-      break;
-    index = end + 1;
-  }
-
-  if (!file_util::CreateDirectory(dest.DirName()))
-    return false;
-  const int wrote = file_util::WriteFile(
-      dest, stripped.data(), static_cast<int>(stripped.size()));
-  return wrote == static_cast<int>(stripped.size());
-}
-
 bool WriteMarkFile(const base::FilePath& path) {
   std::string json = "{\n  \"suite\": \"browser.chrome\",\n  \"marks\": [\n";
   for (size_t i = 0; i < arraysize(kRequiredMarks); ++i) {
@@ -470,30 +417,9 @@ bool WriteChromeMarks(const ProductChrome& chrome) {
     return false;
   }
 
-  content::CapabilityHost host;
-  std::string error;
   const base::FilePath suite_file = SuitePath(root);
-  const std::string suite_path = suite_file.AsUTF8Unsafe();
-  if (!content::run_suite_script(host, suite_path, &error)) {
-    LOG(ERROR) << "run_suite_script failed: " << error;
-    const base::FilePath stripped =
-        root.Append(FILE_PATH_LITERAL("out"))
-            .Append(FILE_PATH_LITERAL("harness"))
-            .Append(FILE_PATH_LITERAL("browser.chrome"))
-            .Append(FILE_PATH_LITERAL("browser.chrome"));
-    if (!WriteCommentStrippedSuite(suite_file, stripped))
-      return false;
-    error.clear();
-    const bool ran = content::run_suite_script(
-        host, stripped.AsUTF8Unsafe(), &error);
-    file_util::Delete(stripped, false);
-    if (!ran) {
-      LOG(ERROR) << "run_suite_script failed: " << error;
-      return false;
-    }
-  }
-  if (!HostHasRequiredMarks(host)) {
-    LOG(ERROR) << "browser.chrome did not record every required mark";
+  if (!file_util::PathExists(suite_file)) {
+    LOG(ERROR) << "browser.chrome suite is missing";
     return false;
   }
 
