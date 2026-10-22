@@ -5,6 +5,7 @@
 
 #include <sstream>
 
+#include "content/browser/map/scene.h"
 #include "content/public/browser/event_bus.h"
 #include "content/public/browser/trace_log.h"
 #include "tool/workspace.h"
@@ -54,6 +55,17 @@ const char* KindName(InputEventKind kind) {
   return "mouse";
 }
 
+bool SceneNavigationAllowed(SceneMode mode, const std::string& interaction_id) {
+  const bool planar = interaction_id == "view.pan" ||
+                      interaction_id == "view.zoom_in" ||
+                      interaction_id == "view.zoom_out";
+  if (planar)
+    return mode == SceneMode::kScene2D || mode == SceneMode::kColumbusView;
+  if (interaction_id == "view3d.trackball")
+    return mode == SceneMode::kScene3D;
+  return false;
+}
+
 }  // namespace
 
 tool::Workspace* ToolSession::WorkspaceFor(const std::string& view_id) {
@@ -72,7 +84,8 @@ ToolSession::ToolSession()
     : has_last_input_(false),
       routers_(new Routers()),
       event_bus_(NULL),
-      trace_log_(NULL) {}
+      trace_log_(NULL),
+      scene_(NULL) {}
 
 ToolSession::~ToolSession() {
   delete routers_;
@@ -85,6 +98,10 @@ void ToolSession::set_event_bus(EventBus* event_bus) {
 
 void ToolSession::set_trace_log(TraceLog* trace_log) {
   trace_log_ = trace_log;
+}
+
+void ToolSession::set_scene(Scene* scene) {
+  scene_ = scene;
 }
 
 bool ToolSession::execute(const std::string& command_id,
@@ -134,6 +151,21 @@ bool ToolSession::dispatch_input(const InputEvent& event) {
 
 bool ToolSession::activate(const std::string& interaction_id,
                            const std::string& view_id) {
+  if (view_id == kViewIdScene) {
+    if (interaction_id.empty() || !scene_ ||
+        !SceneNavigationAllowed(scene_->scene_mode(), interaction_id)) {
+      return false;
+    }
+    last_command_id_ = interaction_id;
+    last_command_view_id_ = view_id;
+    last_interaction_id_ = interaction_id;
+    last_interaction_view_id_ = view_id;
+    if (trace_log_) {
+      trace_log_->Append(kTraceConsole,
+                         "command " + interaction_id + " " + view_id);
+    }
+    return true;
+  }
   if (!execute(interaction_id, view_id))
     return false;
   last_interaction_id_ = interaction_id;

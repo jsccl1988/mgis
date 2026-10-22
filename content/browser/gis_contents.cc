@@ -4,14 +4,21 @@
 #include "content/public/browser/gis_contents.h"
 
 #include "content/browser/map/fake_scene.h"
+#include "content/browser/tool_session.h"
 #include "content/public/browser/types.h"
 
 namespace content {
 
-GisContents::GisContents() : document_(nullptr), scene_(new FakeScene()) {}
+GisContents::GisContents()
+    : document_(nullptr), scene_(new FakeScene()), tools_(new ToolSession()) {
+  tools_->set_scene(scene_);
+}
 
 GisContents::~GisContents() {
+  delete tools_;
+  tools_ = NULL;
   delete scene_;
+  scene_ = NULL;
 }
 
 GisDocument* GisContents::document() const {
@@ -47,6 +54,14 @@ void GisContents::SetSceneMode(SceneMode mode) {
 
 SceneMode GisContents::scene_mode() const {
   return scene_->scene_mode();
+}
+
+std::string GisContents::Pick(int x, int y) const {
+  return scene_->Pick(x, y);
+}
+
+ToolSession* GisContents::tool_session() {
+  return tools_;
 }
 
 }  // namespace content
