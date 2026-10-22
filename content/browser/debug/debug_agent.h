@@ -10,6 +10,7 @@
 
 namespace content {
 
+class GisContents;
 class ToolSession;
 class TraceLog;
 class ViewHost;
@@ -26,6 +27,9 @@ class DebugAgent {
             TraceLog* trace,
             ViewHost* view0,
             void* parent_hwnd);
+
+  // Unowned. attach scene uses this contents and the parent from Bind.
+  void set_contents(GisContents* contents);
 
   // Returns a short UTF-8 reply. Also appends that reply to the agent channel
   // when a trace log is bound.
@@ -47,6 +51,7 @@ class DebugAgent {
   TraceLog* trace_;
   ViewHost* view0_;
   void* parent_hwnd_;
+  GisContents* contents_;
   CapabilityHost host_;
 };
 

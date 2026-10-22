@@ -9,9 +9,11 @@
 #include "content/public/browser/scene_mode.h"
 #include "content/public/browser/event_bus.h"
 #include "content/public/browser/trace_log.h"
+#include "content/public/browser/types.h"
 
 namespace content {
 
+class CapabilityHost;
 class FakeScene;
 class GisDocument;
 class ToolSession;
@@ -44,23 +46,47 @@ class GisContents {
   void SetSceneMode(SceneMode mode);
   SceneMode scene_mode() const;
 
-  // Primitive mark at |x|, |y|. Empty when the current mode misses.
+// Primitive mark at |x|, |y|. Empty when the current mode misses.
   std::string Pick(int x, int y) const;
 
   // Session owned by this contents. Browser tests call it. The shell does not.
   ToolSession* tool_session();
 
+  // Suite host for browser tests. The shell does not call this.
+  CapabilityHost& capability_host();
+
  private:
   GisContents(const GisContents&) = delete;
   GisContents& operator=(const GisContents&) = delete;
+
+  static bool OnCommand(void* context,
+                        const std::string& command_id,
+                        const std::string& view_id);
+  static bool OnActivate(void* context,
+                         const std::string& command_id,
+                         const std::string& view_id);
+  static bool OnPointer(void* context, const InputEvent& event);
+  static bool OnSceneMode(void* context, const std::string& mode);
+  static bool OnExpectCamera(void* context,
+                             const std::string& view_id,
+                             bool has_target,
+                             double lon,
+                             double lat,
+                             double height,
+                             std::string* error);
+  static bool OnAttach(void* context,
+                       const std::string& view_id,
+                       std::string* error);
 
   GisDocument* document_;
   EventBus event_bus_;
   TraceLog trace_log_;
   // Owned. The scene child lives in the browser layer.
   FakeScene* scene_;
-  // Owned. Reads |scene_| when activate() targets kViewIdScene.
+// Owned. Reads |scene_| when activate() targets kViewIdScene.
   ToolSession* tools_;
+  CapabilityHost* host_;
+  void* attach_parent_;
 };
 
 }  // namespace content

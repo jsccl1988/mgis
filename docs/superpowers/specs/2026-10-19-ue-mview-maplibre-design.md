@@ -57,7 +57,7 @@ All rights reserved.
 | 10 | 时间轴的权威在 mview。地理坐标与三维渲染的权威在 UE。出进程的坐标只用 WGS84 经纬高（EPSG:4979）。 |
 | 11 | 目录数据库只由 UE 写入。界面「打开文件」只提交路径。 |
 | 12 | `content/public` 是壳的唯一嵌入面。`content` 不包含 `ui/views`，也不包含 UE 头。壳实现 `GisContentsClient`，只在浏览器进程钩子里建窗口。 |
-| 13 | glang 放在 `content/browser/glang.runtime/`，顶层只有 `language/`、`exec/`、`host/`。公开入口只有 `content::run_suite_script`。 |
+| 13 | glang 放在 `content/browser/glang/`，顶层只有 `language/`、`exec/`、`host/`。公开入口只有 `content::run_suite_script`。 |
 | 14 | 插件进程内加载，清单是 `plugin.json`。插件不实现 `GisContentsClient`，不写管道。处理算法走 `PluginHost::run_processing`。 |
 | 15 | 每个阶段一个套件。`required_marks` 全部落地才算通过。前一阶段未通过时，campaign 不写后续 mark，也不进入下一阶段。 |
 | 16 | 每个视图一个 `tool::Workspace`（`map`、`view0`、`view1`）。命令和交互分开。工具不写文档，只交草稿；`content::EditSession` 提交；`content::EventBus` 公布已经发生的事。指针先变成 `content::InputEvent`，再进 `InputRouter`。 |
@@ -350,7 +350,7 @@ mview_shell.exe
 
 `GisContents` 拥有本会话的 `TraceLog`（环形，最多 256 行）。通道 `console`、`perf`、`agent`。关键路径用 `TraceScope` 记耗时（attach、按下、滚轮、`ExecLine`），移动只进 console。`app/mgis` 订阅后刷新底栏三个 Tab。content 不包含 `ui/views`。
 
-`DebugAgent::ExecLine` 是进程内核心，不做 smartgis 那套回环套接字、Python 工人或界面点击。内置行：`help`、`trace`、`suite <path>`、`attach <view_id> <flycube|maplibre|ue>`。其余一行交给 glang 替身。替身动词：`mark`、`command`、`activate_tool`、`pointer`。`expect_camera`、`expect_layer`、`expect_entity`、`capture` 这一刀返回明确错误，不假装通过。`command` / `activate_tool` / `pointer` 的槽由 agent 接到同一个 `ToolSession`。未知动词失败时，该文件的 mark 一个都不写。
+`DebugAgent::ExecLine` 是进程内核心，不做 smartgis 那套回环套接字、Python 工人或界面点击。内置行：`help`、`trace`、`suite <path>`、`attach scene`。`attach` 只接受一个 token `scene`。其余一行交给 glang 替身。替身动词：`mark`、`command`、`activate_tool`、`pointer`、`scene_mode`、`expect_camera`。`scene_mode` 取 `scene2d`、`scene3d` 或 `columbus`。`expect_camera scene <lon> <lat> <height>` 在 `SCENE2D` 下比较经纬度（绝对误差 `1e-6` 度）和高度（1 米）；`SCENE3D` 的 `expect_camera scene` 在轨道位移大于 0 时通过。未挂接时返回明确错误，不再用 “not available” 表示相机未实现。`expect_layer`、`expect_entity`、`capture` 仍返回明确错误。`command` / `activate_tool` / `pointer` 的槽接到同一个 `ToolSession`。未知动词失败时，该文件的 mark 一个都不写。
 
 产品窗由 `mgis::ShowWorkbench` → `StartSession` 自己登记 FlyCube 钩子，再把 `view0` 子 HWND 交给 `NativeViewHost`。二维页保持占位。`app/shell` 的卫星视口仍可直接使用 `GlobeView` 做渲染检查，那条路径不负责产品接线。
 
@@ -358,7 +358,7 @@ mview_shell.exe
 
 ## glang
 
-glang 在 `content/browser/glang.runtime/`，顶层三块：
+glang 在 `content/browser/glang/`，顶层三块：
 
 | 目录 | 职责 |
 | --- | --- |
@@ -558,7 +558,7 @@ launcher/
 app/shell/                     薄入口（原顶层 shell/），组合 content/public + app/mgis
 app/mgis/                      产品工作台（四区壳 + chrome 面板）
 content/public/
-content/browser/glang.runtime/ language、exec、host
+content/browser/glang/ language、exec、host
 content/browser/               会话、目录、管道、ToolSession 组装
 tool/                          Workspace、命令、交互
 plugin/                        注册表与产品包

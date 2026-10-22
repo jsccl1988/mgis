@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "content/browser/map/scene.h"
+#include "content/public/browser/types.h"
 
 namespace content {
 
@@ -36,6 +37,19 @@ class FakeScene : public Scene {
   SceneMode scene_mode() const override;
   std::string Pick(int x, int y) const override;
 
+  // Arms the orbit sample used by expect_camera in SCENE3D.
+  void ArmTrackball();
+  // A move while the trackball is armed sets the orbit delta to 1.
+  void NotePointer(const InputEvent& event);
+
+  // SCENE2D compares lon/lat within 1e-6 degrees and height within 1 meter.
+  // SCENE3D succeeds when the orbit delta is greater than 0.
+  bool ExpectCamera(bool has_target,
+                    double lon,
+                    double lat,
+                    double height,
+                    std::string* error) const;
+
  private:
   FakeScene(const FakeScene&) = delete;
   FakeScene& operator=(const FakeScene&) = delete;
@@ -44,7 +58,12 @@ class FakeScene : public Scene {
 
   void* child_;
   SceneMode mode_;
-  std::vector<std::string> primitive_ids_;
+std::vector<std::string> primitive_ids_;
+  double lon_;
+  double lat_;
+  double height_;
+  double orbit_delta_;
+  bool trackball_armed_;
 };
 
 }  // namespace content

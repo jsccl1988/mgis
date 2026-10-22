@@ -1,7 +1,7 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/browser/glang.runtime/language/suite_loader.h"
+#include "content/browser/glang/language/suite_loader.h"
 
 #include <stdio.h>
 

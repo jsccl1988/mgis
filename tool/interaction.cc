@@ -11,7 +11,7 @@ bool IsView3dTool(const std::string& id) {
 }
 
 bool IsVolumeView(const std::string& view_id) {
-  return view_id == "view0" || view_id == "view1";
+  return view_id == "view0" || view_id == "view1" || view_id == "scene";
 }
 
 }  // namespace

@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_BROWSER_GLANG_RUNTIME_LANGUAGE_SUITE_LOADER_H_
-#define CONTENT_BROWSER_GLANG_RUNTIME_LANGUAGE_SUITE_LOADER_H_
+#ifndef CONTENT_BROWSER_GLANG_LANGUAGE_SUITE_LOADER_H_
+#define CONTENT_BROWSER_GLANG_LANGUAGE_SUITE_LOADER_H_
 
 #include <string>
 
@@ -17,4 +17,4 @@ bool load_suite_file(const std::string& path_utf8,
 
 }  // namespace content
 
-#endif  // CONTENT_BROWSER_GLANG_RUNTIME_LANGUAGE_SUITE_LOADER_H_
+#endif  // CONTENT_BROWSER_GLANG_LANGUAGE_SUITE_LOADER_H_

@@ -5,10 +5,11 @@
 
 #include <vector>
 
-#include "content/browser/glang.runtime/exec/suite_runner.h"
+#include "content/browser/glang/exec/suite_runner.h"
 #include "content/browser/tool_session.h"
-#include "content/public/browser/trace_log.h"
 #include "content/browser/view_host.h"
+#include "content/public/browser/gis_contents.h"
+#include "content/public/browser/trace_log.h"
 
 namespace content {
 namespace {
@@ -62,7 +63,11 @@ void SplitTokens(const std::string& rest, std::vector<std::string>* out) {
 }  // namespace
 
 DebugAgent::DebugAgent()
-    : tools_(NULL), trace_(NULL), view0_(NULL), parent_hwnd_(NULL) {
+    : tools_(NULL),
+      trace_(NULL),
+      view0_(NULL),
+      parent_hwnd_(NULL),
+      contents_(NULL) {
   host_.set_command_slot(&DebugAgent::OnCommand, this);
   host_.set_activate_slot(&DebugAgent::OnActivate, this);
   host_.set_pointer_slot(&DebugAgent::OnPointer, this);
@@ -78,6 +83,10 @@ void DebugAgent::Bind(ToolSession* tools,
   trace_ = trace;
   view0_ = view0;
   parent_hwnd_ = parent_hwnd;
+}
+
+void DebugAgent::set_contents(GisContents* contents) {
+  contents_ = contents;
 }
 
 bool DebugAgent::OnCommand(void* context,
@@ -115,7 +124,7 @@ std::string DebugAgent::ExecLine(const std::string& line) {
     reply = "empty";
   } else if (verb == "help") {
     reply =
-        "help | trace | suite <path> | attach <view> <flycube|maplibre|ue> | "
+        "help | trace | suite <path> | attach scene | "
         "mark | command <id> <view> | activate_tool <id> <view> | "
         "pointer <view> <move|down|up|wheel> <x> <y> [delta]";
   } else if (verb == "trace") {
@@ -144,26 +153,16 @@ std::string DebugAgent::ExecLine(const std::string& line) {
   } else if (verb == "attach") {
     std::vector<std::string> tokens;
     SplitTokens(rest, &tokens);
-    if (tokens.size() != 2) {
-      reply = "attach needs view and backend";
-    } else if (!view0_ || tokens[0] != kViewIdView0) {
-      reply = "view host not bound";
+    if (tokens.size() != 1 || tokens[0] != kViewIdScene) {
+      reply = "attach accepts only scene";
+    } else if (!contents_) {
+      reply = "scene host not bound";
     } else if (!parent_hwnd_) {
       reply = "parent hwnd missing";
     } else {
-      ViewBackend backend = kViewBackendFlyCube;
-      if (tokens[1] == "maplibre")
-        backend = kViewBackendMapLibre;
-      else if (tokens[1] == "ue")
-        backend = kViewBackendUe;
-      else if (tokens[1] != "flycube") {
-        reply = "unknown backend";
-        backend = kViewBackendFlyCube;
-      }
-      if (reply.empty()) {
-        const bool ok = view0_->Attach(parent_hwnd_, tokens[0], backend, 640, 480);
-        reply = ok ? "attached" : "attach failed";
-      }
+      const bool ok =
+          contents_->AttachView(parent_hwnd_, kViewIdScene, 640, 480);
+      reply = ok ? "attached" : "attach failed";
     }
   } else {
     std::string error;
