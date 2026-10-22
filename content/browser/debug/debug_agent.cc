@@ -5,6 +5,10 @@
 
 #include <vector>
 
+#include "base/bind.h"
+#include "base/message_loop.h"
+#include "base/synchronization/waitable_event.h"
+#include "content/browser/devtools/mcp_server.h"
 #include "content/browser/glang/exec/suite_runner.h"
 #include "content/browser/tool_session.h"
 #include "content/browser/view_host.h"
@@ -60,6 +64,18 @@ void SplitTokens(const std::string& rest, std::vector<std::string>* out) {
   }
 }
 
+struct UiExec {
+  DebugAgent* agent;
+  const std::string* line;
+  std::string* reply;
+  base::WaitableEvent* done;
+};
+
+void RunExecOnUi(UiExec* req) {
+  *req->reply = req->agent->ExecLine(*req->line);
+  req->done->Signal();
+}
+
 }  // namespace
 
 DebugAgent::DebugAgent()
@@ -67,13 +83,20 @@ DebugAgent::DebugAgent()
       trace_(NULL),
       view0_(NULL),
       parent_hwnd_(NULL),
-      contents_(NULL) {
+      contents_(NULL),
+      mcp_(NULL),
+      ui_loop_(NULL) {
   host_.set_command_slot(&DebugAgent::OnCommand, this);
   host_.set_activate_slot(&DebugAgent::OnActivate, this);
   host_.set_pointer_slot(&DebugAgent::OnPointer, this);
+  mcp_ = new McpServer(&DebugAgent::OnMcpLine, this);
 }
 
-DebugAgent::~DebugAgent() {}
+DebugAgent::~DebugAgent() {
+  Stop();
+  delete mcp_;
+  mcp_ = NULL;
+}
 
 void DebugAgent::Bind(ToolSession* tools,
                       TraceLog* trace,
@@ -173,6 +196,59 @@ std::string DebugAgent::ExecLine(const std::string& line) {
   }
   if (trace_)
     trace_->Append(kTraceAgent, reply);
+  return reply;
+}
+
+bool DebugAgent::Start() {
+  ui_loop_ = base::MessageLoop::current();
+  if (!mcp_ || !mcp_->Start()) {
+    if (trace_ && mcp_ && mcp_->bind_failed())
+      trace_->Append(kTraceConsole, "mcp.bind failed");
+    return false;
+  }
+  return true;
+}
+
+void DebugAgent::Stop() {
+  if (mcp_)
+    mcp_->Stop();
+}
+
+int DebugAgent::port() const {
+  return mcp_ ? mcp_->port() : 0;
+}
+
+bool DebugAgent::has_mark(const std::string& name) const {
+  return host_.has_mark(name);
+}
+
+const std::vector<std::string>& DebugAgent::marks() const {
+  return host_.marks();
+}
+
+std::string DebugAgent::OnMcpLine(void* context, const std::string& line) {
+  DebugAgent* agent = static_cast<DebugAgent*>(context);
+  if (!agent)
+    return std::string();
+  return agent->RunLineOnUi(line);
+}
+
+std::string DebugAgent::RunLineOnUi(const std::string& line) {
+  // Tests have no message loop, so the accept thread calls ExecLine directly.
+  // A live UI loop receives the call via PostTask before ExecLine runs.
+  if (!ui_loop_)
+    return ExecLine(line);
+  if (base::MessageLoop::current() == ui_loop_)
+    return ExecLine(line);
+  base::WaitableEvent done(false, false);
+  std::string reply;
+  UiExec req;
+  req.agent = this;
+  req.line = &line;
+  req.reply = &reply;
+  req.done = &done;
+  ui_loop_->PostTask(FROM_HERE, base::Bind(&RunExecOnUi, &req));
+  done.Wait();
   return reply;
 }
 
