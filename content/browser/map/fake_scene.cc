@@ -25,11 +25,22 @@ const char* SceneModeLabel(SceneMode mode) {
   return "scene2d";
 }
 
+bool ToolAllowed(SceneMode mode, const std::string& tool_id) {
+  if (tool_id == "view.pan") {
+    return mode == SceneMode::kScene2D || mode == SceneMode::kColumbusView;
+  }
+  if (tool_id == "selection.point" || tool_id == "edit.append.point")
+    return mode == SceneMode::kScene2D || mode == SceneMode::kScene3D;
+  return false;
+}
+
 }  // namespace
 
 FakeScene::FakeScene()
     : child_(NULL),
       mode_(SceneMode::kScene2D),
+      tool_id_(),
+      draft_points_(0),
       lon_(0),
       lat_(0),
       height_(0),
@@ -156,6 +167,71 @@ bool FakeScene::ExpectCamera(bool has_target,
       *error = "expect_camera: scene camera mismatch";
     return false;
   }
+  return true;
+}
+
+bool FakeScene::SetModeLabel(const std::string& label, TraceLog* trace) {
+  SceneMode mode = SceneMode::kScene2D;
+  if (label == "scene2d")
+    mode = SceneMode::kScene2D;
+  else if (label == "scene3d")
+    mode = SceneMode::kScene3D;
+  else if (label == "columbus")
+    mode = SceneMode::kColumbusView;
+  else
+    return false;
+  draft_points_ = 0;
+  SetSceneMode(mode, trace);
+  return true;
+}
+
+bool FakeScene::ActivateTool(const std::string& tool_id,
+                             const std::string& view_id) {
+  if (view_id != kViewIdScene || !ToolAllowed(mode_, tool_id))
+    return false;
+  tool_id_ = tool_id;
+  if (tool_id == "edit.append.point")
+    draft_points_ = 0;
+  return true;
+}
+
+bool FakeScene::OnPointer(const InputEvent& event, std::string* mark) {
+  if (mark)
+    mark->clear();
+  if (event.view_id != kViewIdScene || !ToolAllowed(mode_, tool_id_))
+    return false;
+  if (tool_id_ == "selection.point" && event.kind == kInputEventMouse &&
+      event.mouse_action == kMouseDown) {
+    const std::string hit = Pick(event.x, event.y);
+    if (hit.empty())
+      return false;
+    if (mark)
+      *mark = hit;
+    return true;
+  }
+  if (tool_id_ == "edit.append.point" && event.kind == kInputEventMouse &&
+      event.mouse_action == kMouseDown) {
+    ++draft_points_;
+    return true;
+  }
+  return true;
+}
+
+bool FakeScene::Commit(std::string* mark) {
+  if (mark)
+    mark->clear();
+  if (tool_id_ != "edit.append.point" || draft_points_ < 1)
+    return false;
+  std::string name;
+  if (mode_ == SceneMode::kScene2D)
+    name = "draft.basemap";
+  else if (mode_ == SceneMode::kScene3D)
+    name = "draft.groundwater";
+  else
+    return false;
+  draft_points_ = 0;
+  if (mark)
+    *mark = name;
   return true;
 }
 

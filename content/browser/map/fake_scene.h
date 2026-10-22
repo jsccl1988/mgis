@@ -50,6 +50,22 @@ class FakeScene : public Scene {
                     double height,
                     std::string* error) const;
 
+  // |label| is scene2d, scene3d, or columbus. Other text returns false.
+  // Clears an in-progress edit draft and does not drop registered primitives.
+  bool SetModeLabel(const std::string& label, TraceLog* trace);
+
+  // view.pan is only 2D or Columbus. selection.point and edit.append.point
+  // are 2D or 3D. The view id must be kViewIdScene.
+  bool ActivateTool(const std::string& tool_id, const std::string& view_id);
+
+  // A selection press writes the mode's primitive id into |mark|.
+  // An edit press records one draft vertex. |mark| may be empty on success.
+  bool OnPointer(const InputEvent& event, std::string* mark);
+
+  // After edit.append.point recorded a vertex, writes draft.basemap or
+  // draft.groundwater into |mark|.
+  bool Commit(std::string* mark);
+
  private:
   FakeScene(const FakeScene&) = delete;
   FakeScene& operator=(const FakeScene&) = delete;
@@ -58,7 +74,9 @@ class FakeScene : public Scene {
 
   void* child_;
   SceneMode mode_;
-std::vector<std::string> primitive_ids_;
+  std::vector<std::string> primitive_ids_;
+  std::string tool_id_;
+  int draft_points_;
   double lon_;
   double lat_;
   double height_;

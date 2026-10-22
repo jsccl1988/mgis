@@ -1,0 +1,7 @@
+attach scene
+scene_mode scene2d
+activate_tool selection.point scene
+pointer scene down 1 1
+scene_mode scene3d
+activate_tool selection.point scene
+pointer scene down 1 1
