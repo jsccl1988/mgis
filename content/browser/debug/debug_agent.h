@@ -1,12 +1,12 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_DEBUG_AGENT_H_
-#define CONTENT_PUBLIC_DEBUG_AGENT_H_
+#ifndef CONTENT_BROWSER_DEBUG_DEBUG_AGENT_H_
+#define CONTENT_BROWSER_DEBUG_DEBUG_AGENT_H_
 
 #include <string>
 
-#include "content/public/script_runtime.h"
+#include "content/browser/script_runtime.h"
 
 namespace content {
 
@@ -52,4 +52,4 @@ class DebugAgent {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_DEBUG_AGENT_H_
+#endif  // CONTENT_BROWSER_DEBUG_DEBUG_AGENT_H_

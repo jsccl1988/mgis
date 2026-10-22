@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "content/public/script_runtime.h"
+#include "content/browser/script_runtime.h"
 
 namespace content {
 namespace {

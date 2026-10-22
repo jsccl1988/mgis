@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_GIS_DOCUMENT_H_
-#define CONTENT_PUBLIC_GIS_DOCUMENT_H_
+#ifndef CONTENT_PUBLIC_BROWSER_GIS_DOCUMENT_H_
+#define CONTENT_PUBLIC_BROWSER_GIS_DOCUMENT_H_
 
 namespace content {
 
@@ -22,4 +22,4 @@ class GisDocument {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_GIS_DOCUMENT_H_
+#endif  // CONTENT_PUBLIC_BROWSER_GIS_DOCUMENT_H_

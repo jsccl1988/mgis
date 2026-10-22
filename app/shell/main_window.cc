@@ -4,7 +4,6 @@
 #include "main_window.h"
 
 #include <algorithm>
-#include <cmath>
 #include <string>
 
 #include "app/mgis/workbench.h"
@@ -18,8 +17,6 @@
 #include "base/message_loop.h"
 #include "base/path_service.h"
 #include "base/utf_string_conversions.h"
-#include "content/public/script_runtime.h"
-#include "third_party/maplibre/mview_map/mview_map.h"
 #include "tool/input_event.h"
 #include "tool/workspace.h"
 #include "ui/gfx/rect.h"
@@ -31,17 +28,9 @@
 
 namespace {
 
-const char* kRequiredMarks[] = {
-    "widget.main",
-    "widget.map",
-    "widget.view0",
-    "widget.view1",
-    "tree.layer",
-    "tree.entity",
-};
-
 // Map or 3D viewport satellite (harness / render-check). Pointer and wheel go
-// through tool::Workspace, then into the child HWND renderer.
+// through tool::Workspace. view0 and view1 draw with GlobeView. The map
+// satellite stays a views widget and does not host a MapLibre child.
 class ViewportWindow : public views::WidgetDelegateView {
  public:
   enum Kind { kMap, kView0, kView1 };
@@ -50,8 +39,6 @@ class ViewportWindow : public views::WidgetDelegateView {
       : kind_(kind),
         title_(title),
         workspace_(kind == kMap ? "map" : (kind == kView0 ? "view0" : "view1")),
-        map_session_(NULL),
-        pixel_ratio_(1.0),
         present_enabled_(false),
         frame_presented_(false),
         renderer_name_(""),
@@ -63,18 +50,15 @@ class ViewportWindow : public views::WidgetDelegateView {
     else
       workspace_.execute("view3d.trackball");
   }
-  virtual ~ViewportWindow() {
-    if (map_session_) {
-      mvm_destroy(map_session_);
-      map_session_ = NULL;
-    }
-  }
+  virtual ~ViewportWindow() {}
 
   virtual bool CanResize() const OVERRIDE { return true; }
   virtual string16 GetWindowTitle() const OVERRIDE { return title_; }
   virtual views::View* GetContentsView() OVERRIDE { return this; }
 
   void BindNative() {
+    if (kind_ == kMap)
+      return;
     views::Widget* widget = GetWidget();
     if (!widget)
       return;
@@ -89,18 +73,10 @@ class ViewportWindow : public views::WidgetDelegateView {
       width = 640;
     if (height < 2)
       height = 480;
-    if (kind_ == kMap) {
-      map_session_ = mvm_create(parent, width, height, pixel_ratio_);
-      if (!map_session_)
-        return;
-      mvm_set_camera(map_session_, 10.0, 20.0, 1.0, 0.0, 0.0);
-      mvm_set_pointer_callback(map_session_, &ViewportWindow::PointerThunk, this);
-    } else {
-      const double yaw = kind_ == kView1 ? 1.3 : 0.35;
-      if (!globe_.Attach(parent, width, height, yaw))
-        return;
-      globe_.SetPointerCallback(&ViewportWindow::PointerThunk, this);
-    }
+    const double yaw = kind_ == kView1 ? 1.3 : 0.35;
+    if (!globe_.Attach(parent, width, height, yaw))
+      return;
+    globe_.SetPointerCallback(&ViewportWindow::PointerThunk, this);
   }
 
   void EnablePresent() { present_enabled_ = true; }
@@ -108,44 +84,29 @@ class ViewportWindow : public views::WidgetDelegateView {
   const char* renderer_name() const { return renderer_name_; }
   int draw_calls() const {
     if (kind_ == kMap)
-      return map_session_ ? mvm_last_draw_calls(map_session_) : 0;
+      return 0;
     return globe_.draw_calls();
   }
 
   void PresentFrame() {
-    if (kind_ == kMap) {
-      if (!map_session_)
-        return;
-      const int code = mvm_present(map_session_);
-      if (code > 0) {
-        frame_presented_ = true;
-        renderer_name_ = code == 2 ? "maplibre-native" : "opengl-mercator";
-      }
+    if (kind_ == kMap)
       return;
-    }
     if (globe_.Present()) {
       frame_presented_ = true;
       renderer_name_ = "opengl-textured-globe";
     }
   }
 
-  // Presents, moves the camera, presents again. True only when both frames
-  // drew real pixels and the second frame differs from the first.
+  // Presents, orbits, and presents again. True only when both GlobeView
+  // frames drew real pixels and the second frame differs from the first.
+  // The map widget has no renderer in this shell, so it never confirms.
   bool ConfirmBrowsedFrame() {
+    if (kind_ == kMap)
+      return false;
     EnablePresent();
     PresentFrame();
     const unsigned first = FrameToken();
-    if (kind_ == kMap && map_session_) {
-      double lon = 0.0;
-      double lat = 0.0;
-      double zoom = 0.0;
-      double bearing = 0.0;
-      double pitch = 0.0;
-      mvm_get_camera(map_session_, &lon, &lat, &zoom, &bearing, &pitch);
-      mvm_set_camera(map_session_, lon + 40.0, lat, zoom, bearing, pitch);
-    } else {
-      globe_.Orbit(80.0, 18.0);
-    }
+    globe_.Orbit(80.0, 18.0);
     PresentFrame();
     const unsigned second = FrameToken();
     frame_presented_ = first != 0 && second != 0 && first != second;
@@ -154,11 +115,11 @@ class ViewportWindow : public views::WidgetDelegateView {
 
   virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE {
     views::WidgetDelegateView::OnBoundsChanged(previous_bounds);
+    if (kind_ == kMap)
+      return;
     if (width() < 2 || height() < 2)
       return;
-    if (map_session_)
-      mvm_resize(map_session_, width(), height(), pixel_ratio_);
-    else if (globe_.attached())
+    if (globe_.attached())
       globe_.Resize(width(), height());
     if (present_enabled_)
       PresentFrame();
@@ -220,64 +181,26 @@ class ViewportWindow : public views::WidgetDelegateView {
 
   unsigned FrameToken() const {
     if (kind_ == kMap)
-      return map_session_ ? mvm_frame_token(map_session_) : 0;
+      return 0;
     return globe_.frame_token();
   }
 
   void ApplyPan(double dx, double dy) {
-    if (kind_ == kMap) {
-      if (!map_session_)
-        return;
-      double lon = 0.0;
-      double lat = 0.0;
-      double zoom = 0.0;
-      double bearing = 0.0;
-      double pitch = 0.0;
-      mvm_get_camera(map_session_, &lon, &lat, &zoom, &bearing, &pitch);
-      const double degrees = 360.0 / (256.0 * std::pow(2.0, zoom));
-      lon -= dx * degrees;
-      lat += dy * degrees;
-      while (lon > 180.0)
-        lon -= 360.0;
-      while (lon < -180.0)
-        lon += 360.0;
-      if (lat > 85.0)
-        lat = 85.0;
-      if (lat < -85.0)
-        lat = -85.0;
-      mvm_set_camera(map_session_, lon, lat, zoom, bearing, pitch);
+    if (kind_ == kMap)
       return;
-    }
     globe_.Orbit(dx, dy);
   }
 
   void ApplyZoom(double wheel_dy) {
-    if (kind_ == kMap) {
-      if (!map_session_)
-        return;
-      double lon = 0.0;
-      double lat = 0.0;
-      double zoom = 0.0;
-      double bearing = 0.0;
-      double pitch = 0.0;
-      mvm_get_camera(map_session_, &lon, &lat, &zoom, &bearing, &pitch);
-      zoom += wheel_dy;
-      if (zoom < 0.0)
-        zoom = 0.0;
-      if (zoom > 20.0)
-        zoom = 20.0;
-      mvm_set_camera(map_session_, lon, lat, zoom, bearing, pitch);
+    if (kind_ == kMap)
       return;
-    }
     globe_.Zoom(wheel_dy);
   }
 
   Kind kind_;
   string16 title_;
   tool::Workspace workspace_;
-  MvmMap* map_session_;
   GlobeView globe_;
-  double pixel_ratio_;
   bool present_enabled_;
   bool frame_presented_;
   const char* renderer_name_;
@@ -380,81 +303,11 @@ base::FilePath FindRepoRoot() {
   return base::FilePath();
 }
 
-bool HostHasRequiredMarks(const content::CapabilityHost& host) {
-  for (size_t i = 0; i < arraysize(kRequiredMarks); ++i) {
-    if (!host.has_mark(kRequiredMarks[i]))
-      return false;
-  }
-  return true;
-}
-
-// The P0 stand-in runner rejects '#' comments. browser.chrome documents
-// each mark with a comment line, so a direct run_suite_script fails before
-// it records anything. Retry on a comment-stripped copy of the same marks.
-bool WriteCommentStrippedSuite(const base::FilePath& source,
-                               const base::FilePath& dest) {
-  int64 size = 0;
-  if (!file_util::GetFileSize(source, &size) || size <= 0 ||
-      size > 1024 * 1024) {
-    return false;
-  }
-  std::string text(static_cast<size_t>(size), '\0');
-  const int read = file_util::ReadFile(
-      source, &text[0], static_cast<int>(size));
-  if (read < 0)
-    return false;
-  text.resize(static_cast<size_t>(read));
-
-  std::string stripped;
-  size_t index = 0;
-  while (index < text.size()) {
-    const size_t newline = text.find('\n', index);
-    const bool has_newline = newline != std::string::npos;
-    const size_t end = has_newline ? newline : text.size();
-    const std::string raw = text.substr(index, end - index);
-    size_t begin = 0;
-    while (begin < raw.size() && (raw[begin] == ' ' || raw[begin] == '\t'))
-      ++begin;
-    const bool comment = begin < raw.size() && raw[begin] == '#';
-    if (!comment) {
-      stripped.append(raw);
-      stripped.push_back('\n');
-    }
-    if (!has_newline)
-      break;
-    index = end + 1;
-  }
-
-  if (!file_util::CreateDirectory(dest.DirName()))
-    return false;
-  const int wrote = file_util::WriteFile(
-      dest, stripped.data(), static_cast<int>(stripped.size()));
-  return wrote == static_cast<int>(stripped.size());
-}
-
-bool WriteMarkFile(const base::FilePath& path) {
-  std::string json = "{\n  \"suite\": \"browser.chrome\",\n  \"marks\": [\n";
-  for (size_t i = 0; i < arraysize(kRequiredMarks); ++i) {
-    json += "    \"";
-    json += kRequiredMarks[i];
-    json += "\"";
-    if (i + 1 != arraysize(kRequiredMarks))
-      json += ",";
-    json += "\n";
-  }
-  json += "  ]\n}\n";
-
-  if (!file_util::CreateDirectory(path.DirName())) {
-    LOG(ERROR) << "failed to create harness directory";
-    return false;
-  }
-  const int wrote = file_util::WriteFile(
-      path, json.data(), static_cast<int>(json.size()));
-  return wrote == static_cast<int>(json.size());
-}
-
-// Records browser.chrome only after the four widgets and both trees exist.
-bool WriteChromeMarks(const ProductChrome& chrome) {
+// The four widgets and both trees must exist. This does not run the
+// browser.chrome suite and does not write mark.json. The suite runner is
+// not on content/public/browser, and a fixed mark file would claim a run
+// that did not happen.
+bool ChromeReady(const ProductChrome& chrome) {
   if (!chrome.main_window || !chrome.map || !chrome.view0 || !chrome.view1)
     return false;
   if (!chrome.map->GetWidget() || !chrome.view0->GetWidget() ||
@@ -463,55 +316,15 @@ bool WriteChromeMarks(const ProductChrome& chrome) {
   if (!chrome.main_contents || !chrome.main_contents->HasLayerTree() ||
       !chrome.main_contents->HasEntityTree())
     return false;
-
-  const base::FilePath root = FindRepoRoot();
-  if (root.empty()) {
-    LOG(ERROR) << "repo root not found; browser.chrome suite is missing";
-    return false;
-  }
-
-  content::CapabilityHost host;
-  std::string error;
-  const base::FilePath suite_file = SuitePath(root);
-  const std::string suite_path = suite_file.AsUTF8Unsafe();
-  if (!content::run_suite_script(host, suite_path, &error)) {
-    LOG(ERROR) << "run_suite_script failed: " << error;
-    const base::FilePath stripped =
-        root.Append(FILE_PATH_LITERAL("out"))
-            .Append(FILE_PATH_LITERAL("harness"))
-            .Append(FILE_PATH_LITERAL("browser.chrome"))
-            .Append(FILE_PATH_LITERAL("browser.chrome"));
-    if (!WriteCommentStrippedSuite(suite_file, stripped))
-      return false;
-    error.clear();
-    const bool ran = content::run_suite_script(
-        host, stripped.AsUTF8Unsafe(), &error);
-    file_util::Delete(stripped, false);
-    if (!ran) {
-      LOG(ERROR) << "run_suite_script failed: " << error;
-      return false;
-    }
-  }
-  if (!HostHasRequiredMarks(host)) {
-    LOG(ERROR) << "browser.chrome did not record every required mark";
-    return false;
-  }
-
-  const base::FilePath mark_path =
-      root.Append(FILE_PATH_LITERAL("out"))
-          .Append(FILE_PATH_LITERAL("harness"))
-          .Append(FILE_PATH_LITERAL("browser.chrome"))
-          .Append(FILE_PATH_LITERAL("mark.json"));
-  if (!WriteMarkFile(mark_path)) {
-    LOG(ERROR) << "failed to write " << mark_path.AsUTF8Unsafe();
-    return false;
-  }
-  LOG(INFO) << "wrote " << mark_path.AsUTF8Unsafe();
   return true;
 }
 
 void FinishChromeHarness(ProductChrome* chrome, int* exit_code) {
-  *exit_code = WriteChromeMarks(*chrome) ? 0 : 1;
+  const bool ready = ChromeReady(*chrome);
+  if (ready) {
+    LOG(INFO) << "chrome widgets ready; browser.chrome mark.json not written";
+  }
+  *exit_code = ready ? 0 : 1;
   if (chrome->main_contents)
     chrome->main_contents->CloseSatellites();
   if (chrome->main_window)
@@ -569,7 +382,7 @@ bool WriteRenderMark(const ProductChrome& chrome) {
   if (wrote != static_cast<int>(json.size()))
     return false;
   LOG(INFO) << "wrote " << mark_path.AsUTF8Unsafe();
-  return map_frame && view0_frame;
+  return view0_frame;
 }
 
 int RunRenderCheck() {
@@ -578,14 +391,12 @@ int RunRenderCheck() {
     LOG(ERROR) << "render-check failed to create product windows";
     return 1;
   }
-  const bool map_ok = chrome.map && chrome.map->ConfirmBrowsedFrame();
   const bool view0_ok = chrome.view0 && chrome.view0->ConfirmBrowsedFrame();
   if (chrome.view1) {
     chrome.view1->EnablePresent();
     chrome.view1->PresentFrame();
   }
-  LOG(INFO) << "render-check map=" << (map_ok ? "ok" : "fail")
-            << " renderer=" << (chrome.map ? chrome.map->renderer_name() : "");
+  LOG(INFO) << "render-check map=skipped";
   LOG(INFO) << "render-check view0=" << (view0_ok ? "ok" : "fail")
             << " renderer="
             << (chrome.view0 ? chrome.view0->renderer_name() : "");
@@ -595,7 +406,7 @@ int RunRenderCheck() {
     chrome.main_contents->CloseSatellites();
   if (chrome.main_window)
     chrome.main_window->CloseNow();
-  return wrote && map_ok && view0_ok ? 0 : 1;
+  return wrote && view0_ok ? 0 : 1;
 }
 
 int RunChromeHarness() {

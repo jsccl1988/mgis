@@ -12,11 +12,8 @@
 #include "base/string16.h"
 #include "ui/views/controls/slider.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane_listener.h"
-#include "content/public/debug_agent.h"
-#include "content/public/gis_contents.h"
-#include "content/public/tool_session.h"
-#include "content/public/trace_log.h"
-#include "content/public/view_host.h"
+#include "content/public/browser/gis_contents.h"
+#include "content/public/browser/trace_log.h"
 #include "ui/views/widget/widget_delegate.h"
 
 namespace views {
@@ -26,10 +23,7 @@ class Menu;
 }
 
 namespace content {
-class DebugAgent;
 class GisContents;
-class ToolSession;
-class ViewHost;
 }
 
 namespace mgis {
@@ -45,8 +39,7 @@ class WorkbenchContents : public views::WidgetDelegateView,
                           public views::SliderListener,
                           public views::TabbedPaneListener,
                           public CatalogTabs::Observer,
-                          public content::TraceLog::Observer,
-                          public content::ViewHost::Delegate {
+                          public content::TraceLog::Observer {
  public:
   WorkbenchContents();
   virtual ~WorkbenchContents();
@@ -88,9 +81,6 @@ class WorkbenchContents : public views::WidgetDelegateView,
   // TraceLog::Observer:
   virtual void OnTrace(const content::TraceLine& line) OVERRIDE;
 
-  // ViewHost::Delegate:
-  virtual bool OnChildGesture(const content::InputEvent& event) OVERRIDE;
-
  private:
   class WindowMenuDelegate;
 
@@ -108,9 +98,6 @@ class WorkbenchContents : public views::WidgetDelegateView,
   scoped_ptr<WindowMenuDelegate> menu_delegate_;
   scoped_ptr<views::Menu> menu_;
   scoped_ptr<content::GisContents> contents_;
-  scoped_ptr<content::ToolSession> session_;
-  scoped_ptr<content::ViewHost> view0_host_;
-  scoped_ptr<content::DebugAgent> agent_;
   views::Widget* map_;
   views::Widget* view0_;
   views::Widget* view1_;

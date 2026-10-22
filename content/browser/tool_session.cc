@@ -1,12 +1,12 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/tool_session.h"
+#include "content/browser/tool_session.h"
 
 #include <sstream>
 
-#include "content/public/event_bus.h"
-#include "content/public/trace_log.h"
+#include "content/public/browser/event_bus.h"
+#include "content/public/browser/trace_log.h"
 #include "tool/workspace.h"
 
 namespace content {

@@ -1,10 +1,10 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "content/public/gis_contents.h"
+#include "content/public/browser/gis_contents.h"
 
 #include "content/browser/map/fake_scene.h"
-#include "content/public/types.h"
+#include "content/public/browser/types.h"
 
 namespace content {
 

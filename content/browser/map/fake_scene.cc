@@ -5,8 +5,8 @@
 
 #include <windows.h>
 
-#include "content/public/trace_log.h"
-#include "content/public/types.h"
+#include "content/public/browser/trace_log.h"
+#include "content/public/browser/types.h"
 
 namespace content {
 

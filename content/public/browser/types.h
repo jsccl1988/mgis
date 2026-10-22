@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef CONTENT_PUBLIC_TYPES_H_
-#define CONTENT_PUBLIC_TYPES_H_
+#ifndef CONTENT_PUBLIC_BROWSER_TYPES_H_
+#define CONTENT_PUBLIC_BROWSER_TYPES_H_
 
 #include <string>
 
@@ -73,4 +73,4 @@ struct InputEvent {
 
 }  // namespace content
 
-#endif  // CONTENT_PUBLIC_TYPES_H_
+#endif  // CONTENT_PUBLIC_BROWSER_TYPES_H_
