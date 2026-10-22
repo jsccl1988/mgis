@@ -20,7 +20,6 @@
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gfx/rect.h"
 #include "ui/views/controls/menu/menu.h"
-#include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/win/hwnd_util.h"
@@ -111,6 +110,16 @@ void WorkbenchContents::ApplyViewTab(ViewId id) {
   if (view_tabs_)
     view_tabs_->SelectTabAt(index);
   syncing_ = false;
+  ApplySceneMode();
+}
+
+void WorkbenchContents::ApplySceneMode() {
+  if (!contents_.get())
+    return;
+  const content::SceneMode mode = active_ == kView0
+                                      ? content::SceneMode::kScene3D
+                                      : content::SceneMode::kScene2D;
+  contents_->SetSceneMode(mode);
 }
 
 bool WorkbenchContents::HasLayerTree() const {
@@ -237,14 +246,15 @@ void WorkbenchContents::StartSession() {
 
   views::Widget* widget = GetWidget();
   HWND parent = widget ? views::HWNDForWidget(widget) : NULL;
-  int width = view0_page_ ? view0_page_->width() : 640;
-  int height = view0_page_ ? view0_page_->height() : 480;
+  int width = view_tabs_ ? view_tabs_->width() : 0;
+  int height = view_tabs_ ? view_tabs_->height() : 0;
   if (width < 2)
     width = 640;
   if (height < 2)
     height = 480;
   if (parent)
     contents_->AttachView(parent, content::kViewIdScene, width, height);
+  ApplySceneMode();
 
   contents_->trace_log()->Append(content::kTraceConsole, "session.ready");
   LOG(INFO) << "mgis content session started";

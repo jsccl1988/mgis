@@ -85,6 +85,8 @@ class WorkbenchContents : public views::WidgetDelegateView,
   class WindowMenuDelegate;
 
   void ApplyViewTab(ViewId id);
+  // 2D tab stores kScene2D. 3D tab stores kScene3D. The child HWND stays one.
+  void ApplySceneMode();
 
   ViewId active_;
   bool syncing_;

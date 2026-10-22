@@ -6,7 +6,8 @@
 namespace mgis {
 
 void InstallFlyCubeBackend() {
-  // StartSession must not register GlobeView as a view0 backend.
+  // StartSession attaches one scene child. This function does not register
+  // GlobeView as a view0 backend.
 }
 
 }  // namespace mgis

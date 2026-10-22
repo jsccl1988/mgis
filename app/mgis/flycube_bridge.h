@@ -6,8 +6,8 @@
 
 namespace mgis {
 
-// No longer registers a view0 backend. Scene children attach through
-// GisContents::AttachView. GlobeView itself stays available for render checks.
+// Scene children attach through GisContents::AttachView. GlobeView stays
+// available for render checks and is not registered as a view0 backend.
 void InstallFlyCubeBackend();
 
 }  // namespace mgis
