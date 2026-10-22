@@ -20,6 +20,7 @@
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gfx/rect.h"
 #include "ui/views/controls/menu/menu.h"
+#include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/win/hwnd_util.h"
