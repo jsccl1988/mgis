@@ -1,2 +1,2 @@
-primitive:basemap:m0
-primitive:groundwater:g0
+pick.2d
+pick.3d

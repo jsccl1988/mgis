@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <string>
 
-#include "app/mgis/workbench.h"
+#include "app/mgis/workbench/workbench.h"
 #include "base/basictypes.h"
 #include "base/bind.h"
 #include "base/file_util.h"
@@ -24,7 +24,7 @@
 #include "ui/views/widget/widget_delegate.h"
 #include "ui/views/win/hwnd_util.h"
 
-#include "app/mgis/globe_view.h"
+#include "app/mgis/viewport/globe_view.h"
 
 namespace {
 
@@ -265,10 +265,24 @@ bool CreateProductChrome(ProductChrome* chrome) {
       !chrome->main_contents->HasEntityTree())
     return false;
 
-  chrome->main_contents->SetSatellites(chrome->map->GetWidget(),
-                                       chrome->view0->GetWidget(),
-                                       chrome->view1->GetWidget());
   return true;
+}
+
+void CloseHarnessSatellites(ProductChrome* chrome) {
+  if (!chrome)
+    return;
+  views::Widget* widgets[] = {
+      chrome->map ? chrome->map->GetWidget() : NULL,
+      chrome->view0 ? chrome->view0->GetWidget() : NULL,
+      chrome->view1 ? chrome->view1->GetWidget() : NULL,
+  };
+  chrome->map = NULL;
+  chrome->view0 = NULL;
+  chrome->view1 = NULL;
+  for (size_t i = 0; i < arraysize(widgets); ++i) {
+    if (widgets[i])
+      widgets[i]->CloseNow();
+  }
 }
 
 base::FilePath SuitePath(const base::FilePath& root) {
@@ -325,8 +339,7 @@ void FinishChromeHarness(ProductChrome* chrome, int* exit_code) {
     LOG(INFO) << "chrome widgets ready; browser.chrome mark.json not written";
   }
   *exit_code = ready ? 0 : 1;
-  if (chrome->main_contents)
-    chrome->main_contents->CloseSatellites();
+  CloseHarnessSatellites(chrome);
   if (chrome->main_window)
     chrome->main_window->CloseNow();
   if (base::MessageLoop::current())
@@ -402,8 +415,7 @@ int RunRenderCheck() {
             << (chrome.view0 ? chrome.view0->renderer_name() : "");
   const bool wrote = WriteRenderMark(chrome);
   mgis::SetQuitWhenWorkbenchCloses(false);
-  if (chrome.main_contents)
-    chrome.main_contents->CloseSatellites();
+  CloseHarnessSatellites(&chrome);
   if (chrome.main_window)
     chrome.main_window->CloseNow();
   return wrote && view0_ok ? 0 : 1;

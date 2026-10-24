@@ -14,14 +14,15 @@
 namespace content {
 
 class CapabilityHost;
-class FakeScene;
 class GisDocument;
+class PluginHost;
+class Scene;
 class ToolSession;
 
 // Viewport and document host for one desktop session.
 // This is not a browser profile or a web contents object. The shell keeps
 // aura windows; this object keeps the document pointer, the session bus,
-// and one scene child.
+// and one scene child (or per-mode presenter children).
 class GisContents {
  public:
   GisContents();
@@ -43,14 +44,34 @@ class GisContents {
                   const std::string& view_id,
                   int width,
                   int height);
+
+  // Active-mode scene child HWND after AttachView succeeds; NULL otherwise.
+  void* scene_child_hwnd() const;
+
+  // Child for |mode|. FakeScene returns the same HWND for every mode.
+  void* scene_child_hwnd_for(SceneMode mode) const;
+
   void SetSceneMode(SceneMode mode);
   SceneMode scene_mode() const;
 
-// Primitive mark at |x|, |y|. Empty when the current mode misses.
+  void ResizeScene(int width, int height);
+  void PresentScene();
+
+  // Primitive mark at |x|, |y|. Empty when the current mode misses.
   std::string Pick(int x, int y) const;
 
   // Session owned by this contents. Browser tests call it. The shell does not.
   ToolSession* tool_session();
+
+  // Shell map-tool entry: activates |interaction_id| on kViewIdScene without
+  // requiring the shell to include content/browser tooling headers.
+  bool ActivateSceneTool(const std::string& interaction_id);
+
+  // Product HWND / suite path: one pointer sample into Scene + ToolSession.
+  bool HandlePointer(const InputEvent& event);
+
+  // In-process plugin contribution surface. Owned by this contents. Never NULL.
+  PluginHost* plugin_host();
 
   // Suite host for browser tests. The shell does not call this.
   CapabilityHost& capability_host();
@@ -77,14 +98,22 @@ class GisContents {
   static bool OnAttach(void* context,
                        const std::string& view_id,
                        std::string* error);
+  static bool OnExpectLayer(void* context,
+                            const std::string& id,
+                            std::string* error);
+  static bool OnExpectEntity(void* context,
+                             const std::string& id,
+                             std::string* error);
 
   GisDocument* document_;
   EventBus event_bus_;
   TraceLog trace_log_;
-  // Owned. The scene child lives in the browser layer.
-  FakeScene* scene_;
-// Owned. Reads |scene_| when activate() targets kViewIdScene.
+  // Owned. Created via CreateScene() (FakeScene unless product factory set).
+  Scene* scene_;
+  // Owned. Reads |scene_| when activate() targets kViewIdScene.
   ToolSession* tools_;
+  // Owned. Bound to |tools_| so contributed factories reach Workspace.
+  PluginHost* plugins_;
   CapabilityHost* host_;
   void* attach_parent_;
 };

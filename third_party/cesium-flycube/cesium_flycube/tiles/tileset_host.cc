@@ -6,10 +6,10 @@
 #include "cesium_flycube/tiles/tileset_services.h"
 
 #include <Cesium3DTilesSelection/EllipsoidTilesetLoader.h>
-#include <Cesium3DTilesSelection/ViewUpdateResult.h>
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <Cesium3DTilesSelection/TilesetOptions.h>
 #include <Cesium3DTilesSelection/TilesetViewGroup.h>
+#include <Cesium3DTilesSelection/ViewUpdateResult.h>
 #include <CesiumGeospatial/Cartographic.h>
 
 #include <utility>
@@ -31,23 +31,36 @@ TilesetHost::~TilesetHost() {
 }
 
 void TilesetHost::LoadEllipsoid() {
+  last_load_error_.clear();
   Cesium3DTilesSelection::TilesetOptions options;
-  options.maximumScreenSpaceError = 16.0;
+  ApplyTilesetSettings(settings_, &options);
   state_->tileset = Cesium3DTilesSelection::EllipsoidTilesetLoader::createTileset(
       state_->services.Externals(), options);
 }
 
 void TilesetHost::LoadUrl(const std::string& url) {
+  last_load_error_.clear();
+  Cesium3DTilesSelection::TilesetOptions options;
+  ApplyTilesetSettings(settings_, &options);
   state_->tileset = std::make_unique<Cesium3DTilesSelection::Tileset>(
-      state_->services.Externals(), url, Cesium3DTilesSelection::TilesetOptions{});
+      state_->services.Externals(), url, options);
 }
 
 void TilesetHost::LoadIon(int64_t asset_id, const std::string& access_token) {
+  last_load_error_.clear();
+  Cesium3DTilesSelection::TilesetOptions options;
+  ApplyTilesetSettings(settings_, &options);
   state_->tileset = std::make_unique<Cesium3DTilesSelection::Tileset>(
-      state_->services.Externals(),
-      asset_id,
-      access_token,
-      Cesium3DTilesSelection::TilesetOptions{});
+      state_->services.Externals(), asset_id, access_token, options);
+}
+
+void TilesetHost::AddRasterOverlay(
+    const CesiumUtility::IntrusivePointer<
+        const CesiumRasterOverlays::RasterOverlay>& overlay) {
+  if (!state_->tileset || !overlay) {
+    return;
+  }
+  state_->tileset->getOverlays().add(overlay);
 }
 
 TilesetFrame TilesetHost::Tick(
@@ -62,6 +75,13 @@ TilesetFrame TilesetHost::Tick(
   state_->services.Pump();
   state_->tileset->loadTiles();
   return CollectTilesetFrame(update, state_->services.credits());
+}
+
+float TilesetHost::LoadProgress() const {
+  if (!state_->tileset) {
+    return 0.0f;
+  }
+  return state_->tileset->computeLoadProgress();
 }
 
 CesiumAsync::Future<double> TilesetHost::SampleHeightDegrees(

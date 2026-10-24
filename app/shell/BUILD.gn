@@ -13,6 +13,7 @@ executable("mview_shell") {
   deps = [
     "//app/mgis:mgis",
     "//content:content",
+    "//content:product_presenters",
     "//plugin:plugin",
     "//tool:tool",
     "//base/third_party/dynamic_annotations:dynamic_annotations",

@@ -8,9 +8,12 @@
 #include "MViewCameraPawn.generated.h"
 
 class UCameraComponent;
+class UCesiumFlyToComponent;
 class UCesiumGlobeAnchorComponent;
 
-// One globe camera. The product registers it on ACesiumCameraManager::AdditionalCameras.
+// Globe-aware camera pawn. Registers into ACesiumCameraManager::AdditionalCameras.
+// Field demos use a short local flight; the Google Earth-style globe view starts
+// in space and FlyTo's into the city.
 UCLASS()
 class MVIEWGLOBE_API AMViewCameraPawn : public APawn
 {
@@ -24,10 +27,31 @@ public:
 	// Writes this pawn into AdditionalCameras. AddCamera is obsolete.
 	void RegisterView(const FVector2D& ViewportSize);
 
+	// Local orbit around a procedural demo, then a short flight to SuggestedEye.
+	void BeginLocalBrowse(const FVector& Focus, const FVector& SuggestedEye);
+
+	// Places the pawn above Earth and starts UCesiumFlyToComponent into Shanghai.
+	void BeginGeodeticBrowse();
+
+protected:
+	virtual void Tick(float DeltaSeconds) override;
+
 private:
+	void ApplyLookAt(const FVector& Eye, const FVector& Target);
+
 	UPROPERTY(VisibleAnywhere)
 	UCesiumGlobeAnchorComponent* GlobeAnchor;
 
 	UPROPERTY(VisibleAnywhere)
+	UCesiumFlyToComponent* FlyTo;
+
+	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
+
+	bool bLocalFlight = false;
+	float LocalFlightElapsed = 0.0f;
+	float LocalFlightDuration = 2.8f;
+	FVector LocalFlightStart = FVector::ZeroVector;
+	FVector LocalFlightEnd = FVector::ZeroVector;
+	FVector LocalFocus = FVector::ZeroVector;
 };

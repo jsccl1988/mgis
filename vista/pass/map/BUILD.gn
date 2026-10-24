@@ -1,0 +1,53 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# 2D MapPass → MapLibre / mercator. Product DLL vista_map.dll.
+
+config("export_defines") {
+  defines = [ "VISTA_MAP_IMPLEMENTATION" ]
+}
+
+static_library("map_math") {
+  sources = [
+    "camera_follow.cc",
+    "camera_follow.h",
+  ]
+  include_dirs += [ "//" ]
+}
+
+shared_library("vista_map") {
+  output_name = "vista_map"
+  sources = [
+    "map_pass.cc",
+    "map_pass.h",
+    "map_surface.cc",
+    "map_surface.h",
+  ]
+  deps = [ ":map_math" ]
+  configs += [ ":export_defines" ]
+  include_dirs += [ "//" ]
+  libs = [
+    "gdi32.lib",
+    "opengl32.lib",
+    "user32.lib",
+  ]
+}
+
+executable("map_pass_test") {
+  testonly = true
+  sources = [ "map_pass_test.cc" ]
+  deps = [
+    ":map_math",
+    ":vista_map",
+    "//testing:gtest",
+    "//testing:gtest_main",
+    "//tool:tool",
+  ]
+  include_dirs += [
+    "//",
+    "//testing/gtest/include",
+  ]
+  if (is_win) {
+    configs += [ "//build/config/win:console_subsystem" ]
+  }
+}

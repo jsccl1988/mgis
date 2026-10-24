@@ -492,17 +492,29 @@ void Widget::CenterWindow(const gfx::Size& size) {
 }
 
 void Widget::SetBoundsConstrained(const gfx::Rect& bounds) {
-  gfx::Rect work_area =
+  gfx::Display display =
       gfx::Screen::GetScreenFor(GetNativeView())->GetDisplayNearestPoint(
-          bounds.origin()).work_area();
+          bounds.origin());
+  gfx::Rect work_area = display.work_area();
   if (work_area.IsEmpty()) {
     SetBounds(bounds);
-  } else {
-    // Inset the work area slightly.
-    work_area.Inset(10, 10, 10, 10);
-    work_area.AdjustToFit(bounds);
-    SetBounds(work_area);
+    return;
   }
+  // Display::work_area is DIP (SetScaleAndBounds). HWNDMessageHandler::
+  // SetBounds expects physical pixels — convert before AdjustToFit so a
+  // 1100x720 workbench is not crushed to ~440x288 on 250% monitors.
+  const float scale = display.device_scale_factor();
+  if (scale > 1.0f) {
+    work_area = gfx::Rect(
+        static_cast<int>(work_area.x() * scale + 0.5f),
+        static_cast<int>(work_area.y() * scale + 0.5f),
+        static_cast<int>(work_area.width() * scale + 0.5f),
+        static_cast<int>(work_area.height() * scale + 0.5f));
+  }
+  work_area.Inset(10, 10, 10, 10);
+  gfx::Rect fitted(bounds);
+  fitted.AdjustToFit(work_area);
+  SetBounds(fitted);
 }
 
 void Widget::SetVisibilityChangedAnimationsEnabled(bool value) {

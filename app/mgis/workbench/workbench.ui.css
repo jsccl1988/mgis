@@ -1,0 +1,53 @@
+/* Workbench chrome — DIP lengths; YogaLayoutManager scales by device DPI. */
+
+/* Outer <View> host: column flex so #root can grow to the client area. */
+.chrome_host {
+  display: flex;
+  flex-direction: column;
+}
+
+.chrome {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.toolbar {
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.mid {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 240px;
+}
+
+.catalog {
+  width: 220px;
+  min-width: 120px;
+  flex-shrink: 1;
+}
+
+.viewport {
+  flex: 1;
+  min-width: 400px;
+}
+
+.tools {
+  width: 280px;
+  min-width: 160px;
+  flex-shrink: 1;
+}
+
+.bottom {
+  height: 140px;
+  min-height: 72px;
+  flex-shrink: 1;
+}
+
+.status {
+  height: 22px;
+  flex-shrink: 0;
+}

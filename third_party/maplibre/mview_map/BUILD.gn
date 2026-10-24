@@ -1,49 +1,14 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
-# 2D map ABI and follow-2d zoom table. Not part of //:default.
-# MapLibre Native is not linked. The DLL keeps an in-memory camera.
+# Optional MapLibre embed sources (maplibre_present.cc + maplibre_embed.cmake)
+# for CMake builds of mview_maplibre.dll. Product MapPass is //vista/pass/map.
 
-config("export_defines") {
-  defines = [ "MVIEW_MAP_BUILD" ]
+group("mview_map") {
+  public_deps = [ "//vista/pass/map:vista_map" ]
 }
 
-static_library("mview_map_math") {
-  sources = [
-    "camera_follow.cc",
-    "camera_follow.h",
-  ]
-}
-
-shared_library("mview_map") {
-  output_name = "mview_map"
-  sources = [
-    "map_surface.cc",
-    "map_surface.h",
-    "mview_map.cc",
-    "mview_map.h",
-  ]
-  deps = [ ":mview_map_math" ]
-  configs += [ ":export_defines" ]
-  libs = [
-    "gdi32.lib",
-    "opengl32.lib",
-    "user32.lib",
-  ]
-}
-
-executable("mview_map_test") {
+group("mview_map_test") {
   testonly = true
-  sources = [ "mview_map_test.cc" ]
-  deps = [
-    ":mview_map",
-    ":mview_map_math",
-    "//testing:gtest",
-    "//testing:gtest_main",
-    "//tool:tool",
-  ]
-  include_dirs += [ "//testing/gtest/include" ]
-  if (is_win) {
-    configs += [ "//build/config/win:console_subsystem" ]
-  }
+  public_deps = [ "//vista/pass/map:map_pass_test" ]
 }

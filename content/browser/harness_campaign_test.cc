@@ -101,11 +101,11 @@ TEST(HarnessCampaign, WritesMarksInOrder) {
   ASSERT_TRUE(file_util::ReadFileToString(MarkPath(out_root, "browser.draw"),
                                           &draw_json));
   EXPECT_NE(std::string::npos, map_json.find("\"pixel_ratio\""));
-  const size_t basemap = pick_json.find("\"primitive:basemap:m0\"");
-  const size_t groundwater = pick_json.find("\"primitive:groundwater:g0\"");
-  EXPECT_NE(std::string::npos, basemap);
-  EXPECT_NE(std::string::npos, groundwater);
-  EXPECT_LT(basemap, groundwater);
+  const size_t pick_2d = pick_json.find("\"pick.2d\"");
+  const size_t pick_3d = pick_json.find("\"pick.3d\"");
+  EXPECT_NE(std::string::npos, pick_2d);
+  EXPECT_NE(std::string::npos, pick_3d);
+  EXPECT_LT(pick_2d, pick_3d);
   const size_t draft_map = draw_json.find("\"draft.basemap\"");
   const size_t draft_ground = draw_json.find("\"draft.groundwater\"");
   EXPECT_NE(std::string::npos, draft_map);

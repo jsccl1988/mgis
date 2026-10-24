@@ -23,6 +23,7 @@
 #include "ui/base/l10n/l10n_util_win.h"
 #include "ui/base/theme_provider.h"
 #include "ui/base/view_prop.h"
+#include "ui/base/win/dpi.h"
 #include "ui/base/win/hwnd_util.h"
 #include "ui/base/win/mouse_wheel_util.h"
 #include "ui/base/win/shell.h"
@@ -112,6 +113,9 @@ void NativeWidgetWin::Show(int show_state) {
 
 void NativeWidgetWin::InitNativeWidget(const Widget::InitParams& params) {
   SetInitParams(params);
+  // Pass bounds through in the same unit HWNDMessageHandler uses. Mixed
+  // DIPToScreen here + ScreenToDIP in OnSize without a matched GetDPIScale
+  // (common on 250% panels) crushes workbench chrome into a corner.
   message_handler_->Init(params.parent, params.bounds);
 }
 

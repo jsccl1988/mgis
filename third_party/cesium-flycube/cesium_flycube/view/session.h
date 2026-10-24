@@ -4,6 +4,8 @@
 #pragma once
 
 #include "cesium_flycube/geo/georeference.h"
+#include "cesium_flycube/geo/globe_anchor.h"
+#include "cesium_flycube/geo/origin_shift.h"
 #include "cesium_flycube/view/camera_manager.h"
 #include "cesium_flycube/view/origin_policy.h"
 
@@ -27,12 +29,19 @@ class Session {
   CameraManager& cameras() { return cameras_; }
   const CameraManager& cameras() const { return cameras_; }
 
+  OriginShift& origin_shift() { return origin_shift_; }
+  const OriginShift& origin_shift() const { return origin_shift_; }
+
   bool CamerasShareOrigin(std::string* reason) const;
   std::vector<Cesium3DTilesSelection::ViewState> BuildViewStates() const;
+
+  // Applies origin_shift_ toward `anchor`. Returns true when the origin moved.
+  bool ShiftOrigin(const GlobeAnchor& anchor);
 
  private:
   Georeference georeference_;
   CameraManager cameras_;
+  OriginShift origin_shift_;
 };
 
 }  // namespace cesium_flycube

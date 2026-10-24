@@ -220,10 +220,14 @@ std::string ResolveMarkupPathImpl(std::string_view path_or_name) {
   const std::string candidates[] = {
       exe + "\\..\\..\\ui\\views\\markup\\testdata\\" + name,
       exe + "/../../ui/views/markup/testdata/" + name,
+      exe + "\\..\\..\\app\\mgis\\workbench\\" + name,
+      exe + "/../../app/mgis/workbench/" + name,
       exe + "\\" + name,
       exe + "/" + name,
       std::string("ui\\views\\markup\\testdata\\") + name,
       std::string("ui/views/markup/testdata/") + name,
+      std::string("app\\mgis\\workbench\\") + name,
+      std::string("app/mgis/workbench/") + name,
   };
   for (const std::string& c : candidates) {
     if (FileExists(c))

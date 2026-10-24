@@ -15,4 +15,8 @@ std::vector<Cesium3DTilesSelection::ViewState> Session::BuildViewStates() const 
   return ViewStateBuilder::Build(georeference_, cameras_);
 }
 
+bool Session::ShiftOrigin(const GlobeAnchor& anchor) {
+  return origin_shift_.Apply(&georeference_, anchor);
+}
+
 }  // namespace cesium_flycube

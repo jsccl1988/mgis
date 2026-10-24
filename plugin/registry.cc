@@ -31,6 +31,20 @@ std::wstring Utf8ToWide(const std::string& utf8) {
   return wide;
 }
 
+std::string WideToUtf8(const std::wstring& wide) {
+  if (wide.empty())
+    return std::string();
+  const int in_len = static_cast<int>(wide.size());
+  const int out_len =
+      WideCharToMultiByte(CP_UTF8, 0, wide.data(), in_len, NULL, 0, NULL, NULL);
+  if (out_len <= 0)
+    return std::string();
+  std::string utf8(static_cast<size_t>(out_len), '\0');
+  WideCharToMultiByte(CP_UTF8, 0, wide.data(), in_len, &utf8[0], out_len, NULL,
+                      NULL);
+  return utf8;
+}
+
 bool ReadFileUtf8(const std::wstring& path, std::string* out) {
   HANDLE file = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
                             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -87,6 +101,7 @@ class ManifestParser {
     bool saw_id = false;
     bool saw_name = false;
     bool saw_commands = false;
+    bool saw_dll = false;
     SkipWs();
     if (Consume('}'))
       return false;
@@ -104,6 +119,10 @@ class ManifestParser {
         if (saw_name || !ParseString(&manifest->name))
           return false;
         saw_name = true;
+      } else if (key == "dll") {
+        if (saw_dll || !ParseString(&manifest->dll))
+          return false;
+        saw_dll = true;
       } else if (key == "commands") {
         if (saw_commands || !ParseCommandArray(&manifest->commands))
           return false;
@@ -355,8 +374,10 @@ bool Registry::Scan(const std::string& directory_utf8) {
   records_.clear();
 
   Manifest root_manifest;
-  if (LoadManifestFile(dir + L"\\plugin.json", &root_manifest))
+  if (LoadManifestFile(dir + L"\\plugin.json", &root_manifest)) {
+    root_manifest.directory = directory_utf8;
     Register(root_manifest);
+  }
 
   const std::wstring pattern = dir + L"\\*";
   WIN32_FIND_DATAW data;
@@ -369,10 +390,12 @@ bool Registry::Scan(const std::string& directory_utf8) {
     if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
       continue;
     Manifest child;
-    const std::wstring child_json =
-        dir + L"\\" + data.cFileName + L"\\plugin.json";
-    if (LoadManifestFile(child_json, &child))
+    const std::wstring child_dir = dir + L"\\" + data.cFileName;
+    const std::wstring child_json = child_dir + L"\\plugin.json";
+    if (LoadManifestFile(child_json, &child)) {
+      child.directory = WideToUtf8(child_dir);
       Register(child);
+    }
   } while (FindNextFileW(find, &data));
   FindClose(find);
   return true;

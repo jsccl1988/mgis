@@ -10,7 +10,7 @@ All rights reserved.
 
 # Logging (`base/logging.h`)
 
-Product C++ under **`ui/`**, **`base/`**, and **`examples/`** uses Chromium logging.
+Product C++ under **`ui/`**, **`base/`**, and **`app/`** uses Chromium logging.
 
 ```cpp
 #include "base/logging.h"

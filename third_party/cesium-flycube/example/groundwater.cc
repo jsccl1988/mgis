@@ -1,7 +1,10 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
+#include "cesium_flycube/gpu/draped_terrain.h"
 #include "cesium_flycube/gpu/scene_present.h"
+#include "cesium_flycube/tiles/tileset_host.h"
+#include "cesium_flycube/view/session.h"
 
 #include <cmath>
 #include <iostream>
@@ -123,10 +126,20 @@ void AddBlock(std::vector<cesium_flycube::PresentMesh>* meshes) {
 
 }  // namespace
 
-// Cutaway groundwater block: bedrock, confined aquifer, aquitard, water table,
-// dry sand, soil, a recharge pond, and two wells.
+// Cutaway groundwater block on draped ellipsoid terrain: bedrock, aquifers,
+// water table, recharge pond, and wells.
 int main() {
-  std::vector<cesium_flycube::PresentMesh> pictures;
+  cesium_flycube::Session session;
+  cesium_flycube::TilesetHost tileset;
+  cesium_flycube::DrapedTerrainOptions opts;
+  const cesium_flycube::DrapedTerrainResult terrain =
+      cesium_flycube::CaptureDrapedEllipsoid(&session, &tileset, opts);
+  if (!terrain.ok) {
+    std::cerr << "groundwater terrain: " << terrain.message << "\n";
+    return 1;
+  }
+
+  std::vector<cesium_flycube::PresentMesh> pictures = terrain.pictures;
   AddBlock(&pictures);
 
   cesium_flycube::PresentCamera camera;
@@ -141,12 +154,15 @@ int main() {
   camera.up[2] = 1.0f;
   camera.fov_y_radians = 0.78f;
   camera.draw_edges = false;
+  camera.skip_shade = true;
 
   const cesium_flycube::PresentResult shown = cesium_flycube::PresentScene(
       "groundwater", camera, pictures,
-      std::string(CESIUM_FLYCUBE_CAPTURE_DIR) + "/groundwater.png");
+      std::string(CESIUM_FLYCUBE_CAPTURE_DIR) + "/groundwater.png",
+      /*open_window=*/false, /*stamp_fps=*/false);
   std::cout << "png " << shown.png_path << " pixels " << shown.drawn_pixels
-            << " meshes " << pictures.size() << " " << shown.message << "\n";
+            << " meshes " << pictures.size() << " draped " << terrain.draped
+            << " " << shown.message << "\n";
   if (!shown.ok || shown.drawn_pixels < 8000) {
     std::cerr << "groundwater was not presented: " << shown.message << "\n";
     return 1;

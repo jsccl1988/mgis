@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>插件接线</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  body { margin:0; font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:960px; margin:32px auto; padding:0 20px 48px; }
+  h1 { font-size:22px; margin:0 0 8px; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  p { color:var(--muted); line-height:1.55; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin:16px 0; }
+  .lanes { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; }
+  .lane { border:1px solid var(--line); border-radius:6px; padding:12px; background:#fafbfc; }
+  .lane h3 { margin:0 0 8px; font-size:14px; color:var(--accent); }
+  .lane ul { margin:0; padding-left:18px; font-size:13px; line-height:1.55; }
+  .flow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px; margin-top:8px; }
+  .chip { background:#eef4fb; border:1px solid #c5d4e8; border-radius:4px; padding:6px 10px; }
+  .arrow { color:var(--accent); font-weight:700; }
+  code { font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>插件接线</h1>
+  <p>方案 1：C ABI。壳持 Registry/Loader；PluginHost 在 GisContents；Interaction 真进 Workspace；右栏可列可跑。</p>
+
+  <div class="card">
+    <h2>分层</h2>
+    <div class="lanes">
+      <div class="lane">
+        <h3>壳 app/mgis</h3>
+        <ul>
+          <li>Registry · Loader</li>
+          <li>扫 UI/plugins → sample</li>
+          <li>ToolPluginPanel 点跑</li>
+          <li>只 include content/public</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>plugin/</h3>
+        <ul>
+          <li>plugin.json + dll 字段</li>
+          <li>LoadLibrary / GetProcAddress</li>
+          <li>api/mview_plugin_api.h</li>
+          <li>sample → plugin_sample.dll</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>content/public</h3>
+        <ul>
+          <li>PluginHost</li>
+          <li>GisContents::plugin_host</li>
+          <li>set_tool_session</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>tool/</h3>
+        <ul>
+          <li>Workspace · Registry</li>
+          <li>桥接后的 Interaction</li>
+          <li>ActivateInteraction</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>启动与贡献</h2>
+    <div class="flow">
+      <span class="chip">Scan plugin.json</span><span class="arrow">→</span>
+      <span class="chip">LoadLibrary</span><span class="arrow">→</span>
+      <span class="chip">mview_plugin_contribute</span><span class="arrow">→</span>
+      <span class="chip">PluginHost 回调</span><span class="arrow">→</span>
+      <span class="chip">command / factory / menu / dock</span>
+    </div>
+    <div class="flow">
+      <span class="chip">factory</span><span class="arrow">→</span>
+      <span class="chip">各视图 Workspace.registry</span><span class="arrow">→</span>
+      <span class="chip">ActivateInteraction</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>执行</h2>
+    <div class="flow">
+      <span class="chip">右栏按钮 / Contribute</span><span class="arrow">→</span>
+      <span class="chip">PluginHost::run_processing</span><span class="arrow">→</span>
+      <span class="chip">mview_plugin_execute</span><span class="arrow">→</span>
+      <span class="chip">out/harness/…/mark.json</span>
+    </div>
+    <p><code>PluginHost</code> 自身不 LoadLibrary。version 不符时 Loader 跳过并写 trace。</p>
+  </div>
+</main>
+</body>
+</html>

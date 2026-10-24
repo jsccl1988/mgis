@@ -1,8 +1,8 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
+#include "cesium_flycube/gpu/frame_present.h"
 #include "cesium_flycube/gpu/scene_present.h"
-#include "cesium_flycube/tiles/raster_image.h"
 #include "cesium_flycube/tiles/raster_overlay.h"
 #include "cesium_flycube/tiles/tileset_host.h"
 #include "cesium_flycube/view/session.h"
@@ -162,53 +162,6 @@ bool CoversCity(const TileExtent& extent) {
          extent.min_y < 500.0 && extent.max_y > -500.0;
 }
 
-cesium_flycube::PresentMesh TerrainMesh(const cesium_flycube::TileMesh& tile,
-                                       const cesium_flycube::Georeference& geo) {
-  cesium_flycube::PresentMesh mesh;
-  mesh.color[0] = 0.20f;
-  mesh.color[1] = 0.45f;
-  mesh.color[2] = 0.62f;
-  mesh.color[3] = 1.0f;
-  mesh.mesh.indices = tile.indices;
-  mesh.mesh.xyz.reserve(tile.ecef_positions.size() * 3);
-  mesh.colors.reserve(tile.ecef_positions.size() * 4);
-  // Ellipsoid skirts have no TEXCOORD_0. Debug colorize is a solid tile color,
-  // so the center texel is the district color.
-  std::uint8_t solid[4] = {};
-  const bool have_solid =
-      !tile.rasters.empty() && tile.texcoords.empty() &&
-      cesium_flycube::SampleRaster(tile.rasters.front(), glm::vec2(0.5f, 0.5f),
-                                   solid);
-  if (have_solid) {
-    mesh.color[0] = static_cast<float>(solid[0]) / 255.0f;
-    mesh.color[1] = static_cast<float>(solid[1]) / 255.0f;
-    mesh.color[2] = static_cast<float>(solid[2]) / 255.0f;
-    mesh.color[3] = 1.0f;
-  }
-  for (size_t i = 0; i < tile.ecef_positions.size(); ++i) {
-    const glm::dvec3 local = geo.EcefToLocal(tile.ecef_positions[i]);
-    mesh.mesh.xyz.push_back(static_cast<float>(local.x));
-    mesh.mesh.xyz.push_back(static_cast<float>(local.y));
-    mesh.mesh.xyz.push_back(static_cast<float>(local.z));
-    float rgba[4] = {mesh.color[0], mesh.color[1], mesh.color[2], 1.0f};
-    if (have_solid) {
-      rgba[0] = mesh.color[0];
-      rgba[1] = mesh.color[1];
-      rgba[2] = mesh.color[2];
-    } else if (!tile.rasters.empty() && i < tile.texcoords.size()) {
-      std::uint8_t sample[4] = {};
-      if (cesium_flycube::SampleRaster(tile.rasters.front(), tile.texcoords[i],
-                                       sample)) {
-        rgba[0] = static_cast<float>(sample[0]) / 255.0f;
-        rgba[1] = static_cast<float>(sample[1]) / 255.0f;
-        rgba[2] = static_cast<float>(sample[2]) / 255.0f;
-      }
-    }
-    mesh.colors.insert(mesh.colors.end(), {rgba[0], rgba[1], rgba[2], rgba[3]});
-  }
-  return mesh;
-}
-
 }  // namespace
 
 // Ellipsoid terrain over Shanghai, a park, streets, and lit blocks.
@@ -274,7 +227,8 @@ int main() {
     if (refined && CoversCity(extent) && extent.span > 1200.0) {
       continue;
     }
-    pictures.push_back(TerrainMesh(tile, session.georeference()));
+    pictures.push_back(
+        cesium_flycube::TileMeshToPresent(tile, session.georeference()));
   }
   AddCity(&pictures);
 

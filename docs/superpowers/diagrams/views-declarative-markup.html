@@ -40,7 +40,8 @@
     <div class="arrow">→</div>
     <div class="card">
       <h2>宿主</h2>
-      <div class="lane"><strong>产品 Dialog</strong> 可选依赖 markup</div>
+      <div class="lane"><strong>mgis workbench</strong> <code>workbench.ui.xml</code> → slot + FillLayout</div>
+      <div class="lane"><strong>产品 Dialog</strong> 其它面可选依赖</div>
       <div class="lane"><strong>UiDesigner.exe</strong> 画布 / 树 / 属性 / 热重载</div>
     </div>
   </div>
@@ -50,7 +51,8 @@
       <li>不引入 Qt / WebView2 / CEF；画布仍是 Views + Skia。</li>
       <li>不搬 smartgis <code>primitives/</code>；tag 绑 <code>ui/views/controls</code>。</li>
       <li>方言故意不兼容 smartgis；API 用 Chromium <code>PascalCase</code>。</li>
-      <li><code>pugixml</code> / <code>yoga</code> 已 pin；默认 shell 不强制链接。</li>
+      <li><code>pugixml</code> / <code>yoga</code> 已 pin；shell 入口薄，workbench 显式 opt-in。</li>
+      <li>CSS 长度为 DIP；Yoga <code>StyleScale</code> × 设备缩放 → 物理像素。</li>
     </ul>
   </div>
   <p class="foot">docs/superpowers/diagrams/views-declarative-markup.html · 对应 specs/2026-10-20-views-declarative-markup-design.md</p>

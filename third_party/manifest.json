@@ -89,7 +89,7 @@
         "platform/default",
         "platform/windows"
       ],
-      "note": "Copied pin from smartgis (tag ios-v6.30.0, commit 0ffe6336b4e7266c75c13337b4aa1d0f2b0877d5). If third_party/.src/maplibre-native already exists as a junction to the smartgis checkout, fetch reuses it. Not compiled by this repo's GN. Example: third_party/maplibre/example. Product DLL is mview_map.dll later."
+      "note": "Copied pin from smartgis (tag ios-v6.30.0, commit 0ffe6336b4e7266c75c13337b4aa1d0f2b0877d5). If third_party/.src/maplibre-native already exists as a junction to the smartgis checkout, fetch reuses it. Not compiled by this repo's GN. Example: third_party/maplibre/example. Product MapPass is vista_map.dll; optional engine DLL is mview_maplibre.dll."
     },
     {
       "name": "vtk",

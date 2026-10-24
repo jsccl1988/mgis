@@ -12,6 +12,7 @@
   p { color:var(--muted); line-height:1.55; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin:16px 0; }
   .lanes { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .lanes4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; }
   .lane { border:1px solid var(--line); border-radius:6px; padding:12px; background:#fafbfc; }
   .lane h3 { margin:0 0 8px; font-size:14px; color:var(--accent); }
   .lane ul { margin:0; padding-left:18px; font-size:13px; line-height:1.6; }
@@ -24,35 +25,68 @@
 <body>
 <main>
   <h1>Content 接线</h1>
-  <p>产品窗在 <code>app/mgis</code>。<code>app/shell</code> 只是孵化器，可以打开工作台，mgis 不包含它。手势先经过 <code>tool::Workspace</code>，总线只公布已经发生的 <code>GestureApplied</code>。三维子窗口这一刀是 FlyCube 地球，不是 MapLibre，也不是 UE。</p>
+  <p>产品窗在 <code>app/mgis</code>。<code>app/shell</code> 只是孵化器。壳只包含 <code>content/public/browser</code>。实现按职责落在 <code>content/browser</code> 深目录。手势先经过 <code>tool::Workspace</code>，总线只公布已经发生的 <code>GestureApplied</code>。三维子窗口这一刀是 FlyCube 地球。</p>
 
   <div class="card">
     <h2>分层</h2>
     <div class="lanes">
       <div class="lane">
-        <h3>app/mgis</h3>
+        <h3>app/mgis · shell</h3>
         <ul>
-          <li>aura 窗口与底栏</li>
-          <li>自己登记 FlyCube 钩子（GlobeView）</li>
+          <li>只 include public</li>
+          <li>登记 ViewHost hooks</li>
           <li>NativeViewHost 托住子 HWND</li>
-          <li>不包含 app/shell</li>
         </ul>
       </div>
       <div class="lane">
-        <h3>content</h3>
+        <h3>content/public</h3>
         <ul>
-          <li>ToolSession → 三个 Workspace</li>
-          <li>EventBus 事实</li>
-          <li>TraceLog + DebugAgent</li>
-          <li>ViewHost 父子 HWND</li>
+          <li>GisContents / EventBus / TraceLog</li>
+          <li>ViewHost + ViewBackendHooks</li>
+          <li>PluginHost / types</li>
         </ul>
       </div>
       <div class="lane">
-        <h3>这一刀不做</h3>
+        <h3>content/browser lanes</h3>
         <ul>
-          <li>MapLibre / UE 子窗口</li>
-          <li>回环套接字与 Python 工人</li>
-          <li>expect_* / capture 真值</li>
+          <li>session · viewport · tooling</li>
+          <li>ipc · glang.runtime · agent · plugin</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>browser 目录</h2>
+    <div class="lanes4">
+      <div class="lane">
+        <h3>session</h3>
+        <ul>
+          <li>GisContents 组装</li>
+          <li>EventBus / TraceLog</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>viewport</h3>
+        <ul>
+          <li>ViewHost 实现</li>
+          <li>map / FakeScene</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>tooling · glang.runtime</h3>
+        <ul>
+          <li>ToolSession</li>
+          <li>language / exec / host</li>
+          <li>exec/py → glang.plugin</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>ipc · agent · plugin</h3>
+        <ul>
+          <li>命名管道 / ue_peer</li>
+          <li>DebugAgent / MCP</li>
+          <li>PluginHost 实现</li>
         </ul>
       </div>
     </div>
@@ -75,9 +109,15 @@
     <div class="flow">
       <span class="chip">底栏 agent / ExecLine</span><span class="arrow">→</span>
       <span class="chip">help · trace · suite · attach</span><span class="arrow">→</span>
-      <span class="chip">mark · command · activate_tool · pointer</span><span class="arrow">→</span>
-      <span class="chip">同一个 ToolSession</span>
+      <span class="chip">run_suite_script</span><span class="arrow">→</span>
+      <span class="chip">*.py → CPython main + glang.plugin</span>
     </div>
+    <div class="flow" style="margin-top:10px">
+      <span class="chip">非 .py 行解释器</span><span class="arrow">→</span>
+      <span class="chip">mark · command · activate_tool · pointer · scene_mode · expect_layer · expect_entity</span><span class="arrow">→</span>
+      <span class="chip">GisContents CapabilityHost → ToolSession / Scene</span>
+    </div>
+    <p>产品 <code>StartSession</code> 启动 DebugAgent MCP。<code>capture</code> 仍 fail-closed。<code>build/python.gni</code>：Debug 需 <code>python312_d</code>；缺则软降级为桩。</p>
   </div>
 </main>
 </body>

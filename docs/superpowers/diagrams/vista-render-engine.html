@@ -1,0 +1,133 @@
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>Vista 渲染引擎层</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --line: #d8dee6;
+    --text: #1a2330;
+    --muted: #5a6a7e;
+    --accent: #2563a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 28px 32px 48px;
+  }
+  h1 { font-size: 1.35rem; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: stretch;
+    margin-bottom: 14px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    min-width: 200px;
+    flex: 1;
+  }
+  .card h2 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+  .card p, .card li {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.45;
+  }
+  .card ul { margin: 6px 0 0; padding-left: 1.1em; }
+  .arrow {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 4px 0 10px;
+  }
+  .lane-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.82em;
+    background: #eef2f6;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .gone { color: #a33; text-decoration: line-through; }
+</style>
+</head>
+<body>
+  <h1>Vista 渲染引擎层</h1>
+  <p class="sub">smartgis vista 的瘦通路 · C++ only · MapLibre + cesium_flycube 真渲染 · FlyCube 三维 SoT</p>
+
+  <div class="lane-label">壳 / content</div>
+  <div class="row">
+    <div class="card">
+      <h2>MapLibrePresenter · FlyCubeHost</h2>
+      <ul>
+        <li>只 include <code>vista/pass/…</code></li>
+        <li>链 <code>vista_map</code> / <code>vista_world</code> 导入库</li>
+        <li class="gone">LoadLibrary + mvm_* / mvf_*</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">▼ C++ · namespace vista</div>
+
+  <div class="lane-label">vista（引擎层）</div>
+  <div class="row">
+    <div class="card">
+      <h2>pass/map · MapPass</h2>
+      <p><code>vista_map.dll</code></p>
+      <ul>
+        <li>Present → MapLibre / mercator</li>
+        <li>相机 · 指针回调 · 子 HWND</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>pass/world · WorldPass</h2>
+      <p><code>vista_world.dll</code></p>
+      <ul>
+        <li>Present → cesium_flycube DX12</li>
+        <li>Orbit · 相机 · 子 HWND</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">▼ 引擎（third_party）· gis 数据后置</div>
+
+  <div class="row">
+    <div class="card">
+      <h2>maplibre</h2>
+      <p>可选 <code>mview_maplibre.dll</code>；源在 third_party</p>
+    </div>
+    <div class="card">
+      <h2>cesium-flycube + FlyCube</h2>
+      <p>预编库；CMake 编 world DLL</p>
+    </div>
+    <div class="card">
+      <h2>gis / render</h2>
+      <p>P0：数据与共享 RHI 位；Pass 不反向依赖壳</p>
+    </div>
+  </div>
+</body>
+</html>

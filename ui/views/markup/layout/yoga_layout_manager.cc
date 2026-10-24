@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "base/basictypes.h"
+#include "ui/base/win/dpi.h"
 #include "ui/views/view.h"
 #include "yoga/Yoga.h"
 
@@ -52,10 +53,13 @@ YGAlign ToYgAlign(FlexStyle::Align a) {
   }
 }
 
-// Widget in this tree has no device_scale_factor. Keep markup lengths at 1.
+// CSS lengths are DIP. NativeWidgetWin children use physical pixels, so
+// multiply Yoga style lengths by the process device scale (same as
+// ui::win::DIPToScreenSize). Per-monitor HWND DPI can refine later.
 float StyleScale(const View* view) {
   (void)view;
-  return 1.f;
+  const float scale = ui::win::GetDeviceScaleFactor();
+  return scale > 0.f ? scale : 1.f;
 }
 
 void ApplyFlexStyle(YGNodeRef node,

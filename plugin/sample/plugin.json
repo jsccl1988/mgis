@@ -1,5 +1,6 @@
 {
   "id": "plugin.sample",
   "name": "Sample",
+  "dll": "plugin_sample.dll",
   "commands": ["plugin.sample.run"]
 }

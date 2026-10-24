@@ -1,32 +1,41 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
-# Product workbench: Mgis main window and chrome panels.
+# Product workbench: Mgis main window and horizon panels.
 
 static_library("mgis") {
   sources = [
-    "bottom_panel.cc",
-    "bottom_panel.h",
-    "flycube_bridge.cc",
-    "flycube_bridge.h",
-    "globe_view.cc",
-    "globe_view.h",
-    "catalog_tabs.cc",
-    "catalog_tabs.h",
-    "tool_plugin_panel.cc",
-    "tool_plugin_panel.h",
+    "horizon/bottom_panel.cc",
+    "horizon/bottom_panel.h",
+    "horizon/catalog_tabs.cc",
+    "horizon/catalog_tabs.h",
+    "horizon/map_toolbar.cc",
+    "horizon/map_toolbar.h",
+    "horizon/status_bar.cc",
+    "horizon/status_bar.h",
+    "horizon/tool_plugin_panel.cc",
+    "horizon/tool_plugin_panel.h",
+    "horizon/viewport_placeholder.cc",
+    "horizon/viewport_placeholder.h",
+    "session/session.cc",
+    "session/session.h",
     "view_id.h",
-    "viewport_placeholder.cc",
-    "viewport_placeholder.h",
-    "viewport_surface.cc",
-    "viewport_surface.h",
-    "workbench.cc",
-    "workbench.h",
+    "viewport/globe_view.cc",
+    "viewport/globe_view.h",
+    "viewport/viewport_surface.cc",
+    "viewport/viewport_surface.h",
+    "workbench/workbench.cc",
+    "workbench/workbench.h",
+    "workbench/workbench_markup.cc",
+    "workbench/workbench_markup.h",
   ]
   deps = [
     "//base:base",
     "//base:base_i18n",
     "//content:content",
+    "//content:product_presenters",
+    "//plugin:plugin",
+    "//plugin:plugin_sample",
     "//build/grit:headers",
     "//skia:skia",
     "//ui/views:views",

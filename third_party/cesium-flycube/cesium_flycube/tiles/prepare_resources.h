@@ -8,7 +8,7 @@
 namespace cesium_flycube {
 
 // Cesium for Unreal's render-resource hook, reduced to a CPU mesh FlyCube can
-// upload. Raster overlays are accepted and then ignored.
+// upload. Raster overlays become RasterDrape entries on the TileMesh.
 class PrepareRendererResources
     : public Cesium3DTilesSelection::IPrepareRendererResources {
  public:

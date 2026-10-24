@@ -11,12 +11,12 @@
 #include "base/at_exit.h"
 #include "gtest/gtest.h"
 
-#include "content/browser/debug/debug_agent.h"
-#include "content/browser/devtools/mcp_server.h"
-#include "content/browser/glang/exec/suite_runner.h"
-#include "content/browser/script_runtime.h"
-#include "content/browser/tool_session.h"
-#include "content/browser/view_host.h"
+#include "content/browser/agent/debug/debug_agent.h"
+#include "content/browser/agent/devtools/mcp_server.h"
+#include "content/browser/glang.runtime/exec/suite_runner.h"
+#include "content/browser/glang.runtime/script_runtime.h"
+#include "content/browser/tooling/tool_session.h"
+#include "content/public/browser/view_host.h"
 #include "content/public/browser/gis_contents.h"
 
 namespace {
@@ -267,6 +267,23 @@ TEST(SessionWire, UnknownVerbWritesNoMarks) {
   EXPECT_NE(std::string::npos, error.find("unknown verb"));
 }
 
+TEST(SessionWire, PySuiteMarksViaPlugin) {
+  content::CapabilityHost host;
+  std::string error;
+#ifndef GLANG_PY_MARK_SUITE
+#error GLANG_PY_MARK_SUITE must be defined by //content:session_wire
+#endif
+  const std::string path = GLANG_PY_MARK_SUITE;
+#if defined(HAS_PYTHON)
+  EXPECT_TRUE(content::run_suite_script(host, path, &error)) << error;
+  EXPECT_TRUE(host.has_mark("py.ready"));
+#else
+  EXPECT_FALSE(content::run_suite_script(host, path, &error));
+  EXPECT_TRUE(host.marks().empty());
+  EXPECT_NE(std::string::npos, error.find("python"));
+#endif
+}
+
 TEST(SessionWire, AgentCommandAndClosedVerb) {
   content::GisContents contents;
   content::ToolSession tools;
@@ -342,6 +359,33 @@ TEST(SessionWire, ModeSelectsControllerAndPrimitive) {
   DestroyWindow(parent);
 }
 
+TEST(SessionWire, SelectionEmitsPickMarks) {
+  HWND parent = MakeParent();
+  ASSERT_TRUE(parent != NULL);
+  content::GisContents contents;
+  ASSERT_TRUE(contents.AttachView(parent, "scene", 80, 60));
+  std::string error;
+  EXPECT_TRUE(content::run_suite_text(
+      contents.capability_host(),
+      "activate_tool selection.point scene\n"
+      "pointer scene down 4 5\n",
+      &error))
+      << error;
+  EXPECT_TRUE(contents.capability_host().has_mark("pick.2d"));
+  EXPECT_EQ("primitive:basemap:m0", contents.Pick(4, 5));
+
+  EXPECT_TRUE(content::run_suite_text(
+      contents.capability_host(),
+      "scene_mode scene3d\n"
+      "activate_tool selection.point scene\n"
+      "pointer scene down 6 7\n",
+      &error))
+      << error;
+  EXPECT_TRUE(contents.capability_host().has_mark("pick.3d"));
+  EXPECT_EQ("primitive:groundwater:g0", contents.Pick(6, 7));
+  DestroyWindow(parent);
+}
+
 TEST(SessionWire, SuiteSceneModeAndUnknownVerb) {
   content::GisContents contents;
   HWND parent = MakeParent();
@@ -410,7 +454,7 @@ TEST(SessionWire, AttachAcceptsOnlyScene) {
   DestroyWindow(parent);
 }
 
-TEST(SessionWire, ExpectLayerAndEntityStayExplicit) {
+TEST(SessionWire, ExpectLayerAndEntityNeedSlotsWithoutContents) {
   content::DebugAgent agent;
   const std::string layer = agent.ExecLine("expect_layer basemap");
   const std::string entity = agent.ExecLine("expect_entity g0");
@@ -420,6 +464,31 @@ TEST(SessionWire, ExpectLayerAndEntityStayExplicit) {
   EXPECT_NE(std::string::npos, entity.find("expect_entity"));
   EXPECT_EQ(std::string::npos, layer.find("ok"));
   EXPECT_EQ(std::string::npos, entity.find("ok"));
+}
+
+TEST(SessionWire, AgentExpectLayerAndEntityViaContentsHost) {
+  content::GisContents contents;
+  content::DebugAgent agent;
+  agent.Bind(contents.tool_session(), contents.trace_log(), NULL, NULL);
+  agent.set_contents(&contents);
+
+  EXPECT_EQ("ok", agent.ExecLine("expect_layer basemap"));
+  EXPECT_EQ("ok", agent.ExecLine("expect_layer groundwater"));
+  EXPECT_NE(std::string::npos,
+            agent.ExecLine("expect_layer nope").find("missing"));
+
+  EXPECT_EQ("ok", agent.ExecLine("scene_mode scene2d"));
+  EXPECT_EQ("ok", agent.ExecLine("expect_entity m0"));
+  EXPECT_NE(std::string::npos,
+            agent.ExecLine("expect_entity g0").find("missing"));
+
+  EXPECT_EQ("ok", agent.ExecLine("scene_mode scene3d"));
+  EXPECT_EQ("ok", agent.ExecLine("expect_entity g0"));
+  EXPECT_NE(std::string::npos,
+            agent.ExecLine("expect_entity m0").find("missing"));
+
+  const std::string capture = agent.ExecLine("capture scene out.bmp");
+  EXPECT_NE(std::string::npos, capture.find("not available"));
 }
 
 TEST(SessionWire, McpHelpMatchesExecLine) {

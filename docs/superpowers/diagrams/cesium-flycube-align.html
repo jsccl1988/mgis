@@ -1,0 +1,68 @@
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>cesium-flycube 对齐</title>
+<style>
+  body { margin: 0; background: #f4f6f8; color: #1a2330; font: 15px/1.5 "Segoe UI", sans-serif; }
+  main { max-width: 980px; margin: 28px auto; padding: 0 16px 40px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
+  p.lead { color: #5a6a7e; margin: 0 0 20px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: #fff; border: 1px solid #d8dee6; border-radius: 8px; padding: 14px 16px; }
+  .card h2 { margin: 0 0 6px; font-size: 16px; color: #2563a8; }
+  .card p { margin: 0; color: #5a6a7e; }
+  .flow { margin-top: 16px; background: #fff; border: 1px solid #d8dee6; border-radius: 8px; padding: 16px; }
+  .lane { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .box { border: 1px solid #d8dee6; background: #fafbfc; border-radius: 6px; padding: 6px 10px; }
+  .accent { border-color: #2563a8; color: #2563a8; }
+</style>
+</head>
+<body>
+<main>
+  <h1>FlyCube 运行时对齐 Cesium for Unreal</h1>
+  <p class="lead">同一份 cesium-native。虚幻只留在标配进程里。</p>
+  <div class="grid">
+    <section class="card">
+      <h2>1 视图</h2>
+      <p>Georeference、GlobeAnchor、AdditionalCameras、OriginShift。默认不漂移，远距离仍是 origin_conflict。</p>
+    </section>
+    <section class="card">
+      <h2>2 瓦片集</h2>
+      <p>TilesetSettings 写入 TilesetOptions。加载失败和进度从 Tileset 读出。</p>
+    </section>
+    <section class="card">
+      <h2>3 影像</h2>
+      <p>ion、TMS、WMS、WMTS、URL、Bing、Azure、Google、多边形、调试分色。像素按 UV 采样。</p>
+    </section>
+    <section class="card">
+      <h2>4 要素</h2>
+      <p>_FEATURE_ID_0 与字符串属性列。属性纹理和数值列不在这一刀。</p>
+    </section>
+  </div>
+  <section class="flow">
+    <div class="lane">
+      <span class="box accent">相机 / 锚点</span>
+      <span class="box">ViewState</span>
+      <span class="box">Tileset::updateViewGroup</span>
+      <span class="box">TileMesh UV + RasterDrape</span>
+      <span class="box accent">FrameToPresent</span>
+      <span class="box">Present / FlyCube</span>
+    </div>
+    <div class="lane">
+      <span class="box">刀 1：SampleRaster → 顶点色（CPU PNG 与 DX12 同源）</span>
+    </div>
+    <div class="lane">
+      <span class="box">刀 2（未做）：真纹理 upload + HLSL 采样</span>
+    </div>
+    <div class="lane">
+      <span class="box">不进入这条链：Pawn、材质、CesiumSunSky、编辑器、壳 GN</span>
+    </div>
+  </section>
+</main>
+</body>
+</html>

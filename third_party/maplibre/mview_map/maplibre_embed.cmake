@@ -2,7 +2,7 @@
 # All rights reserved.
 
 # Built by MapLibre's CMake so this DLL shares that library's CRT and
-# exception flags. GN links mview_map.dll and LoadLibrary's this one.
+# exception flags. vista_map LoadLibrary's this optional engine DLL.
 
 get_filename_component(MVIEW_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
 

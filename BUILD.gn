@@ -1,11 +1,14 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
-# Root groups: all / default / m. Default builds //examples:examples
-# (base_widget, activex_widget, extra_views).
+# Root groups: all / default / m. Default builds product demos under
+# //ui/views/examples plus //app/ui_designer.
 
 group("all") {
-  deps = [ "//examples:examples" ]
+  deps = [
+    "//app/ui_designer:ui_designer",
+    "//ui/views/examples:product_examples",
+  ]
 }
 
 group("default") {
@@ -64,8 +67,18 @@ group("volume_tests") {
   deps = [ "//third_party/vtk/mview_volume:volume_field_test" ]
 }
 
-# P3 map camera and navigation math. Not part of //:default.
+# P3 map camera / MapPass tests. Not part of //:default.
 group("mview_map_tests") {
   testonly = true
-  deps = [ "//third_party/maplibre/mview_map:mview_map_test" ]
+  deps = [ "//vista:vista_tests" ]
+}
+
+group("vista_tests") {
+  testonly = true
+  deps = [ "//vista:vista_tests" ]
+}
+
+# Vista render-engine layer (MapPass + WorldPass).
+group("vista") {
+  deps = [ "//vista:vista" ]
 }

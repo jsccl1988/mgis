@@ -3,16 +3,19 @@
 
 #include "plugin/contribute.h"
 
-#include <stddef.h>
-#include <string.h>
+#include <string>
+
+#include "content/public/browser/plugin_host.h"
 
 namespace plugin {
 
-bool Contribute(const char* command_id) {
-  // In-process sample command. No DLL is loaded.
-  if (command_id == NULL || command_id[0] == '\0')
+bool Contribute(content::PluginHost* host, const char* command_id) {
+  if (!host || command_id == NULL || command_id[0] == '\0')
     return false;
-  return strcmp(command_id, "plugin.sample.run") == 0;
+  std::string error;
+  if (!host->has_command_id(command_id))
+    return false;
+  return host->run_processing(command_id, &error);
 }
 
 }  // namespace plugin

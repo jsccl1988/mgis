@@ -2,7 +2,8 @@
 // All rights reserved.
 
 // Install-layout launcher. Paths are relative to this executable:
-// Engine/, UI/mview_shell.exe, UI/mview_map.dll, Bin/mview_volume.dll.
+// Engine/, UI/mview_shell.exe, UI/vista_map.dll, UI/vista_world.dll,
+// Bin/mview_volume.dll.
 // It does not start Unreal. --check-layout builds a temp tree, checks those
 // paths, and writes out/harness/browser.install/mark.json.
 
@@ -175,7 +176,8 @@ bool HasCheckLayoutFlag() {
 bool LayoutComplete(const std::wstring& root) {
   return DirExists(root + L"\\Engine") &&
          FileExists(root + L"\\UI\\mview_shell.exe") &&
-         FileExists(root + L"\\UI\\mview_map.dll") &&
+         FileExists(root + L"\\UI\\vista_map.dll") &&
+         FileExists(root + L"\\UI\\vista_world.dll") &&
          FileExists(root + L"\\Bin\\mview_volume.dll");
 }
 
@@ -188,8 +190,12 @@ std::string LayoutReport(const std::wstring& root) {
             (FileExists(root + L"\\UI\\mview_shell.exe") ? "present"
                                                          : "missing") +
             "\n";
-  report += std::string("UI/mview_map.dll=") +
-            (FileExists(root + L"\\UI\\mview_map.dll") ? "present" : "missing") +
+  report += std::string("UI/vista_map.dll=") +
+            (FileExists(root + L"\\UI\\vista_map.dll") ? "present" : "missing") +
+            "\n";
+  report += std::string("UI/vista_world.dll=") +
+            (FileExists(root + L"\\UI\\vista_world.dll") ? "present"
+                                                         : "missing") +
             "\n";
   report += std::string("Bin/mview_volume.dll=") +
             (FileExists(root + L"\\Bin\\mview_volume.dll") ? "present"
@@ -265,7 +271,9 @@ bool CreateTempInstall(std::wstring* root) {
     return false;
   if (!TouchFile(*root + L"\\UI\\mview_shell.exe"))
     return false;
-  if (!TouchFile(*root + L"\\UI\\mview_map.dll"))
+  if (!TouchFile(*root + L"\\UI\\vista_map.dll"))
+    return false;
+  if (!TouchFile(*root + L"\\UI\\vista_world.dll"))
     return false;
   if (!TouchFile(*root + L"\\Bin\\mview_volume.dll"))
     return false;

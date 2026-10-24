@@ -17,7 +17,8 @@
 namespace views {
 
 // LayoutManager backed by Yoga. Positions direct children of the host.
-// mview Widget has no device scale, so lengths stay at scale 1.
+// CSS lengths are DIP; StyleScale multiplies by ui::win::GetDeviceScaleFactor
+// so SetBoundsRect matches NativeWidgetWin physical pixels.
 class VIEWS_EXPORT YogaLayoutManager : public LayoutManager {
  public:
   YogaLayoutManager();

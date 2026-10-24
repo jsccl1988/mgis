@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+
+Product workbench chrome. Slot Views receive real horizon/viewport widgets
+at runtime (FillLayout). Yoga owns zone proportions — no hand SetBounds math.
+-->
+<View name="workbench" class="chrome_host">
+  <Style src="workbench.ui.css"/>
+  <FlexColumn id="root" class="chrome">
+    <View id="toolbar_slot" class="toolbar"/>
+    <FlexRow id="mid" class="mid">
+      <View id="catalog_slot" class="catalog"/>
+      <View id="viewport_slot" class="viewport"/>
+      <View id="tools_slot" class="tools"/>
+    </FlexRow>
+    <View id="bottom_slot" class="bottom"/>
+    <View id="status_slot" class="status"/>
+  </FlexColumn>
+</View>

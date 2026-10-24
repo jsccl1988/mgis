@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Scene 呈现器注册表</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  body { margin:0; font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:980px; margin:32px auto; padding:0 20px 48px; }
+  h1 { font-size:22px; margin:0 0 8px; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  p { color:var(--muted); line-height:1.55; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin:16px 0; }
+  .lanes { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .lane { border:1px solid var(--line); border-radius:6px; padding:12px; background:#fafbfc; }
+  .lane h3 { margin:0 0 8px; font-size:14px; color:var(--accent); }
+  .lane ul { margin:0; padding-left:18px; font-size:13px; line-height:1.6; }
+  .flow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13px; margin-top:8px; }
+  .chip { background:#eef4fb; border:1px solid #c5d4e8; border-radius:4px; padding:6px 10px; }
+  .arrow { color:var(--accent); font-weight:700; }
+  .tree { font-family:Consolas,"Courier New",monospace; font-size:12px; line-height:1.55; background:#fafbfc; border:1px solid var(--line); border-radius:6px; padding:12px 14px; white-space:pre; overflow-x:auto; }
+  code { font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Scene 呈现器注册表（方案 1）</h1>
+  <p>一个 <code>Scene</code> + <code>SceneMode</code>。产品用可插拔呈现器替换 <code>FakeScene</code> 绘制；壳内不挂双 <code>ViewHost</code>。测试 <code>session_wire</code> 仍默认 <code>FakeScene</code>。</p>
+
+  <div class="card">
+    <h2>核心分层</h2>
+    <div class="lanes">
+      <div class="lane">
+        <h3>app/mgis</h3>
+        <ul>
+          <li>双 ViewportSurface（2D|3D）</li>
+          <li>SelectViewTab → SetSceneMode</li>
+          <li>仅活动页 Attach；另一页 Detach</li>
+          <li>只 include content/public</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>content/public</h3>
+        <ul>
+          <li>GisContents / SceneMode</li>
+          <li>AttachView(kViewIdScene)</li>
+          <li>scene_child_hwnd_for(mode)</li>
+          <li>无 MapLibre / UE / FlyCube 头</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h3>content/browser</h3>
+        <ul>
+          <li>SceneImpl + 呈现器</li>
+          <li>SCENE2D → MapLibre（mercator 软回退）</li>
+          <li>SCENE3D → 试 UE 管 → FlyCube</li>
+          <li>product_presenters 注册工厂</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>原则：模式切换与 HWND</h2>
+    <div class="tree">GisContents::AttachView("scene")
+  ├─ 创建 2D 呈现器子 HWND
+  └─ 试 PipeClient(\\.\pipe\mview)
+       ├─ 成功 → UePresenter（presenter.3d ue）
+       └─ 失败 → presenter.ue_failed
+            → FlyCubePresenter（presenter.fallback flycube）
+
+SelectViewTab(2D|3D)
+  → SetSceneMode
+  → 活动页 NativeViewHost::Attach(child_for_mode)
+  → 另一页 Detach（不 Destroy）
+  → Resize + Present</div>
+    <div class="flow">
+      <span class="chip">session.ready</span>
+      <span class="chip">presenter.2d</span>
+      <span class="chip">presenter.3d</span>
+      <span class="chip">pick.2d / pick.3d</span>
+      <span class="chip">expect_camera ×2</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>数据 / 控制流</h2>
+    <div class="flow">
+      <span class="chip">指针 / 滚轮</span><span class="arrow">→</span>
+      <span class="chip">ToolSession</span><span class="arrow">→</span>
+      <span class="chip">SceneImpl（按模式）</span><span class="arrow">→</span>
+      <span class="chip">MapLibre 相机 / UE camera.set / FlyCube Camera</span>
+    </div>
+    <div class="flow" style="margin-top:10px">
+      <span class="chip">selection.point</span><span class="arrow">→</span>
+      <span class="chip">Pick</span><span class="arrow">→</span>
+      <span class="chip">primitive:basemap:m0 | groundwater:g0</span>
+    </div>
+  </div>
+</main>
+</body>
+</html>

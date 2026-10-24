@@ -10,7 +10,7 @@ All rights reserved.
 
 # Code style consistency by directory tree
 
-Top-level trees: **`ui/`**, **`base/`**, **`skia/`**, **`examples/`**, **`testing/`**, **`build/`**, **`third_party/`**. Within each tree, match siblings.
+Top-level trees: **`ui/`**, **`base/`**, **`skia/`**, **`app/`**, **`content/`**, **`gis/`**, **`render/`**, **`testing/`**, **`build/`**, **`third_party/`**. Within each tree, match siblings. Align `gis/` / `render/` layout with smartgis (`gis/map`, `render/rhi/flycube`).
 
 ## Do
 

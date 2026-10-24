@@ -4,11 +4,14 @@
 #ifndef PLUGIN_CONTRIBUTE_H_
 #define PLUGIN_CONTRIBUTE_H_
 
+namespace content {
+class PluginHost;
+}
+
 namespace plugin {
 
-// Narrow command entry used until a PluginHost is linked into this process.
-// |command_id| is a UTF-8 command id. Returns true when that command ran.
-bool Contribute(const char* command_id);
+// Runs |command_id| through |host|. Returns true when the host accepts it.
+bool Contribute(content::PluginHost* host, const char* command_id);
 
 }  // namespace plugin
 

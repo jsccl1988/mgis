@@ -5,9 +5,9 @@ All rights reserved.
 
 # Design: Views declarative markup (mview dialect) + UiDesigner
 
-**Status:** active  
-**Date:** 2026-10-20  
-**Diagram:** [`../diagrams/views-declarative-markup.html`](../diagrams/views-declarative-markup.html)
+**Status:** active (product workbench chrome opts in)  
+**Date:** 2026-10-23  
+**Diagram:** [`../diagrams/views-declarative-markup.html`](../diagrams/views-declarative-markup.html) · [`../diagrams/mgis-workbench-chrome.html`](../diagrams/mgis-workbench-chrome.html)
 
 **Living files considered:** [`2026-10-19-ue-mview-maplibre-design.md`](2026-10-19-ue-mview-maplibre-design.md) (UE dual viewport + MapLibre + pipe).  
 **Why a new dated file:** declarative XML/CSS/Yoga + independent UiDesigner is a **new toolkit subsystem**. Folding into the UE/MapLibre living spec would bury a views IR/editor contract inside a GIS host narrative.
@@ -21,7 +21,7 @@ All rights reserved.
 | ID | Decision |
 | --- | --- |
 | **Scope** | Runtime load **and** independent `UiDesigner.exe` in the same milestone. |
-| **Host** | Separate process under `examples/ui_designer/` (output `UiDesigner`). Not embedded in product `shell`. |
+| **Host** | Separate process under `app/ui_designer/` (output `UiDesigner`). Not embedded in product `shell`. |
 | **Controls** | Tag creators bind to Chromium `ui/views/controls` (`Label`, `LabelButton`, `Textfield`, …). Do **not** vendor smartgis `primitives/`. |
 | **Dialect** | **mview** XML/CSS dialect (Chromium-flavored tag names). Intentionally **not** compatible with smartgis `.ui.xml`. |
 | **Libs** | `//third_party:pugixml` + `//third_party:yoga` (already pinned). Product shell does not force-link; dependents opt in. |
@@ -47,16 +47,16 @@ All rights reserved.
 | Layout | Yoga → `View::SetBoundsRect` | `YogaLayoutManager` : `LayoutManager` |
 | Factory | Tag → Chromium control | `ControlFactory` + register TUs |
 | Load | Path/bytes → `MarkupRoot` | `LoadMarkup` / `LoadMarkupInto` |
-| Designer | Independent exe | `examples/ui_designer/` |
+| Designer | Independent exe | `app/ui_designer/` |
 
 GN sketch:
 
 - `:views_control_factory` — registry only (no pugixml/yoga)  
 - `:views_markup` — document/style/layout/loader + layout tag regs; deps yoga + pugixml  
 - Chromium control tag registration in markup factory TU (depends on controls already in `:views`)  
-- `examples/ui_designer:ui_designer` → deps `:views` + pugixml  
+- `app/ui_designer:ui_designer` → deps `:views` + pugixml  
 
-Default product `shell` stays free of markup unless a later dialog opts in.
+Default product `shell` entry stays thin; **`app/mgis` workbench** opts into `//ui/views` markup for chrome zones (`workbench.ui.xml` / embedded bytes). Other shell surfaces still do not force-link markup.
 
 ---
 
@@ -104,9 +104,19 @@ if (root.ok()) {
 
 ---
 
+## Product workbench chrome (opt-in)
+
+| Item | Convention |
+| --- | --- |
+| Assets | `app/mgis/workbench/workbench.ui.xml` + `.ui.css` (DIP lengths) |
+| Embed | `WorkbenchMarkupXml()` fallback when file resolve fails |
+| Inflate | `LoadMarkupInto` / `LoadMarkupBytes` → slot Views + `FillLayout` mount of horizon/viewport widgets |
+| Layout | `YogaLayoutManager` owns zone bounds; `WorkbenchContents::Layout` only sizes markup root + scene HWND |
+| DPI | CSS DIP × `ui::win::GetDeviceScaleFactor()` inside Yoga (`StyleScale`) |
+
 ## Out of scope (this milestone)
 
 - smartgis dialect compatibility / converters  
-- GIS panel real widgets (placeholders only if registered)  
+- Registering GIS panel types as ControlFactory tags (slots + FillLayout instead)  
 - Text2UI / LLM backends inside UiDesigner  
-- Linking markup into product `shell` by default
+- Forcing markup into every product dialog by default

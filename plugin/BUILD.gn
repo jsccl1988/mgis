@@ -1,7 +1,7 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 
-# In-process plugin catalog.
+# In-process plugin catalog and DLL loader.
 
 config("plugin_includes") {
   include_dirs += [ "//" ]
@@ -11,11 +11,24 @@ static_library("plugin") {
   sources = [
     "contribute.cc",
     "contribute.h",
+    "loader.cc",
+    "loader.h",
     "registry.cc",
     "registry.h",
+    "api/mview_plugin_api.h",
   ]
   include_dirs += [ "//" ]
   public_configs = [ ":plugin_includes" ]
+  deps = [
+    "//base:base",
+    "//content:content",
+  ]
+}
+
+shared_library("plugin_sample") {
+  sources = [ "sample/plugin_sample.cc" ]
+  include_dirs += [ "//" ]
+  output_name = "plugin_sample"
 }
 
 executable("plugin_sample_test") {
@@ -23,6 +36,8 @@ executable("plugin_sample_test") {
   sources = [ "../testing/plugin/p6_harness_test.cc" ]
   deps = [
     ":plugin",
+    ":plugin_sample",
+    "//content:content",
     "//testing:gtest",
     "//testing:gtest_main",
   ]

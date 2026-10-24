@@ -1,0 +1,12 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Product demo targets colocated under ui/views/examples (not Chromium
+# views_examples_lib sources listed in //ui/views:views_examples_lib).
+group("product_examples") {
+  public_deps = [
+    "//ui/views/examples/activex_widget:activex_widget",
+    "//ui/views/examples/base_widget:base_widget",
+    "//ui/views/examples/extra_views:extra_views",
+  ]
+}

@@ -10,7 +10,7 @@ All rights reserved.
 
 # Colocated headers and sources
 
-A directory is one unit: the header and its implementation live **side by side**. Applies to new files and moves under `ui/`, `base/`, `examples/`, and `testing/`.
+A directory is one unit: the header and its implementation live **side by side**. Applies to new files and moves under `ui/`, `base/`, `app/`, and `testing/`.
 
 ## Do
 

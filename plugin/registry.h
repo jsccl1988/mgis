@@ -9,10 +9,14 @@
 
 namespace plugin {
 
-// One plugin.json manifest kept in process. No DLL is loaded for the record.
+// One plugin.json manifest kept in process.
 struct Manifest {
   std::string id;
   std::string name;
+  // Optional DLL file name (e.g. plugin_sample.dll). Empty means catalog only.
+  std::string dll;
+  // Absolute UTF-8 directory that held plugin.json. Set by Scan.
+  std::string directory;
   std::vector<std::string> commands;
 };
 

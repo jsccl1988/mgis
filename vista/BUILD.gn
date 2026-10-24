@@ -1,0 +1,16 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Vista render-engine layer: MapPass + WorldPass (C++ only).
+
+group("vista") {
+  public_deps = [
+    "//vista/pass/map:vista_map",
+    "//vista/pass/world:vista_world",
+  ]
+}
+
+group("vista_tests") {
+  testonly = true
+  deps = [ "//vista/pass/map:map_pass_test" ]
+}

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <title>OEDI: New Submission</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+      <meta http-equiv="Content-Style-Type" content="text/css" />
+      <meta name="Keywords" content="Open Energy Data Initiative, OEDI, DOE-OEDI, data lake, energy, data, energy data, tool, app, webapp" />
+      <meta name="Description" content="A searchable online software discovery platform and knowledge base, developed by NLR, and powered by OpenEI: Open Energy Information." />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+      <!-- Twitter Card data -->
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@ENERGY" />
+      <meta name="twitter:creator" content="@NLR" />
+      <meta name="twitter:title" content="Open Energy Data Initiative (OEDI)" />
+      <meta name="twitter:description" content="A searchable online software discovery platform and knowledge base, developed by NLR, and powered by OpenEI: Open Energy Information.." />
+      <meta name="twitter:url" content="https://data.openei.org/" />
+      <meta name="twitter:image" content="http://data.openei.org/assets/img/OEDI-text-logo.png" />
+
+        <!-- Open Graph data -->
+      <meta property="og:title" content="Open Energy Data Initiative (OEDI)" />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://data.openei.org/" />
+      <meta property="og:image" content="http://data.openei.org/assets/img/OEDI-text-logo.png" />
+      <meta property="og:image:secure_url" content="https://data.openei.org/assets/img/OEDI-text-logo.png" />
+      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:alt" content="The Open Energy Data Initiative (OEDI) logo." />
+      <meta property="og:description" content="A searchable online software discovery platform and knowledge base, developed by NLR, and powered by OpenEI: Open Energy Information." />
+      <meta property="og:site_name" content="OpenEI" />
+
+      <!-- Favicon -->
+      <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+      <!-- iOS/Android/MS icons -->
+      <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/icons/apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/icons/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/icons/android-chrome-192x192.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/icons/favicon-16x16.png">
+
+      <!-- Icon Manifest / Theme -->
+      <link rel="manifest" href="/site.webmanifest">
+      <link rel="mask-icon" href="/assets/img/icons/safari-pinned-tab.svg" color="#5bbad5">
+      <meta name="msapplication-TileColor" content="#00aba9">
+      <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+      <meta name="theme-color" content="#ffffff">
+
+      <!-- Common CSS -->
+      <link rel="stylesheet" href="https://auth.openei.org/assets/css/common.css" type="text/css" media="screen" />
+
+
+      <!-- Fonts -->
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+      <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+      <link href="//fonts.googleapis.com/css?family=Oxygen|Ubuntu:300|Roboto:300" rel="stylesheet">
+
+      <!-- Custom fonts -->
+      <link rel="stylesheet" href="/assets/css/font-awesome-custom.css" type="text/css" />
+
+      <!-- Polyfills -->
+      <!--[if lte IE 8]><script type="text/javascript" src="/assets/js/polyfills/array.map.js"></script><![endif]-->
+
+      <!-- App CSS -->
+      <link rel="stylesheet" href="/assets/css/bootstrap.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/bootstrap-datepicker.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/jquery-ui-datepicker-bootstrap-custom.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/bootstrap-tagmanager.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/bootstrap-typeahead.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/openei-nav.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/main.css" type="text/css" />
+      <link rel="stylesheet" href="/assets/css/tutorial.css" type="text/css" />
+      <!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie-hax.css" type="text/css" /><![endif]-->
+
+      <!-- jQuery -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh" crossorigin="anonymous"></script>
+      <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha384-Dziy8F2VlJQLMShA6FHWNul/veM9bCkRUaLqr199K94ntO5QUrLJBEbYegdSkkqX" crossorigin="anonymous"></script>
+
+      <!-- Common JS -->
+      <script type="text/javascript" src="/assets/js/common.js"></script>
+
+      <!-- App JS -->
+      <script type="text/javascript" src="/assets/js/main.js"></script>
+      <script type="text/javascript" src="/assets/js/bootstrap.js"></script>
+      <!-- <script type="text/javascript" src="/assets/js/bootstrap-datepicker.js"></script> -->
+      <script type="text/javascript" src="/assets/js/bootstrap-tagmanager.js"></script>
+      <script type="text/javascript" src="/assets/js/bootstrap-typeahead.js"></script>
+      <script type="text/javascript" src="/assets/js/tutorial/boot-tutorial.js"></script>
+
+      <!-- Head Scripts -->
+              <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GEZRSCPTPF"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-GEZRSCPTPF');
+        </script>
+          </head>
+    <body>
+      
+<nav class="navbar navbar-default navbar-static-top navbar-openei">
+  <div class="container-fluid">
+
+    <div class="navbar-header">
+      <a class="navbar-brand" href="//openei.org/wiki/Main_Page" aria-label="Main Page Link">
+        <img alt="OpenEI: Energy Information" height="36" width="95" src="/assets/img/OpenEI-Logo.svg" style="pointer-events: none;" />
+      </a>
+      <!-- Mobile button -->
+      <button class="openei-btn-wrapper navbar-toggle collapsed" data-toggle="collapse" data-target="#oeiNavbarCollpase" aria-expanded=" false">
+        <span class="openei-user-btn" >
+                    <span class="fa fa-user" aria-hidden="true"></span><span class="sr-only">My User</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- Navbar-collapse -->
+    <div class="collapse navbar-collapse" id="oeiNavbarCollpase">
+      <ul class="nav navbar-nav primary-nav hidden-xs">
+        <li><a style="color:#525259;" href="/" title="Home">Open Energy Data Initiative (OEDI)</a></li>
+      </ul>
+
+      <!-- User Menu -->
+      <ul class="nav navbar-nav navbar-right openei-user">
+        <!-- User Menu Dropdown -->
+        <li class="dropdown user-menu">
+
+          <a href="https://auth.openei.org/account" class="dropdown-toggle openei-user-btn" data-toggle="dropdown" role="button" rel="nofollow" aria-haspopup="true" aria-expanded="false" >
+                        <span class="fa fa-user" aria-hidden="true"></span><span class="sr-only">My User</span>
+          </a>
+
+          <ul class="dropdown-menu">
+                          <li><a class="create_account" href="https://auth.openei.org/register?redir=https%3A%2F%2Fdata.openei.org%2Fsubmissions%2F7183">Sign Up</a></li>
+              <li><a class="log_in" href="https://auth.openei.org/login?redir=https%3A%2F%2Fdata.openei.org%2Fsubmissions%2F7183">Login</a></li>
+                      </ul>
+        </li><!-- end User Menu Dropdown -->
+      </ul><!-- end User Menu -->
+    </div><!-- end .navbar-collapse -->
+
+  </div><!-- end .container-fluid -->
+</nav>
+      <!-- <div id="background-canvas"> -->
+        <!--  hardcode an image for now. We will need to make an API (or JS tool) to transfer image rotation to other sites, or copy all of the images over. -->
+        <!-- <div id="background-image" class="fade-in" alt="background images sourced from unsplash.com" style="background-image: url('https://auth.openei.org/assets/img/unsplash/geyser.jpeg'); opacity: 0;"></div> -->
+      <!-- </div> -->
+
+      <div class="container xdr-body-container">
+        <div id="content" class="content ui-corner-all clear">
+          <a name="top" id="top"></a>
+          <!-- start content -->
+<nav class="navbar navbar-default xdr-nav">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#xdrLargeScreenNav" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand home-link" href="/home" aria-label="Link to Home">
+        <img class="home-logo" src="/assets/img/OEDI_logo_color.svg" alt="OEDI logo" aria-hidden="true" width="86"/>
+      </a>
+    </div>
+
+    <div class="collapse navbar-collapse jc-sb main-nav" id="xdrLargeScreenNav">
+      <ul class="nav navbar-nav">
+        <li class="dropdown active">
+          <a id="data-dropdown" class="dropdown-toggle" data-toggle="dropdown" href="#">
+            Data
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li value='1' id="tutorialViewSubmissions"><a href="/submissions/all">View All Submissions</a></li>
+                        <li><a href="/data_lakes">Data Lakes</a></li>
+            <li role="separator" class="divider"></li>
+                        <li><a tabindex="-1" href="/submit">Submit Data</a></li>
+          </ul>
+        </li>
+        <li class="dropdown ">
+          <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+            Help
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a tabindex="-1" href="/faq">Frequently Asked Questions</a></li>
+                        <li><a tabindex="-1" href="https://data.openei.org/submissions/11" target="_blank" rel="noopener">Data Submission Best Practices</a></li>
+            <li><a tabindex="-1" href="https://youtube.com/playlist?list=PL4lfI7kmtVfoYHJJfHA68ybf8iLsDsoiX" target="_blank" rel="noopener">Data Submission Tutorial Videos</a></li>
+            <li><a tabindex="-1" href=mailto:OpenEI.Webmaster@nlr.gov>Contact OpenEI Help</a></li>
+          </ul>
+        </li>
+        <li class=""><a href="/about">About</a></li>
+        <li class=""><a href="/search">Search</a></li>
+      </ul>
+            <form class="navbar-form navbar-right navbar-search white-form" action="/search" method="get">
+        <div class="form-group">
+          <input type="text" name="q" class="search-query form-control" placeholder="search open data" autocomplete="off" aria-label="Search Open Energy Data"><button style="background:none; border:none;" aria-label="Search open energy data"><i class="fa fa-search" aria-hidden="true"></button></i>
+        </div>
+      </form>
+          </div><!-- end .navbar-collapse -->
+  </div><!-- end .container-fluid -->
+</nav>
+
+<style>
+  #digitalWave {
+    position: relative;
+    width: 100%;
+    height: 15vh;
+    min-height: 100px;
+    /* background-color: rgba(63, 203, 203, 0.6); */
+  }
+  #digitalWave canvas {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+  }
+  #digitalWave::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #56d1d1;
+    /* background: linear-gradient(#3fcbcb 40%, #fff); */
+    /* background: linear-gradient(#3fcbcb 45%, #fff 68%, rgba(0,0,0,0) 100%); */
+    /* background: linear-gradient(#56d1d1 0%, #33b4b4 40%, rgba(0,0,0,0) 100%); */
+  }
+  #digitalWave::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.13) 20%, #fff 100%);
+  }
+</style>
+
+<div id="digitalWave">
+  <canvas id="canvasWaves">"Womp Womp! Your browser does not support canvas :'("</canvas>
+</div>
+
+<script>
+  window.addEventListener('resize', canvasResize);
+
+  var container = $('#digitalWave'),
+      canvas    = document.getElementById('canvasWaves');
+
+  canvasResize();
+
+  var ctx     =  canvas.getContext('2d'),
+      cw      =  canvas.width,
+      ch      =  Math.ceil(canvas.height*.7), // .5
+      frame   =  0,
+      opacity =  1;
+
+  opacity = 0; // comment out to make everything opaque
+
+  var styleColors = [
+    // Background of waves
+    'rgba(38, 79, 128, '+opacity+'.2)',// Darker Blue50, 143, 159
+    'rgba(86, 209, 209, '+opacity+'.4)', // Purple
+
+    'rgba(86, 209, 209, '+opacity+'.4)',// Medium Blue58, 169, 152
+    'rgba(49, 234, 247, '+opacity+'.15)',// Dark Blue
+
+    'rgba(49, 234, 247, '+opacity+'.5)',// Light BLue173, 226, 245
+    'rgba(255, 255, 255, '+opacity+'.0)',// White
+    'rgba(86, 209, 209, '+opacity+'.3)',// RED
+    'rgba(255, 255, 255, '+opacity+'.6)',// Hard White
+    // Foreground of waves
+  ];
+
+  function render() {
+    var cw = canvas.width,
+        hh = Math.ceil(ch*.75), // vertical spacing
+        bars = cw * .6; // horizontal spacing
+    
+    var grd, c, i, j, k, px, py, lh, wave;
+    
+    //Clear canvas (except buffer area)
+    ctx.clearRect(0, 0, cw, ch);
+    
+    //Render wave lines
+    var numWaves = styleColors.length;
+    // j = value iterating UP to max wave count
+    // k = value iterating DOWN from max wave count
+    for (j = 0, k = numWaves; j < numWaves; j++,k--) {
+      ctx.beginPath();
+      ctx.strokeStyle = styleColors[j];
+
+      for (i = 0 ; i < bars ; i++) {
+        //Start Points
+        var xOffset = 6; // controls Bar Width
+        var oddOffset = i%2==0 ? 1 : 2;
+        oddOffset = 0;
+        var angle = 20; // 40
+        px = i * xOffset + oddOffset;
+        py = (hh) + (j*angle);
+        //Wave shape
+        // px = i * 4;
+        // px = i * (j+2+k*.2);
+        // wave  = (Math.cos((((frame*.4)+i*5)*.35)*.15)+2)*1.75;
+        // wave *= (Math.sin(((frame-i*60)*.35)*.15)+2)*.25;
+        var speed = ((numWaves - k) % .3) + (j % .003);
+        var waveSpeed = (k%.21) + .001;
+        var topHeight = i%3==0 ? 2.9 : 3;
+        // topHeight = (Math.cos(i/topHeight)*j)<<0;
+        // topHeight = i%2==0 ?  2 : 3 ;
+        
+        var bottomHeight = i%2==0 ? (j)/(k) : (k)/(j);
+        // bottomHeight = i%2==0 ? .4 : .3;
+        // bottomHeight = 1;
+        
+        // var static = 60;
+        var static = (i%10);
+        var reverseFrame = j%2==0 ? (frame-i*static) : (frame+i*static);
+            
+        wave = (Math.cos((((frame*waveSpeed)+i*.35)*.5)*.15) +topHeight) * ((k+.5) *.55);
+        wave *= (Math.sin(((reverseFrame)*.12)*.15) +bottomHeight) *.25;
+
+        //Draw waves
+        var baseHeight = 15;
+        lh = baseHeight + (j*2);
+        ctx.lineWidth = (xOffset * 2);
+        var a = 0; // left offset
+        ctx.moveTo(px+a, py+(k));
+        ctx.lineTo(px+a, py-(lh*wave+(j)));
+        ctx.lineTo(px+a, py+(lh*wave-(j)));
+      }
+      
+      ctx.stroke();
+      ctx.closePath();
+    }
+    
+    function getRandInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+    
+    //Overlay elements
+    ctx.globalCompositeOperation = 'destination-over';
+    // ctx.fillRect(0, ch/1.5, cw, ch);
+    ctx.globalCompositeOperation = 'source-over';
+    
+    //Render loop
+    frame += 1;
+    
+    // return; // block animation
+    
+    requestAnimationFrame(render);
+  }
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  function canvasResize(e) {
+    canvas.width = $('#digitalWave').width();
+    canvas.height = $('#digitalWave').height();
+  }
+
+  render();
+
+</script>  <script type="text/javascript" src="/assets/js/xdr.js"></script>
+  <script type="text/javascript" src="/assets/js/view.js?v=2.0"></script>
+  <script type="text/javascript" src="/assets/js/remote-sites.js"></script>
+  <script type="text/javascript" src="/assets/js/list-submissions.js"></script>
+  <script type="text/javascript" src="/assets/js/download-archive.js"></script>
+  <link rel="stylesheet" type="text/css" href="/assets/css/dataTables.css">
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+  <main id="app-container" style="position:relative;">
+    <h2 class="text-warning">Error</h2>
+<p class="lead">No data found.</p>
+<small>If you feel you have reached this page in error, please contact the site administrator.</small>
+  </main>
+
+<div id="downloadArchiverWrapper" class="fade">
+  <div class="download-archive-heading">
+    Submission Downloads<a id="toggleDownloadList" href="javascript:void(0);"><span class="pull-right"><i class="fa fa-chevron-down" aria-hidden="true"></i></span></a>
+  </div>
+  <div id="activeArchiveCreations">
+  </div>
+</div>
+</div> <!-- end .content -->
+
+<footer id="xdr-footer">
+  <div class="footer-container">
+
+    <!-- <div id="feedbackBtn">
+      <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+    </div> -->
+
+    <div class="special-links noprintpdf">
+      <div class="footer-nav-bar">
+        <ul class="footer-links flex jc-c w">
+          <li class="footer-link"><a href="/about" title="About the Open Energy Data Initiative">About the Open Energy Data Initiative</a></li>
+          <li class="footer-link"><a href="//openei.org/wiki/OpenEI_International_Sponsors_and_Partners">Partners &amp; Sponsors</a></li>
+          <li class="footer-link"><a href="//openei.org/wiki/OpenEI:General_disclaimer">Disclaimers</a></li>
+          <li class="footer-link"><a href="//openei.org/services/" rel="nofollow">Developer Services</a></li>
+          <li class="footer-link">
+<script nonce='165650b2ac17' type="text/javascript">
+var th = "ilto"; em = "web"+"mas"+"ter"+"@op"+"ene"+"i.o"+"rg"; tx = "Cont"+"act "+"Open"+"EI H"+"elp";
+document.write('<a ' + 'hr' + 'ef="ma'+th+':'+em+'" rel="nofollow">'+tx+'</a>');
+</script>
+</li>
+        </ul>
+      </div>
+      <ul class="footer-info">
+        <li class="footer-about">The OEDI Data Lake is a centralized repository of datasets aggregated from the U.S. Department of Energy’s Programs, Offices, and National Laboratories.</li>
+        <li class="footer-copyright flex jc-c"><span>Content is available under <a rel="nofollow noopener noreferrer" href="https://creativecommons.org/licenses/by/4.0/" target="_blank"> Creative Commons Attribution 4.0 </a> unless otherwise noted.</span></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<style>
+  #privacyModal {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    max-width: 50rem;
+    border-radius: 0;
+    margin-bottom: 0;
+    z-index: 1059;
+  }
+  .pp-modal-content {
+    position: relative;
+    background-color: #2f3337;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    outline: 0;
+  }
+
+  .pp-modal-content h3, 
+  .pp-link a, .pp-link a:visited {
+    color: #659ccc;
+  }
+
+  @media only screen and (min-width: 801px) {
+    .pp-link {
+      margin: 0 1em;
+    }
+    .pp-link.right {
+      float: right;
+    }
+  }
+
+  @media only screen and (max-width: 800px) {
+    .pp-link {
+      display: block;
+    }
+  }
+
+  #savePrivacyBtn {
+    width: 100%;
+  }
+</style>
+
+<!-- begin Privacy modal -->
+<div id="privacyModal" class="alert" role="dialog" tabindex="1" aria-labelledby="privacyHeader">
+  <div class="pp-modal-content">
+    <div class="modal-header">
+        <h3 id="privacyHeader" class="modal-title"><i class="fas fa-user-shield"></i> Privacy Policy Notification</h3>
+    </div>
+    <div class="modal-body">
+      <p>
+        This site uses cookies to store and share user preferences with other OpenEI sites, and uses Google Analytics to collect anonymous user information such as which pages are visited, for how often, and what searches or other webpages may have led users here.
+        You can prevent Google Analytics from recognizing you on return visits to this site by disabling cookies on your browser or by installing a Google Analytics Opt-out Browser Add-on.
+        By clicking "Accept" you agree this site can store cookies on your device and disclose information to OpenEI and Google Analytics in accordance with our privacy policy.
+      </p>
+      <p>
+        <span class="pp-link left"><a href="https://openei.org/wiki/OpenEI:General_disclaimer" rel="noopener" target="_blank">OpenEI Privacy Policy</a></span>
+        <span class="pp-link right"><a href="https://marketingplatform.google.com/about/analytics/terms/us/" rel="noopener noreferrer" target="_blank">Google Analytics Terms of Service</a></span>
+      </p>
+      <button class="btn btn-primary test" id="savePrivacyBtn" data-loading-text="Submiting..." tabindex="1">Accept</button>
+    </div>
+  </div><!-- end .pp-modal-content -->
+</div>
+<!-- end Privacy modal -->
+
+<script>
+ $(document).ready(function(){
+  $('#savePrivacyBtn').click(function(){
+    $.ajax({
+      url: "https://auth.openei.org/privacy_policy_set",
+      type: "POST",
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true
+      },
+      dataType: "json",
+      data: {
+        action: 'setAcceptedPrivacyPolicy',
+      },
+      error: function(xhr) {
+        showPageAlert('Something went wrong! Error: ' + JSON.stringify(xhr.responseText), 'alert-error');
+        return;
+      },
+      success: function(result) {
+        $('#privacyModal').hide();
+      }
+    });
+    //Always close on click, even if AJAX fails (Note: will result in popup appearing on each page load if AJAX is failing)
+    $('#privacyModal').hide();
+  });
+});
+</script>
+</div>
+</body>
+
+</html>

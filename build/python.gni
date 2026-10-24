@@ -1,18 +1,21 @@
 # Copyright (c) 2026 The Mogu Authors.
 # All rights reserved.
 #
-# CPython 3.12 embed. Default prefix is
-# %LOCALAPPDATA%/Programs/Python/Python312 (same as build.bat).
-# Override with python_root. Force the skip stub with has_python=false.
+# CPython 3.12 embed for Debug and Release.
+# - Release: official Python312 (/MD) is fine.
+# - Debug: must use a prefix built with the debug CRT (python312_d.lib +
+#   python312_d.dll). Linking the official /MD python312.dll into a /MDd
+#   process mixes CRTs and can trip STATUS_HEAP_CORRUPTION.
+# Override with python_root. Force the stub with has_python=false.
 # Optional check: python build/find_python.py
 
 declare_args() {
-  # Compile in-process CPython bindings when a 3.12 prefix is set.
+  # Compile in-process CPython when the matching 3.12 prefix is present.
   # Set false to force the skip stub even if Python is installed.
   has_python = true
 
   # Empty = %LOCALAPPDATA%/Programs/Python/Python312.
-  # Prefix must contain include/Python.h, libs/python312.lib, python312.dll.
+  # Prefix must contain include/Python.h and the config-matched lib + DLL.
   python_root = ""
 }
 
@@ -29,19 +32,55 @@ if (python_root != "") {
 }
 python_prefix = string_replace(python_prefix, "\\", "/")
 
+# Debug links python312_d; Release links python312.
+if (is_debug) {
+  python_lib_name = "python312_d.lib"
+  python_dll_name = "python312_d.dll"
+} else {
+  python_lib_name = "python312.lib"
+  python_dll_name = "python312.dll"
+}
+
 python_include = ""
 python_libdir = ""
 python_dll = ""
+_python_header = ""
+_python_lib = ""
 if (python_prefix != "") {
   python_include = python_prefix + "/include"
   python_libdir = python_prefix + "/libs"
-  python_dll = python_prefix + "/python312.dll"
+  python_dll = python_prefix + "/" + python_dll_name
+  _python_header = python_include + "/Python.h"
+  _python_lib = python_libdir + "/" + python_lib_name
 }
 
-# Official Windows CPython ships /MD only (no python312_d). Linking
-# python312.dll into a /MDd SmartGIS process mixes MSVCP140 with
-# MSVCP140D and trips STATUS_HEAP_CORRUPTION (0xC0000374) on ordinary
-# interactive launch. Keep Python for Release; Debug uses the stub until a
-# matching debug CPython is available.
+# Probe the matched import lib + DLL + header. GN has no file_exists; use
+# a tiny Python probe so Debug cannot silently fall back to /MD CPython.
+_python_probe = exec_script("//build/check_python_embed.py",
+                            [
+                              python_prefix,
+                              _python_header,
+                              _python_lib,
+                              python_dll,
+                            ],
+                            "value")
+
 python_enabled =
-    has_python && python_prefix != "" && !is_debug
+    has_python && python_prefix != "" && _python_probe == "ok"
+
+# Soft-disable when the CRT-matched embed is missing so Debug can still gen
+# with stubs. Never fall back to linking the opposite CRT. Force the stub with
+# has_python=false. Point python_root at a complete prefix to enable embed.
+if (has_python && !python_enabled) {
+  if (is_debug) {
+    print("NOTE: Debug CPython embed off — need python312_d.lib + " +
+          "python312_d.dll next to include/Python.h under " + python_prefix +
+          ". Stub path active. Set python_root to that prefix, or " +
+          "has_python=false to silence.")
+  } else {
+    print("NOTE: Release CPython embed off — need python312.lib + " +
+          "python312.dll under " + python_prefix +
+          ". Stub path active. Install Python 3.12, set python_root, or " +
+          "has_python=false to silence.")
+  }
+}

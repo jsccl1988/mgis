@@ -27,7 +27,7 @@ Normative allow rule: **`.cursor/rules/build/agent-may-build.mdc`**.
 1. **Entry:** from the **mview** repo root, run `.\build.bat debug` (or `.\build.bat debug <target>`).
 2. **Engineering management is GN.** `build.bat` → `gn gen out/Debug|Release` + `ninja`. Transcripts: `out/Debug/build.log`, `out/Release/build.log`.
 3. **Do not** use `gen.bat`, `gen-dll.bat`, or MSBuild as the fix loop. `sln` exits 2.
-4. Product sources are **`ui/`**, **`base/`**, **`skia/`**, **`examples/`**. Do not invent smartgis `//src` targets.
+4. Product sources are **`ui/`**, **`base/`**, **`skia/`**, **`app/`**. Do not invent smartgis `//src` targets.
 5. There is **no** compile lock. Do not create `out/.build.lock.on`.
 6. Stay on **`master`**.
 

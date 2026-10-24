@@ -2,7 +2,9 @@
 // All rights reserved.
 
 #include "cesium_flycube/geo/globe_anchor.h"
+#include "cesium_flycube/gpu/draped_terrain.h"
 #include "cesium_flycube/gpu/scene_present.h"
+#include "cesium_flycube/tiles/tileset_host.h"
 #include "cesium_flycube/view/camera.h"
 #include "cesium_flycube/view/session.h"
 
@@ -11,6 +13,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -21,21 +24,51 @@ bool Expect(bool condition, const char* message) {
   return condition;
 }
 
+void AddDiamond(cesium_flycube::PresentMesh* mesh,
+                double x,
+                double y,
+                float half,
+                const float color[4]) {
+  const float fx = static_cast<float>(x);
+  const float fy = static_cast<float>(y);
+  const float z = 40.0f;
+  mesh->mesh.xyz = {fx, fy + half, z, fx + half, fy, z, fx, fy - half, z,
+                     fx - half, fy, z};
+  mesh->mesh.indices = {0, 1, 2, 0, 2, 3};
+  mesh->color[0] = color[0];
+  mesh->color[1] = color[1];
+  mesh->color[2] = color[2];
+  mesh->color[3] = color[3];
+}
+
+void AddPyramid(cesium_flycube::PresentMesh* mesh,
+                double x,
+                double y,
+                float half,
+                float height,
+                const float color[4]) {
+  const float fx = static_cast<float>(x);
+  const float fy = static_cast<float>(y);
+  const float z = 40.0f;
+  mesh->mesh.xyz = {fx, fy + half, z, fx + half, fy, z, fx, fy - half, z,
+                     fx - half, fy, z, fx, fy, z + height};
+  mesh->mesh.indices = {0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4};
+  mesh->color[0] = color[0];
+  mesh->color[1] = color[1];
+  mesh->color[2] = color[2];
+  mesh->color[3] = color[3];
+}
+
 }  // namespace
 
-// Two AdditionalCameras over one city, plus anchors. A second pair placed on
-// another continent reports origin_conflict and leaves the origin alone.
+// Two AdditionalCameras over draped ellipsoid terrain, plus anchors.
+// A second pair on another continent reports origin_conflict.
 int main() {
   cesium_flycube::Session session;
-  session.georeference().SetOriginDegrees(121.4737, 31.2304, 0.0);
-
   cesium_flycube::GlobeAnchor bund;
   bund.SetDegrees(121.4998, 31.2397, 0.0);
   cesium_flycube::GlobeAnchor east;
   east.SetDegrees(121.4937, 31.2304, 20.0);
-
-  const glm::dvec3 bund_local = bund.LocalPosition(session.georeference());
-  const glm::dvec3 east_local = east.LocalPosition(session.georeference());
 
   cesium_flycube::Camera overview;
   overview.viewport_size = glm::dvec2(1280.0, 720.0);
@@ -44,14 +77,23 @@ int main() {
   overview.up = glm::dvec3(0.0, 1.0, 0.0);
   overview.horizontal_fov_degrees = 60.0;
 
+  session.cameras().additional_cameras() = {overview};
+  cesium_flycube::TilesetHost tileset;
+  cesium_flycube::DrapedTerrainOptions terrain_opts;
+  const cesium_flycube::DrapedTerrainResult terrain =
+      cesium_flycube::CaptureDrapedEllipsoid(&session, &tileset, terrain_opts);
+  if (!terrain.ok) {
+    std::cerr << "dual_view terrain: " << terrain.message << "\n";
+    return 1;
+  }
+
+  const glm::dvec3 bund_local = bund.LocalPosition(session.georeference());
+  const glm::dvec3 east_local = east.LocalPosition(session.georeference());
+
   cesium_flycube::Camera detail = overview;
   detail.viewport_size = glm::dvec2(960.0, 540.0);
-  detail.location = glm::dvec3(east_local.x, east_local.y, 600.0);
+  detail.location = glm::dvec3(east_local.x, east_local.y, 2400.0);
   detail.horizontal_fov_degrees = 45.0;
-
-  session.cameras().use_player_cameras = false;
-  session.cameras().use_editor_cameras = false;
-  session.cameras().use_scene_captures = false;
   session.cameras().additional_cameras() = {overview, detail};
 
   std::string reason;
@@ -61,7 +103,8 @@ int main() {
   std::cout << "origin_local_bund_m " << bund_local.x << " " << bund_local.y
             << " " << bund_local.z << "\n";
   std::cout << "anchors " << east_local.x << " " << east_local.y << "\n";
-  std::cout << "views " << views.size() << " shared " << shared << "\n";
+  std::cout << "views " << views.size() << " shared " << shared << " draped "
+            << terrain.draped << " verts " << terrain.vertex_count << "\n";
 
   bool ok = true;
   ok = Expect(shared, "nearby cameras must share an origin") && ok;
@@ -88,41 +131,23 @@ int main() {
               "origin_conflict must not move the georeference") &&
        ok;
 
-  cesium_flycube::PresentMesh ground;
-  const float ground_color[4] = {0.16f, 0.22f, 0.20f, 1.0f};
-  ground.mesh.xyz = {-7000.0f, -7000.0f, 0.0f, 7000.0f, -7000.0f, 0.0f,
-                     7000.0f, 7000.0f, 0.0f, -7000.0f, 7000.0f, 0.0f};
-  ground.mesh.indices = {0, 1, 2, 0, 2, 3};
-  ground.color[0] = ground_color[0];
-  ground.color[1] = ground_color[1];
-  ground.color[2] = ground_color[2];
-  ground.color[3] = ground_color[3];
-
-  cesium_flycube::PresentMesh origin;
-  cesium_flycube::PresentMesh bund_mark;
-  cesium_flycube::PresentMesh east_mark;
-  // Horizontal diamond (two triangles). A single triangle reads as a missing vertex.
-  const auto add_diamond = [](cesium_flycube::PresentMesh* mesh, double x, double y, float half,
-                             const float color[4]) {
-    const float fx = static_cast<float>(x);
-    const float fy = static_cast<float>(y);
-    const float z = 40.0f;
-    mesh->mesh.xyz = {fx, fy + half, z, fx + half, fy, z, fx, fy - half, z, fx - half, fy, z};
-    mesh->mesh.indices = {0, 1, 2, 0, 2, 3};
-    mesh->color[0] = color[0];
-    mesh->color[1] = color[1];
-    mesh->color[2] = color[2];
-    mesh->color[3] = color[3];
-  };
   const float amber[4] = {0.95f, 0.55f, 0.15f, 1};
   const float green[4] = {0.25f, 0.8f, 0.35f, 1};
   const float blue[4] = {0.25f, 0.55f, 0.95f, 1};
-  add_diamond(&origin, 0.0, 0.0, 350.0f, amber);
-  add_diamond(&bund_mark, bund_local.x, bund_local.y, 280.0f, green);
-  add_diamond(&east_mark, east_local.x, east_local.y, 280.0f, blue);
+  cesium_flycube::PresentMesh origin_mark;
+  cesium_flycube::PresentMesh bund_mark;
+  cesium_flycube::PresentMesh east_mark;
+  AddDiamond(&origin_mark, 0.0, 0.0, 350.0f, amber);
+  AddDiamond(&bund_mark, bund_local.x, bund_local.y, 280.0f, green);
+  AddPyramid(&east_mark, east_local.x, east_local.y, 180.0f, 220.0f, blue);
 
-  const auto look_down = [](cesium_flycube::PresentCamera* camera, double x, double y, double z,
-                            float fov_y) {
+  std::vector<cesium_flycube::PresentMesh> pictures = terrain.pictures;
+  pictures.push_back(std::move(origin_mark));
+  pictures.push_back(std::move(bund_mark));
+  pictures.push_back(std::move(east_mark));
+
+  const auto look_down = [](cesium_flycube::PresentCamera* camera, double x,
+                            double y, double z, float fov_y) {
     camera->eye[0] = static_cast<float>(x);
     camera->eye[1] = static_cast<float>(y);
     camera->eye[2] = static_cast<float>(z);
@@ -134,15 +159,15 @@ int main() {
     camera->up[2] = 0.0f;
     camera->fov_y_radians = fov_y;
     camera->draw_edges = false;
+    camera->skip_shade = true;
   };
-  // Vertical FOV matches ViewStateBuilder for the 16:9 viewports above.
   cesium_flycube::PresentCamera overview_picture;
   cesium_flycube::PresentCamera detail_picture;
   look_down(&overview_picture, 0.0, 0.0, 8000.0, 0.627f);
-  look_down(&detail_picture, east_local.x, east_local.y, 600.0, 0.457f);
+  look_down(&detail_picture, east_local.x, east_local.y, 2400.0, 0.457f);
+
   const cesium_flycube::PresentResult shown = cesium_flycube::PresentSplitScene(
-      "dual_view", overview_picture, detail_picture,
-      {ground, origin, bund_mark, east_mark},
+      "dual_view", overview_picture, detail_picture, pictures,
       std::string(CESIUM_FLYCUBE_CAPTURE_DIR) + "/dual_view.png");
   std::cout << "png " << shown.png_path << " pixels " << shown.drawn_pixels
             << " " << shown.message << "\n";

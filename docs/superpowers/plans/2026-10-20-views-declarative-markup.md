@@ -9,7 +9,7 @@ All rights reserved.
 
 **Goal:** Ship Chromium-adapted declarative markup (`ui/views/markup`) plus independent `UiDesigner.exe`, using pinned pugixml/yoga.
 
-**Architecture:** Port smartgis markup responsibilities into `views` namespace with PascalCase APIs and mview XML dialect; bind tags to `ui/views/controls`; designer under `examples/ui_designer/`.
+**Architecture:** Port smartgis markup responsibilities into `views` namespace with PascalCase APIs and mview XML dialect; bind tags to `ui/views/controls`; designer under `app/ui_designer/`.
 
 **Tech Stack:** C++23/MSVC, GN/Ninja, pugixml, Yoga, gtest, Chromium views.
 
@@ -33,7 +33,7 @@ All rights reserved.
 
 ## Task 2: UiDesigner executable
 
-**Files:** `examples/ui_designer/**`, `examples/BUILD.gn`
+**Files:** `app/ui_designer/**`
 
 - [x] Independent win32/exe target `UiDesigner`.
 - [x] Live canvas via `LoadMarkup`; open/save/hot-reload.

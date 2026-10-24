@@ -1,0 +1,9 @@
+NASA SRTM GL1 tile N31E121, public domain.
+Source: https://elevation-tiles-prod.s3.amazonaws.com/skadi/N31/N31E121.hgt.gz
+Stored as shanghai_n31e121_srtm.i16: 121 by 121 int16 meters, every 30 arc-seconds,
+west 121E, south 31N, row 0 along the south edge. Voids were not present.
+Satellite drape, when the network is up, is Esri World Imagery
+(https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer)
+cached under imagery_cache/ and not committed.
+Ion terrain/imagery: set CESIUM_ION_TOKEN and use the Unreal example, or
+MVIEW_TILESET_URL for a 3D Tiles URL. No access token is stored in the repo.

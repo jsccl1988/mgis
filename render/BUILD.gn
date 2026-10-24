@@ -1,0 +1,8 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# Render RHI / frame-graph tree (align smartgis //src/render). Peer of //content.
+# World present lives in //vista/pass/world; shared RHI modules land here later.
+
+group("render") {
+}

@@ -9,8 +9,8 @@
 #include <windows.h>
 
 #include "base/file_util.h"
-#include "content/browser/map/fake_scene.h"
-#include "content/browser/script_runtime.h"
+#include "content/browser/viewport/map/fake_scene.h"
+#include "content/browser/glang.runtime/script_runtime.h"
 #include "content/public/browser/types.h"
 
 namespace content {

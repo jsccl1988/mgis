@@ -1,0 +1,40 @@
+# Copyright (c) 2026 The Mogu Authors.
+# All rights reserved.
+
+# 3D WorldPass → cesium_flycube / FlyCube. DLL via CMake; GN copies to out/.
+
+_cf_build = "//third_party/cesium-flycube/build"
+_out_dll = "$root_out_dir/vista_world.dll"
+_out_lib = "$root_out_dir/vista_world.dll.lib"
+
+action("vista_world_cmake") {
+  script = "//vista/pass/world/build_via_cmake.py"
+  inputs = [
+    "world_pass.cc",
+    "world_pass.h",
+    "build_via_cmake.py",
+    "//third_party/cesium-flycube/CMakeLists.txt",
+  ]
+  outputs = [
+    _out_dll,
+    _out_lib,
+  ]
+  args = [
+    "--cmake-build-dir",
+    rebase_path(_cf_build, root_build_dir),
+    "--out-dll",
+    rebase_path(_out_dll, root_build_dir),
+    "--out-lib",
+    rebase_path(_out_lib, root_build_dir),
+  ]
+}
+
+config("vista_world_link") {
+  libs = [ "vista_world.dll.lib" ]
+  lib_dirs = [ root_out_dir ]
+}
+
+group("vista_world") {
+  public_deps = [ ":vista_world_cmake" ]
+  public_configs = [ ":vista_world_link" ]
+}

@@ -3,18 +3,51 @@
 
 #include "cesium_flycube/tiles/prepare_resources.h"
 
+#include "cesium_flycube/tiles/raster_image.h"
 #include "cesium_flycube/tiles/tile_mesh.h"
 
 #include <Cesium3DTilesSelection/Tile.h>
+#include <Cesium3DTilesSelection/TileContent.h>
 #include <Cesium3DTilesSelection/TileLoadResult.h>
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumGltf/Model.h>
+#include <CesiumImage/ImageAsset.h>
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <variant>
 
 namespace cesium_flycube {
+namespace {
+
+struct PreparedRaster {
+  std::shared_ptr<RasterImage> image;
+};
+
+std::shared_ptr<RasterImage> CopyImageAsset(
+    const CesiumImage::ImageAsset& image) {
+  auto out = std::make_shared<RasterImage>();
+  out->width = image.width;
+  out->height = image.height;
+  out->channels = image.channels;
+  out->bytes_per_channel = image.bytesPerChannel;
+  out->compressed =
+      image.compressedPixelFormat != CesiumImage::GpuCompressedPixelFormat::NONE;
+  out->pixels = image.pixelData;
+  return out;
+}
+
+TileMesh* MeshFromTile(const Cesium3DTilesSelection::Tile& tile) {
+  const Cesium3DTilesSelection::TileRenderContent* content =
+      tile.getContent().getRenderContent();
+  if (content == nullptr || content->getRenderResources() == nullptr) {
+    return nullptr;
+  }
+  return static_cast<TileMesh*>(content->getRenderResources());
+}
+
+}  // namespace
 
 CesiumAsync::Future<Cesium3DTilesSelection::TileLoadResultAndRenderResources>
 PrepareRendererResources::prepareInLoadThread(
@@ -49,34 +82,69 @@ void PrepareRendererResources::free(Cesium3DTilesSelection::Tile& /*tile*/,
 }
 
 void* PrepareRendererResources::prepareRasterInLoadThread(
-    CesiumImage::ImageAsset& /*image*/,
+    CesiumImage::ImageAsset& image,
     const std::any& /*renderer_options*/) {
-  return nullptr;
+  auto* prepared = new PreparedRaster;
+  prepared->image = CopyImageAsset(image);
+  return prepared;
 }
 
 void* PrepareRendererResources::prepareRasterInMainThread(
     CesiumRasterOverlays::RasterOverlayTile& /*raster_tile*/,
-    void* /*load_thread_result*/) {
-  return nullptr;
+    void* load_thread_result) {
+  return load_thread_result;
 }
 
 void PrepareRendererResources::freeRaster(
     const CesiumRasterOverlays::RasterOverlayTile& /*raster_tile*/,
-    void* /*load_thread_result*/,
-    void* /*main_thread_result*/) noexcept {}
+    void* load_thread_result,
+    void* main_thread_result) noexcept {
+  void* resources =
+      main_thread_result != nullptr ? main_thread_result : load_thread_result;
+  delete static_cast<PreparedRaster*>(resources);
+}
 
 void PrepareRendererResources::attachRasterInMainThread(
-    const Cesium3DTilesSelection::Tile& /*tile*/,
-    int32_t /*overlay_texture_coordinate_id*/,
+    const Cesium3DTilesSelection::Tile& tile,
+    int32_t overlay_texture_coordinate_id,
     const CesiumRasterOverlays::RasterOverlayTile& /*raster_tile*/,
-    void* /*main_thread_renderer_resources*/,
-    const glm::dvec2& /*translation*/,
-    const glm::dvec2& /*scale*/) {}
+    void* main_thread_renderer_resources,
+    const glm::dvec2& translation,
+    const glm::dvec2& scale) {
+  TileMesh* mesh = MeshFromTile(tile);
+  auto* prepared = static_cast<PreparedRaster*>(main_thread_renderer_resources);
+  if (mesh == nullptr || prepared == nullptr || !prepared->image) {
+    return;
+  }
+  RasterDrape drape;
+  drape.texture_coordinate_id = overlay_texture_coordinate_id;
+  drape.translation = translation;
+  drape.scale = scale;
+  drape.image = prepared->image;
+  mesh->rasters.push_back(std::move(drape));
+}
 
 void PrepareRendererResources::detachRasterInMainThread(
-    const Cesium3DTilesSelection::Tile& /*tile*/,
-    int32_t /*overlay_texture_coordinate_id*/,
+    const Cesium3DTilesSelection::Tile& tile,
+    int32_t overlay_texture_coordinate_id,
     const CesiumRasterOverlays::RasterOverlayTile& /*raster_tile*/,
-    void* /*main_thread_renderer_resources*/) noexcept {}
+    void* main_thread_renderer_resources) noexcept {
+  TileMesh* mesh = MeshFromTile(tile);
+  auto* prepared = static_cast<PreparedRaster*>(main_thread_renderer_resources);
+  if (mesh == nullptr) {
+    return;
+  }
+  const RasterImage* image =
+      prepared != nullptr && prepared->image ? prepared->image.get() : nullptr;
+  mesh->rasters.erase(
+      std::remove_if(mesh->rasters.begin(),
+                     mesh->rasters.end(),
+                     [&](const RasterDrape& drape) {
+                       return drape.texture_coordinate_id ==
+                                  overlay_texture_coordinate_id &&
+                              (image == nullptr || drape.image.get() == image);
+                     }),
+      mesh->rasters.end());
+}
 
 }  // namespace cesium_flycube

@@ -1,9 +1,17 @@
-struct VsOutput {
-    float4 pos : SV_POSITION;
+struct VsInput {
+    float3 pos : POSITION;
+    float3 color : COLOR;
 };
 
-VsOutput main(float3 pos : POSITION) {
+struct VsOutput {
+    float4 pos : SV_POSITION;
+    float3 color : COLOR;
+};
+
+VsOutput main(VsInput input) {
     VsOutput output;
-    output.pos = float4(pos, 1.0);
+    // Positions are already in clip/NDC from the CPU projector.
+    output.pos = float4(input.pos, 1.0);
+    output.color = input.color;
     return output;
 }

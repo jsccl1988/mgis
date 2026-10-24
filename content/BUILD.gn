@@ -3,8 +3,13 @@
 
 # Desktop GIS embedder surface. Headers are included as
 # "content/public/browser/....h" from the repo root. Language mode is the tree
-# cc_std (c++14). This library does not depend on views, UE, or MapLibre.
+# cc_std. This library does not depend on views, UE, or MapLibre.
 # Not part of //:default.
+#
+# Implementation lives under content/browser/<lane>/:
+#   session / viewport / tooling / ipc / glang.runtime / agent / plugin
+
+import("//build/python.gni")
 
 config("content_includes") {
   include_dirs += [ "//" ]
@@ -24,6 +29,7 @@ static_library("content") {
     libs = [ "ws2_32.lib" ]
   }
   sources = [
+    # public embedder surface
     "public/browser/scene_mode.h",
     "public/browser/types.h",
     "public/browser/event_bus.h",
@@ -31,49 +37,84 @@ static_library("content") {
     "public/browser/gis_contents.h",
     "public/browser/gis_contents_client.h",
     "public/browser/plugin_host.h",
+    "public/browser/product_presenters.h",
     "public/browser/trace_log.h",
-    "browser/view_host.h",
-    "browser/tool_session.h",
-    "browser/script_runtime.h",
-    "browser/debug/debug_agent.h",
-    "browser/types.cc",
-    "browser/event_bus.cc",
-    "browser/gis_document.cc",
-    "browser/gis_contents.cc",
-    "browser/map/scene.h",
-    "browser/map/fake_scene.h",
-    "browser/map/fake_scene.cc",
-    "browser/gis_contents_client.cc",
-    "browser/plugin_host.cc",
-    "browser/tool_session.cc",
-    "browser/script_runtime.cc",
-    "browser/trace_log.cc",
-    "browser/view_host.cc",
-    "browser/debug/debug_agent.cc",
-    "browser/devtools/mcp_server.h",
-    "browser/devtools/mcp_server.cc",
-    "browser/glang/language/suite_loader.h",
-    "browser/glang/language/suite_loader.cc",
-    "browser/glang/exec/suite_runner.h",
-    "browser/glang/exec/suite_runner.cc",
-    "browser/glang/host/capability_host.h",
-    "browser/glang/host/capability_host.cc",
-    "browser/pipe/pipe_json.h",
-    "browser/pipe/pipe_json.cc",
-    "browser/pipe/pipe_message.h",
-    "browser/pipe/pipe_message.cc",
-    "browser/pipe/pipe_client.h",
-    "browser/pipe/pipe_client.cc",
+    "public/browser/view_host.h",
+
+    # session
+    "browser/session/types.cc",
+    "browser/session/event_bus.cc",
+    "browser/session/gis_document.cc",
+    "browser/session/gis_contents.cc",
+    "browser/session/gis_contents_client.cc",
+    "browser/session/trace_log.cc",
+
+    # viewport
+    "browser/viewport/view_host.cc",
+    "browser/viewport/map/scene.h",
+    "browser/viewport/map/scene_factory.h",
+    "browser/viewport/map/scene_factory.cc",
+    "browser/viewport/map/fake_scene.h",
+    "browser/viewport/map/fake_scene.cc",
+
+    # tooling
+    "browser/tooling/tool_session.h",
+    "browser/tooling/tool_session.cc",
+
+    # glang.runtime (language / exec / host + optional in-process CPython)
+    "browser/glang.runtime/script_runtime.h",
+    "browser/glang.runtime/script_runtime.cc",
+    "browser/glang.runtime/language/suite_loader.h",
+    "browser/glang.runtime/language/suite_loader.cc",
+    "browser/glang.runtime/exec/suite_runner.h",
+    "browser/glang.runtime/exec/suite_runner.cc",
+    "browser/glang.runtime/exec/py/cpython.h",
+    "browser/glang.runtime/exec/py/cpython.cc",
+    "browser/glang.runtime/exec/py/plugin_module.h",
+    "browser/glang.runtime/exec/py/plugin_module.cc",
+    "browser/glang.runtime/exec/py/script_call.h",
+    "browser/glang.runtime/exec/py/script_call.cc",
+    "browser/glang.runtime/exec/py/eval_verbs.h",
+    "browser/glang.runtime/exec/py/eval_verbs.cc",
+    "browser/glang.runtime/host/capability_host.h",
+    "browser/glang.runtime/host/capability_host.cc",
+
+    # agent
+    "browser/agent/debug/debug_agent.h",
+    "browser/agent/debug/debug_agent.cc",
+    "browser/agent/devtools/mcp_server.h",
+    "browser/agent/devtools/mcp_server.cc",
+
+    # ipc
+    "browser/ipc/pipe_json.h",
+    "browser/ipc/pipe_json.cc",
+    "browser/ipc/pipe_message.h",
+    "browser/ipc/pipe_message.cc",
+    "browser/ipc/pipe_client.h",
+    "browser/ipc/pipe_client.cc",
+
+    # plugin
+    "browser/plugin/plugin_host.cc",
   ]
+
+  if (python_enabled) {
+    include_dirs += [ python_include ]
+    lib_dirs += [ python_libdir ]
+    libs += [ python_lib_name ]
+    defines += [
+      "HAS_PYTHON=1",
+      "PYTHON_HOME=\"" + python_prefix + "\"",
+    ]
+  }
 }
 
 # P2 viewport pipe and P4 origin/tileset protocol. Not part of //:default.
 executable("viewport_gate") {
   testonly = true
   sources = [
-    "browser/pipe/ue_peer.h",
-    "browser/pipe/ue_peer.cc",
-    "browser/pipe/viewport_gate_test.cc",
+    "browser/ipc/ue_peer.h",
+    "browser/ipc/ue_peer.cc",
+    "browser/ipc/viewport_gate_test.cc",
   ]
   deps = [
     ":content",
@@ -89,6 +130,39 @@ executable("viewport_gate") {
   }
 }
 
+# Product SceneImpl + MapLibre / UE→FlyCube presenters. Linked by mgis /
+# mview_shell only. session_wire must not depend on this target.
+static_library("product_presenters") {
+  sources = [
+    "browser/viewport/present/scene_presenter.h",
+    "browser/viewport/present/maplibre_presenter.h",
+    "browser/viewport/present/maplibre_presenter.cc",
+    "browser/viewport/present/flycube_host.h",
+    "browser/viewport/present/flycube_host.cc",
+    "browser/viewport/present/flycube_presenter.h",
+    "browser/viewport/present/flycube_presenter.cc",
+    "browser/viewport/present/ue_presenter.h",
+    "browser/viewport/present/ue_presenter.cc",
+    "browser/viewport/present/scene_impl.h",
+    "browser/viewport/present/scene_impl.cc",
+    "browser/viewport/present/product_presenters_register.cc",
+  ]
+  deps = [
+    ":content",
+    "//base:base",
+    "//vista/pass/map:vista_map",
+    "//vista/pass/world:vista_world",
+  ]
+  include_dirs += [ "//" ]
+  if (is_win) {
+    libs = [
+      "gdi32.lib",
+      "opengl32.lib",
+      "user32.lib",
+    ]
+  }
+}
+
 executable("session_wire") {
   testonly = true
   sources = [ "browser/session_wire_test.cc" ]
@@ -101,6 +175,14 @@ executable("session_wire") {
     "//",
     "//testing/gtest/include",
   ]
+  # Absolute path so the exe can run from any cwd (repo root or out/).
+  _py_mark_suite =
+      rebase_path("browser/glang.runtime/testdata/mark_ready.py", "")
+  defines += [ "GLANG_PY_MARK_SUITE=\"" +
+               string_replace(_py_mark_suite, "\\", "/") + "\"" ]
+  if (python_enabled) {
+    defines += [ "HAS_PYTHON=1" ]
+  }
   if (is_win) {
     configs += [ "//build/config/win:console_subsystem" ]
     libs = [ "ws2_32.lib" ]

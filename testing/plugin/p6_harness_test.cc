@@ -1,12 +1,16 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
+#include "content/public/browser/gis_contents.h"
+#include "content/public/browser/plugin_host.h"
 #include "plugin/contribute.h"
+#include "plugin/loader.h"
 #include "plugin/registry.h"
 
 #include <stdio.h>
 
 #include <string>
+#include <vector>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -170,6 +174,7 @@ bool PluginSourcesPassIncludeCheck(const std::wstring& plugin_dir,
                                    std::string* error) {
   const wchar_t* kFiles[] = {
       L"contribute.h", L"contribute.cc", L"registry.h", L"registry.cc",
+      L"loader.h",     L"loader.cc",     L"api\\mview_plugin_api.h",
   };
   for (size_t i = 0; i < sizeof(kFiles) / sizeof(kFiles[0]); ++i) {
     const std::wstring path = plugin_dir + L"\\" + kFiles[i];
@@ -196,8 +201,6 @@ bool PluginSourcesPassIncludeCheck(const std::wstring& plugin_dir,
   return true;
 }
 
-// In-test hit table. Both views share one feature id and one llh.
-// No UE scene and no MapLibre map.
 class FeaturePickStub {
  public:
   FeaturePickStub(const std::string& feature_id, double lon, double lat,
@@ -281,26 +284,41 @@ TEST(PluginSample, LoadsManifestAndRunsCommand) {
   const plugin::Manifest* manifest = registry.Find("plugin.sample");
   ASSERT_TRUE(manifest != NULL);
   EXPECT_EQ(std::string("Sample"), manifest->name);
+  EXPECT_EQ(std::string("plugin_sample.dll"), manifest->dll);
   ASSERT_EQ(static_cast<size_t>(1), manifest->commands.size());
   EXPECT_EQ(std::string("plugin.sample.run"), manifest->commands[0]);
 
-  EXPECT_FALSE(plugin::Contribute(NULL));
-  EXPECT_FALSE(plugin::Contribute(""));
-  EXPECT_FALSE(plugin::Contribute("plugin.sample.missing"));
-  ASSERT_TRUE(plugin::Contribute(manifest->commands[0].c_str()));
+  // Loader before GisContents so PluginHost/Workspace die while DLLs are mapped.
+  plugin::Loader loader;
+  content::GisContents contents;
+  content::PluginHost* host = contents.plugin_host();
+  ASSERT_TRUE(host != NULL);
+
+  std::vector<std::string> search_dirs;
+  search_dirs.push_back(WideToUtf8(ParentDir(ModulePath())));
+  search_dirs.push_back(WideToUtf8(root + L"\\out\\Debug"));
+  search_dirs.push_back(WideToUtf8(root + L"\\out\\Release"));
+  ASSERT_GE(loader.LoadAll(registry, host, search_dirs, contents.trace_log()),
+            1);
+
+  EXPECT_TRUE(host->has_command_id("plugin.sample.run"));
+  EXPECT_TRUE(host->has_interaction_factory_id("plugin.sample.interaction"));
+  ASSERT_FALSE(host->menu_items().empty());
+  ASSERT_FALSE(host->dock_panels().empty());
+
+  EXPECT_FALSE(plugin::Contribute(NULL, "plugin.sample.run"));
+  EXPECT_FALSE(plugin::Contribute(host, NULL));
+  EXPECT_FALSE(plugin::Contribute(host, ""));
+  EXPECT_FALSE(plugin::Contribute(host, "plugin.sample.missing"));
+  ASSERT_TRUE(plugin::Contribute(host, "plugin.sample.run"));
 
   const std::wstring mark_path =
       root + L"\\out\\harness\\plugin.sample\\mark.json";
-  const std::string mark =
-      "{\n"
-      "  \"command\": \"plugin.sample.run\",\n"
-      "  \"marks\": [\"plugin.sample.ran\"]\n"
-      "}\n";
-  ASSERT_TRUE(WriteFileBytes(mark_path, mark));
-
   std::string written;
-  ASSERT_TRUE(ReadFileBytes(mark_path, &written));
+  ASSERT_TRUE(ReadFileBytes(mark_path, &written)) << WideToUtf8(mark_path);
   EXPECT_NE(std::string::npos, written.find("plugin.sample.ran"));
+
+  ASSERT_TRUE(host->ActivateInteraction("plugin.sample.interaction", "map"));
 }
 
 TEST(BrowserPick, SameFeatureIdOnMapAndView0) {

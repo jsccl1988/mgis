@@ -10,14 +10,23 @@
 #include "ui/views/markup/style/flex_style.h"
 #include "ui/views/view.h"
 
+#include <cmath>
+
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/logging.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "ui/base/win/dpi.h"
 
 namespace views {
 namespace {
+
+int DipPx(int dip) {
+  const float scale = ui::win::GetDeviceScaleFactor();
+  const float s = scale > 0.f ? scale : 1.f;
+  return static_cast<int>(std::lround(static_cast<float>(dip) * s));
+}
 
 TEST(CssParserTest, CascadeAndColor) {
   CssParser parser;
@@ -104,10 +113,10 @@ TEST(YogaLayoutTest, RowPlacesChildren) {
   host.Layout();
 
   EXPECT_EQ(0, a->x());
-  EXPECT_EQ(40, a->width());
-  EXPECT_EQ(20, a->height());
-  EXPECT_EQ(50, b->x());
-  EXPECT_EQ(50, b->width());
+  EXPECT_EQ(DipPx(40), a->width());
+  EXPECT_EQ(DipPx(20), a->height());
+  EXPECT_EQ(DipPx(50), b->x());
+  EXPECT_EQ(DipPx(50), b->width());
 }
 
 TEST(ControlFactoryTest, RegistersChromiumTags) {
@@ -160,10 +169,10 @@ TEST(LoadMarkupTest, BytesBuildIdsAndYogaSize) {
   PlaceholderView* weird = loaded.ids.FindAs<PlaceholderView>("w");
   ASSERT_TRUE(weird != NULL);
 
-  loaded.root->SetBounds(0, 0, 200, 120);
+  loaded.root->SetBounds(0, 0, DipPx(200), DipPx(120));
   loaded.root->Layout();
-  EXPECT_EQ(80, slot->width());
-  EXPECT_EQ(30, slot->height());
+  EXPECT_EQ(DipPx(80), slot->width());
+  EXPECT_EQ(DipPx(30), slot->height());
   View* row = loaded.ids.Find("row");
   ASSERT_TRUE(row != NULL);
   EXPECT_EQ(2, row->child_count());

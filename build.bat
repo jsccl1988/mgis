@@ -61,7 +61,7 @@ copy /Y "%~dp0out\environment.x64.x64" "%~dp0out\Debug\environment.x64.x64" >nul
 copy /Y "%~dp0out\environment.x64.x64" "%~dp0out\Release\environment.x64.x64" >nul
 
 REM Optional first arg: debug|release, then m / all / a raw ninja target.
-REM Default and m build the product group (//examples:examples). Both configs unless filtered.
+REM Default and m build product demos (ui/views/examples + app/ui_designer). Both configs unless filtered.
 set "BUILD_DEBUG=1"
 set "BUILD_RELEASE=1"
 set "TARGET_ARG=%~1"

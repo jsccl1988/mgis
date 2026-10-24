@@ -1,0 +1,131 @@
+<!--
+Copyright (c) 2026 The Mogu Authors.
+All rights reserved.
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>gis / render 产品 ABI 分层</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --line: #d8dee6;
+    --text: #1a2330;
+    --muted: #5a6a7e;
+    --accent: #2563a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 28px 32px 48px;
+  }
+  h1 { font-size: 1.35rem; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 22px; }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: stretch;
+    margin-bottom: 14px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    min-width: 200px;
+    flex: 1;
+  }
+  .card h2 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+  .card p, .card li {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .card ul { margin: 6px 0 0; padding-left: 1.1em; }
+  .arrow {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    margin: 4px 0 10px;
+  }
+  .lane-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.82em;
+    background: #eef2f6;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+  <h1>gis / render 产品 ABI 门面</h1>
+  <p class="sub">对齐 smartgis：<code>gis/map</code> · <code>render/rhi/flycube</code> · peer of <code>content/</code> · 引擎在 third_party</p>
+
+  <div class="lane-label">壳 / 呈现</div>
+  <div class="row">
+    <div class="card">
+      <h2>app/mgis · content presenters</h2>
+      <ul>
+        <li><code>MapLibrePresenter</code> → <code>mvm_*</code></li>
+        <li><code>FlyCubeHost</code> → <code>LoadLibrary(mview_flycube.dll)</code></li>
+        <li>不 include 引擎头</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">▼ LoadLibrary / import lib · data_deps 旁路 DLL</div>
+
+  <div class="lane-label">产品 ABI（本仓 GN · 对齐 smartgis）</div>
+  <div class="row">
+    <div class="card">
+      <h2>gis/map</h2>
+      <p><code>mview_map.dll</code> · C ABI <code>mvm_*</code></p>
+      <ul>
+        <li>MapSurface / camera_follow</li>
+        <li>可选旁路 <code>mview_maplibre.dll</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>render/rhi/flycube</h2>
+      <p><code>mview_flycube.dll</code> · C ABI <code>mvf_*</code></p>
+      <ul>
+        <li>DX12 子 HWND</li>
+        <li>draped 椭球 + orbit</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="arrow">▼ 链预编库 / 可选 CMake 引擎 DLL</div>
+
+  <div class="lane-label">引擎（third_party）</div>
+  <div class="row">
+    <div class="card">
+      <h2>maplibre</h2>
+      <p>CMake 编可选 <code>mview_maplibre.dll</code>；嵌入源仍在 <code>third_party/maplibre/mview_map/</code></p>
+    </div>
+    <div class="card">
+      <h2>cesium-flycube + FlyCube</h2>
+      <p>预编 <code>cesium_flycube*.lib</code> / <code>FlyCube.lib</code> / Cesium*；shader/data 路径指向 third_party</p>
+    </div>
+  </div>
+</body>
+</html>
