@@ -43,7 +43,7 @@ Prefer skipping over colliding with an active agent:
 |---|-------|----------------|
 | 1 | `auto-build-fix` | `build.bat debug` exit 0 |
 | 2 | `auto-bug-fix` | gtest exit 0, or an explicit “no test binary” skip reported as a stop |
-| 3 | `auto-cbm-gen` | index for project `mview` |
+| 3 | `auto-cbm-gen` | index for project `mgis` |
 | 4 | `auto-commit-push` | commit on `master` + push, or clean skip |
 
 Continue only after the current stage’s done bar.

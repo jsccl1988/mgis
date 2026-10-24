@@ -6,7 +6,7 @@ description: >-
   the user says crash, 崩溃, 卡死, hang, freeze, deadlock, not responding,
   timeout, dmp, AV, !analyze, 自动诊断, /auto-diagnose-fix, or hands over a
   .dmp / hung PID. For this repo: cdb; PDBs beside the PE (often under out/);
-  logs under out/crash/; CBM project mview. After the root-cause fix, verify
+  logs under out/crash/; CBM project mgis. After the root-cause fix, verify
   with the same repro or auto-bug-fix. Supersedes windbg-crash-diagnose.
 ---
 
@@ -22,7 +22,7 @@ All rights reserved.
 Prefer **`cdb.exe`**. Do not open the WinDbg GUI unless cdb is missing and the user explicitly asks.
 
 **REQUIRED BACKGROUND:** superpowers:systematic-debugging.
-**REQUIRED SUB-SKILL:** codebase-memory (project `mview`) before repo-wide Grep.
+**REQUIRED SUB-SKILL:** codebase-memory (project `mgis`) before repo-wide Grep.
 
 ## Authorization
 
@@ -41,7 +41,7 @@ When this skill is invoked, the agent **MUST** classify → find cdb → dump/an
 1. `scripts/find_cdb.ps1` first. Missing cdb → hard stop; ask for Debugging Tools for Windows.
 2. Defaults: `PdbDir` = directory that holds the PE’s PDB (often `out`), `OutDir=out/crash`.
 3. Use the scripts for `-c`. Do not hand-roll cdb command strings.
-4. CBM project **`mview`**, root `C:/Dev/src/gis/mview`.
+4. CBM project **`mgis`**, root `C:/Dev/src/gis/mgis`.
 5. Stay on **`master`**.
 6. Kill leftover cdb / target via non-sandbox shell (`agent-terminal-kill`): gentle stop first.
 7. Fix root cause. Not `#if 0`, not “increase timeout” as the only fix for a deadlock.

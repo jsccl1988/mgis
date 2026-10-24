@@ -36,11 +36,14 @@
 #include "ui/base/win/dpi.h"
 #include "ui/gfx/native_widget_types.h"
 #include "ui/gfx/rect.h"
+#include "ui/views/background.h"
 #include "ui/views/controls/menu/menu.h"
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane.h"
 #include "ui/views/layout/fill_layout.h"
 #include "ui/views/markup/loader/markup_loader.h"
+#include "ui/views/theme/theme.h"
+#include "ui/views/theme/theme_service.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/win/hwnd_util.h"
 
@@ -48,6 +51,17 @@ namespace mgis {
 namespace {
 
 bool g_quit_when_main_closes = true;
+
+enum {
+  kMenuFile = 1,
+  kMenuEdit = 2,
+  kMenuView = 3,
+  kMenuLayer = 4,
+  kMenuPlugins = 5,
+  kMenuTheme = 50,
+  kMenuThemeLight = 51,
+  kMenuThemeDark = 52,
+};
 
 // NativeWidgetWin / HWNDMessageHandler layout in physical pixels. Design
 // constants in this file are 96-DPI DIP; convert with the window DPI when
@@ -99,6 +113,22 @@ class WorkbenchContents::WindowMenuDelegate : public views::Menu::Delegate {
   WindowMenuDelegate() {}
   virtual ~WindowMenuDelegate() {}
 
+  virtual bool IsItemChecked(int id) const OVERRIDE {
+    const std::string_view cur = views::ThemeService::Get().current_id();
+    if (id == kMenuThemeLight)
+      return cur == "light";
+    if (id == kMenuThemeDark)
+      return cur == "dark";
+    return false;
+  }
+
+  virtual void ExecuteCommand(int id) OVERRIDE {
+    if (id == kMenuThemeLight)
+      views::ThemeService::Get().SetTheme("light");
+    else if (id == kMenuThemeDark)
+      views::ThemeService::Get().SetTheme("dark");
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(WindowMenuDelegate);
 };
@@ -145,6 +175,7 @@ WorkbenchContents::WorkbenchContents()
   MountSlot("tools_slot", tools_panel_);
   MountSlot("bottom_slot", bottom_);
   MountSlot("status_slot", status_);
+  ApplyChromeThemeColors();
 }
 
 WorkbenchContents::~WorkbenchContents() {
@@ -246,11 +277,13 @@ void WorkbenchContents::ApplySceneMode() {
 void WorkbenchContents::UpdateStatusMessage() {
   if (!status_)
     return;
-  if (active_ == kView0)
-    status_->SetMessage("3D scene present");
-  else
-    status_->SetMessage("2D map GPU present");
-  status_->SetCrsText("EPSG:4326");
+  if (active_ == kView0) {
+    status_->SetMessage("3D China DEM · present");
+    status_->SetCrsText("EPSG:4978");
+  } else {
+    status_->SetMessage("2D China map · GPU present");
+    status_->SetCrsText("EPSG:4326");
+  }
 }
 
 bool WorkbenchContents::HasLayerTree() const {
@@ -272,11 +305,22 @@ void WorkbenchContents::EnsureWindowMenu() {
                                   widget->GetNativeView()));
   if (!menu_)
     return;
-  menu_->AppendMenuItemWithLabel(1, ASCIIToUTF16("File"));
-  menu_->AppendMenuItemWithLabel(2, ASCIIToUTF16("Edit"));
-  menu_->AppendMenuItemWithLabel(3, ASCIIToUTF16("View"));
-  menu_->AppendMenuItemWithLabel(4, ASCIIToUTF16("Layer"));
-  menu_->AppendMenuItemWithLabel(5, ASCIIToUTF16("Plugins"));
+  menu_->AppendMenuItemWithLabel(kMenuFile, ASCIIToUTF16("File"));
+  menu_->AppendMenuItemWithLabel(kMenuEdit, ASCIIToUTF16("Edit"));
+  views::Menu* view_menu =
+      menu_->AppendSubMenu(kMenuView, ASCIIToUTF16("View"));
+  if (view_menu) {
+    views::Menu* theme_menu =
+        view_menu->AppendSubMenu(kMenuTheme, ASCIIToUTF16("Theme"));
+    if (theme_menu) {
+      theme_menu->AppendMenuItem(kMenuThemeLight, ASCIIToUTF16("Light"),
+                                 views::Menu::RADIO);
+      theme_menu->AppendMenuItem(kMenuThemeDark, ASCIIToUTF16("Dark"),
+                                 views::Menu::RADIO);
+    }
+  }
+  menu_->AppendMenuItemWithLabel(kMenuLayer, ASCIIToUTF16("Layer"));
+  menu_->AppendMenuItemWithLabel(kMenuPlugins, ASCIIToUTF16("Plugins"));
 }
 
 bool WorkbenchContents::CanResize() const { return true; }
@@ -310,6 +354,29 @@ void WorkbenchContents::Layout() {
     chrome_root_->Layout();
   }
   LayoutSceneSurfaces();
+}
+
+void WorkbenchContents::ApplyChromeThemeColors() {
+  const views::Theme& t = views::Theme::Current();
+  auto paint = [](views::View* view, SkColor color) {
+    if (!view)
+      return;
+    view->set_background(views::Background::CreateSolidBackground(color));
+  };
+  paint(chrome_root_, t.shell_bg);
+  paint(markup_.ids.Find("root"), t.shell_bg);
+  paint(markup_.ids.Find("toolbar_slot"), t.panel_header);
+  paint(markup_.ids.Find("catalog_slot"), t.panel_bg);
+  paint(markup_.ids.Find("viewport_slot"), t.map_placeholder);
+  paint(markup_.ids.Find("tools_slot"), t.panel_bg);
+  paint(markup_.ids.Find("bottom_slot"), t.panel_bg);
+  paint(markup_.ids.Find("status_slot"), t.caption_bg);
+  SchedulePaint();
+}
+
+void WorkbenchContents::OnThemeChanged() {
+  ApplyChromeThemeColors();
+  View::OnThemeChanged();
 }
 
 void WorkbenchContents::WindowClosing() {
@@ -411,9 +478,13 @@ void WorkbenchContents::StartSession() {
     LOG(WARNING) << "debug-agent MCP did not start; ExecLine still works";
   ApplySceneMode();
   UpdateStatusMessage();
+  contents_->trace_log()->Append(
+      content::kTraceConsole,
+      "map.2d china style (mainland + taiwan + hainan)");
 }
 
 void ShowWorkbench() {
+  views::ThemeService::Get().LoadPersisted();
   WorkbenchContents* contents = new WorkbenchContents();
   // DIP design size; CreateWindowWithBounds path is physical for Win32.
   const gfx::Rect kDipBounds(60, 60, 1100, 720);
@@ -432,8 +503,6 @@ void ShowWorkbench() {
   widget->Show();
   contents->EnsureWindowMenu();
   contents->StartSession();
-  if (CommandLine::ForCurrentProcess()->HasSwitch("scene3d"))
-    contents->SelectViewTab(kView0);
   ForceWorkbenchBounds(widget, kDipBounds);
   if (MessageLoopForUI::current()) {
     MessageLoopForUI::current()->PostTask(
@@ -447,6 +516,22 @@ void ShowWorkbench() {
         FROM_HERE,
         base::Bind(&ForceWorkbenchBounds, widget, kDipBounds),
         base::TimeDelta::FromMilliseconds(2000));
+  }
+  // Select 3D after layout so NativeViewHost visible-bounds are non-empty.
+  if (CommandLine::ForCurrentProcess()->HasSwitch("scene3d") &&
+      MessageLoopForUI::current()) {
+    MessageLoopForUI::current()->PostDelayedTask(
+        FROM_HERE,
+        base::Bind(&WorkbenchContents::SelectViewTab,
+                   base::Unretained(contents), kView0),
+        base::TimeDelta::FromMilliseconds(800));
+    MessageLoopForUI::current()->PostDelayedTask(
+        FROM_HERE,
+        base::Bind(&WorkbenchContents::SelectViewTab,
+                   base::Unretained(contents), kView0),
+        base::TimeDelta::FromMilliseconds(2000));
+  } else if (CommandLine::ForCurrentProcess()->HasSwitch("scene3d")) {
+    contents->SelectViewTab(kView0);
   }
   LOG(INFO) << "mgis workbench shown";
 }

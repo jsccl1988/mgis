@@ -15,15 +15,18 @@ std::string_view WorkbenchMarkupXml() {
 .chrome_host {
   display: flex;
   flex-direction: column;
+  background-color: theme(shell_bg);
 }
 .chrome {
   display: flex;
   flex-direction: column;
   flex: 1;
+  background-color: theme(shell_bg);
 }
 .toolbar {
-  height: 28px;
+  height: 32px;
   flex-shrink: 0;
+  background-color: theme(panel_header);
 }
 .mid {
   display: flex;
@@ -33,26 +36,32 @@ std::string_view WorkbenchMarkupXml() {
 }
 .catalog {
   width: 220px;
-  min-width: 120px;
+  min-width: 160px;
   flex-shrink: 1;
+  background-color: theme(panel_bg);
 }
 .viewport {
   flex: 1;
-  min-width: 400px;
+  min-width: 360px;
+  background-color: theme(map_placeholder);
 }
 .tools {
   width: 280px;
-  min-width: 160px;
-  flex-shrink: 1;
+  min-width: 260px;
+  flex-shrink: 0;
+  background-color: theme(panel_bg);
 }
 .bottom {
   height: 140px;
   min-height: 72px;
   flex-shrink: 1;
+  background-color: theme(panel_bg);
 }
 .status {
   height: 22px;
   flex-shrink: 0;
+  background-color: theme(caption_bg);
+  color: theme(text);
 }
   </Style>
   <FlexColumn id="root" class="chrome">

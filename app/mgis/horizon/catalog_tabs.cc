@@ -21,10 +21,14 @@ CatalogTabs::CatalogTabs()
       entity_tree_(NULL),
       tabs_(NULL),
       suppress_observer_(false) {
-  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("Hillshade"), 1), 0);
-  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("Land"), 2), 1);
-  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("Lines"), 3), 2);
-  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("Points"), 4), 3);
+  // Mirror the offline MapLibre style layers in maplibre_present.cc.
+  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("background"), 1), 0);
+  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("china"), 2), 1);
+  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("china-outline"), 3),
+                              2);
+  layer_model_.GetRoot()->Add(new NodeType(ASCIIToUTF16("islands"), 4), 3);
+  layer_model_.GetRoot()->Add(
+      new NodeType(ASCIIToUTF16("islands-outline"), 5), 4);
 
   source_model_.GetRoot()->Add(
       new NodeType(ASCIIToUTF16("(no datasources)"), 1), 0);

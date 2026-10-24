@@ -7,7 +7,7 @@
 namespace content {
 
 // Registers the product SceneImpl factory (MapLibre / UE→FlyCube). Call once
-// before constructing GisContents in mview_shell / mgis. session_wire never
+// before constructing GisContents in mgis. session_wire never
 // calls this and keeps FakeScene.
 void EnsureProductPresentersRegistered();
 

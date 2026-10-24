@@ -23,6 +23,7 @@ class ViewportPlaceholder : public views::View {
   virtual ~ViewportPlaceholder();
 
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE;
+  virtual void OnThemeChanged() OVERRIDE;
   virtual void Layout() OVERRIDE;
 
  private:

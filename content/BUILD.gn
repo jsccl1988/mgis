@@ -131,7 +131,7 @@ executable("viewport_gate") {
 }
 
 # Product SceneImpl + MapLibre / UE→FlyCube presenters. Linked by mgis /
-# mview_shell only. session_wire must not depend on this target.
+# Product mgis.exe only. session_wire must not depend on this target.
 static_library("product_presenters") {
   sources = [
     "browser/viewport/present/scene_presenter.h",

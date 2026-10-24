@@ -1,12 +1,12 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#ifndef SHELL_MAIN_WINDOW_H_
-#define SHELL_MAIN_WINDOW_H_
+#ifndef APP_MGIS_HARNESS_HARNESS_H_
+#define APP_MGIS_HARNESS_HARNESS_H_
 
-namespace shell {
+namespace mgis {
 
-// Shows the product mgis workbench (single main window). The caller owns
+// Shows the product workbench (single main window). The caller owns
 // MessageLoopForUI and must run it.
 void ShowMainWindow();
 
@@ -23,6 +23,6 @@ int RunChromeHarness();
 // view0 frame was actually drawn.
 int RunRenderCheck();
 
-}  // namespace shell
+}  // namespace mgis
 
-#endif  // SHELL_MAIN_WINDOW_H_
+#endif  // APP_MGIS_HARNESS_HARNESS_H_

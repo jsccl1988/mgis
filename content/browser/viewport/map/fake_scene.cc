@@ -39,11 +39,6 @@ bool ToolAllowed(SceneMode mode, const std::string& tool_id) {
 
 }  // namespace
 
-void Scene::SetInputForwarder(InputForwardFn fn, void* context) {
-  (void)fn;
-  (void)context;
-}
-
 FakeScene::FakeScene()
     : child_(NULL),
       mode_(SceneMode::kScene2D),

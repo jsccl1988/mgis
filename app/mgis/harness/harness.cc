@@ -1,11 +1,12 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-#include "main_window.h"
+#include "app/mgis/harness/harness.h"
 
 #include <algorithm>
 #include <string>
 
+#include "app/mgis/viewport/globe_view.h"
 #include "app/mgis/workbench/workbench.h"
 #include "base/basictypes.h"
 #include "base/bind.h"
@@ -23,8 +24,6 @@
 #include "ui/views/widget/widget.h"
 #include "ui/views/widget/widget_delegate.h"
 #include "ui/views/win/hwnd_util.h"
-
-#include "app/mgis/viewport/globe_view.h"
 
 namespace {
 
@@ -99,7 +98,7 @@ class ViewportWindow : public views::WidgetDelegateView {
 
   // Presents, orbits, and presents again. True only when both GlobeView
   // frames drew real pixels and the second frame differs from the first.
-  // The map widget has no renderer in this shell, so it never confirms.
+  // The map widget has no renderer in this harness, so it never confirms.
   bool ConfirmBrowsedFrame() {
     if (kind_ == kMap)
       return false;
@@ -348,10 +347,10 @@ void FinishChromeHarness(ProductChrome* chrome, int* exit_code) {
 
 }  // namespace
 
-namespace shell {
+namespace mgis {
 
 void ShowMainWindow() {
-  mgis::ShowWorkbench();
+  ShowWorkbench();
 }
 
 bool WriteRenderMark(const ProductChrome& chrome) {
@@ -414,7 +413,7 @@ int RunRenderCheck() {
             << " renderer="
             << (chrome.view0 ? chrome.view0->renderer_name() : "");
   const bool wrote = WriteRenderMark(chrome);
-  mgis::SetQuitWhenWorkbenchCloses(false);
+  SetQuitWhenWorkbenchCloses(false);
   CloseHarnessSatellites(&chrome);
   if (chrome.main_window)
     chrome.main_window->CloseNow();
@@ -434,4 +433,4 @@ int RunChromeHarness() {
   return exit_code;
 }
 
-}  // namespace shell
+}  // namespace mgis

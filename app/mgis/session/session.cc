@@ -94,6 +94,8 @@ void ShowAttachedChild(ViewportSurface* surface, void* child_hwnd) {
     return;
   surface->Layout();
   views::NativeViewHost* host = surface->native_host();
+  // Layout may HideWidget when GetVisibleBounds is still empty right after a
+  // tab switch; raise and show again so DX12 China DEM is not left SW_HIDE.
   host->Layout();
   HWND hwnd = reinterpret_cast<HWND>(child_hwnd);
   if (!IsWindow(hwnd))

@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <unordered_map>
 
+#include "ui/views/theme/theme.h"
+
 namespace views {
 namespace {
 
@@ -73,10 +75,25 @@ bool ParseHexByte(char c, int* n) {
   return false;
 }
 
+bool ParseThemeColor(std::string_view raw, SkColor* out) {
+  // theme(shell_bg) — resolves against Theme::Current() at parse time.
+  raw = Trim(raw);
+  const std::string lower = ToLower(raw);
+  if (lower.size() < 8 || lower.compare(0, 6, "theme(") != 0 ||
+      lower.back() != ')') {
+    return false;
+  }
+  std::string_view name = Trim(std::string_view(lower).substr(
+      6, lower.size() - 7));
+  return Theme::ColorByName(name, out);
+}
+
 bool ParseColor(std::string_view raw, SkColor* out) {
   if (!out)
     return false;
   raw = Trim(raw);
+  if (ParseThemeColor(raw, out))
+    return true;
   if (!raw.empty() && raw.front() == '#')
     raw.remove_prefix(1);
   if (raw.size() == 6) {

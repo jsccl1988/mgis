@@ -20,7 +20,7 @@ All rights reserved.
 `auto-build-fix` = compile loop. This skill = **run gtest binaries, reproduce failures, fix root cause, re-run**.
 
 **REQUIRED BACKGROUND:** superpowers:systematic-debugging.
-**REQUIRED SUB-SKILL:** codebase-memory (project `mview`) before repo-wide Grep.
+**REQUIRED SUB-SKILL:** codebase-memory (project `mgis`) before repo-wide Grep.
 
 ## Authorization
 
@@ -31,7 +31,7 @@ When this skill is invoked, the agent **MUST** run the tests and iterate. Do not
 1. Build the test target with `.\build.bat debug <gtest_target>` (same entry as `auto-build-fix`).
 2. Tests are **gtest** (`testing/BUILD.gn`). There is **no** `SmartGIS.exe --harness` and no `build.bat debug te`.
 3. Run the gtest executable the GN target produces. Pass `--gtest_filter` when isolating one case.
-4. **CBM first** (project `mview`, root `C:/Dev/src/gis/mview`).
+4. **CBM first** (project `mgis`, root `C:/Dev/src/gis/mgis`).
 5. Stay on **`master`**.
 
 ## Fix loop

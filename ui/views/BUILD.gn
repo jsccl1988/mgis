@@ -132,6 +132,8 @@ component("views") {
     "painter.cc",
     "repeat_controller.cc",
     "round_rect_painter.cc",
+    "theme/theme.cc",
+    "theme/theme_service.cc",
     "touchui/touch_editing_menu.cc",
     "touchui/touch_selection_controller_impl.cc",
     "view.cc",

@@ -7,13 +7,13 @@
 
 #include "base/utf_string_conversions.h"
 #include "content/public/browser/plugin_host.h"
-#include "third_party/skia/include/core/SkColor.h"
 #include "ui/base/win/dpi.h"
 #include "ui/gfx/canvas.h"
 #include "ui/views/controls/button/text_button.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane.h"
 #include "ui/views/controls/textfield/textfield.h"
+#include "ui/views/theme/theme.h"
 
 namespace mgis {
 namespace {
@@ -83,7 +83,7 @@ ToolPluginPanel::ToolPluginPanel()
   placeholder_ = new views::Label(
       ASCIIToUTF16("Select a group. Extend hosts plugins."));
   placeholder_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  placeholder_->SetEnabledColor(SkColorSetRGB(0x5a, 0x6a, 0x7e));
+  placeholder_->SetEnabledColor(views::Theme::Current().text_muted);
   placeholder_->SetAutoColorReadabilityEnabled(false);
   body_->AddChildView(placeholder_);
 
@@ -106,14 +106,14 @@ ToolPluginPanel::ToolPluginPanel()
   hint_ = new views::Label(
       ASCIIToUTF16("Select a plugin. Its commands open here."));
   hint_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  hint_->SetEnabledColor(SkColorSetRGB(0x5a, 0x6a, 0x7e));
+  hint_->SetEnabledColor(views::Theme::Current().text_muted);
   hint_->SetAutoColorReadabilityEnabled(false);
   plugins_page_->AddChildView(hint_);
 
   views::Label* atm_label =
       new views::Label(ASCIIToUTF16("(Atmosphere panel placeholder)"));
   atm_label->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  atm_label->SetEnabledColor(SkColorSetRGB(0x5a, 0x6a, 0x7e));
+  atm_label->SetEnabledColor(views::Theme::Current().text_muted);
   atm_label->SetAutoColorReadabilityEnabled(false);
   views::View* atmosphere = new FillLabelPage(atm_label);
 
@@ -263,22 +263,52 @@ bool ToolPluginPanel::HandleKeyEvent(views::Textfield* /*sender*/,
 }
 
 void ToolPluginPanel::OnPaint(gfx::Canvas* canvas) {
-  canvas->FillRect(GetLocalBounds(), SkColorSetRGB(0xfa, 0xfb, 0xfc));
+  canvas->FillRect(GetLocalBounds(), views::Theme::Current().panel_bg);
   View::OnPaint(canvas);
+}
+
+void ToolPluginPanel::OnThemeChanged() {
+  const SkColor muted = views::Theme::Current().text_muted;
+  if (placeholder_)
+    placeholder_->SetEnabledColor(muted);
+  if (hint_)
+    hint_->SetEnabledColor(muted);
+  SchedulePaint();
 }
 
 void ToolPluginPanel::Layout() {
   const int pad = ScaleDip(6);
   const int group_h = ScaleDip(26);
   const int gap = ScaleDip(2);
-  int x = pad;
-  const int group_w =
-      std::max(ScaleDip(48),
-               (std::max(0, width() - 2 * pad) / kGroupCount) - gap);
+  const int inner = std::max(0, width() - 2 * pad);
+  // Size each group tab to its label; fall back to equal columns if cramped.
+  int preferred_total = 0;
+  int preferred_w[kGroupCount] = {};
   for (int i = 0; i < kGroupCount; ++i) {
-    if (group_buttons_[i])
-      group_buttons_[i]->SetBounds(x, pad, group_w, group_h);
-    x += group_w + gap;
+    preferred_w[i] = ScaleDip(56);
+    if (group_buttons_[i]) {
+      preferred_w[i] =
+          std::max(preferred_w[i],
+                   group_buttons_[i]->GetPreferredSize().width() + ScaleDip(8));
+    }
+    preferred_total += preferred_w[i];
+  }
+  preferred_total += gap * (kGroupCount - 1);
+  int x = pad;
+  if (preferred_total <= inner) {
+    for (int i = 0; i < kGroupCount; ++i) {
+      if (group_buttons_[i])
+        group_buttons_[i]->SetBounds(x, pad, preferred_w[i], group_h);
+      x += preferred_w[i] + gap;
+    }
+  } else {
+    const int group_w =
+        std::max(ScaleDip(52), (inner / kGroupCount) - gap);
+    for (int i = 0; i < kGroupCount; ++i) {
+      if (group_buttons_[i])
+        group_buttons_[i]->SetBounds(x, pad, group_w, group_h);
+      x += group_w + gap;
+    }
   }
 
   const int body_y = pad + group_h + pad;

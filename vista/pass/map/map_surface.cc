@@ -107,6 +107,70 @@ void Quad(double lon0, double lat0, double lon1, double lat1) {
   glVertex2d(x0, y1);
 }
 
+// Mainland ring (lon, lat), closed. Matches offline MapLibre china source.
+const double kChinaLon[] = {
+    73.5, 76.0, 80.0, 85.0, 87.5, 90.0, 93.0, 97.0, 100.0, 104.0, 108.0,
+    111.5, 115.0, 119.0, 122.5, 126.0, 130.0, 134.0, 133.0, 131.0, 128.5,
+    126.0, 124.0, 122.5, 121.8, 121.5, 121.8, 122.0, 121.5, 121.0, 120.2,
+    119.2, 118.0, 116.5, 114.5, 112.5, 110.5, 109.0, 107.5, 106.0, 104.5,
+    102.5, 100.5, 98.8, 97.8, 97.2, 94.5, 91.5, 88.0, 85.0, 82.0, 79.5,
+    77.5, 75.5, 73.5};
+const double kChinaLat[] = {
+    39.0, 40.5, 42.0, 45.0, 47.0, 48.5, 49.5, 50.5, 51.5, 53.0, 53.2,
+    51.0, 48.5, 47.2, 47.5, 48.8, 48.5, 48.0, 46.0, 45.0, 43.0, 41.5,
+    40.2, 39.5, 38.0, 36.5, 34.5, 32.0, 30.5, 29.0, 27.5, 26.0, 24.5,
+    23.5, 22.5, 21.8, 21.2, 21.3, 21.8, 22.8, 22.6, 22.0, 21.5, 23.5,
+    26.5, 28.2, 28.8, 28.2, 28.0, 28.5, 29.5, 31.0, 33.0, 35.5, 39.0};
+const int kChinaN = static_cast<int>(sizeof(kChinaLon) / sizeof(kChinaLon[0]));
+
+void EmitRing(const double* lon, const double* lat, int n, double shift) {
+  for (int i = 0; i < n; ++i)
+    glVertex2d(MercX(lon[i] + shift), MercY(lat[i]));
+}
+
+void DrawChinaOverview() {
+  // Mainland + Taiwan / Hainan on ocean — same idea as MapLibre offline style.
+  // Fill via centroid fans: GL_TRIANGLE_FAN from ring[0] spikes on this
+  // concave coast (east-coast artifacts on mercator fallback).
+  glColor3f(0.18f, 0.48f, 0.23f);
+  for (int wrap = -1; wrap <= 1; ++wrap) {
+    const double shift = static_cast<double>(wrap) * 360.0;
+    double cx = 0.0;
+    double cy = 0.0;
+    for (int i = 0; i < kChinaN; ++i) {
+      cx += MercX(kChinaLon[i] + shift);
+      cy += MercY(kChinaLat[i]);
+    }
+    cx /= static_cast<double>(kChinaN);
+    cy /= static_cast<double>(kChinaN);
+    glBegin(GL_TRIANGLES);
+    for (int i = 0; i < kChinaN - 1; ++i) {
+      glVertex2d(cx, cy);
+      glVertex2d(MercX(kChinaLon[i] + shift), MercY(kChinaLat[i]));
+      glVertex2d(MercX(kChinaLon[i + 1] + shift), MercY(kChinaLat[i + 1]));
+    }
+    glEnd();
+  }
+
+  glColor3f(0.91f, 0.72f, 0.14f);
+  glBegin(GL_QUADS);
+  for (int wrap = -1; wrap <= 1; ++wrap) {
+    const double shift = static_cast<double>(wrap) * 360.0;
+    Quad(120.4 + shift, 21.8, 122.2 + shift, 25.4);  // Taiwan
+    Quad(108.5 + shift, 18.1, 111.2 + shift, 20.2);  // Hainan
+  }
+  glEnd();
+
+  glColor3f(0.08f, 0.24f, 0.11f);
+  glLineWidth(2.0f);
+  for (int wrap = -1; wrap <= 1; ++wrap) {
+    const double shift = static_cast<double>(wrap) * 360.0;
+    glBegin(GL_LINE_LOOP);
+    EmitRing(kChinaLon, kChinaLat, kChinaN, shift);
+    glEnd();
+  }
+}
+
 }  // namespace
 
 LRESULT CALLBACK MapSurfaceProc(HWND hwnd,
@@ -381,31 +445,7 @@ int MapSurface::PresentMercator(int width,
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  glColor3f(0.56f, 0.74f, 0.40f);
-  glBegin(GL_QUADS);
-  for (int wrap = -1; wrap <= 1; ++wrap) {
-    const double shift = static_cast<double>(wrap) * 360.0;
-    Quad(-130.0 + shift, 25.0, -60.0 + shift, 50.0);
-    Quad(-10.0 + shift, 35.0, 30.0 + shift, 60.0);
-    Quad(70.0 + shift, 10.0, 140.0 + shift, 50.0);
-    Quad(-20.0 + shift, -35.0, 50.0 + shift, 35.0);
-    Quad(110.0 + shift, -45.0, 155.0 + shift, -10.0);
-  }
-  glEnd();
-
-  glColor3f(0.20f, 0.38f, 0.52f);
-  glBegin(GL_LINES);
-  for (int lon_line = -180; lon_line <= 180; lon_line += 30) {
-    const double x = MercX(static_cast<double>(lon_line));
-    glVertex2d(x, 0.0);
-    glVertex2d(x, 1.0);
-  }
-  for (int lat_line = -60; lat_line <= 60; lat_line += 30) {
-    const double y = MercY(static_cast<double>(lat_line));
-    glVertex2d(-1.0, y);
-    glVertex2d(2.0, y);
-  }
-  glEnd();
+  DrawChinaOverview();
 
   std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 3);
   // Default pack alignment is 4. A width whose RGB row is not a multiple of 4

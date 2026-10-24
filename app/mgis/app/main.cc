@@ -1,10 +1,15 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
+// Product PE entry (mgis.exe). Dispatches workbench / harness / layout check.
+
 #include <tchar.h>
 #include <windows.h>
 #include <atlbase.h>
 
+#include "app/mgis/app/cmdline/launch_switches.h"
+#include "app/mgis/harness/harness.h"
+#include "app/mgis/layout/check_layout.h"
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/i18n/icu_util.h"
@@ -14,8 +19,6 @@
 #include "ui/base/ui_base_paths.h"
 #include "ui/base/win/dpi.h"
 #include "ui/base/win/scoped_ole_initializer.h"
-
-#include "main_window.h"
 
 CComModule _Module;
 
@@ -28,11 +31,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
   UNREFERENCED_PARAMETER(lpCmdLine);
   UNREFERENCED_PARAMETER(nCmdShow);
 
+  CommandLine::Init(0, NULL);
+  if (CommandLine::ForCurrentProcess()->HasSwitch(mgis::switches::kCheckLayout))
+    return mgis::CheckLayout();
+
   // Before any HWND / GetDeviceCaps: opt out of OS bitmap scaling.
   ui::EnableHighDPISupport();
 
   ui::ScopedOleInitializer ole_initializer;
-  CommandLine::Init(0, NULL);
 
   base::EnableTerminationOnHeapCorruption();
   base::AtExitManager exit_manager;
@@ -43,12 +49,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
   MessageLoopForUI main_message_loop;
   int exit_code = 0;
-  if (CommandLine::ForCurrentProcess()->HasSwitch("harness-chrome")) {
-    exit_code = shell::RunChromeHarness();
-  } else if (CommandLine::ForCurrentProcess()->HasSwitch("render-check")) {
-    exit_code = shell::RunRenderCheck();
+  if (CommandLine::ForCurrentProcess()->HasSwitch(
+          mgis::switches::kHarnessChrome)) {
+    exit_code = mgis::RunChromeHarness();
+  } else if (CommandLine::ForCurrentProcess()->HasSwitch(
+                 mgis::switches::kRenderCheck)) {
+    exit_code = mgis::RunRenderCheck();
   } else {
-    shell::ShowMainWindow();
+    mgis::ShowMainWindow();
     MessageLoopForUI::current()->Run();
   }
 

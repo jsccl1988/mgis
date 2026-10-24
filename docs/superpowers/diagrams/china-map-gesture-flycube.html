@@ -6,14 +6,14 @@ All rights reserved.
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>中国底图 · 手势 · FlyCube</title>
+<title>中国底图 · 真数据源 · FlyCube</title>
 <style>
   :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
   body { margin:0; font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
   main { max-width:980px; margin:28px auto; padding:0 16px 40px; }
   h1 { font-size:22px; margin:0 0 8px; }
   p.lead { color:var(--muted); margin:0 0 20px; line-height:1.55; }
-  .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
   .card h2 { margin:0 0 8px; font-size:15px; color:var(--accent); }
   .card ul { margin:0; padding-left:18px; font-size:13px; line-height:1.55; color:var(--muted); }
@@ -21,52 +21,45 @@ All rights reserved.
   .lane { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0; font-size:13px; }
   .box { border:1px solid var(--line); background:#fafbfc; border-radius:6px; padding:6px 10px; }
   .accent { border-color:var(--accent); color:var(--accent); }
+  code { font-size:12px; background:#eef2f6; padding:1px 5px; border-radius:3px; }
 </style>
 </head>
 <body>
 <main>
-  <h1>中国底图 · 手势 · FlyCube GE</h1>
-  <p class="lead">方案 1：Presenter + C ABI 旁路加深。实现序 2D → 手势 → 3D。</p>
+  <h1>中国底图 · 真数据源（混合缓存）</h1>
+  <p class="lead">默认联网真源 + MapLibre / overlay 本地缓存；<code>offline</code> 才回退示意 GeoJSON / debug 色块。</p>
   <div class="grid">
     <section class="card">
-      <h2>刀 1 · 2D</h2>
+      <h2>2D · MapPass</h2>
       <ul>
-        <li>离线中国矢量 style</li>
-        <li>MVIEW_MAP_STYLE 可选 demotiles / URL</li>
-        <li>mvm_set_style_url 进渲染</li>
+        <li>默认 OpenFreeMap Bright（全球 OMT）</li>
+        <li>磁盘 cache：混合优先</li>
+        <li><code>MVIEW_MAP_STYLE=offline</code> → 示意环</li>
+        <li>相机 ~108E/34N z3.8</li>
       </ul>
     </section>
     <section class="card">
-      <h2>刀 2 · 手势</h2>
+      <h2>3D · WorldPass</h2>
       <ul>
-        <li>子窗 WM → InputEvent</li>
-        <li>HandlePointer → Scene + Workspace</li>
-        <li>捏合→wheel；右键→倾斜</li>
-      </ul>
-    </section>
-    <section class="card">
-      <h2>刀 3 · 3D</h2>
-      <ul>
-        <li>CaptureDrapedEllipsoid 进壳</li>
-        <li>中国 DEM / 影像可配置</li>
-        <li>无 Photorealistic</li>
+        <li>椭球 + Terrarium DEM 色</li>
+        <li>+ Esri World Imagery</li>
+        <li><code>MVIEW_FLYCUBE_OFFLINE=1</code> 关网</li>
+        <li>色阶可读；非 mesh 置换</li>
       </ul>
     </section>
   </div>
   <section class="flow">
     <div class="lane">
-      <span class="box accent">子 HWND</span>
-      <span class="box">InputEvent</span>
-      <span class="box">GisContents::HandlePointer</span>
-      <span class="box">SceneImpl 相机</span>
-      <span class="box">ToolSession</span>
-      <span class="box accent">GestureApplied</span>
+      <span class="box accent">OpenFreeMap / TMS</span>
+      <span class="box">首次拉取</span>
+      <span class="box">MapLibre / FlyCube cache</span>
+      <span class="box accent">Vista 子 HWND</span>
     </div>
     <div class="lane">
       <span class="box">SCENE2D</span>
-      <span class="box">mvm_* / MapLibre|mercator</span>
+      <span class="box">mview_maplibre</span>
       <span class="box">SCENE3D</span>
-      <span class="box">mvf_* / draped FlyCube</span>
+      <span class="box">CaptureDrapedEllipsoid</span>
     </div>
   </section>
 </main>

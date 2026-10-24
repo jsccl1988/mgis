@@ -46,8 +46,7 @@ app/mgis · content presenters
 vista/pass/map  (MapPass)     vista/pass/world (WorldPass)
         │                            │
         ▼                            ▼
-third_party/maplibre          render glue → cesium-flycube + FlyCube
-gis/  (future data/style)     render/rhi/  (future shared RHI; P0 world 内聚)
+third_party/maplibre          cesium-flycube + FlyCube（WorldPass 内聚）
 ```
 
 ## 公开 API（P0 最小）

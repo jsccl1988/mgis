@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Mgis 主题双轨</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --line:#d8dee6; --text:#1a2330; --muted:#5a6a7e; --accent:#2563a8; }
+  body { margin:0; font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:920px; margin:32px auto; padding:0 20px 48px; }
+  h1 { font-size:22px; margin:0 0 8px; }
+  p { color:var(--muted); line-height:1.55; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin:16px 0; }
+  .row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .box { border:1px solid var(--line); border-radius:6px; padding:12px; background:#fafbfc; font-size:13px; line-height:1.55; }
+  .box h3 { margin:0 0 8px; font-size:14px; color:var(--accent); }
+  .flow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:13px; }
+  .chip { background:#eef4fb; border:1px solid #c5d4e8; border-radius:4px; padding:4px 10px; }
+  .arrow { color:var(--accent); font-weight:700; }
+  code { font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mgis 主题 · 双轨接线</h1>
+  <p>对标 SmartGIS <code>Theme</code>/<code>ThemeService</code>；默认 light；View → Theme 切换；持久化到 <code>%LocalAppData%\MView\</code>。</p>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 12px">核心分层</h2>
+    <div class="row">
+      <div class="box">
+        <h3>ui/views/theme</h3>
+        Theme 快照 · ThemeService · ThemeObserver<br>
+        light / dark packs
+      </div>
+      <div class="box">
+        <h3>Widget bridge</h3>
+        ShellThemeBridge → ThemeChanged → OnThemeChanged
+      </div>
+      <div class="box">
+        <h3>app/mgis</h3>
+        horizon 自绘 · markup theme(token) · 菜单切换
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 12px">切换流</h2>
+    <div class="flow">
+      <span class="chip">View → Theme</span>
+      <span class="arrow">→</span>
+      <span class="chip">ThemeService::SetTheme</span>
+      <span class="arrow">→</span>
+      <span class="chip">persist</span>
+      <span class="arrow">→</span>
+      <span class="chip">observers</span>
+      <span class="arrow">→</span>
+      <span class="chip">Widget::ThemeChanged</span>
+      <span class="arrow">→</span>
+      <span class="chip">horizon + slot 重刷</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:16px;margin:0 0 12px">双轨</h2>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="box">
+        <h3>C++</h3>
+        <code>Theme::Current().panel_bg</code> 等<br>
+        MapToolbar / StatusBar / Bottom / Tools
+      </div>
+      <div class="box">
+        <h3>markup CSS</h3>
+        <code>background-color: theme(shell_bg)</code><br>
+        inflate 解析；切换时 ApplyChromeThemeColors
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

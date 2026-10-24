@@ -66,8 +66,13 @@ class Scene {
 
   // Product HWND callbacks forward through this into GisContents::OnPointer.
   typedef bool (*InputForwardFn)(void* context, const InputEvent& event);
-  // Out-of-line so FakeScene's vtable gets a real address (MSVC).
-  virtual void SetInputForwarder(InputForwardFn fn, void* context);
+  // Inline default (same as Resize/Present). An out-of-line stub in
+  // fake_scene.cc duplicated when SceneImpl also emitted Scene's vtable
+  // (LNK2005 Scene::SetInputForwarder).
+  virtual void SetInputForwarder(InputForwardFn fn, void* context) {
+    (void)fn;
+    (void)context;
+  }
 };
 
 }  // namespace content

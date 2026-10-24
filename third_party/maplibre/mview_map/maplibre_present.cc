@@ -29,50 +29,61 @@
 
 namespace {
 
-// Offline China-capable style (no network). World land blocks + mainland /
-// Taiwan / Hainan outlines so ~105E/35N zoom 3.5–5 reads as a China map.
+// Offline China style (no network). Ocean background + mainland + Taiwan /
+// Hainan only — no rectangular "world land" quads (those read as a wrong
+// bounding box behind China at country zoom ~108E/34N, z 3.5–4.5).
 const char kStyleJson[] =
     "{"
     "\"version\":8,"
     "\"name\":\"mview-china\","
     "\"sources\":{"
-    "\"land\":{"
-    "\"type\":\"geojson\","
-    "\"data\":{\"type\":\"FeatureCollection\",\"features\":["
-    "{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Polygon\","
-    "\"coordinates\":[[[-130,25],[-130,50],[-60,50],[-60,25],[-130,25]]]}},"
-    "{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Polygon\","
-    "\"coordinates\":[[[-10,35],[-10,60],[30,60],[30,35],[-10,35]]]}},"
-    "{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Polygon\","
-    "\"coordinates\":[[[70,10],[70,55],[145,55],[145,10],[70,10]]]}}"
-    "]}"
-    "},"
     "\"china\":{"
     "\"type\":\"geojson\","
     "\"data\":{\"type\":\"FeatureCollection\",\"features\":["
     "{\"type\":\"Feature\",\"properties\":{\"name\":\"mainland\"},\"geometry\":{\"type\":\"Polygon\","
-    "\"coordinates\":[[[73,39],[80,42],[87,47],[95,49],[105,49],[112,45],"
-    "[119,43],[122,41],[124,40],[123,37],[122,32],[121,28],[120,25],"
-    "[116,23],[110,21],[108,18],[104,22],[98,24],[91,28],[85,28],"
-    "[80,30],[75,35],[73,39]]]}},"
+    "\"coordinates\":[[[73.5,39.0],[76.0,40.5],[80.0,42.0],[85.0,45.0],"
+    "[87.5,47.0],[90.0,48.5],[93.0,49.5],[97.0,50.5],[100.0,51.5],"
+    "[104.0,53.0],[108.0,53.2],[111.5,51.0],[115.0,48.5],[119.0,47.2],"
+    "[122.5,47.5],[126.0,48.8],[130.0,48.5],[134.0,48.0],[133.0,46.0],"
+    "[131.0,45.0],[128.5,43.0],[126.0,41.5],[124.0,40.2],[122.5,39.5],"
+    "[121.8,38.0],[121.5,36.5],[121.8,34.5],[122.0,32.0],[121.5,30.5],"
+    "[121.0,29.0],[120.2,27.5],[119.2,26.0],[118.0,24.5],[116.5,23.5],"
+    "[114.5,22.5],[112.5,21.8],[110.5,21.2],[109.0,21.3],[107.5,21.8],"
+    "[106.0,22.8],[104.5,22.6],[102.5,22.0],[100.5,21.5],[98.8,23.5],"
+    "[97.8,26.5],[97.2,28.2],[94.5,28.8],[91.5,28.2],[88.0,28.0],"
+    "[85.0,28.5],[82.0,29.5],[79.5,31.0],[77.5,33.0],[75.5,35.5],"
+    "[73.5,39.0]]]}}"
+    "]}"
+    "},"
+    "\"islands\":{"
+    "\"type\":\"geojson\","
+    "\"data\":{\"type\":\"FeatureCollection\",\"features\":["
     "{\"type\":\"Feature\",\"properties\":{\"name\":\"taiwan\"},\"geometry\":{\"type\":\"Polygon\","
-    "\"coordinates\":[[[120.0,21.9],[122.0,21.9],[122.0,25.3],[120.0,25.3],[120.0,21.9]]]}},"
+    "\"coordinates\":[[[120.5,21.7],[121.0,21.8],[121.6,22.3],[122.1,23.2],"
+    "[122.2,24.2],[122.0,25.2],[121.5,25.5],[120.9,25.3],[120.4,24.5],"
+    "[120.2,23.4],[120.3,22.4],[120.5,21.7]]]}},"
     "{\"type\":\"Feature\",\"properties\":{\"name\":\"hainan\"},\"geometry\":{\"type\":\"Polygon\","
-    "\"coordinates\":[[[108.6,18.1],[111.1,18.1],[111.1,20.1],[108.6,20.1],[108.6,18.1]]]}}"
+    "\"coordinates\":[[[108.5,18.1],[109.5,18.0],[110.5,18.2],[111.2,18.8],"
+    "[111.3,19.5],[110.8,20.2],[109.8,20.3],[108.9,20.0],[108.4,19.3],"
+    "[108.5,18.1]]]}}"
     "]}"
     "}"
     "},"
     "\"layers\":["
     "{\"id\":\"background\",\"type\":\"background\",\"paint\":{\"background-color\":\"#6fa8c9\"}},"
-    "{\"id\":\"land\",\"type\":\"fill\",\"source\":\"land\",\"paint\":{\"fill-color\":\"#a8c47a\"}},"
     "{\"id\":\"china\",\"type\":\"fill\",\"source\":\"china\",\"paint\":{\"fill-color\":\"#2f7a3a\"}},"
     "{\"id\":\"china-outline\",\"type\":\"line\",\"source\":\"china\","
-    "\"paint\":{\"line-color\":\"#1a4d24\",\"line-width\":1.2}}"
+    "\"paint\":{\"line-color\":\"#143d1c\",\"line-width\":2.0}},"
+    "{\"id\":\"islands\",\"type\":\"fill\",\"source\":\"islands\",\"paint\":{\"fill-color\":\"#e8b923\"}},"
+    "{\"id\":\"islands-outline\",\"type\":\"line\",\"source\":\"islands\","
+    "\"paint\":{\"line-color\":\"#6b4a00\",\"line-width\":2.2}}"
     "]"
     "}";
-
-// Prefer demotiles when MVIEW_MAP_STYLE=demotiles (network). Default is the
-// offline China GeoJSON above so the product shell always has a China map.
+// Network OSM Bright (global OMT via OpenFreeMap). Cached under MapLibre's
+// disk cache after first fetch. MVIEW_MAP_STYLE=offline keeps the GeoJSON
+// mainland ring above. demotiles remains an opt-in world color demo.
+const char kOpenFreeMapBrightUrl[] =
+    "https://tiles.openfreemap.org/styles/bright";
 const char kDemoTilesStyleUrl[] = "https://demotiles.maplibre.org/style.json";
 
 std::string ReadFileUtf8(const char* path) {
@@ -97,29 +108,6 @@ std::string ReadFileUtf8(const char* path) {
   return out;
 }
 
-bool ApplyStyle(Session* session, const char* spec) {
-  if (!session || !session->map)
-    return false;
-  if (!spec || !spec[0]) {
-    session->map->getStyle().loadJSON(kStyleJson);
-    return true;
-  }
-  if (_stricmp(spec, "demotiles") == 0) {
-    session->map->getStyle().loadURL(kDemoTilesStyleUrl);
-    return true;
-  }
-  if (_strnicmp(spec, "http://", 7) == 0 ||
-      _strnicmp(spec, "https://", 8) == 0) {
-    session->map->getStyle().loadURL(spec);
-    return true;
-  }
-  const std::string json = ReadFileUtf8(spec);
-  if (json.empty())
-    return false;
-  session->map->getStyle().loadJSON(json);
-  return true;
-}
-
 class Observer : public mln::MapObserver {};
 
 struct Session {
@@ -135,6 +123,38 @@ struct Session {
   Session(const Session&) = delete;
   Session& operator=(const Session&) = delete;
 };
+
+bool ApplyStyle(Session* session, const char* spec) {
+  if (!session || !session->map)
+    return false;
+  // Empty → OpenFreeMap Bright (real OSM). Explicit offline → GeoJSON ring.
+  if (!spec || !spec[0]) {
+    session->map->getStyle().loadURL(kOpenFreeMapBrightUrl);
+    return true;
+  }
+  if (_stricmp(spec, "offline") == 0) {
+    session->map->getStyle().loadJSON(kStyleJson);
+    return true;
+  }
+  if (_stricmp(spec, "demotiles") == 0) {
+    session->map->getStyle().loadURL(kDemoTilesStyleUrl);
+    return true;
+  }
+  if (_stricmp(spec, "openfreemap") == 0 || _stricmp(spec, "bright") == 0) {
+    session->map->getStyle().loadURL(kOpenFreeMapBrightUrl);
+    return true;
+  }
+  if (_strnicmp(spec, "http://", 7) == 0 ||
+      _strnicmp(spec, "https://", 8) == 0) {
+    session->map->getStyle().loadURL(spec);
+    return true;
+  }
+  const std::string json = ReadFileUtf8(spec);
+  if (json.empty())
+    return false;
+  session->map->getStyle().loadJSON(json);
+  return true;
+}
 
 unsigned HashGrid(const uint8_t* data,
                   int width,
@@ -283,14 +303,16 @@ extern "C" __declspec(dllexport) int mln_session_open(void** session,
 
     held->map.reset(new mln::Map(*held->frontend, *held->observer, options,
                                  resources, client));
-    // Default: offline China. Opt-in via MVIEW_MAP_STYLE=demotiles|url|path.
+    // Default: OpenFreeMap Bright. Opt-in offline / demotiles / url / path.
     char style_env[MAX_PATH] = {};
     const DWORD env_n =
         GetEnvironmentVariableA("MVIEW_MAP_STYLE", style_env, sizeof(style_env));
     const char* spec =
         (env_n > 0 && env_n < sizeof(style_env)) ? style_env : "";
-    if (!ApplyStyle(held.get(), spec))
-      ApplyStyle(held.get(), "");
+    if (!ApplyStyle(held.get(), spec)) {
+      // Network style failed — keep a China-shaped offline map.
+      ApplyStyle(held.get(), "offline");
+    }
     *session = held.release();
     return 1;
   } catch (const std::exception&) {

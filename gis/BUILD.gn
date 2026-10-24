@@ -1,8 +1,0 @@
-# Copyright (c) 2026 The Mogu Authors.
-# All rights reserved.
-
-# GIS data/domain tree (align smartgis //src/gis). Peer of //content.
-# Map present lives in //vista/pass/map; data/style modules land here later.
-
-group("gis") {
-}

@@ -12,7 +12,7 @@ All rights reserved.
 
 Looking up code in this repo **must** use **codebase-memory-mcp**. Do not start with workspace-wide Grep/Glob while CBM is connected.
 
-**Windows Cursor:** project **`mview`**, `root_path` `C:/Dev/src/gis/mview`. Match `list_projects` before querying.
+**Windows Cursor:** project **`mgis`**, `root_path` `C:/Dev/src/gis/mgis`. Match `list_projects` before querying.
 
 WSL CBM is a **separate store**. Do not reuse the WSL project name `smartgis` (that store’s `smartgis` is an old vs08 tree).
 
@@ -23,7 +23,7 @@ WSL CBM is a **separate store**. Do not reuse the WSL project name `smartgis` (t
 Grep pattern="Widget"   # no path
 
 # GOOD
-list_projects → search_graph(project="mview", name_pattern=".*Widget.*")
+list_projects → search_graph(project="mgis", name_pattern=".*Widget.*")
              → get_code_snippet / trace_path
 ```
 
@@ -36,4 +36,4 @@ Grep/Glob only if CBM is down, the user named an exact path, or the search is al
 
 Fallthrough: CBM → codegraph (if present) → graphify (only if `graph.json` exists) → Grep with `path`.
 
-Do not auto-reindex after edits. If `mview` is not in `list_projects`, say so and fall through; do not query project `smartgis` for this tree.
+Do not auto-reindex after edits. If `mgis` is not in `list_projects`, say so and fall through; do not query project `smartgis` for this tree.

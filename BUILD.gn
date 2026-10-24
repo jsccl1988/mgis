@@ -30,9 +30,14 @@ group("content_lib") {
   deps = [ "//content:content" ]
 }
 
-# Product shell. Not part of //:default. ninja target: mview_shell.
+# Compat aliases for former shell / launcher group names.
+# Product PE is //app/mgis:mgis (mgis.exe). ninja / build.bat: mgis
 group("shell") {
-  deps = [ "//app/shell:mview_shell" ]
+  deps = [ "//app/mgis:mgis" ]
+}
+
+group("launcher") {
+  deps = [ "//app/mgis:mgis" ]
 }
 
 # P2/P4 pipe gate. Not part of //:default. ninja target: viewport_gate.
@@ -47,17 +52,12 @@ group("plugin_tests") {
   deps = [ "//plugin:plugin_sample_test" ]
 }
 
-# P7 install launcher. Not part of //:default.
-group("launcher") {
-  deps = [ "//launcher:mview_launcher" ]
-}
-
 # P6 and P7 verifiers together. Not part of //:default.
 group("p6_p7") {
   testonly = true
   deps = [
     "//plugin:plugin_sample_test",
-    "//launcher:mview_launcher",
+    "//app/mgis:mgis",
   ]
 }
 

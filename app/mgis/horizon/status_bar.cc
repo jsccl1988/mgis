@@ -6,10 +6,10 @@
 #include <algorithm>
 
 #include "base/utf_string_conversions.h"
-#include "third_party/skia/include/core/SkColor.h"
 #include "ui/base/win/dpi.h"
 #include "ui/gfx/canvas.h"
 #include "ui/views/controls/label.h"
+#include "ui/views/theme/theme.h"
 
 namespace mgis {
 namespace {
@@ -22,7 +22,7 @@ int ScaleDip(int dip) {
 views::Label* MakeField(const string16& text) {
   views::Label* label = new views::Label(text);
   label->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-  label->SetEnabledColor(SkColorSetRGB(0x1a, 0x23, 0x30));
+  label->SetEnabledColor(views::Theme::Current().text);
   label->SetAutoColorReadabilityEnabled(false);
   return label;
 }
@@ -40,6 +40,23 @@ StatusBar::StatusBar()
   AddChildView(scale_);
   AddChildView(crs_);
   AddChildView(coord_);
+}
+
+void StatusBar::ApplyThemeColors() {
+  const SkColor ink = views::Theme::Current().text;
+  if (message_)
+    message_->SetEnabledColor(ink);
+  if (scale_)
+    scale_->SetEnabledColor(ink);
+  if (crs_)
+    crs_->SetEnabledColor(ink);
+  if (coord_)
+    coord_->SetEnabledColor(ink);
+}
+
+void StatusBar::OnThemeChanged() {
+  ApplyThemeColors();
+  SchedulePaint();
 }
 
 StatusBar::~StatusBar() {}
@@ -65,20 +82,39 @@ void StatusBar::SetCoordText(const std::string& utf8) {
 }
 
 void StatusBar::OnPaint(gfx::Canvas* canvas) {
-  canvas->FillRect(GetLocalBounds(), SkColorSetRGB(0xee, 0xf2, 0xf6));
+  canvas->FillRect(GetLocalBounds(), views::Theme::Current().caption_bg);
   View::OnPaint(canvas);
 }
 
 void StatusBar::Layout() {
   const int pad = ScaleDip(6);
   const int h = std::max(0, height() - 2);
-  const int w = std::max(0, width() - 2 * pad);
-  // Flexible message, then fixed-ish fields on the right (DIP widths).
-  const int scale_w = ScaleDip(120);
-  const int crs_w = ScaleDip(100);
-  const int coord_w = ScaleDip(180);
-  const int msg_w =
-      std::max(ScaleDip(80), w - scale_w - crs_w - coord_w - 3 * pad);
+  const int inner = std::max(0, width() - 2 * pad);
+  // Prefer a readable CRS; shrink coord then scale when the bar is narrow.
+  int scale_w = ScaleDip(100);
+  int crs_w = ScaleDip(120);
+  int coord_w = ScaleDip(160);
+  int reserved = scale_w + crs_w + coord_w + 3 * pad;
+  if (reserved > inner) {
+    int overflow = reserved - inner;
+    const int cut_coord =
+        std::min(overflow, std::max(0, coord_w - ScaleDip(72)));
+    coord_w -= cut_coord;
+    overflow -= cut_coord;
+    if (overflow > 0) {
+      const int cut_scale =
+          std::min(overflow, std::max(0, scale_w - ScaleDip(56)));
+      scale_w -= cut_scale;
+      overflow -= cut_scale;
+    }
+    if (overflow > 0) {
+      const int cut_crs =
+          std::min(overflow, std::max(0, crs_w - ScaleDip(88)));
+      crs_w -= cut_crs;
+    }
+    reserved = scale_w + crs_w + coord_w + 3 * pad;
+  }
+  const int msg_w = std::max(ScaleDip(64), inner - reserved);
   int x = pad;
   if (message_) {
     message_->SetBounds(x, 1, msg_w, h);

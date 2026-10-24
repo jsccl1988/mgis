@@ -6,11 +6,11 @@
 #include <algorithm>
 
 #include "base/utf_string_conversions.h"
-#include "third_party/skia/include/core/SkColor.h"
 #include "ui/base/win/dpi.h"
 #include "ui/gfx/canvas.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/tabbed_pane/tabbed_pane.h"
+#include "ui/views/theme/theme.h"
 
 namespace mgis {
 namespace {
@@ -30,7 +30,7 @@ class BottomPanel::LogPage : public views::View {
     for (int i = 0; i < kLogLines; ++i) {
       lines_[i] = new views::Label();
       lines_[i]->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-      lines_[i]->SetEnabledColor(SkColorSetRGB(0x1a, 0x23, 0x30));
+      lines_[i]->SetEnabledColor(views::Theme::Current().text);
       lines_[i]->SetAutoColorReadabilityEnabled(false);
       AddChildView(lines_[i]);
     }
@@ -48,8 +48,17 @@ class BottomPanel::LogPage : public views::View {
     }
   }
 
+  virtual void OnThemeChanged() OVERRIDE {
+    const SkColor ink = views::Theme::Current().text;
+    for (int i = 0; i < kLogLines; ++i) {
+      if (lines_[i])
+        lines_[i]->SetEnabledColor(ink);
+    }
+    SchedulePaint();
+  }
+
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE {
-    canvas->FillRect(GetLocalBounds(), SkColorSetRGB(0xfa, 0xfb, 0xfc));
+    canvas->FillRect(GetLocalBounds(), views::Theme::Current().panel_bg);
     View::OnPaint(canvas);
   }
 

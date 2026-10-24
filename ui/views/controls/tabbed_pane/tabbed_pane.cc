@@ -327,7 +327,9 @@ void TabbedPane::Layout() {
 }
 
 void TabbedPane::ViewHierarchyChanged(bool is_add, View* parent, View* child) {
-  if (is_add) {
+  // Only when this pane itself is attached — descendant notifications must
+  // not re-register (and must not run before FocusManager exists).
+  if (is_add && child == this) {
     // Support navigating tabs by Ctrl+Tab and Ctrl+Shift+Tab.
     AddAccelerator(ui::Accelerator(ui::VKEY_TAB,
                                    ui::EF_CONTROL_DOWN | ui::EF_SHIFT_DOWN));

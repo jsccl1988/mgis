@@ -27,7 +27,7 @@ Active if another transcript changed in the last **~10 minutes** and the turn is
 
 Do not run `auto-build-fix`, `auto-bug-fix`, or `auto-commit-push`.
 
-CBM target: project `mview`, root `C:/Dev/src/gis/mview`.
+CBM target: project `mgis`, root `C:/Dev/src/gis/mgis`.
 
 ## Arming the 1h loop
 

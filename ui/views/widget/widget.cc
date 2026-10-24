@@ -19,6 +19,7 @@
 #include "ui/views/focus/widget_focus_manager.h"
 #include "ui/views/ime/input_method.h"
 #include "ui/views/views_delegate.h"
+#include "ui/views/theme/theme_service.h"
 #include "ui/views/widget/default_theme_provider.h"
 #include "ui/views/widget/native_widget_private.h"
 #include "ui/views/widget/root_view.h"
@@ -36,10 +37,26 @@ namespace views {
 
 namespace {
 
-// If |view| has a layer the layer is added to |layers|. Else this recurses
-// through the children. This is used to build a list of the layers created by
-// views that are direct children of the Widgets layer.
+// Forwards ThemeService pack changes into the Chromium ThemeChanged pipeline.
+class ShellThemeBridge : public ThemeObserver {
+ public:
+  explicit ShellThemeBridge(Widget* widget) : widget_(widget) {
+    ThemeService::Get().AddObserver(this);
+  }
+  virtual ~ShellThemeBridge() {
+    ThemeService::Get().RemoveObserver(this);
+  }
 
+  virtual void OnThemeChanged() OVERRIDE {
+    if (widget_)
+      widget_->ThemeChanged();
+  }
+
+ private:
+  Widget* widget_;
+
+  DISALLOW_COPY_AND_ASSIGN(ShellThemeBridge);
+};
 
 // Create a native widget implementation.
 // First, use the supplied one if non-NULL.
@@ -378,6 +395,7 @@ void Widget::Init(const InitParams& in_params) {
     SetContentsView(params.delegate->GetContentsView());
     SetInitialBoundsForFramelessWindow(params.bounds);
   }
+  shell_theme_bridge_.reset(new ShellThemeBridge(this));
   native_widget_initialized_ = true;
 }
 

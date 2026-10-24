@@ -54,6 +54,7 @@ class InputMethod;
 class NativeWidget;
 class NonClientFrameView;
 class ScopedEvent;
+class ThemeObserver;
 class View;
 class WidgetDelegate;
 class WidgetObserver;
@@ -743,6 +744,9 @@ class VIEWS_EXPORT Widget : public internal::NativeWidgetDelegate,
 
   // A theme provider to use when no other theme provider is specified.
   scoped_ptr<DefaultThemeProvider> default_theme_provider_;
+
+  // Bridges ThemeService packs to Widget::ThemeChanged() / view OnThemeChanged.
+  scoped_ptr<ThemeObserver> shell_theme_bridge_;
 
   // Valid for the lifetime of RunShellDrag(), indicates the view the drag
   // started from.

@@ -70,6 +70,7 @@ class WorkbenchContents : public views::WidgetDelegateView,
   virtual views::View* GetContentsView() OVERRIDE;
   virtual gfx::Size GetPreferredSize() OVERRIDE;
   virtual void Layout() OVERRIDE;
+  virtual void OnThemeChanged() OVERRIDE;
   virtual void WindowClosing() OVERRIDE;
 
   // TabbedPaneListener (center view tabs):
@@ -99,6 +100,7 @@ class WorkbenchContents : public views::WidgetDelegateView,
   bool InflateChromeFromMarkup();
   void MountSlot(std::string_view slot_id, views::View* child);
   void LayoutSceneSurfaces();
+  void ApplyChromeThemeColors();
 
   ViewId active_;
   bool syncing_;

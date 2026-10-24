@@ -53,9 +53,9 @@ bool MapLibrePresenter::Create(void* parent_hwnd,
     map_ = NULL;
     return false;
   }
-  // China overview: ~105E / 35N; zoom ~3.8 keeps water around the mainland
-  // so the offline China fill is not a full-viewport green slab.
-  map_->SetCamera(105.0, 35.0, 3.8, 0.0, 0.0);
+  // China overview: ~108E / 34N; zoom ~3.8 frames mainland + Taiwan/Hainan
+  // with surrounding water (offline GeoJSON style in mview_map).
+  map_->SetCamera(108.0, 34.0, 3.8, 0.0, 0.0);
   Present();
   if (!map_->hwnd()) {
     delete map_;

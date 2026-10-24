@@ -1,11 +1,12 @@
 // Copyright (c) 2026 The Mogu Authors.
 // All rights reserved.
 
-// Install-layout launcher. Paths are relative to this executable:
-// Engine/, UI/mview_shell.exe, UI/vista_map.dll, UI/vista_world.dll,
-// Bin/mview_volume.dll.
-// It does not start Unreal. --check-layout builds a temp tree, checks those
+// Install-layout gate for the single product PE. Paths are relative to the
+// install root: mgis.exe, Engine/, UI/vista_map.dll, UI/vista_world.dll,
+// Bin/mview_volume.dll. --check-layout builds a temp tree, checks those
 // paths, and writes out/harness/browser.install/mark.json.
+
+#include "app/mgis/layout/check_layout.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -158,24 +159,10 @@ bool ReadFileBytes(const std::wstring& path, std::string* out) {
   return ok == TRUE && read == out->size();
 }
 
-bool HasCheckLayoutFlag() {
-  const wchar_t* cmd = GetCommandLineW();
-  const wchar_t* flag = L"--check-layout";
-  const size_t n = wcslen(flag);
-  for (const wchar_t* p = cmd; *p != L'\0'; ++p) {
-    if (wcsncmp(p, flag, n) == 0) {
-      const wchar_t next = p[n];
-      if (next == L'\0' || next == L' ' || next == L'\t' || next == L'"')
-        return true;
-    }
-  }
-  return false;
-}
-
-// Relative install paths the product expects beside the launcher.
+// Relative install paths beside the product PE.
 bool LayoutComplete(const std::wstring& root) {
   return DirExists(root + L"\\Engine") &&
-         FileExists(root + L"\\UI\\mview_shell.exe") &&
+         FileExists(root + L"\\mgis.exe") &&
          FileExists(root + L"\\UI\\vista_map.dll") &&
          FileExists(root + L"\\UI\\vista_world.dll") &&
          FileExists(root + L"\\Bin\\mview_volume.dll");
@@ -186,10 +173,8 @@ std::string LayoutReport(const std::wstring& root) {
   report += "root=" + WideToUtf8(root) + "\n";
   report += std::string("Engine=") +
             (DirExists(root + L"\\Engine") ? "present" : "missing") + "\n";
-  report += std::string("UI/mview_shell.exe=") +
-            (FileExists(root + L"\\UI\\mview_shell.exe") ? "present"
-                                                         : "missing") +
-            "\n";
+  report += std::string("mgis.exe=") +
+            (FileExists(root + L"\\mgis.exe") ? "present" : "missing") + "\n";
   report += std::string("UI/vista_map.dll=") +
             (FileExists(root + L"\\UI\\vista_map.dll") ? "present" : "missing") +
             "\n";
@@ -269,7 +254,7 @@ bool CreateTempInstall(std::wstring* root) {
     return false;
   if (!TouchFile(*root + L"\\Engine\\placeholder.txt"))
     return false;
-  if (!TouchFile(*root + L"\\UI\\mview_shell.exe"))
+  if (!TouchFile(*root + L"\\mgis.exe"))
     return false;
   if (!TouchFile(*root + L"\\UI\\vista_map.dll"))
     return false;
@@ -286,36 +271,9 @@ bool CreateTempInstall(std::wstring* root) {
   return WriteFileBytes(*root + L"\\UI\\p1_marks.txt", fixture);
 }
 
-int RunShell(const std::wstring& shell) {
-  STARTUPINFOW si;
-  ZeroMemory(&si, sizeof(si));
-  si.cb = sizeof(si);
-  PROCESS_INFORMATION pi;
-  ZeroMemory(&pi, sizeof(pi));
-  if (!CreateProcessW(shell.c_str(), NULL, NULL, NULL, FALSE, 0, NULL, NULL,
-                      &si, &pi)) {
-    return 1;
-  }
-  WaitForSingleObject(pi.hProcess, INFINITE);
-  DWORD code = 1;
-  GetExitCodeProcess(pi.hProcess, &code);
-  CloseHandle(pi.hThread);
-  CloseHandle(pi.hProcess);
-  return static_cast<int>(code);
-}
+}  // namespace
 
-std::wstring ShellBesideOrDebug(const std::wstring& exe_dir,
-                                const std::wstring& repo) {
-  const std::wstring beside = exe_dir + L"\\mview_shell.exe";
-  if (FileExists(beside))
-    return beside;
-  if (!repo.empty()) {
-    const std::wstring debug = repo + L"\\out\\Debug\\mview_shell.exe";
-    if (FileExists(debug))
-      return debug;
-  }
-  return std::wstring();
-}
+namespace mgis {
 
 int CheckLayout() {
   std::wstring temp_root;
@@ -373,19 +331,4 @@ int CheckLayout() {
   return 0;
 }
 
-}  // namespace
-
-int main() {
-  const std::wstring exe_dir = ParentDir(ModulePath());
-  if (HasCheckLayoutFlag())
-    return CheckLayout();
-
-  const std::wstring shell = ShellBesideOrDebug(exe_dir, RepoRoot());
-  if (!shell.empty())
-    return RunShell(shell);
-
-  const std::string report = LayoutReport(exe_dir);
-  WriteFileBytes(exe_dir + L"\\layout-report.txt", report);
-  fputs(report.c_str(), stdout);
-  return 0;
-}
+}  // namespace mgis

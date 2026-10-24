@@ -5,6 +5,7 @@
 
 #include <GL/gl.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -19,8 +20,8 @@ LRESULT CALLBACK FlyCubeHostProc(HWND hwnd,
 
 namespace {
 
-const int kStacks = 18;
-const int kSlices = 36;
+const int kStacks = 36;
+const int kSlices = 72;
 const wchar_t kClassName[] = L"MViewFlyCubeHost";
 
 struct Vert {
@@ -33,22 +34,45 @@ std::vector<Vert> g_verts;
 std::vector<unsigned short> g_indices;
 bool g_mesh = false;
 
-bool Land(float lon_deg, float lat_deg) {
-  if (lat_deg > 72.0f || lat_deg < -56.0f)
-    return false;
-  if (lon_deg > -130.0f && lon_deg < -60.0f && lat_deg > 25.0f && lat_deg < 50.0f)
+const float kChinaLon[] = {
+    73.5f, 76.0f, 80.0f, 85.0f, 87.5f, 90.0f, 93.0f, 97.0f, 100.0f, 104.0f,
+    108.0f, 111.5f, 115.0f, 119.0f, 122.5f, 126.0f, 130.0f, 134.0f, 133.0f,
+    131.0f, 128.5f, 126.0f, 124.0f, 122.5f, 121.8f, 121.5f, 121.8f, 122.0f,
+    121.5f, 121.0f, 120.2f, 119.2f, 118.0f, 116.5f, 114.5f, 112.5f, 110.5f,
+    109.0f, 107.5f, 106.0f, 104.5f, 102.5f, 100.5f, 98.8f, 97.8f, 97.2f,
+    94.5f, 91.5f, 88.0f, 85.0f, 82.0f, 79.5f, 77.5f, 75.5f, 73.5f};
+const float kChinaLat[] = {
+    39.0f, 40.5f, 42.0f, 45.0f, 47.0f, 48.5f, 49.5f, 50.5f, 51.5f, 53.0f,
+    53.2f, 51.0f, 48.5f, 47.2f, 47.5f, 48.8f, 48.5f, 48.0f, 46.0f, 45.0f,
+    43.0f, 41.5f, 40.2f, 39.5f, 38.0f, 36.5f, 34.5f, 32.0f, 30.5f, 29.0f,
+    27.5f, 26.0f, 24.5f, 23.5f, 22.5f, 21.8f, 21.2f, 21.3f, 21.8f, 22.8f,
+    22.6f, 22.0f, 21.5f, 23.5f, 26.5f, 28.2f, 28.8f, 28.2f, 28.0f, 28.5f,
+    29.5f, 31.0f, 33.0f, 35.5f, 39.0f};
+const int kChinaN = static_cast<int>(sizeof(kChinaLon) / sizeof(kChinaLon[0]));
+
+bool PointInChina(float lon_deg, float lat_deg) {
+  bool inside = false;
+  for (int i = 0, j = kChinaN - 1; i < kChinaN; j = i++) {
+    const float yi = kChinaLat[i];
+    const float yj = kChinaLat[j];
+    const float xi = kChinaLon[i];
+    const float xj = kChinaLon[j];
+    const bool hit = ((yi > lat_deg) != (yj > lat_deg)) &&
+                     (lon_deg < (xj - xi) * (lat_deg - yi) / (yj - yi + 1e-6f) + xi);
+    if (hit)
+      inside = !inside;
+  }
+  if (lon_deg > 120.3f && lon_deg < 122.3f && lat_deg > 21.6f && lat_deg < 25.5f)
     return true;
-  if (lon_deg > -10.0f && lon_deg < 30.0f && lat_deg > 35.0f && lat_deg < 60.0f)
+  if (lon_deg > 108.4f && lon_deg < 111.3f && lat_deg > 18.0f && lat_deg < 20.3f)
     return true;
-  if (lon_deg > 70.0f && lon_deg < 140.0f && lat_deg > 10.0f && lat_deg < 50.0f)
-    return true;
-  if (lon_deg > -20.0f && lon_deg < 50.0f && lat_deg > -35.0f && lat_deg < 35.0f)
-    return true;
-  if (lon_deg > 110.0f && lon_deg < 155.0f && lat_deg > -45.0f && lat_deg < -10.0f)
-    return true;
-  if (lon_deg > -80.0f && lon_deg < -35.0f && lat_deg > -55.0f && lat_deg < 12.0f)
-    return true;
-  return false;
+  return inside;
+}
+
+float ChinaDemShade(float lon_deg, float lat_deg) {
+  const float west = (std::max)(0.0f, (std::min)(1.0f, (100.0f - lon_deg) / 25.0f));
+  const float north = (std::max)(0.0f, (std::min)(1.0f, (lat_deg - 25.0f) / 25.0f));
+  return 0.25f + 0.55f * west + 0.20f * north;
 }
 
 void EnsureMesh() {
@@ -71,20 +95,15 @@ void EnsureMesh() {
       vert.z = cos_lat * std::sin(lon);
       vert.u = u;
       vert.v = v;
-      const bool ice = lat_deg > 72.0f || lat_deg < -62.0f;
-      const bool land = Land(lon_deg, lat_deg);
-      if (ice) {
-        vert.r = 230;
-        vert.g = 236;
-        vert.b = 242;
-      } else if (land) {
-        vert.r = 126;
-        vert.g = 168;
-        vert.b = 78;
+      if (PointInChina(lon_deg, lat_deg)) {
+        const float h = ChinaDemShade(lon_deg, lat_deg);
+        vert.r = static_cast<unsigned char>(50 + 90 * h);
+        vert.g = static_cast<unsigned char>(140 - 60 * h);
+        vert.b = static_cast<unsigned char>(55 + 15 * h);
       } else {
-        vert.r = 48;
-        vert.g = 110;
-        vert.b = 168;
+        vert.r = 40;
+        vert.g = 90;
+        vert.b = 150;
       }
       vert.a = 255;
     }
@@ -308,7 +327,11 @@ bool FlyCubeHost::TryWorldCreate(HWND parent, int width, int height) {
     world_ = NULL;
     return false;
   }
-  world_->SetCamera(lon_, lat_, height_m_);
+  // WorldPass::Create already frames a China DEM overview (draped ENU orbit or
+  // sphere fallback). Do not stomp with the host's full-Earth height (~1.2e7 m)
+  // — that pulls the camera so far the local patch clears to navy only.
+  world_->GetCamera(&lon_, &lat_, &height_m_);
+  SyncOrbitFromCamera(lon_, lat_, height_m_, &yaw_, &pitch_, &distance_);
   dx12_ = true;
   backend_ = "flycube-dx12";
   width_ = width;

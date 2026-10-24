@@ -29,8 +29,11 @@ class StatusBar : public views::View {
 
   virtual void Layout() OVERRIDE;
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE;
+  virtual void OnThemeChanged() OVERRIDE;
 
  private:
+  void ApplyThemeColors();
+
   views::Label* message_;
   views::Label* scale_;
   views::Label* crs_;

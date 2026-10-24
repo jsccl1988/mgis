@@ -7,7 +7,7 @@ All rights reserved.
 
 **Status:** draft
 **Date:** 2026-10-19
-**Updated:** 2026-10-24 — § Vista 渲染引擎层（取代 C ABI；FlyCube 三维 SoT）；§ 中国底图/手势/FlyCube GE；§Content DebugAgent/MCP。2026-10-23 — § Mgis chrome；§ Scene FlyCube。
+**Updated:** 2026-10-24 — § 产品入口合并（`launcher` + `app/shell` → `app/mgis`，单 PE `mgis.exe`）；删除顶层占位 `gis/` / `render/` / `ipc/`；§ Vista 渲染引擎层；§ 中国底图/手势/FlyCube GE；§Content DebugAgent/MCP。2026-10-23 — § Mgis chrome；§ Scene FlyCube。
 **Diagram:** [`../diagrams/third-party-pins.html`](../diagrams/third-party-pins.html) · [`../diagrams/mgis-workbench-chrome.html`](../diagrams/mgis-workbench-chrome.html) · [`../diagrams/content-wiring.html`](../diagrams/content-wiring.html) · [`../diagrams/scene-presenter-registry.html`](../diagrams/scene-presenter-registry.html) · [`../diagrams/plugin-wiring.html`](../diagrams/plugin-wiring.html) · [`../diagrams/cesium-flycube-align.html`](../diagrams/cesium-flycube-align.html) · [`../diagrams/china-map-gesture-flycube.html`](../diagrams/china-map-gesture-flycube.html) · [`../diagrams/vista-render-engine.html`](../diagrams/vista-render-engine.html)
 **Plan:** [`../plans/2026-10-24-china-map-gesture-flycube.md`](../plans/2026-10-24-china-map-gesture-flycube.md)
 **Scope:** 独立桌面 GIS 的进程、窗口、地理底座、体渲染与界面边界。本文是方案，不包含实现。
@@ -19,8 +19,8 @@ All rights reserved.
 1. 用户能看到的界面全部由本仓库的 aura/views 创建：一个二维窗口、两个三维窗口、图层树、实体树，以及时间轴和菜单。
 2. 两个三维窗口显示 DEM、3D Tiles、风场，以及与场景深度正确遮挡的标量体。二维窗口用 MapLibre Native 画底图和业务矢量。
 3. 地理底座使用 Cesium Native，通过 Cesium for Unreal 进入工程，不从零写 Cesium Native 胶水。
-4. 窗口框、停靠、树和菜单都在 `mview_shell.exe` 里。UE 进程不出现自己的标题栏。
-5. 界面进程崩溃或二维地图崩溃时，三维渲染进程继续出帧。
+4. 窗口框、停靠、树和菜单都在 `mgis.exe` 里。UE 进程不出现自己的标题栏。
+5. 界面进程崩溃或二维地图崩溃时，三维渲染进程继续出帧（Job Object / 壳重启为后续；本刀为单 PE）。
 6. 进程之间只传递轻量 JSON。体纹理、风场粒子和大块网格不进管道。
 7. 壳只包含 `content/public`。文档、目录、管道、glang 和插件宿主在 `content/browser`。插件只走 `content::PluginHost`。
 8. 场景脚本、回归和代理迭代都走 glang 套件。具名 `eval_*` 是唯一的能力入口。
@@ -46,7 +46,7 @@ All rights reserved.
 
 | # | 决定 |
 | --- | --- |
-| 1 | 产品进程两个：UE 打包进程、`mview_shell.exe`。另有一个无界面的 Win32 启动器。 |
+| 1 | 产品进程：UE 打包进程 + `mgis.exe`（单 PE 界面；原独立启动器已并入）。Job/壳重启为后续。 |
 | 2 | 产品窗口全部是 shell 进程里的 `views::Widget`（`aura::RootWindow` + `RootWindowHostWin`）：主窗口、二维窗口、`view0`、`view1`。UE 不创建任务栏上的顶层窗口。 |
 | 3 | 引擎钉扎 Unreal Engine 5.6，插件钉扎 Cesium for Unreal 2.30 的 `CesiumForUnreal-56` 包。 |
 | 4 | 一个 `UWorld`、一个 `ACesiumGeoreference`。两台相机每帧写入 `ACesiumCameraManager::AdditionalCameras`。不用已废弃的 `AddCamera`。 |
@@ -79,8 +79,7 @@ All rights reserved.
 ## 进程与窗口
 
 ```
-MView.exe                     Win32 启动器
-├─ mview_shell.exe            唯一的产品界面进程
+mgis.exe                      唯一的产品界面进程（含 layout 门禁开关）
 │    主 Widget                菜单、图层树、实体树、时间轴
 │    二维 Widget              NativeViewHost → MapLibre 子 HWND
 │    view0 / view1 Widget     NativeViewHost → UE 子 HWND
@@ -558,11 +557,25 @@ glang 的 `activate_tool`、`pointer`、`command` 往指定 `view_id` 注入同�
 
 ## Mgis 工作台壳（`app/mgis`）
 
-**Status:** landed (SmartGIS chrome + markup Yoga zones) · **Updated:** 2026-10-23  
-**Diagram:** [`../diagrams/mgis-workbench-chrome.html`](../diagrams/mgis-workbench-chrome.html) · [`../diagrams/views-declarative-markup.html`](../diagrams/views-declarative-markup.html) · [`../diagrams/scene-presenter-registry.html`](../diagrams/scene-presenter-registry.html)  
-**Plan:** [`../plans/2026-10-23-mgis-smartgis-chrome-align.md`](../plans/2026-10-23-mgis-smartgis-chrome-align.md) · markup: [`../plans/2026-10-20-views-declarative-markup.md`](../plans/2026-10-20-views-declarative-markup.md)
+**Status:** landed (SmartGIS chrome + markup Yoga zones) · **Updated:** 2026-10-24  
+**Diagram:** [`../diagrams/mgis-workbench-chrome.html`](../diagrams/mgis-workbench-chrome.html) · [`../diagrams/mgis-theme.html`](../diagrams/mgis-theme.html) · [`../diagrams/views-declarative-markup.html`](../diagrams/views-declarative-markup.html) · [`../diagrams/scene-presenter-registry.html`](../diagrams/scene-presenter-registry.html)  
+**Plan:** [`../plans/2026-10-23-mgis-smartgis-chrome-align.md`](../plans/2026-10-23-mgis-smartgis-chrome-align.md) · theme: [`../plans/2026-10-24-mgis-theme-chrome.md`](../plans/2026-10-24-mgis-theme-chrome.md) · markup: [`../plans/2026-10-20-views-declarative-markup.md`](../plans/2026-10-20-views-declarative-markup.md)
 
 对照 smartgis（`src/ui/gis` + `src/app/views`）**布局与字段**，本仓在 `app/mgis` 重做面板，**不**移植 smartgis View 实现。产品主路径是**单主窗 IDE 布局**。
+
+### 主题与 chrome 视觉（1+2）
+
+**Status:** landed · **Updated:** 2026-10-24
+
+全量对标 SmartGIS 的长期路线拆为：①主题基座 ②chrome 视觉 ③Catalog ④Ambox 工具 ⑤右栏 ⑥底栏。本刀落地 **①+②**。
+
+| 决策 | 选择 |
+| --- | --- |
+| 默认包 | **light**；可切 dark；持久化 `%LocalAppData%\MView\ui_theme_id.txt` |
+| 内核位置 | `ui/views/theme/`（`Theme` / `ThemeService` / `ThemeObserver`），API 形对齐 SmartGIS，命名跟 Chromium（`PascalCase`） |
+| 双轨 | C++ `Theme::Current()` 自绘 + markup `theme(token)`（`CssParser`）；切换时 `ThemeService` → Widget bridge → `ThemeChanged` / `OnThemeChanged`，`WorkbenchContents` 重刷 slot 背景 |
+| 菜单 | View → Theme → Light / Dark（RADIO） |
+| 非目标（本刀） | Catalog/Ambox/Inspect 业务实质；链 smartgis DLL；改 Chromium `ThemeProvider` 语义 |
 
 **Chrome 分区**由 `workbench.ui.xml` + Yoga 声明式布局驱动（DIP 长度经 `StyleScale` 乘设备缩放）；`WorkbenchContents` 不再对手写四区 `SetBounds` 像素算术负责。真实控件仍挂到 markup **slot**（`FillLayout`）。
 
@@ -592,12 +605,19 @@ glang 的 `activate_tool`、`pointer`、`command` 往指定 `view_id` 注入同�
 
 | 路径 | 职责 |
 | --- | --- |
-| `app/mgis/` | 工作台壳（单一 GN `//app/mgis:mgis`，命名空间 `mgis`） |
-| `app/shell/` | 薄入口；`ShowMainWindow` → `mgis::ShowWorkbench`；harness 自管卫星 ViewportWindow |
+| `app/mgis/` | 产品树：库 `//app/mgis:mgis_lib` + PE `//app/mgis:mgis`（`mgis.exe`），命名空间 `mgis` |
+| `app/mgis/app/` | `main.cc` + cmdline 开关（参照 smartgis `app/views/app`） |
+| `app/mgis/harness/` | `--harness-chrome` / `--render-check` 卫星 ViewportWindow |
+| `app/mgis/layout/` | `--check-layout` 安装布局门禁 |
 
 ```
 app/mgis/
-  BUILD.gn
+  BUILD.gn                   # :mgis_lib 库 + :mgis exe
+  app/
+    main.cc
+    cmdline/launch_switches.*
+  harness/
+  layout/
   view_id.h
   workbench/                 # 主窗组合、markup inflate、SelectViewTab
     workbench.{h,cc}
@@ -617,7 +637,7 @@ app/mgis/
     session.{h,cc}
 ```
 
-原则：`horizon/` 只放 View 壳；`workbench/` 用 markup/Yoga 分区并接线；视口挂载与会话进 `viewport/`、`session/`。工作台**不**拥有卫星 Widget。
+原则：`horizon/` 只放 View 壳；`workbench/` 用 markup/Yoga 分区并接线；视口挂载与会话进 `viewport/`、`session/`。工作台**不**拥有卫星 Widget。顶层 `launcher/` 与 `app/shell/` 已删除。
 
 产品会话走 `GisContents::AttachView` → `scene_child_hwnd_for(mode)` → 活动页 `NativeViewHost`。呈现器路径不变（Scene 注册表）。
 
@@ -678,9 +698,7 @@ SceneImpl（相机、图元、拾取、草稿）按 SceneMode 选呈现器
 ## 目录与安装布局
 
 ```
-launcher/
-app/shell/                     薄入口（原顶层 shell/），组合 content/public + app/mgis
-app/mgis/                      产品工作台（四区壳 + chrome 面板）
+app/mgis/                      产品工作台 + 单 PE 入口（mgis.exe）
 content/public/browser/        唯一嵌入面（含 ViewHost hooks）
 content/browser/
   session/                     GisContents 组装、EventBus、TraceLog、types
@@ -694,16 +712,13 @@ tool/                          Workspace、命令、交互
 plugin/                        注册表与产品包
 vista/pass/map/                二维 MapPass（vista_map.dll）
 vista/pass/world/              三维 WorldPass（vista_world.dll）
-gis/                           数据/域占位（对齐 smartgis //src/gis）
-render/                        RHI 占位（对齐 smartgis //src/render）
 third_party/vtk/mview_volume/
 third_party/maplibre/mview_map/  # 可选 mview_maplibre embed
 ue/
-ipc/schema/
 testing/tools/harness/         阶段套件
 ```
 
-`app/shell/` 与 `app/mgis/` 只 `#include "content/public/..."`，不得包含 `content/browser/**`。`app/shell/` 的 GN 目标为 `//app/shell:mview_shell`，依赖与根组里的 examples 同类，并只依赖 `content/public`（及 `app/mgis`）。不修改 `ui/aura` 合成器。`tool/` 不依赖 `ui/views`。
+`app/mgis/` 只 `#include "content/public/..."`，不得包含 `content/browser/**`。产品 PE 为 `//app/mgis:mgis`。不修改 `ui/aura` 合成器。`tool/` 不依赖 `ui/views`。
 
 ## content/browser 深度重构
 
@@ -722,15 +737,29 @@ testing/tools/harness/         阶段套件
 ### 门禁
 
 - `session_wire` / `viewport_gate` / `harness_campaign` 绿。
-- `app/shell` 与 `app/mgis` 源文件不得出现 `#include "content/browser/`。
+- `app/mgis` 源文件不得出现 `#include "content/browser/`。
 
-安装布局：`MView.exe`、`Engine/`、`UI/mview_shell.exe`、`UI/vista_map.dll`、`UI/vista_world.dll`、`Bin/mview_volume.dll`。插件放在 `UI/plugins/<id>/`。日志在 `%LOCALAPPDATA%\MView\logs\`。
+安装布局：`mgis.exe`、`Engine/`、`UI/vista_map.dll`、`UI/vista_world.dll`、`Bin/mview_volume.dll`。插件放在 `UI/plugins/<id>/`。日志在 `%LOCALAPPDATA%\MView\logs\`。`--check-layout` 挂在同一 `mgis.exe` 上。
+
+## 产品入口合并（单 PE）
+
+**Status:** landed · **Updated:** 2026-10-24
+
+### 决定
+
+| # | 决定 |
+| --- | --- |
+| 1 | 唯一产品 PE：`mgis.exe`（`//app/mgis:mgis`）。删除顶层 `launcher/` 与 `app/shell/`。 |
+| 2 | 单进程：无独立启动器、不 `CreateProcess` 拉界面子进程。Job Object / 壳崩溃重启为后续。 |
+| 3 | 默认无参起工作台；`--harness-chrome`、`--render-check`、`--check-layout` 同 PE。 |
+| 4 | 目录对齐 smartgis 轻量形态：`app/mgis/app/`（main + cmdline）、`harness/`、`layout/`。 |
+| 5 | 工作台静态库为 `//app/mgis:mgis_lib`；`//:shell` / `//:launcher` 为兼容别名指向 `//app/mgis:mgis`。 |
 
 ## 阶段与门控
 
 campaign 顺序就是阶段顺序。进入下一阶段之前，前面每个套件的 `required_marks` 必须在同一次 campaign 里全部落地。某一套件失败时，不写它后面的 mark，也不启动下一套件。
 
-每一阶段另外有一条永久门禁：`app/shell/` 与 `plugin/` 的包含检查失败则该阶段失败。`app/shell` 不得包含 `content/browser`、`tool/` 的内部头、UE 头、MapLibre 头。`content` 不得包含 `ui/views` 或 UE 头。`tool/` 不得包含 HWND、UE、MapLibre。
+每一阶段另外有一条永久门禁：`app/mgis/` 与 `plugin/` 的包含检查失败则该阶段失败。`app/mgis` 不得包含 `content/browser`、`tool/` 的内部头、UE 头、MapLibre 头。`content` 不得包含 `ui/views` 或 UE 头。`tool/` 不得包含 HWND、UE、MapLibre。
 
 | 阶段 | 套件 | 通过条件 |
 | --- | --- | --- |
@@ -751,18 +780,18 @@ P3 起，导航与选择必须走「工具交互」一节的路径。只把相�
 
 ## 中国底图 · 手势 · FlyCube Google Earth（方案 1）
 
-**Status:** landed (刀 1–3) · **Updated:** 2026-10-24  
+**Status:** landed (真数据源) · **Updated:** 2026-10-25  
 **Diagram:** [`../diagrams/china-map-gesture-flycube.html`](../diagrams/china-map-gesture-flycube.html)  
-**Plan:** [`../plans/2026-10-24-china-map-gesture-flycube.md`](../plans/2026-10-24-china-map-gesture-flycube.md)
+**Plan:** [`../plans/2026-10-25-real-map-dem-sources.md`](../plans/2026-10-25-real-map-dem-sources.md)（刀 1–3 见 [`../plans/2026-10-24-china-map-gesture-flycube.md`](../plans/2026-10-24-china-map-gesture-flycube.md)）
 
 ### 验收（已锁）
 
 | 刀 | 验收 |
 | --- | --- |
 | 排期 | 规格一次写齐；实现 **2D → 手势 → 3D** |
-| 2D | 默认**离线矢量**可读为中国；可选 demotiles / 自托管 URL 或本地 style（`MVIEW_MAP_STYLE`）；无天地图/GCJ 本刀 |
+| 2D | 默认 **OpenFreeMap Bright**（全球 OMT，中国区路网/水体可读）；MapLibre disk cache 混合缓存；`MVIEW_MAP_STYLE=offline` 才回退示意 GeoJSON；无天地图/GCJ |
 | 手势 | `view.pan` + `wheel.zoom`（2D）与 `view3d.trackball`（3D）；双指→滚轮原语、右键拖→倾斜/轨道；**不扩** Interaction 表 |
-| 3D | `google_earth` 管线进产品 `mview_flycube`：draped 椭球 + 飞入/browse；**中国区** DEM/影像可配置；无 Google Photorealistic |
+| 3D | draped 椭球 + 默认 **Terrarium DEM 色** + **Esri 影像**（可关）；高程以色可读，非真 mesh 置换；无 Photorealistic |
 
 ### 架构（方案 1 · 呈现器旁路加深）
 
@@ -777,9 +806,10 @@ mgis ViewportSurface
 
 ### 2D
 
-- 默认 style：离线 GeoJSON（大陆 + 台 / 琼等示意多边形 + 描边）；mercator 软回退用同一轮廓。
-- `MVIEW_MAP_STYLE`：空=离线；`demotiles`；`http(s)://…`；本地 style 路径。
-- `mvm_set_style_url` 必须进 `mview_maplibre` 渲染路径（非仅图层 stub）。
+- 默认 style：**OpenFreeMap Bright**（`https://tiles.openfreemap.org/styles/bright`）；首次联网后 MapLibre cache 优先。
+- `MVIEW_MAP_STYLE`：空=OpenFreeMap；`offline`=示意 GeoJSON；`demotiles`；`http(s)://…`；本地 style 路径。
+- 加载失败 → 回退示意 GeoJSON；mercator 软回退仍用同一示意轮廓。
+- 相机概览：约 **108°E / 34°N · z≈3.8**。
 
 ### 手势
 
@@ -790,15 +820,15 @@ mgis ViewportSurface
 
 ### 3D
 
-- `mview_flycube` 优先 `CaptureDrapedEllipsoid` + `ProductMeshCache` 投影进子 HWND（对齐 `google_earth` 飞入/orbit）；失败回退手搓球。
-- 默认原点 **105°E / 35°N**（中国概览椭球瓦片）。覆盖：`MVIEW_FLYCUBE_LON` / `MVIEW_FLYCUBE_LAT`。
-- 影像：`MVIEW_FLYCUBE_IMAGERY=1` 用 Esri URL（或 `MVIEW_FLYCUBE_IMAGERY_URL` 自托管 TMS）；默认 debug colorize（离线）。
-- 导航：`mvf_orbit` / `mvf_set_camera` + 开场径向飞入；手势走 `InputEvent`。
-- 重建 DLL：`build.bat debug mview_flycube`（或 `//render/rhi/flycube`）；引擎静态库仍由 cesium-flycube CMake 预编。
+- `WorldPass` / FlyCube：`CaptureDrapedEllipsoid` + `ProductMeshCache`；失败回退中国形假 DEM 球。
+- 默认原点 **105°E / 35°N**。覆盖：`MVIEW_FLYCUBE_LON` / `MVIEW_FLYCUBE_LAT`。
+- **默认**叠加：Terrarium DEM 色 TMS + Esri World Imagery（可 `MVIEW_FLYCUBE_DEM_URL` / `MVIEW_FLYCUBE_IMAGERY_URL` 覆盖）。
+- `MVIEW_FLYCUBE_OFFLINE=1`：关网 overlay，回退 debug colorize；`MVIEW_FLYCUBE_DEM=0` / `MVIEW_FLYCUBE_IMAGERY=0` 可单独关掉。
+- 验收：DEM **色阶**可读；**不做**真 mesh 高程置换 / Photorealistic。
 
 ### 非目标
 
-壳 GN 直链 MapLibre / cesium-native 引擎源；天地图/高德/GCJ；扩 Interaction 表；UE 断管热切；真 GPU 纹理绑定（本刀 CPU drape→顶点色）；ion Photorealistic。
+壳 GN 直链 MapLibre / cesium-native 引擎源；天地图/高德/GCJ；扩 Interaction 表；UE 断管热切；真 GPU 纹理绑定 / mesh 置换；ion Photorealistic；把中国 planet mbtiles 提交进 git。
 
 ## gis / render 产品 ABI 门面
 

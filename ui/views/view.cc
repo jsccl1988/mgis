@@ -1852,10 +1852,10 @@ void View::RegisterPendingAccelerators() {
 
   accelerator_focus_manager_ = GetFocusManager();
   if (!accelerator_focus_manager_) {
-    // Some crash reports seem to show that we may get cases where we have no
-    // focus manager (see bug #1291225).  This should never be the case, just
-    // making sure we don't crash.
-    NOTREACHED();
+    // Widget attached but FocusManager not ready yet (e.g. TabbedPane
+    // AddAccelerator during early hierarchy notifications). Defer until
+    // NativeViewHierarchyChanged / a later RegisterPendingAccelerators.
+    accelerator_registration_delayed_ = true;
     return;
   }
   for (std::vector<ui::Accelerator>::const_iterator i(

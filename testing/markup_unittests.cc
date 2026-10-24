@@ -8,6 +8,8 @@
 #include "ui/views/markup/loader/markup_loader.h"
 #include "ui/views/markup/style/css_parser.h"
 #include "ui/views/markup/style/flex_style.h"
+#include "ui/views/theme/theme.h"
+#include "ui/views/theme/theme_service.h"
 #include "ui/views/view.h"
 
 #include <cmath>
@@ -47,6 +49,27 @@ TEST(CssParserTest, CascadeAndColor) {
   EXPECT_EQ(FlexStyle::Display::kFlex, *style.display);
   ASSERT_TRUE(style.color.has_value());
   EXPECT_EQ(SkColorSetRGB(0xAA, 0xBB, 0xCC), *style.color);
+}
+
+TEST(CssParserTest, ThemeTokenColor) {
+  ASSERT_TRUE(ThemeService::Get().SetTheme("light", false));
+  CssParser parser;
+  ASSERT_TRUE(parser.Parse(
+      ".chrome { background-color: theme(shell_bg); color: theme(text); }"));
+  const FlexStyle style = parser.Resolve("view", "", {"chrome"});
+  ASSERT_TRUE(style.background_color.has_value());
+  EXPECT_EQ(Theme::Current().shell_bg, *style.background_color);
+  ASSERT_TRUE(style.color.has_value());
+  EXPECT_EQ(Theme::Current().text, *style.color);
+}
+
+TEST(ThemeServiceTest, SwitchLightDarkWithoutPersist) {
+  ASSERT_TRUE(ThemeService::Get().SetTheme("dark", false));
+  EXPECT_EQ("dark", ThemeService::Get().current_id());
+  EXPECT_EQ(MakeDarkTheme().shell_bg, Theme::Current().shell_bg);
+  ASSERT_TRUE(ThemeService::Get().SetTheme("light", false));
+  EXPECT_EQ("light", ThemeService::Get().current_id());
+  EXPECT_EQ(MakeLightTheme().shell_bg, Theme::Current().shell_bg);
 }
 
 TEST(CssParserTest, RejectsPercentAndMissingBrace) {

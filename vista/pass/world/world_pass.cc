@@ -83,8 +83,9 @@ struct WorldPassImpl {
 
 namespace {
 
-constexpr int kStacks = 16;
-constexpr int kSlices = 32;
+// Dense enough that the China mainland ring is readable on the sphere fallback.
+constexpr int kStacks = 36;
+constexpr int kSlices = 72;
 
 using Session = WorldPassImpl;
 using Vert = WorldPassImpl::Vert;
@@ -130,6 +131,18 @@ bool EnvTruthy(const char* name) {
          _stricmp(buf, "yes") == 0 || _stricmp(buf, "imagery") == 0;
 }
 
+// Missing or empty → default_on; explicit 0/false/off → false.
+bool EnvEnabled(const char* name, bool default_on) {
+  char buf[32] = {};
+  const DWORD n = GetEnvironmentVariableA(name, buf, sizeof(buf));
+  if (n == 0 || n >= sizeof(buf))
+    return default_on;
+  if (_stricmp(buf, "0") == 0 || _stricmp(buf, "false") == 0 ||
+      _stricmp(buf, "off") == 0 || _stricmp(buf, "no") == 0)
+    return false;
+  return true;
+}
+
 std::string EnvString(const char* name) {
   char buf[1024] = {};
   const DWORD n = GetEnvironmentVariableA(name, buf, sizeof(buf));
@@ -160,32 +173,53 @@ void SyncGeodeticFromOrbit(Session* s) {
   // Local ENU origin is the draped georeference; report configured lon/lat.
 }
 
+bool TryCaptureChina(cesium_flycube::Session* geo,
+                     cesium_flycube::TilesetHost* tileset,
+                     cesium_flycube::DrapedTerrainOptions opts,
+                     cesium_flycube::DrapedTerrainResult* out) {
+  *out = cesium_flycube::CaptureDrapedEllipsoid(geo, tileset, opts);
+  return out->ok && !out->pictures.empty();
+}
+
 bool TryLoadDraped(Session* s) {
   cesium_flycube::Session geo;
   cesium_flycube::Camera overview;
   overview.viewport_size = glm::dvec2(960.0, 540.0);
-  overview.location = glm::dvec3(0.0, -2.0e5, 2.2e5);
-  overview.direction = glm::normalize(glm::dvec3(0.0, 0.4, -1.0));
+  // Slightly wider China overview so the draped patch fills the viewport.
+  overview.location = glm::dvec3(0.0, -3.5e5, 3.8e5);
+  overview.direction = glm::normalize(glm::dvec3(0.0, 0.45, -1.0));
   overview.up = glm::dvec3(0.0, 0.0, 1.0);
-  overview.horizontal_fov_degrees = 50.0;
+  overview.horizontal_fov_degrees = 55.0;
   geo.cameras().additional_cameras() = {overview};
 
   cesium_flycube::DrapedTerrainOptions opts;
   opts.longitude_degrees = EnvDouble("MVIEW_FLYCUBE_LON", 105.0);
   opts.latitude_degrees = EnvDouble("MVIEW_FLYCUBE_LAT", 35.0);
-  opts.prefer_imagery = EnvTruthy("MVIEW_FLYCUBE_IMAGERY");
+  const bool offline = EnvTruthy("MVIEW_FLYCUBE_OFFLINE");
+  // Product default: real DEM color + imagery. Offline / explicit 0 disables.
+  opts.prefer_imagery = offline ? EnvTruthy("MVIEW_FLYCUBE_IMAGERY")
+                                : EnvEnabled("MVIEW_FLYCUBE_IMAGERY", true);
   opts.imagery_url_template = EnvString("MVIEW_FLYCUBE_IMAGERY_URL");
-  opts.max_ticks = opts.prefer_imagery ? 220 : 140;
+  opts.prefer_dem = offline ? false : EnvEnabled("MVIEW_FLYCUBE_DEM", true);
+  opts.dem_url_template = EnvString("MVIEW_FLYCUBE_DEM_URL");
+  opts.max_ticks =
+      (opts.prefer_imagery || opts.prefer_dem) ? 260 : 180;
   opts.require_drape = true;
 
   s->lon = opts.longitude_degrees;
   s->lat = opts.latitude_degrees;
 
   cesium_flycube::TilesetHost tileset;
-  const cesium_flycube::DrapedTerrainResult terrain =
-      cesium_flycube::CaptureDrapedEllipsoid(&geo, &tileset, opts);
-  if (!terrain.ok || terrain.pictures.empty())
-    return false;
+  cesium_flycube::DrapedTerrainResult terrain;
+  if (!TryCaptureChina(&geo, &tileset, opts, &terrain)) {
+    // Ellipsoid mesh with normal shading is still a usable China DEM patch
+    // when raster drape (debug colorize / imagery) times out.
+    opts.require_drape = false;
+    opts.max_ticks = 200;
+    cesium_flycube::TilesetHost tileset2;
+    if (!TryCaptureChina(&geo, &tileset2, opts, &terrain))
+      return false;
+  }
 
   cesium_flycube::PresentCamera style = {};
   style.skip_shade = true;
@@ -197,32 +231,69 @@ bool TryLoadDraped(Session* s) {
   s->orbit.target[0] = 0;
   s->orbit.target[1] = 0;
   s->orbit.target[2] = 0;
-  s->orbit.distance = 2.8e5;
-  s->orbit.yaw_radians = 0.2;
-  s->orbit.pitch_radians = 0.42;
+  // Start at a China-region overview (not a full-Earth disk).
+  s->orbit.distance = 4.5e5;
+  s->orbit.yaw_radians = 0.15;
+  s->orbit.pitch_radians = 0.55;
   s->orbit.max_distance = 4.0e7;
   s->orbit.min_distance = 80.0;
 
   cesium_flycube::OrbitController near_orbit = s->orbit;
-  near_orbit.distance = 2.8e4;
-  near_orbit.yaw_radians = 0.55;
-  near_orbit.pitch_radians = 0.48;
+  near_orbit.distance = 4.0e4;
+  near_orbit.yaw_radians = 0.45;
+  near_orbit.pitch_radians = 0.52;
   cesium_flycube::BeginFlight(&s->flight, cesium_flycube::PoseFromOrbit(s->orbit),
-                              cesium_flycube::PoseFromOrbit(near_orbit), 6.0);
+                              cesium_flycube::PoseFromOrbit(near_orbit), 5.0);
   s->height_m = s->orbit.distance;
   s->draped = true;
   s->indices = s->product_cache.indices;
   return true;
 }
 
-bool Land(float lon_deg, float lat_deg) {
-  if (lat_deg > 72.0f || lat_deg < -56.0f)
-    return false;
-  if (lon_deg > 70.0f && lon_deg < 140.0f && lat_deg > 10.0f && lat_deg < 50.0f)
+// Simplified mainland outline for sphere fallback (same ring as MapLibre).
+const float kChinaLon[] = {
+    73.5f, 76.0f, 80.0f, 85.0f, 87.5f, 90.0f, 93.0f, 97.0f, 100.0f, 104.0f,
+    108.0f, 111.5f, 115.0f, 119.0f, 122.5f, 126.0f, 130.0f, 134.0f, 133.0f,
+    131.0f, 128.5f, 126.0f, 124.0f, 122.5f, 121.8f, 121.5f, 121.8f, 122.0f,
+    121.5f, 121.0f, 120.2f, 119.2f, 118.0f, 116.5f, 114.5f, 112.5f, 110.5f,
+    109.0f, 107.5f, 106.0f, 104.5f, 102.5f, 100.5f, 98.8f, 97.8f, 97.2f,
+    94.5f, 91.5f, 88.0f, 85.0f, 82.0f, 79.5f, 77.5f, 75.5f, 73.5f};
+const float kChinaLat[] = {
+    39.0f, 40.5f, 42.0f, 45.0f, 47.0f, 48.5f, 49.5f, 50.5f, 51.5f, 53.0f,
+    53.2f, 51.0f, 48.5f, 47.2f, 47.5f, 48.8f, 48.5f, 48.0f, 46.0f, 45.0f,
+    43.0f, 41.5f, 40.2f, 39.5f, 38.0f, 36.5f, 34.5f, 32.0f, 30.5f, 29.0f,
+    27.5f, 26.0f, 24.5f, 23.5f, 22.5f, 21.8f, 21.2f, 21.3f, 21.8f, 22.8f,
+    22.6f, 22.0f, 21.5f, 23.5f, 26.5f, 28.2f, 28.8f, 28.2f, 28.0f, 28.5f,
+    29.5f, 31.0f, 33.0f, 35.5f, 39.0f};
+const int kChinaN = static_cast<int>(sizeof(kChinaLon) / sizeof(kChinaLon[0]));
+
+bool PointInChina(float lon_deg, float lat_deg) {
+  // Ray cast against mainland ring.
+  bool inside = false;
+  for (int i = 0, j = kChinaN - 1; i < kChinaN; j = i++) {
+    const float yi = kChinaLat[i];
+    const float yj = kChinaLat[j];
+    const float xi = kChinaLon[i];
+    const float xj = kChinaLon[j];
+    const bool hit = ((yi > lat_deg) != (yj > lat_deg)) &&
+                     (lon_deg < (xj - xi) * (lat_deg - yi) / (yj - yi + 1e-6f) + xi);
+    if (hit)
+      inside = !inside;
+  }
+  // Taiwan / Hainan boxes (readable on a low-res sphere).
+  if (lon_deg > 120.3f && lon_deg < 122.3f && lat_deg > 21.6f && lat_deg < 25.5f)
     return true;
-  if (lon_deg > -130.0f && lon_deg < -60.0f && lat_deg > 25.0f && lat_deg < 50.0f)
+  if (lon_deg > 108.4f && lon_deg < 111.3f && lat_deg > 18.0f && lat_deg < 20.3f)
     return true;
-  return false;
+  return inside;
+}
+
+// Fake DEM height (0..1) over China for sphere-fallback shading.
+float ChinaDemShade(float lon_deg, float lat_deg) {
+  // Tibetan plateau / west high, east low — readable green→brown ramp.
+  const float west = (std::max)(0.0f, (std::min)(1.0f, (100.0f - lon_deg) / 25.0f));
+  const float north = (std::max)(0.0f, (std::min)(1.0f, (lat_deg - 25.0f) / 25.0f));
+  return 0.25f + 0.55f * west + 0.20f * north;
 }
 
 void BuildSphere(std::vector<Vert>* verts, std::vector<uint32_t>* indices) {
@@ -244,14 +315,15 @@ void BuildSphere(std::vector<Vert>* verts, std::vector<uint32_t>* indices) {
       vert.x = static_cast<float>(kR * cos_lat * std::cos(lon));
       vert.y = static_cast<float>(kR * sin_lat);
       vert.z = static_cast<float>(kR * cos_lat * std::sin(lon));
-      if (Land(lon_deg, lat_deg)) {
-        vert.r = 0.24f;
-        vert.g = 0.55f;
-        vert.b = 0.30f;
+      if (PointInChina(lon_deg, lat_deg)) {
+        const float h = ChinaDemShade(lon_deg, lat_deg);
+        vert.r = 0.20f + 0.35f * h;
+        vert.g = 0.55f - 0.25f * h;
+        vert.b = 0.22f + 0.05f * h;
       } else {
-        vert.r = 0.18f;
-        vert.g = 0.42f;
-        vert.b = 0.65f;
+        vert.r = 0.14f;
+        vert.g = 0.32f;
+        vert.b = 0.55f;
       }
       verts->push_back(vert);
     }
@@ -645,7 +717,15 @@ void WorldPass::SetCamera(double lon, double lat, double height_m) {
   s->height_m = height_m;
   if (s->draped) {
     s->flight.active = false;
-    s->orbit.distance = (std::max)(80.0, height_m);
+    // Draped mesh is a local ENU China patch; full-globe heights make it a speck.
+    double d = height_m;
+    if (d < s->orbit.min_distance)
+      d = s->orbit.min_distance;
+    if (d > 2.5e6)
+      d = 2.5e6;
+    if (d > s->orbit.max_distance)
+      d = s->orbit.max_distance;
+    s->orbit.distance = d;
     SyncGeodeticFromOrbit(s);
     return;
   }

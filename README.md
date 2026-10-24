@@ -1,4 +1,4 @@
-# mview
+# mgis
 
 Views 示例。编译入口是 `build.bat`（GN + ninja，`out/Debug` 与 `out/Release`）。`m` 编产品目标，`sln` 会被拒绝。三方源码在 `third_party/.src`，说明见 `third_party/README.md`。工程描述在各目录的 `BUILD.gn`。
 

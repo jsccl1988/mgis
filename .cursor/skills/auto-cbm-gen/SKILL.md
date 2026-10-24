@@ -4,7 +4,7 @@ description: >-
   Refresh the codebase-memory (CBM) index for this repo. Use when the user
   invokes /auto-cbm-gen, or says CBM index, 更新索引, codebase memory index
   update, or when auto-idle-pipeline reaches the CBM stage. MCP
-  user-codebase-memory-mcp; project mview; root C:/Dev/src/gis/mview.
+  user-codebase-memory-mcp; project mgis; root C:/Dev/src/gis/mgis.
 ---
 
 <!--
@@ -23,8 +23,8 @@ Independently callable (`/auto-cbm-gen`) and also stage 3 of `/auto-idle-pipelin
 | | |
 |---|---|
 | MCP namespace | `user-codebase-memory-mcp` |
-| Project | `mview` |
-| Root | `C:/Dev/src/gis/mview` |
+| Project | `mgis` |
+| Root | `C:/Dev/src/gis/mgis` |
 
 Windows Cursor store only. Do **not** index the WSL store or the `smartgis` project.
 
@@ -35,9 +35,9 @@ When this skill is invoked, the agent **MUST** run the index steps below.
 ## Steps
 
 1. Discover tools if needed (`GetDynamicTools` on `user-codebase-memory-mcp`), then `CallDynamicTool`.
-2. `list_projects` — confirm project `mview` with `root_path` `C:/Dev/src/gis/mview`.
-3. `index_repository` with `repo_path` `C:/Dev/src/gis/mview`, `name` `mview`, `mode` `full` (or `moderate` if full times out), `persistence` `false`.
-4. `index_status` for `mview` and report in **简体中文**.
+2. `list_projects` — confirm project `mgis` with `root_path` `C:/Dev/src/gis/mgis`.
+3. `index_repository` with `repo_path` `C:/Dev/src/gis/mgis`, `name` `mgis`, `mode` `full` (or `moderate` if full times out), `persistence` `false`.
+4. `index_status` for `mgis` and report in **简体中文**.
 
 ## Done bar
 

@@ -18,13 +18,17 @@ struct DrapedTerrainOptions {
   double longitude_degrees = 121.4737;
   double latitude_degrees = 31.2304;
   double height_meters = 0.0;
-  // Prefer Esri World Imagery URL template; falls back to debug colorize.
+  // Prefer Esri World Imagery URL template; falls back to debug colorize when
+  // neither imagery nor DEM is requested.
   bool prefer_imagery = false;
   // Non-empty overrides Esri when prefer_imagery is true (self-hosted TMS).
   std::string imagery_url_template;
+  // Terrarium-encoded DEM color tiles (elevation as RGB, not mesh displace).
+  bool prefer_dem = false;
+  std::string dem_url_template;
   int max_ticks = 120;
   float tick_delta_seconds = 0.05f;
-  // Stop when any mesh has a raster drape (debug colorize / imagery).
+  // Stop when any mesh has a raster drape (debug colorize / imagery / DEM).
   bool require_drape = true;
 };
 

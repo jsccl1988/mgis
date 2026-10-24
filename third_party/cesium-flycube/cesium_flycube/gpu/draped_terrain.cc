@@ -16,6 +16,11 @@ constexpr char kEsriWorldImageryUrl[] =
     "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/"
     "MapServer/tile/{z}/{y}/{x}";
 
+// Mapzen / AWS Terrarium encoding (R/G/B → meters). Used as a color drape so
+// elevation is readable without mesh displacement.
+constexpr char kAwsTerrariumDemUrl[] =
+    "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
+
 }  // namespace
 
 DrapedTerrainResult CaptureDrapedEllipsoid(Session* session,
@@ -44,12 +49,21 @@ DrapedTerrainResult CaptureDrapedEllipsoid(Session* session,
   tileset->settings().maximum_simultaneous_tile_loads = 64;
   tileset->settings().loading_descendant_limit = 64;
   tileset->LoadEllipsoid();
+  // DEM under imagery so photo wins where present; DEM color remains where
+  // imagery is sparse / for elevation-readable product captures.
+  if (options.prefer_dem) {
+    const char* dem_url = options.dem_url_template.empty()
+                              ? kAwsTerrariumDemUrl
+                              : options.dem_url_template.c_str();
+    tileset->AddRasterOverlay(MakeUrlTemplateOverlay("dem", dem_url));
+  }
   if (options.prefer_imagery) {
     const char* url = options.imagery_url_template.empty()
                           ? kEsriWorldImageryUrl
                           : options.imagery_url_template.c_str();
     tileset->AddRasterOverlay(MakeUrlTemplateOverlay("imagery", url));
-  } else {
+  }
+  if (!options.prefer_dem && !options.prefer_imagery) {
     tileset->AddRasterOverlay(MakeDebugColorizeTilesOverlay("districts"));
   }
 

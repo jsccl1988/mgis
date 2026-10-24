@@ -116,7 +116,7 @@ bool IsInHighDPIMode() {
 
 void EnableHighDPISupport() {
   // Prefer per-monitor V2 so GetDpiForSystem / window DPI match the monitor
-  // that hosts mview_shell (common 150%/250% laptop + external packs).
+  // that hosts mgis (common 150%/250% laptop + external packs).
   typedef BOOL(WINAPI *SetProcessDpiAwarenessContextPtr)(HANDLE);
   SetProcessDpiAwarenessContextPtr set_ctx =
       reinterpret_cast<SetProcessDpiAwarenessContextPtr>(GetProcAddress(
